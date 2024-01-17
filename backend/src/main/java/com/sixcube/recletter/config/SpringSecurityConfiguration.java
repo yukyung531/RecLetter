@@ -1,4 +1,4 @@
-package com.springtowinter.springboottemplate.config;
+package com.sixcube.recletter.config;
 
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -6,8 +6,8 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import com.springtowinter.springboottemplate.auth.JwtToUserConverter;
-import com.springtowinter.springboottemplate.auth.KeyUtils;
+import com.sixcube.recletter.auth.JwtToUserConverter;
+import com.sixcube.recletter.auth.KeyUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

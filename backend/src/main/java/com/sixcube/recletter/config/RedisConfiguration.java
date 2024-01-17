@@ -1,4 +1,4 @@
-package com.springtowinter.springboottemplate.config;
+package com.sixcube.recletter.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;

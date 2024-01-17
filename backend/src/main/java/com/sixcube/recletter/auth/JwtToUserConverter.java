@@ -1,6 +1,6 @@
-package com.springtowinter.springboottemplate.auth;
+package com.sixcube.recletter.auth;
 
-import com.springtowinter.springboottemplate.user.dto.User;
+import com.sixcube.recletter.user.dto.User;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;

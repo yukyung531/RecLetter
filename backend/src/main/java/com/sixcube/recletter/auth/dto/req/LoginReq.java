@@ -1,4 +1,4 @@
-package com.springtowinter.springboottemplate.auth.dto.req;
+package com.sixcube.recletter.auth.dto.req;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

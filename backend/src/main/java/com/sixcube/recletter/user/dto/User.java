@@ -1,4 +1,4 @@
-package com.springtowinter.springboottemplate.user.dto;
+package com.sixcube.recletter.user.dto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

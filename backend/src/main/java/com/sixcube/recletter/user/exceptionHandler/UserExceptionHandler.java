@@ -1,4 +1,4 @@
-package com.springtowinter.springboottemplate.user.exceptionHandler;
+package com.sixcube.recletter.user.exceptionHandler;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RequiredArgsConstructor
-@RestControllerAdvice(basePackages = "com.springtowinter.springboottemplate.user.controller")
+@RestControllerAdvice(basePackages = "com.sixcube.recletter.user.controller")
 public class UserExceptionHandler {
 
   private final MessageSource messageSource;

@@ -1,4 +1,4 @@
-package com.springtowinter.springboottemplate;
+package com.sixcube.recletter;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,4 +1,4 @@
-package com.springtowinter.springboottemplate;
+package com.sixcube.recletter;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,10 +9,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
-public class SpringBootTemplateApplication {
+public class RecLetterApplication {
 
   public static void main(String[] args) {
-    SpringApplication.run(SpringBootTemplateApplication.class, args);
+    SpringApplication.run(RecLetterApplication.class, args);
   }
 
   @Bean

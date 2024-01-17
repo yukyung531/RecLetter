@@ -1,8 +1,8 @@
-package com.springtowinter.springboottemplate.user.service;
+package com.sixcube.recletter.user.service;
 
-import com.springtowinter.springboottemplate.user.dto.User;
-import com.springtowinter.springboottemplate.user.dto.UserInfo;
-import com.springtowinter.springboottemplate.user.repository.UserRepository;
+import com.sixcube.recletter.user.dto.User;
+import com.sixcube.recletter.user.dto.UserInfo;
+import com.sixcube.recletter.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

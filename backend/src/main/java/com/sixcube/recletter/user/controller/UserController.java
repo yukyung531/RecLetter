@@ -1,8 +1,8 @@
-package com.springtowinter.springboottemplate.user.controller;
+package com.sixcube.recletter.user.controller;
 
-import com.springtowinter.springboottemplate.user.dto.RegistReq;
-import com.springtowinter.springboottemplate.user.dto.User;
-import com.springtowinter.springboottemplate.user.service.UserService;
+import com.sixcube.recletter.user.dto.RegistReq;
+import com.sixcube.recletter.user.dto.User;
+import com.sixcube.recletter.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

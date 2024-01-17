@@ -1,4 +1,4 @@
-package com.springtowinter.springboottemplate.user.dto;
+package com.sixcube.recletter.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,7 +1,7 @@
-package com.springtowinter.springboottemplate.auth;
+package com.sixcube.recletter.auth;
 
-import com.springtowinter.springboottemplate.auth.dto.Token;
-import com.springtowinter.springboottemplate.user.dto.User;
+import com.sixcube.recletter.auth.dto.Token;
+import com.sixcube.recletter.user.dto.User;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.Instant;

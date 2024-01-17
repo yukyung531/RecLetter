@@ -1,4 +1,4 @@
-package com.springtowinter.springboottemplate.auth;
+package com.sixcube.recletter.auth;
 
 import java.io.File;
 import java.io.FileOutputStream;

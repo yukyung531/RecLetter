@@ -1,4 +1,4 @@
-package com.springtowinter.springboottemplate.user.dto;
+package com.sixcube.recletter.user.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

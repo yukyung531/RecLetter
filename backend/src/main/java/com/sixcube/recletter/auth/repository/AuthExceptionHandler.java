@@ -1,4 +1,4 @@
-package com.springtowinter.springboottemplate.auth.repository;
+package com.sixcube.recletter.auth.repository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice(basePackages = {"com.springtowinter.springboottemplate.auth.controller"})
+@RestControllerAdvice(basePackages = {"com.sixcube.recletter.auth.controller"})
 public class AuthExceptionHandler {
   @ExceptionHandler(InternalAuthenticationServiceException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)

@@ -1,6 +1,6 @@
-package com.springtowinter.springboottemplate.auth.dto.res;
+package com.sixcube.recletter.auth.dto.res;
 
-import com.springtowinter.springboottemplate.auth.dto.Token;
+import com.sixcube.recletter.auth.dto.Token;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

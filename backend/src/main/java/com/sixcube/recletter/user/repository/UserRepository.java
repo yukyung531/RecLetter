@@ -1,6 +1,6 @@
-package com.springtowinter.springboottemplate.user.repository;
+package com.sixcube.recletter.user.repository;
 
-import com.springtowinter.springboottemplate.user.dto.User;
+import com.sixcube.recletter.user.dto.User;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
