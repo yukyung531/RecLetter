@@ -35,40 +35,7 @@ export default function StudioCreatePage() {
                     />
                 </div>
             </div>
-            {/* <div className="border w-96 flex flex-col items-center p-4">
-        <p className="w-full h-12 bg-gray-200 flex justify-center items-center">
-          멤버 추가
-        </p>
-        <div className="w-full h-6 my-2 bg-gray-200 flex justify-center items-center">
-          +
-        </div>
-        <ul className="w-full">
-          <li className="flex justify-between px-8 py-2 border my-2">
-            <p>은쮸</p>
-            <span>x</span>
-          </li>
-          <li className="flex justify-between px-8 py-2 border my-2">
-            <p>연쮸</p>
-            <span>x</span>
-          </li>
-          <li className="flex justify-between px-8 py-2 border my-2">
-            <p>유꼉</p>
-            <span>x</span>
-          </li>
-          <li className="flex justify-between px-8 py-2 border my-2">
-            <p>뗜재</p>
-            <span>x</span>
-          </li>
-          <li className="flex justify-between px-8 py-2 border my-2">
-            <p>하영</p>
-            <span>x</span>
-          </li>
-          <li className="flex justify-between px-8 py-2 border my-2">
-            <p>때웅</p>
-            <span>x</span>
-          </li>
-        </ul>
-      </div> */}
+
             <div className="w-full flex justify-end pe-32 py-12">
                 <a href="/studiomain" className="btn-cover color-bg-blue1">
                     스튜디오 생성
