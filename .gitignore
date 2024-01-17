@@ -4,6 +4,7 @@
 
 # token key
 access-refresh-token-keys
+.env
 
 # User-specific stuff
 .idea
