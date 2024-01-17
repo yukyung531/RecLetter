@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import '../assets/scss/3_components/Header.css';
+import '../assets/css/3_components/Header.css';
 
 export default function Header() {
     if (
