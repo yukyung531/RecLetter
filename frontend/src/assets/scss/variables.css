@@ -1,0 +1,79 @@
+:root {
+    --color-black: #363636;
+    --color-lightgrey1: #f5f5f5;
+    --color-lightgrey2: #e9e9e9;
+    --color-grey: #d5d5d5;
+    --color-darkgrey: #626262;
+    --color-red1: #ffa9a9;
+    --color-red2: #ff777f;
+    --color-red3: #ff4954;
+    --color-blue1: #9ccaff;
+    --color-blue2: #65a6f2;
+    --color-blue3: #2c75e2;
+    --color-yellow1: #fffacf;
+    --color-yellow2: #fff593;
+    --color-yellow3: #ffc165;
+}
+.color-bg-black {
+    background-color: var(--color-black);
+}
+.color-text-black {
+    color: var(--color-black);
+}
+.color-bg-yellow1 {
+    background-color: var(--color-yellow1);
+}
+.color-text-yellow1 {
+    color: var(--color-yellow1);
+}
+.color-bg-yellow2 {
+    background-color: var(--color-yellow2);
+}
+.color-text-yellow2 {
+    color: var(--color-yellow2);
+}
+.color-bg-blue1 {
+    background-color: var(--color-blue1);
+}
+.color-text-blue1 {
+    color: var(--color-blue1);
+}
+.color-border-blue1 {
+    border-color: var(--color-blue1);
+}
+.color-bg-blue2 {
+    background-color: var(--color-blue2);
+}
+.color-text-blue2 {
+    color: var(--color-blue2);
+}
+.color-border-blue2 {
+    border-color: var(--color-blue2);
+}
+.color-bg-blue3 {
+    background-color: var(--color-blue3);
+}
+.color-text-blue3 {
+    color: var(--color-blue3);
+}
+.color-border-blue3 {
+    border-color: var(--color-blue3);
+}
+.color-bg-red1 {
+    background-color: var(--color-red1);
+}
+.color-text-red1 {
+    color: var(--color-red1);
+}
+.color-bg-red2 {
+    background-color: var(--color-red2);
+}
+.color-text-red2 {
+    color: var(--color-red2);
+}
+.color-bg-red3 {
+    background-color: var(--color-red3);
+}
+.color-text-red3 {
+    color: var(--color-red3);
+}
