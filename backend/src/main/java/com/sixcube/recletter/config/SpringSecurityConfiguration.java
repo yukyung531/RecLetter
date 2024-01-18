@@ -50,10 +50,11 @@ public class SpringSecurityConfiguration {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.httpBasic(HttpBasicConfigurer::disable)
-        .csrf(CsrfConfigurer::disable)
-        .cors(CorsConfigurer::disable)
+        .csrf(CsrfConfigurer::disable) //CSRF 공격을 막는 필터
+        .cors(CorsConfigurer::disable) //cors 관련 필터
+            //인증 url 설정하는 필터(얘는 무조건 인증해야 하고.. 얘는 안 해도 되고....)
         .authorizeHttpRequests(authorize -> authorize.requestMatchers("/auth/**").permitAll()
-            .requestMatchers("/**").permitAll()
+            .requestMatchers("/**").permitAll() //인증 안해도 됨
             .requestMatchers("/static/**").permitAll()
             .requestMatchers("/user").permitAll()
             .anyRequest().authenticated()
@@ -116,7 +117,7 @@ public class SpringSecurityConfiguration {
   @Bean
   @Qualifier("jwtRefreshTokenAuthProvider")
   JwtAuthenticationProvider jwtRefreshTokenAuthProvider() {
-    JwtAuthenticationProvider provider = new JwtAuthenticationProvider(jwtRefreshTokenDecoder());
+      JwtAuthenticationProvider provider = new JwtAuthenticationProvider(jwtRefreshTokenDecoder());
     provider.setJwtAuthenticationConverter(jwtToUserConverter);
     return provider;
   }

@@ -47,10 +47,15 @@ public class AuthController {
   public ResponseEntity<LoginRes> login(@RequestBody LoginReq loginReq) {
     log.debug("login call");
 
+
+//인증 완료된 객체를 최종적으로 저장
     Authentication authentication = daoAuthenticationProvider.authenticate(
         UsernamePasswordAuthenticationToken.unauthenticated(loginReq.getUserId(),
             loginReq.getUserPassword()));
 
+    //인증 완료된 친구들만 토큰 발급
+    //principle과 credential을 보고 id 비번이면 새로 토큰 만들고
+    //만약 토큰이 들어 있으면 토큰 정보를 통해서 토큰을 재발급
     Token token = tokenGenerator.createToken((authentication));
     UserInfo userInfo = userService.searchUserInfoByUserId(loginReq.getUserId());
 
@@ -73,6 +78,8 @@ public class AuthController {
     return ResponseEntity.ok().build();
   }
 
+
+  //여기에 왔다는 거 자체가 accessToken 토큰이 만료된 것임....
   @PostMapping("/token")
   public ResponseEntity<TokenRes> tokenRegenerate(@RequestBody TokenReq tokenReq) {
     Authentication authentication = refreshTokenAuthProvider.authenticate(new BearerTokenAuthenticationToken(tokenReq.getRefreshToken()));
@@ -85,6 +92,7 @@ public class AuthController {
       if(values.get(userId) != null) {
         refreshToken = (String) values.get(userId);
 
+        //refreshToken 같으면 accessToken
         if(tokenReq.getRefreshToken().equals(refreshToken)) {
           Token token = tokenGenerator.createToken((authentication));
           return ResponseEntity.ok().body(new TokenRes(token));
