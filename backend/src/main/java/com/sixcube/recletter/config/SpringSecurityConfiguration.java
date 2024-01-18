@@ -36,6 +36,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import org.springframework.security.web.FilterChainProxy;
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true)
 @Slf4j
@@ -47,17 +48,19 @@ public class SpringSecurityConfiguration {
   private final PasswordEncoder passwordEncoder;
   private final UserDetailsService userDetailsService;
 
+  //HttpSecurity를 구성하여 보안 설정을 정의하는 함수
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http.httpBasic(HttpBasicConfigurer::disable)
-        .csrf(CsrfConfigurer::disable) //CSRF 공격을 막는 필터
+    http.httpBasic(HttpBasicConfigurer::disable) //Basic 인증을 사용하지 않음
+        .csrf(CsrfConfigurer::disable) //CSRF(Cross-Site Request Forgery) 보안을 비활성화
         .cors(CorsConfigurer::disable) //cors 관련 필터
-            //인증 url 설정하는 필터(얘는 무조건 인증해야 하고.. 얘는 안 해도 되고....)
+        //요청에 대한 인가 규칙 설정
         .authorizeHttpRequests(authorize -> authorize.requestMatchers("/auth/**").permitAll()
-            .requestMatchers("/**").permitAll() //인증 안해도 됨
+            .requestMatchers("/**").permitAll() // 해당 경로에 대한 요청은 모든 사용자에게 허용(인증 안해도 접근 가능)
             .requestMatchers("/static/**").permitAll()
             .requestMatchers("/user").permitAll()
-            .anyRequest().authenticated()
+            //requestmatchers("members/test").hasRole("USER") -> "members/test" 경로에 대한 요청은 "USER" 권한을 가진 사용자만 허용
+            .anyRequest().authenticated() //나머지 모든 요청은 인증을 필요로 함
         )
         .oauth2ResourceServer(
             (oauth2) -> oauth2.jwt((jwt) -> jwt.jwtAuthenticationConverter(jwtToUserConverter)))
@@ -66,7 +69,7 @@ public class SpringSecurityConfiguration {
         .exceptionHandling((exceptions) -> exceptions.authenticationEntryPoint(
                 new BearerTokenAuthenticationEntryPoint())
             .accessDeniedHandler(new BearerTokenAccessDeniedHandler()));
-    return http.build();
+    return http.build(); //설정대로 filter chain 생성 후 실행
   }
 
   @Bean
