@@ -3,46 +3,85 @@
 <head>
   <title>Spring Boot Tutorial - WebSocket</title>
   <link href="/main.css" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-  <script src="/main.js"></script>
+<!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>-->
+<!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>-->
+<!--  <script src="/main.js"></script>-->
 </head>
 <body>
-<div>
-  <div>
-    <h1>Spring Boot Tutorial.</h1>
-    <h2>Websockets.</h2>
-    <div class="row">
-      <form id="form">
-        <div class="row">
-          <label for="connect">WebSocket connection:</label>
-          <button id="connect" type="submit">Connect</button>
-          <button id="disconnect" type="submit" disabled="disabled">Disconnect</button>
-        </div>
-      </form>
-    </div>
-    <div class="row">
-      <form>
-        <div>
-          <label class="row" for="name">What is your name?</label>
-          <input type="text" id="name" placeholder="Your name here...">
-          <button id="send" type="submit" disabled="disabled">Send</button>
-        </div>
-      </form>
-    </div id="row">
-  </div>
-  <div>
-    <div id="conversation">
-      <table>
-        <thead>
-        <tr>
-          <th>Greetings:</th>
-        </tr>
-        </thead>
-        <tbody id="greetings"></tbody>
-      </table>
-    </div>
+<!--<div>-->
+<!--  <div>-->
+<!--    <h1>Spring Boot Tutorial.</h1>-->
+<!--    <h2>Websockets.</h2>-->
+<!--    <div class="row">-->
+<!--      <form id="form">-->
+<!--        <div class="row">-->
+<!--          <label for="connect">WebSocket connection:</label>-->
+<!--          <button id="connect" type="submit">Connect</button>-->
+<!--          <button id="disconnect" type="submit" disabled="disabled">Disconnect</button>-->
+<!--        </div>-->
+<!--      </form>-->
+<!--    </div>-->
+<!--    <div class="row">-->
+<!--      <form>-->
+<!--        <div>-->
+<!--          <label class="row" for="name">What is your name?</label>-->
+<!--          <input type="text" id="name" placeholder="Your name here...">-->
+<!--          <button id="send" type="submit" disabled="disabled">Send</button>-->
+<!--        </div>-->
+<!--      </form>-->
+<!--    </div id="row">-->
+<!--  </div>-->
+<!--  <div>-->
+<!--    <div id="conversation">-->
+<!--      <table>-->
+<!--        <thead>-->
+<!--        <tr>-->
+<!--          <th>Greetings:</th>-->
+<!--        </tr>-->
+<!--        </thead>-->
+<!--        <tbody id="greetings"></tbody>-->
+<!--      </table>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+
+<div id="username-page">
+  <div class="username-page-container">
+    <h1 class="title">Type your username to enter the Chatroom</h1>
+    <form id="usernameForm" name="usernameForm">
+      <div class="form-group">
+        <input type="text" id="name" placeholder="Username" autocomplete="off" class="form-control" />
+      </div>
+      <div class="form-group">
+        <button type="submit" class="accent username-submit">Start Chatting</button>
+      </div>
+    </form>
   </div>
 </div>
+
+<div id="chat-page" class="hidden">
+  <div class="chat-container">
+    <div class="chat-header">
+      <h2>Spring WebSocket Chat Demo - By Alibou</h2>
+    </div>
+    <div class="connecting">
+      Connecting...
+    </div>
+    <ul id="messageArea">
+
+    </ul>
+    <form id="messageForm" name="messageForm">
+      <div class="form-group">
+        <div class="input-group clearfix">
+          <input type="text" id="message" placeholder="Type a message..." autocomplete="off" class="form-control"/>
+          <button type="submit" class="primary">Send</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script src="/main.js"></script>
 </body>
 </html>
