@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App.tsx';
 import './assets/css/common.css';
 import './assets/css/variables.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
@@ -19,6 +18,9 @@ import LetterMakePage from './pages/LetterMakePage.tsx';
 import LetterFinishPage from './pages/LetterFinishPage.tsx';
 import FindResultPage from './pages/FindResultPage.tsx';
 import MyPage from './pages/MyPage.tsx';
+
+
+
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
