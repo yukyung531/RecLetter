@@ -1,0 +1,273 @@
+[
+    {
+        "studioId": 1,
+        "studioTitle": "studio1",
+        "studioStatus": false,
+        "studioOwner": "은쮸",
+        "clipInfoList" : [
+                            {
+                                "clipId": 2,
+                                "clipTitle": "떤재",
+                                "clipOwner": "user02",
+                                "clipLength": 46,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": -1,
+                                "clipVolume": 50
+                            },
+                            {
+                                "clipId": 4,
+                                "clipTitle": "때운",
+                                "clipOwner": "user03",
+                                "clipLength": 51,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": -1,
+                                "clipVolume": 70
+                            },
+                            {
+                                "clipId": 6,
+                                "clipTitle": "하용",
+                                "clipOwner": "user04",
+                                "clipLength": 46,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": -1,
+                                "clipVolume": 50
+                            },
+                            {
+                                "clipId": 1,
+                                "clipTitle": "은쮸",
+                                "clipOwner": "user01",
+                                "clipLength": 46,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": 0,
+                                "clipVolume": 50
+                            },
+                            {
+                                "clipId": 3,
+                                "clipTitle": "연쮸",
+                                "clipOwner": "user05",
+                                "clipLength": 42,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": 1,
+                                "clipVolume": 70
+                            },
+                            {
+                                "clipId": 5,
+                                "clipTitle": "유꼉",
+                                "clipOwner": "user01",
+                                "clipLength": 60,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": 2,
+                                "clipVolume": 41
+                            }
+                        ],
+        "studioFrame" : 1,
+        "studioFont" : 1,
+        "studioBGM" : 1,
+        "studioChecklist" : 1
+    },
+    {
+        "studioId": 2,
+        "studioTitle": "studio2",
+        "studioStatus": false,
+        "studioOwner": "연쮸",
+        "clipInfoList" : [
+                            {
+                                "clipId": 2,
+                                "clipTitle": "떤재",
+                                "clipOwner": "user02",
+                                "clipLength": 46,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": -1,
+                                "clipVolume": 50
+                            },
+                            {
+                                "clipId": 4,
+                                "clipTitle": "때운",
+                                "clipOwner": "user03",
+                                "clipLength": 51,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": -1,
+                                "clipVolume": 70
+                            },
+                            {
+                                "clipId": 6,
+                                "clipTitle": "하용",
+                                "clipOwner": "user04",
+                                "clipLength": 46,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": -1,
+                                "clipVolume": 50
+                            },
+                            {
+                                "clipId": 3,
+                                "clipTitle": "연쮸",
+                                "clipOwner": "user05",
+                                "clipLength": 42,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": 1,
+                                "clipVolume": 70
+                            }
+                        ],
+        "studioFrame" : 1,
+        "studioFont" : 1,
+        "studioBGM" : 1,
+        "studioChecklist" : 1
+
+    },
+    {
+        "studioId": 3,
+        "studioTitle": "studio3",
+        "studioStatus": false,
+        "studioOwner": "연쮸",
+        "clipInfoList" : [
+                            {
+                                "clipId": 2,
+                                "clipTitle": "떤재",
+                                "clipOwner": "user02",
+                                "clipLength": 46,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": -1,
+                                "clipVolume": 50
+                            },
+                            {
+                                "clipId": 4,
+                                "clipTitle": "때운",
+                                "clipOwner": "user03",
+                                "clipLength": 51,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": -1,
+                                "clipVolume": 70
+                            },
+                            {
+                                "clipId": 6,
+                                "clipTitle": "하용",
+                                "clipOwner": "user04",
+                                "clipLength": 46,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": -1,
+                                "clipVolume": 50
+                            },
+                            {
+                                "clipId": 1,
+                                "clipTitle": "은쮸",
+                                "clipOwner": "user01",
+                                "clipLength": 46,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": 0,
+                                "clipVolume": 50
+                            },
+                            {
+                                "clipId": 3,
+                                "clipTitle": "연쮸",
+                                "clipOwner": "user05",
+                                "clipLength": 42,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": 1,
+                                "clipVolume": 70
+                            },
+                            {
+                                "clipId": 5,
+                                "clipTitle": "유꼉",
+                                "clipOwner": "user01",
+                                "clipLength": 60,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": 2,
+                                "clipVolume": 41
+                            }
+                        ],
+        "studioFrame" : 1,
+        "studioFont" : 1,
+        "studioBGM" : 1,
+        "studioChecklist" : 1
+
+    },
+    {
+        "studioId": 4,
+        "studioTitle": "studio4",
+        "studioStatus": true,
+        "studioOwner": "연쮸",
+        "clipInfoList" : [
+                            {
+                                "clipId": 2,
+                                "clipTitle": "떤재",
+                                "clipOwner": "user02",
+                                "clipLength": 46,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": -1,
+                                "clipVolume": 50
+                            },
+                            {
+                                "clipId": 4,
+                                "clipTitle": "때운",
+                                "clipOwner": "user03",
+                                "clipLength": 51,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": -1,
+                                "clipVolume": 70
+                            },
+                            {
+                                "clipId": 6,
+                                "clipTitle": "하용",
+                                "clipOwner": "user04",
+                                "clipLength": 46,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": -1,
+                                "clipVolume": 50
+                            },
+                            {
+                                "clipId": 1,
+                                "clipTitle": "은쮸",
+                                "clipOwner": "user01",
+                                "clipLength": 46,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": 0,
+                                "clipVolume": 50
+                            },
+                            {
+                                "clipId": 3,
+                                "clipTitle": "연쮸",
+                                "clipOwner": "user05",
+                                "clipLength": 42,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": 1,
+                                "clipVolume": 70
+                            },
+                            {
+                                "clipId": 5,
+                                "clipTitle": "유꼉",
+                                "clipOwner": "user01",
+                                "clipLength": 60,
+                                "clipThumbnail": "/src/assets/images/nothumb.png",
+                                "clipUrl": "/clipUrl",
+                                "clipOrder": 2,
+                                "clipVolume": 41
+                            }
+                        ],
+        "studioFrame" : 1,
+        "studioFont" : 1,
+        "studioBGM" : 1,
+        "studioChecklist" : 1
+
+    }
+]
