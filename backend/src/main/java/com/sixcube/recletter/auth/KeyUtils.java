@@ -67,19 +67,29 @@ public class KeyUtils {
         File publicKeyFile = new File(publicKeyPath);
         File privateKeyFile = new File(privateKeyPath);
 
+        //KEY가 이미 있으면 가져오기
         if (publicKeyFile.exists() && privateKeyFile.exists()) {
             log.info("loading keys from file: {}, {}", publicKeyPath, privateKeyPath);
             try {
+                //KeyFactory: 키(공개 키 및 개인 키)의 생성을 담당하는 클래스
+                // KeyFactory 인스턴스를 RSA 알고리즘으로 생성
                 KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 
+                // 공개 키 파일의 내용을 바이트 배열로 읽어옵니다.
                 byte[] publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
+                // X.509 표준에 따라 인코딩된 공개 키를 나타내는 키 사양을 생성합니다.
                 EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+                // 공개 키를 KeyFactory를 사용하여 생성합니다.
                 PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
 
+                // 개인 키 파일의 내용을 바이트 배열로 읽어옵니다.
                 byte[] privateKeyBytes = Files.readAllBytes(privateKeyFile.toPath());
+                // PKCS #8 표준에 따라 인코딩된 개인 키를 나타내는 키 사양을 생성합니다.
                 PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+                // 개인 키를 KeyFactory를 사용하여 생성합니다.
                 PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
 
+                // 생성된 공개 키와 개인 키로 KeyPair 객체를 생성합니다.
                 keyPair = new KeyPair(publicKey, privateKey);
                 return keyPair;
             } catch (NoSuchAlgorithmException | IOException | InvalidKeySpecException e) {
@@ -91,10 +101,13 @@ public class KeyUtils {
             }
         }
 
+        //key가 없는 경우
+        //폴더 만들고
         File directory = new File("access-refresh-token-keys");
         if (!directory.exists()) {
             directory.mkdirs();
         }
+        //key 생성
         try {
             log.info("Generating new public and private keys: {}, {}", publicKeyPath, privateKeyPath);
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");

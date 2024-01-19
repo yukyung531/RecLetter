@@ -47,8 +47,7 @@ public class AuthController {
   public ResponseEntity<LoginRes> login(@RequestBody LoginReq loginReq) {
     log.debug("login call");
 
-
-//인증 완료된 객체를 최종적으로 저장
+    //인증 완료된 객체를 최종적으로 저장
     Authentication authentication = daoAuthenticationProvider.authenticate(
         UsernamePasswordAuthenticationToken.unauthenticated(loginReq.getUserId(),
             loginReq.getUserPassword()));

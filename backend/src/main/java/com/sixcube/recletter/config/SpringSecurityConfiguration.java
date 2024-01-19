@@ -36,7 +36,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import org.springframework.security.web.FilterChainProxy;
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true)
 @Slf4j
@@ -90,12 +89,14 @@ public class SpringSecurityConfiguration {
   @Bean
   @Primary
   JwtDecoder jwtAccessTokenDecoder() {
+    //공개키로 jwt 토큰의 서명 검증하는 디코더 반환
     return NimbusJwtDecoder.withPublicKey(keyUtils.getAccessTokenPublicKey()).build();
   }
 
   @Bean
   @Primary
   JwtEncoder jwtAccessTokenEncoder() {
+    //jwt를 생성하는 인코더 (여기서 private key는 서명하는 데 사용됨)
     JWK jwk = new RSAKey.Builder(keyUtils.getAccessTokenPublicKey()).privateKey(
         keyUtils.getAccessTokenPrivateKey()).build();
     JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
