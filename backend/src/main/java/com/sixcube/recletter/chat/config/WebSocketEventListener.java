@@ -1,10 +1,8 @@
 package com.sixcube.recletter.chat.config;
 
 import com.sixcube.recletter.chat.dto.ChatMessage;
-import com.sixcube.recletter.chat.dto.MessageType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Session;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -27,7 +25,7 @@ public class WebSocketEventListener {
         if (username != null){
             log.info("User disconnected: {}", username);
             var chatMessage = ChatMessage.builder()
-                    .type(MessageType.LEAVE)
+                    .type(ChatMessage.MessageType.LEAVE)
                     .sender(username)
                     .build();
             messageTemplate.convertAndSend("/topic/greetings", chatMessage);
