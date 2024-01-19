@@ -8,6 +8,8 @@ import com.sixcube.recletter.studio.dto.res.SearchStudioDetailRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioListRes;
 import com.sixcube.recletter.studio.repository.StudioParticipantRepository;
 import com.sixcube.recletter.studio.repository.StudioRepository;
+import com.sixcube.recletter.studio.service.StudioParticipantService;
+import com.sixcube.recletter.studio.service.StudioService;
 import com.sixcube.recletter.user.dto.User;
 import java.util.List;
 import java.util.UUID;
@@ -28,19 +30,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class StudioController {
 
-  private final StudioRepository studioRepository;
-  private final StudioParticipantRepository studioParticipantRepository;
+  private final StudioService studioService;
+  private final StudioParticipantService studioParticipantService;
 
   // TODO - JPA 예외처리
   @GetMapping
   public ResponseEntity<SearchStudioListRes> searchStudioList(@AuthenticationPrincipal User user) {
     // 참가중인 Studio의 studioId 불러오기
-    List<UUID> participantStudioList = studioParticipantRepository.findAllByUserId(
-        user.getUserId()).stream().map(
-        StudioParticipant::getStudioId).toList();
+    List<UUID> participantStudioIdList = studioParticipantService.searchParticipantStudioByUserId(user.getUserId())
+        .stream()
+        .map(StudioParticipant::getStudioId)
+        .toList();
 
     // 참가중인 Studio 정보 불러오기
-    List<Studio> studioList = studioRepository.findByStudioIdIn(participantStudioList);
+    List<Studio> studioList = studioService.searchAllStudioByStudioIdList(participantStudioIdList);
 
     SearchStudioListRes result = new SearchStudioListRes();
 
@@ -63,10 +66,10 @@ public class StudioController {
     return ResponseEntity.ok().body(result);
   }
 
-  // TODO - 예외처리
-  @GetMapping("/{studiId}")
+  // TODO - JPA 예외처리
+  @GetMapping("/{studioId}")
   public ResponseEntity<SearchStudioDetailRes> searchStudioDetail(@PathVariable String studioId) {
-    Studio studio = studioRepository.findByStudioId(UUID.fromString(studioId));
+    Studio studio = studioService.searchStudioByStudioId(UUID.fromString(studioId));
 
     // TODO - studioId로 보유하고 있는 clipInfoList를 삽입.
     SearchStudioDetailRes result = SearchStudioDetailRes.builder()
@@ -83,18 +86,29 @@ public class StudioController {
     return ResponseEntity.ok().body(result);
   }
 
+  // TODO - JPA 예외처리
   @PostMapping
   public ResponseEntity<Void> createStudio(CreateStudioReq createStudioReq, @AuthenticationPrincipal User user) {
+    studioService.createStudio(Studio.builder()
+        .studioOwner(user.getUserId())
+        .studioTitle(createStudioReq.getStudioTitle())
+        .expireDate(createStudioReq.getExpireDate())
+        .studioFrameId(createStudioReq.getStudioFrameId())
+        .build());
 
+    return ResponseEntity.ok().build();
   }
 
-  @DeleteMapping("/{studioId")
-  public ResponseEntity<> deleteStudio(@PathVariable Integer studioId) {
+  // TODO - JPA 예외처리
+  @DeleteMapping("/{studioId}")
+  public ResponseEntity<Void> deleteStudio(@PathVariable String studioId) {
+    studioService.deleteStudioByStudioId(UUID.fromString(studioId));
 
+    return ResponseEntity.ok().build();
   }
 
-  @PostMapping("/{studioId")
-  public ResponseEntity<> joinStudio(@PathVariable Integer studioId) {
+  @PostMapping("/{studioId}")
+  public ResponseEntity<> joinStudio(@PathVariable String studioId) {
 
   }
 
