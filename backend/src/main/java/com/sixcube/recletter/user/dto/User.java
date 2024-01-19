@@ -6,7 +6,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
+
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import lombok.AllArgsConstructor;
@@ -53,10 +54,10 @@ public class User implements UserDetails {
 
   @CreationTimestamp(source = SourceType.DB)
   @Column(nullable = false)
-  private LocalDateTime createdAt;
+  private Timestamp createdAt;
 
   @Column(nullable = false)
-  private LocalDateTime deletedAt;
+  private Timestamp deletedAt;
 
 
   @Override
@@ -78,11 +79,11 @@ public class User implements UserDetails {
     return authorities;
   }
 
-  public User(RegistReq registReq) {
-    this.userId = registReq.getUserId();
-    this.userEmail = registReq.getUserEmail();
-    this.userPassword = registReq.getUserPassword();
-    this.userNickname = registReq.getUserName();
+  public User(CreateUserReq createUserReq) {
+    this.userId = createUserReq.getUserId();
+    this.userEmail = createUserReq.getUserEmail();
+    this.userPassword = createUserReq.getUserPassword();
+    this.userNickname = createUserReq.getUserNickname();
   }
   @Override
   public String getPassword() {
