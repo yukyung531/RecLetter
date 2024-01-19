@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS studio_participant (
-    studio_id int,
+    studio_id char(36),
     user_id varchar(16),
     PRIMARY KEY(studio_id, user_id),
     FOREIGN KEY(studio_id) REFERENCES studio(studio_id),

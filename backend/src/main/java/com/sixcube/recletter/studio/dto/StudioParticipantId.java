@@ -1,6 +1,7 @@
 package com.sixcube.recletter.studio.dto;
 
 import java.io.Serializable;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class StudioParticipantId implements Serializable {
 
-  private Integer studioId;
+  private UUID studioId;
   private String userId;
 }

@@ -5,6 +5,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 import java.io.Serializable;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +20,7 @@ import lombok.NoArgsConstructor;
 @IdClass(StudioParticipantId.class)
 public class StudioParticipant implements Serializable {
   @Id
-  Integer studioId;
+  UUID studioId;
 
   @Id
   String userId;

@@ -1,7 +1,6 @@
-package com.sixcube.recletter.studio.dto;
+package com.sixcube.recletter.studio.dto.req;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,14 +10,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class StudioInfo {
-  private UUID studioId;
+@AllArgsConstructor
+public class CreateStudioReq {
   private String studioTitle;
-  private Boolean isStudioOwner;
-  private Boolean isCompleted;
-  private String thumbnailUrl;
+  private Integer studioFrameId;
   private LocalDateTime expireDate;
-  private Boolean isUpload;
 }

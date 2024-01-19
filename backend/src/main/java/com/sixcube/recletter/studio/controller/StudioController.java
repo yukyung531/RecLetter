@@ -3,12 +3,14 @@ package com.sixcube.recletter.studio.controller;
 import com.sixcube.recletter.studio.dto.Studio;
 import com.sixcube.recletter.studio.dto.StudioInfo;
 import com.sixcube.recletter.studio.dto.StudioParticipant;
+import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.dto.res.SearchStudioDetailRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioListRes;
 import com.sixcube.recletter.studio.repository.StudioParticipantRepository;
 import com.sixcube.recletter.studio.repository.StudioRepository;
 import com.sixcube.recletter.user.dto.User;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,7 +35,7 @@ public class StudioController {
   @GetMapping
   public ResponseEntity<SearchStudioListRes> searchStudioList(@AuthenticationPrincipal User user) {
     // 참가중인 Studio의 studioId 불러오기
-    List<Integer> participantStudioList = studioParticipantRepository.findAllByUserId(
+    List<UUID> participantStudioList = studioParticipantRepository.findAllByUserId(
         user.getUserId()).stream().map(
         StudioParticipant::getStudioId).toList();
 
@@ -63,8 +65,8 @@ public class StudioController {
 
   // TODO - 예외처리
   @GetMapping("/{studiId}")
-  public ResponseEntity<SearchStudioDetailRes> searchStudioDetail(@PathVariable Integer studioId) {
-    Studio studio = studioRepository.findByStudioId(studioId);
+  public ResponseEntity<SearchStudioDetailRes> searchStudioDetail(@PathVariable String studioId) {
+    Studio studio = studioRepository.findByStudioId(UUID.fromString(studioId));
 
     // TODO - studioId로 보유하고 있는 clipInfoList를 삽입.
     SearchStudioDetailRes result = SearchStudioDetailRes.builder()
@@ -81,14 +83,8 @@ public class StudioController {
     return ResponseEntity.ok().body(result);
   }
 
-
-  @GetMapping("/{studioId}/thumbnail")
-  public ResponseEntity<> searchStudioThumbnail(@PathVariable Integer studioId) {
-
-  }
-
   @PostMapping
-  public ResponseEntity<> createStudio() {
+  public ResponseEntity<Void> createStudio(CreateStudioReq createStudioReq, @AuthenticationPrincipal User user) {
 
   }
 
