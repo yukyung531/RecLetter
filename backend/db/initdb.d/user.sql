@@ -1,6 +1,3 @@
-CREATE SCHEMA IF NOT EXISTS SWTTemplate
-USE SWTTemplate
-
 CREATE TABLE IF NOT EXISTS user (
     user_id varchar(16) primary key,
     user_email varchar(320) unique not null,
