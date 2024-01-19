@@ -1,27 +1,59 @@
 import VideoCard from "../components/VideoCard";
-import clipInfo from "../dummy-datas/clipList.json";
-import { useState, useEffect } from "react";
-import { ClipInfo } from "../types/type";
+import studioDetail from "../dummy-datas/studioDetail.json";
+import { useState, useEffect, BaseSyntheticEvent } from "react";
+import { StudioDetail, ClipInfo } from "../types/type";
 import { useNavigate } from "react-router-dom";
+import DeleteCheckWindow from "../components/DeleteCheckWindow";
 
 export default function StudioMainPage() {
     const navigator = useNavigate();
 
-    //유저 정보 불러오기
+    //로그인 유저 정보 불러오기
     const userId: string | null = localStorage.getItem("userId");
 
 
     //mode 0: 영상, 1: 관리
     const [mode, setMode] = useState<number>(0);
 
+    //영상 편집 여부
+    const [isEditingName, setIsEditingName] = useState<boolean>(false);
+
+    //영상 삭제 여부
+    const [isDeleting, setIsDeleting] = useState<boolean>(false)
+    const [deleteStateId, setDeleteStateId] = useState<number>(-1);
+    
     //영상 정보 불러오기
-    const [clipInfoList, setClipInfoList] = useState<ClipInfo[]>([]);
+    // const [clipInfoList, setClipInfoList] = useState<ClipInfo[]>([]);
+    const [studioDetailInfo, setStudioDetailInfo] = useState<StudioDetail>({
+        studioId: -1,
+        studioTitle: '',
+        studioStatus: false,
+        studioOwner: '',
+        clipInfoList: [],
+        studioFrame: -1,
+        studioFont: -1,
+        studioBGM: -1,
+        studioChecklist: -1
+    });
 
 
     //영상 서버로부터 불러오기
     useEffect(() => {
         //API 불러오는 함수로 clipInfo를 받아옴
-        setClipInfoList(clipInfo);
+        //우선 url query String으로부터 스튜디오 상세 정보 받아오기
+        const studioId : string|null = new URLSearchParams(location.search).get("id");
+        if(studioId !== null){
+            const studioIdNum : number = Number(studioId);
+            for(let i = 0; i < studioDetail.length; i++){
+                if(studioDetail[i].studioId === studioIdNum) {
+                    //해당되는 유저 정보 찾아 업데이트
+                    setStudioDetailInfo(studioDetail[i]);
+                    // setClipInfoList(studioDetail[i].clipInfoList);
+                    break;
+                }
+            }
+        }
+
     }, [])
 
     //편집창으로 이동
@@ -31,16 +63,37 @@ export default function StudioMainPage() {
 
     //요소 삭제
     const onDelete = (clipId : number) => {
-        setClipInfoList((prevList) => {
-            for(let i = 0; i < prevList.length; i++){
-                if(prevList[i].clipId === clipId){
-                    prevList.splice(i, 1);
-                    break;
+        setIsDeleting(true);
+        setDeleteStateId(clipId);
+
+
+        
+    }
+
+    const chooseDelete = () => {
+        if(studioDetailInfo !== null && studioDetailInfo.clipInfoList !== undefined){
+            setStudioDetailInfo((prevValue) => {
+                const prevList : ClipInfo[] = prevValue?.clipInfoList;
+                for(let i = 0; i < prevList.length; i++){
+                    if(prevList[i].clipId === deleteStateId){
+                        prevList.splice(i, 1);
+                        break;
+                    }
                 }
-            }
-            const newList: ClipInfo[] = [...prevList];
-            return newList;
-        })
+                const newList: ClipInfo[] = [...prevList];
+                const newValue = {...prevValue};
+                newValue.clipInfoList = newList;
+                return newValue;
+            })
+        }
+
+        setDeleteStateId(-1);
+        setIsDeleting(false);
+    }
+
+    const chooseNotDelete = () => {
+        setDeleteStateId(-1);
+        setIsDeleting(false);
     }
 
 
@@ -58,7 +111,7 @@ export default function StudioMainPage() {
                             </p>
                         </div>
                         {
-                            clipInfoList.map((clip) => {
+                            studioDetailInfo.clipInfoList.map((clip) => {
                                 if(clip.clipOrder != -1){
                                     return <VideoCard key={clip.clipId} onDelete={() => {onDelete(clip.clipId)}} onClick={() => {onClickEdit(clip.clipId)}} props={clip} />
                                 }
@@ -68,7 +121,7 @@ export default function StudioMainPage() {
                             <p>선택되지 않은 영상</p>
                         </div>
                         {
-                            clipInfoList.map((clip) => {
+                            studioDetailInfo.clipInfoList.map((clip) => {
                                 if(clip.clipOrder == -1){
                                     return <VideoCard key={clip.clipId} onDelete={() => {onDelete(clip.clipId)}} onClick={() => {onClickEdit(clip.clipId)}} props={clip} />
                                 }
@@ -94,21 +147,48 @@ export default function StudioMainPage() {
         setMode(1);
     }
 
+    //스튜디오 이름 변경
+    const handleStudioEditing = () => {
+        setIsEditingName(true);
+    }
+
+    const handleStudioName = () => {
+        //DB에 변경 요청
+        setIsEditingName(false);
+    }
+
+    const updateStudioName = (event : BaseSyntheticEvent) => {
+        if(studioDetailInfo !== null){
+            const newValue = {...studioDetailInfo};
+            newValue.studioTitle = event.target.value;
+            setStudioDetailInfo(newValue);
+        }
+    }
+
 
 
 
     return (
         <section className="relative section-top pt-16 ">
+            {isDeleting ? <DeleteCheckWindow onClickOK={chooseDelete} onClickCancel={chooseNotDelete}/> : <></>}
             <div className="h-20 w-full px-12 bg-black text-white flex justify-between items-center">
                 <div className="flex items-center">
                     <span className="material-symbols-outlined">
                         arrow_back_ios
                     </span>
-                    <p className="text-3xl">studio1</p>
+                    {!isEditingName ?
+                    <p className="text-3xl w-64">{studioDetailInfo ? studioDetailInfo.studioTitle : "new studio"}</p> :
+                    <input type="text" value={studioDetailInfo?.studioTitle} className="text-3xl text-black w-64" onChange={updateStudioName}/>
+                    }
                     <div className="ml-28" />
-                    <span className="material-symbols-outlined mx-2 text-3xl">
+
+                    {!isEditingName ? <span className="material-symbols-outlined mx-2 text-3xl" onClick={handleStudioEditing}>
                         edit
-                    </span>
+                    </span> : 
+                    <span className="material-symbols-outlined mx-2 text-3xl" onClick={handleStudioName}>
+                        check_box
+                    </span>}
+
                     <span className="material-symbols-outlined mx-2 text-3xl">
                         group_add
                     </span>
@@ -188,7 +268,7 @@ export default function StudioMainPage() {
                                 <p>나의 영상</p>
                             </div>
                             {
-                            clipInfoList.map((clip) => {
+                            studioDetailInfo.clipInfoList.map((clip) => {
                                 if(clip.clipOwner === userId){
                                     return <VideoCard key={clip.clipId} onDelete={() => {onDelete(clip.clipId)}} onClick={() => {onClickEdit(clip.clipId)}} props={clip} />
                                 }
