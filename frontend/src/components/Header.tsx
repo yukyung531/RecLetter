@@ -1,7 +1,25 @@
-import { useEffect } from 'react';
 import '../assets/css/3_components/Header.css';
 
+
 export default function Header() {
+
+    //로그아웃 함수
+    const onLogout = () => {
+        if(localStorage.getItem("userId")){
+            localStorage.removeItem("userId");
+        }
+        if(localStorage.getItem("usernickname")){
+            localStorage.removeItem("usernickname");
+        }
+        if(localStorage.getItem("accessToken")){
+            localStorage.removeItem("accessToken");
+        }
+        if(localStorage.getItem("refreshToken")){
+            localStorage.removeItem("refreshToken");
+        }
+        //이거 한 후, main page로 이동하도록 만들어야 함.
+    }
+
     if (
         window.location.pathname === '/' ||
         window.location.pathname === '/cliprecode' ||
@@ -31,12 +49,12 @@ export default function Header() {
                         </span>
                         <p>마이페이지</p>
                     </a>
-                    <a className="flex mx-2 text-xl justify-center items-center cursor-pointer">
+                    <div className="flex mx-2 text-xl justify-center items-center cursor-pointer" onClick={onLogout}>
                         <span className="material-symbols-outlined mx-1">
                             logout
                         </span>
                         <p>로그아웃</p>
-                    </a>
+                    </div>
                 </div>
             </div>
         );

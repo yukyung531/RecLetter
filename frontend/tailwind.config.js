@@ -6,7 +6,8 @@ module.exports = {
         '.src/styles/main.css',
     ],
     theme: {
-        extend: {},
+        extend: {
+        },
     },
     plugins: [],
 };
