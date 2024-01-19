@@ -1,0 +1,38 @@
+[
+    {
+        "studioId": 1,
+        "studioTitle": "studio1",
+        "isStudioOwner": false,
+        "studioStatus": false,
+        "thumbnailUrl": "/src/assets/images/nothumb.png",
+        "expireDate": "2024-01-27T00:00:00.000Z",
+        "isUpload": true
+    },
+    {
+        "studioId": 2,
+        "studioTitle": "studio2",
+        "isStudioOwner": true,
+        "studioStatus": false,
+        "thumbnailUrl": "/src/assets/images/nothumb.png",
+        "expireDate": "2024-01-25T00:00:00.000Z",
+        "isUpload": false
+    },
+    {
+        "studioId": 3,
+        "studioTitle": "studio3",
+        "isStudioOwner": true,
+        "studioStatus": false,
+        "thumbnailUrl": "/src/assets/images/nothumb.png",
+        "expireDate": "2024-01-28T00:00:00.000Z",
+        "isUpload": true
+    },
+    {
+        "studioId": 4,
+        "studioTitle": "studio4",
+        "isStudioOwner": true,
+        "studioStatus": true,
+        "thumbnailUrl": "/src/assets/images/nothumb.png",
+        "expireDate": "2024-01-22T00:00:00.000Z",
+        "isUpload": true
+    }
+]

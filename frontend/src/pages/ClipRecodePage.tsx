@@ -1,4 +1,39 @@
+import {useState, useEffect} from 'react';
+import clipList from '../dummy-datas/clipList.json';
+import { ClipInfo } from '../types/type';
+import MyClipCard from '../components/MyClipCard';
+
 export default function ClipRecodePage() {
+
+
+    const [myClipList, setMyClipList] = useState<ClipInfo[]>([]);
+    //정보 불러오기
+    useEffect(() => {
+        const userId : string | null = localStorage.getItem("userId");
+        const newList : ClipInfo[] = [];
+        clipList.map((clip) => {
+            if(clip.clipOwner === userId){
+                newList.push(clip);
+            }
+        })
+        setMyClipList(newList);
+    }, [])
+
+    //동영상 삭제
+    const onPressDelete = (clipId: number) => {
+        setMyClipList((prevList) => {
+            for(let i = 0; i < prevList.length; i++){
+                if(prevList[i].clipId === clipId){
+                    prevList.splice(i, 1);
+                    break;
+                }
+            }
+            const newList: ClipInfo[] = [...prevList];
+            return newList;
+        })
+    }
+
+
     return (
         <section className="relative section-top">
             <div className="h-20 w-full px-12 color-text-black flex justify-between items-center">
@@ -50,49 +85,24 @@ export default function ClipRecodePage() {
                         <div className="w-full flex justify-start text-xl ">
                             <p>선택하지 않은 영상</p>
                         </div>
-
-                        <div className="relative flex w-full my-2 p-2 border-2 color-border-blue2">
-                            <img
-                                className="w-16 h-12"
-                                src="/src/assets/images/nothumb.png"
-                                alt=""
-                            />
-                            <div className="ms-2">
-                                <p className="font-bold">연쮸</p>
-                                <p>0:48</p>
-                            </div>
-                            <span className="material-symbols-outlined text-xl absolute bottom-0 right-0 color-text-red3">
-                                delete
-                            </span>
+                        {
+                            myClipList.map((clip) => {
+                                if(clip.clipOrder === -1){
+                                    return <MyClipCard props={clip} onClick={() => {onPressDelete(clip.clipId)}}/>
+                                }
+                            })
+                        }
+                        <p>-------------------------------------</p>
+                        <div className="w-full flex justify-start text-xl ">
+                            <p>선택한 영상</p>
                         </div>
-                        <div className="relative flex w-full my-2 p-2 border-2">
-                            <img
-                                className="w-16 h-12"
-                                src="/src/assets/images/nothumb.png"
-                                alt=""
-                            />
-                            <div className="ms-2">
-                                <p className="font-bold">유경</p>
-                                <p>0:48</p>
-                            </div>
-                            <span className="material-symbols-outlined text-xl absolute bottom-0 right-0 color-text-red3">
-                                delete
-                            </span>
-                        </div>
-                        <div className="relative flex w-full my-2 p-2 border-2">
-                            <img
-                                className="w-16 h-12"
-                                src="/src/assets/images/nothumb.png"
-                                alt=""
-                            />
-                            <div className="ms-2">
-                                <p className="font-bold">은수</p>
-                                <p>0:48</p>
-                            </div>
-                            <span className="material-symbols-outlined text-xl absolute bottom-0 right-0 color-text-red3">
-                                delete
-                            </span>
-                        </div>
+                        {
+                            myClipList.map((clip) => {
+                                if(clip.clipOrder !== -1){
+                                    return <MyClipCard props={clip} onClick={() => {onPressDelete(clip.clipId)}}/>
+                                }
+                            })
+                        }
                     </div>
                 </div>
                 {/* 우측부분 */}

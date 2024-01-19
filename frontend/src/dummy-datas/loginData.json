@@ -1,0 +1,8 @@
+{
+    "accessToken" : "accessToken",
+    "refreshToken" : "refreshToken",
+    "userInfo" : [
+        "user01",
+        "연쮸"
+    ]
+}

@@ -1,4 +1,21 @@
+import loginData from '../dummy-datas/loginData.json';
+import {useNavigate} from 'react-router-dom';
+
+
 export default function LoginPage() {
+
+    const navigate = useNavigate();
+
+    const onClickLogin = function() {
+        //api로 정보 받아옴
+        localStorage.setItem("userId", loginData.userInfo[0]);
+        localStorage.setItem("usernickname", loginData.userInfo[1]);
+        localStorage.setItem("accessToken", loginData.accessToken);
+        localStorage.setItem("refreshToken", loginData.refreshToken);
+        navigate(`/studiolist`);
+    }
+
+
     return (
         <section className="section-center">
             <div className="w-1/3 flex flex-col justify-center items-center">
@@ -18,22 +35,20 @@ export default function LoginPage() {
                     />
                 </div>
 
-                <a
-                    href="./studiolist"
+                <div onClick={onClickLogin}
                     className=" w-88 block text-2xl color-bg-blue1 text-white border text-center p-2 rounded-md"
                 >
                     로그인
-                </a>
+                </div>
                 <p className="my-4">
                     -------------------------------- 또는
                     --------------------------------
                 </p>
-                <a
-                    href="./studiolist"
+                <div onClick={onClickLogin}
                     className="block w-80 text-black border-black text-2xl border text-center py-2 rounded-md"
                 >
                     Google으로 로그인하기
-                </a>
+                </div>
                 <div className="flex justify-center items-center my-2 color-text-blue1">
                     <a className="mx-4 my-2 text-2xl" href="./findid">
                         아이디 찾기

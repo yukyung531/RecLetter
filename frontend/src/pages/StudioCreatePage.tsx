@@ -1,6 +1,21 @@
+import { useState } from "react";
+import AddMemberWindow from "../components/AddMemberWindow";
+
 export default function StudioCreatePage() {
+
+    const [isInviteActive, setIsInviteActive] = useState<boolean>(false);
+
+    const onPressAddMember = () => {
+        setIsInviteActive(true);
+    }
+
+    const onPressCloseWindow = () => {
+        setIsInviteActive(false);
+    }
+
     return (
-        <section className="relative section-top pt-10 mt-20 ml-16">
+        <section className="relative section-top pt-20 mt-20 ml-16">
+            {isInviteActive ? <AddMemberWindow onClose={onPressCloseWindow}/> : <></>}
             <div>
                 <h5 className="text-3xl font-bold">스튜디오 제목</h5>
                 <input
@@ -14,7 +29,7 @@ export default function StudioCreatePage() {
                     type="text"
                     placeholder="Placeholder"
                 />
-                <p className="btn-cover color-bg-yellow2">멤버추가</p>
+                <p className="btn-cover color-bg-yellow2" onClick={onPressAddMember}>멤버추가</p>
                 <h5 className="text-3xl font-bold mt-16">영상 프레임</h5>
                 <div className="flex">
                     <img
