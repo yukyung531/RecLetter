@@ -3,6 +3,7 @@ package com.sixcube.recletter.studio.controller;
 import com.sixcube.recletter.studio.dto.Studio;
 import com.sixcube.recletter.studio.dto.StudioInfo;
 import com.sixcube.recletter.studio.dto.StudioParticipant;
+import com.sixcube.recletter.studio.dto.res.SearchStudioDetailRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioListRes;
 import com.sixcube.recletter.studio.repository.StudioParticipantRepository;
 import com.sixcube.recletter.studio.repository.StudioRepository;
@@ -46,24 +47,40 @@ public class StudioController {
     // 불러온 Studio들을 통해 StudioInfo List 생성후 할당.
     result.setStudioInfoList(
         studioList.stream().map(studio -> StudioInfo.builder()
-              .studioId(studio.getStudioId())
-              .studioTitle(studio.getStudioTitle())
-              .isStudioOwner(user.getUserId().equals(studio.getStudioOwner()))
-              .isCompleted(studio.getIsCompleted())
-              .thumbnailUrl("")
-              .expireDate(studio.getExpireDate())
-              .isUpload(false)
-              .build()
+            .studioId(studio.getStudioId())
+            .studioTitle(studio.getStudioTitle())
+            .isStudioOwner(user.getUserId().equals(studio.getStudioOwner()))
+            .isCompleted(studio.getIsCompleted())
+            .thumbnailUrl("")
+            .expireDate(studio.getExpireDate())
+            .isUpload(false)
+            .build()
         ).toList()
     );
 
     return ResponseEntity.ok().body(result);
   }
 
+  // TODO - 예외처리
   @GetMapping("/{studiId}")
-  public ResponseEntity<> searchStudioDetail(@PathVariable Integer studiId) {
+  public ResponseEntity<SearchStudioDetailRes> searchStudioDetail(@PathVariable Integer studioId) {
+    Studio studio = studioRepository.findByStudioId(studioId);
 
+    // TODO - studioId로 보유하고 있는 clipInfoList를 삽입.
+    SearchStudioDetailRes result = SearchStudioDetailRes.builder()
+        .studioId(studio.getStudioId())
+        .studioTitle(studio.getStudioTitle())
+        .isCompleted(studio.getIsCompleted())
+        .studioOwner(studio.getStudioOwner())
+//        .clipInfoList()
+        .studioFrameId(studio.getStudioFrameId())
+        .studioFontId(studio.getStudioFontId())
+        .studioBgmId(studio.getStudioBgmId())
+        .build();
+    
+    return ResponseEntity.ok().body(result);
   }
+
 
   @GetMapping("/{studioId}/thumbnail")
   public ResponseEntity<> searchStudioThumbnail(@PathVariable Integer studioId) {
