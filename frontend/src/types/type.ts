@@ -24,3 +24,15 @@ export interface ClipInfo {
     clipOrder: number;
     clipVolume: number;
 }
+
+export interface StudioDetail {
+    studioId: number;
+    studioTitle: string;
+    studioStatus: boolean;
+    studioOwner: string;
+    clipInfoList: ClipInfo[];
+    studioFrame: number;
+    studioFont: number;
+    studioBGM: number;
+    studioChecklist: number;
+}
