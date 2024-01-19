@@ -107,13 +107,20 @@ public class StudioController {
     return ResponseEntity.ok().build();
   }
 
+  // TODO - JPA 예외처리
   @PostMapping("/{studioId}")
-  public ResponseEntity<> joinStudio(@PathVariable String studioId) {
+  public ResponseEntity<Void> joinStudio(@PathVariable String studioId, @AuthenticationPrincipal User user) {
+    studioParticipantService.createStudioParticipant(StudioParticipant.builder()
+        .studioId(UUID.fromString(studioId))
+        .userId(user.getUserId())
+        .build()
+    );
 
+    return ResponseEntity.ok().build();
   }
 
   @GetMapping("/{studioId}/active")
-  public ResponseEntity<> searchActiveUser() {
+  public ResponseEntity<Boolean> searchActiveUser() {
 
   }
 

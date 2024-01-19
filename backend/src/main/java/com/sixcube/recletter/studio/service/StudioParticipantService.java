@@ -6,4 +6,6 @@ import java.util.UUID;
 
 public interface StudioParticipantService {
   List<StudioParticipant> searchParticipantStudioByUserId(String userId);
+
+  void createStudioParticipant(StudioParticipant studioParticipant);
 }

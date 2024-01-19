@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface StudioParticipantRepository extends JpaRepository<StudioParticipant, StudioParticipantId> {
   List<StudioParticipant> findAllByStudioId(String studioId);
-
   List<StudioParticipant> findAllByUserId(String userId);
+
+
 }
