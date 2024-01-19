@@ -33,4 +33,9 @@ public class StudioServiceImpl implements StudioService {
   public void deleteStudioByStudioId(UUID studioId) {
     studioRepository.deleteById(studioId);
   }
+
+  @Override
+  public void updateStudioTitle(Studio studio) {
+    studioRepository.save(studio);
+  }
 }

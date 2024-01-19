@@ -12,4 +12,6 @@ public interface StudioService {
   void createStudio(Studio studio);
 
   void deleteStudioByStudioId(UUID studioId);
+
+  void updateStudioTitle(Studio studio);
 }

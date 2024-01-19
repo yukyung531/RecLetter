@@ -4,6 +4,7 @@ import com.sixcube.recletter.studio.dto.Studio;
 import com.sixcube.recletter.studio.dto.StudioInfo;
 import com.sixcube.recletter.studio.dto.StudioParticipant;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
+import com.sixcube.recletter.studio.dto.res.SearchActiveUserRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioDetailRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioListRes;
 import com.sixcube.recletter.studio.repository.StudioParticipantRepository;
@@ -119,14 +120,20 @@ public class StudioController {
     return ResponseEntity.ok().build();
   }
 
+  // TODO - redis 예외처리
   @GetMapping("/{studioId}/active")
-  public ResponseEntity<Boolean> searchActiveUser() {
-
+  public ResponseEntity<SearchActiveUserRes> searchActiveUser(@PathVariable String studioId) {
+    // TODO - 해당 studioId로 활성화된 챗팅방이 있는를 체크해서 반환
+    return ResponseEntity.ok().body(SearchActiveUserRes.builder().isActive(false).build());
   }
 
+  // TODO - JPA 예외처리
   @PutMapping("/studio/{studioId}/title")
-  public ResponseEntity<> updateStudioTitle(@PathVariable Integer studioId,
+  public ResponseEntity<Void> updateStudioTitle(@PathVariable String studioId,
       @RequestParam String studioTitle) {
+    Studio studio = studioService.searchStudioByStudioId(UUID.fromString(studioId));
+
+
 
   }
 
