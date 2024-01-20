@@ -13,5 +13,5 @@ public interface StudioService {
 
   void deleteStudioByStudioId(UUID studioId);
 
-  void updateStudioTitle(Studio studio);
+  void updateStudioTitle(UUID studioId, String studioTitle);
 }

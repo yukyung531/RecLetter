@@ -12,9 +12,11 @@ import com.sixcube.recletter.studio.repository.StudioRepository;
 import com.sixcube.recletter.studio.service.StudioParticipantService;
 import com.sixcube.recletter.studio.service.StudioService;
 import com.sixcube.recletter.user.dto.User;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -131,10 +133,9 @@ public class StudioController {
   @PutMapping("/studio/{studioId}/title")
   public ResponseEntity<Void> updateStudioTitle(@PathVariable String studioId,
       @RequestParam String studioTitle) {
-    Studio studio = studioService.searchStudioByStudioId(UUID.fromString(studioId));
+    studioService.updateStudioTitle(UUID.fromString(studioId), studioTitle);
 
-
-
+    return ResponseEntity.ok().build();
   }
 
 

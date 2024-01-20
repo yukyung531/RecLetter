@@ -3,6 +3,7 @@ package com.sixcube.recletter.studio.service;
 import com.sixcube.recletter.studio.dto.Studio;
 import com.sixcube.recletter.studio.exception.StudioNotFoundException;
 import com.sixcube.recletter.studio.repository.StudioRepository;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class StudioServiceImpl implements StudioService {
 
   private final StudioRepository studioRepository;
@@ -35,7 +37,9 @@ public class StudioServiceImpl implements StudioService {
   }
 
   @Override
-  public void updateStudioTitle(Studio studio) {
-    studioRepository.save(studio);
+  public void updateStudioTitle(UUID studioId, String studioTitle) {
+    Studio studio = studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
+    studio.setStudioTitle(studioTitle);
   }
+
 }
