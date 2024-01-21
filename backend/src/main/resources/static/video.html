@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="https://vjs.zencdn.net/8.9.0/video-js.css" rel="stylesheet" />
+
+</head>
+<body>
+<h1>video</h1>
+<button id="getVideo">get Video</button>
+<video-js id="video-player" width="500" height="500" controls></video-js>
+
+
+<script src="https://vjs.zencdn.net/8.9.0/video.min.js"></script>
+<script>
+
+    var myPlayer = videojs('video-player');
+    myPlayer.src("https://sunjbucket.s3.ap-northeast-2.amazonaws.com/testVideo.mp4")
+
+    const videoBtn=document.querySelector("#getVideo");
+    videoBtn.addEventListener("click",()=>{
+        let srcUrl=fetch("http://localhost:8080/clip")
+            // .then((res)=> res.json())
+            .then((data)=>console.log(data))
+        // myPlayer.src(srcUrl);
+        // console.log("get info")
+        //
+        // console.log("play!")
+        // myPlayer.ready(
+        //     function(){
+        //         myPlayer.play()
+        //     }
+        // )
+    })
+
+
+
+</script>
+</body>
+</html>
