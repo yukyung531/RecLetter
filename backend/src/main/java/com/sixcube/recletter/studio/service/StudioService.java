@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.UUID;
 
 public interface StudioService {
-  Studio searchStudioByStudioId(UUID studioId);
+  Studio searchStudioByStudioId(String studioId);
 
-  List<Studio> searchAllStudioByStudioIdList(List<UUID> studioIdList);
+  List<Studio> searchAllStudioByStudioIdList(List<String> studioIdList);
 
   void createStudio(Studio studio);
 
-  void deleteStudioByStudioId(UUID studioId);
+  void deleteStudioByStudioId(String studioId);
 
-  void updateStudioTitle(UUID studioId, String studioTitle);
+  void updateStudioTitle(String studioId, String studioTitle);
 }

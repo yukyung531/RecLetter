@@ -7,4 +7,4 @@ CREATE TABLE IF NOT EXISTS frame (
     font_size int default 20,
     font_bold bool default false,
     FOREIGN KEY(font_id) REFERENCES font(font_id)
-)
+) ENGINE innoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

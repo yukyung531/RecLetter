@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class StudioParticipantId implements Serializable {
 
-  private UUID studioId;
+  private String studioId;
   private String userId;
 }

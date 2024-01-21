@@ -6,19 +6,7 @@ spring:
     import:
       - optional:file:.env[.properties]
   datasource:
-    url: ${DB_URL}
-#    hikari:
-#      driver-class-name: org.mariadb.jdbc.Driver
-#      jdbc-url: ${DB_URL}
-#      username: ${USER_NAME}
-#      password: ${USER_PASSWORD}
-#      maximum-pool-size: 15
-#      minimum-idle: 1
-#      connection-timeout: 5000
-#      connection-init-sql: SELECT 1
-#      idle-timeout: 600000
-#      max-lifetime: 1800000
-#      auto-commit: true
+    url: ${TEST_DB_URL}
     username: ${USER_NAME}
     password: ${USER_PASSWORD}
     driver-class-name: org.mariadb.jdbc.Driver
@@ -38,6 +26,9 @@ logging:
     org:
       hibernate:
         SQL: DEBUG
+    com:
+      sixcube:
+        recletter: debug
 access-token:
   private: access-refresh-token-keys/access-token-private.key
   public: access-refresh-token-keys/access-token-public.key

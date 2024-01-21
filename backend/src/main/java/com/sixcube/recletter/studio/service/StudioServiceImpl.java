@@ -17,12 +17,12 @@ public class StudioServiceImpl implements StudioService {
   private final StudioRepository studioRepository;
 
   @Override
-  public Studio searchStudioByStudioId(UUID studioId) {
+  public Studio searchStudioByStudioId(String studioId) {
     return studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
   }
 
   @Override
-  public List<Studio> searchAllStudioByStudioIdList(List<UUID> studioIdList) {
+  public List<Studio> searchAllStudioByStudioIdList(List<String> studioIdList) {
     return studioRepository.findByStudioIdIn(studioIdList);
   }
 
@@ -32,12 +32,12 @@ public class StudioServiceImpl implements StudioService {
   }
 
   @Override
-  public void deleteStudioByStudioId(UUID studioId) {
+  public void deleteStudioByStudioId(String studioId) {
     studioRepository.deleteById(studioId);
   }
 
   @Override
-  public void updateStudioTitle(UUID studioId, String studioTitle) {
+  public void updateStudioTitle(String studioId, String studioTitle) {
     Studio studio = studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
     studio.setStudioTitle(studioTitle);
   }

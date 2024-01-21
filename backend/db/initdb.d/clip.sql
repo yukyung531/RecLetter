@@ -10,4 +10,4 @@ CREATE TABLE IF NOT EXISTS clip (
     studio_id uuid,
     FOREIGN KEY(clip_owner) REFERENCES user(user_id),
     FOREIGN KEY(studio_id) REFERENCES studio(studio_id)
-)
+) ENGINE innoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

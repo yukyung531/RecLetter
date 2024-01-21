@@ -20,11 +20,4 @@ public class RecLetterApplication {
     return new BCryptPasswordEncoder();
   }
 
-  @Bean
-  public MessageSource messageSource() {
-    ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-    messageSource.setBasename("classpath:errors");
-    messageSource.setDefaultEncoding("UTF-8");
-    return messageSource;
-  }
 }

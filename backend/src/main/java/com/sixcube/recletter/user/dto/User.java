@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.SourceType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,6 +29,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @AllArgsConstructor
 @Entity
 @Table(name = "user")
+@DynamicInsert
 public class User implements UserDetails {
 
 //  @Id @GeneratedValue(strategy = GenerationType.UUID)
@@ -36,6 +38,7 @@ public class User implements UserDetails {
   //  @Column(nullable = false, unique = true)
   @NotBlank
   @Id
+  @Column(name = "user_id")
   private String userId;
 
   @Email
@@ -55,7 +58,6 @@ public class User implements UserDetails {
   @Column(nullable = false)
   private LocalDateTime createdAt;
 
-  @Column(nullable = false)
   private LocalDateTime deletedAt;
 
 

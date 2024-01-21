@@ -16,6 +16,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/studio")
 @RequiredArgsConstructor
+@Slf4j
 public class StudioController {
 
   private final StudioService studioService;
@@ -40,7 +43,7 @@ public class StudioController {
   @GetMapping
   public ResponseEntity<SearchStudioListRes> searchStudioList(@AuthenticationPrincipal User user) {
     // 참가중인 Studio의 studioId 불러오기
-    List<UUID> participantStudioIdList = studioParticipantService.searchParticipantStudioByUserId(user.getUserId())
+    List<String> participantStudioIdList = studioParticipantService.searchParticipantStudioByUserId(user.getUserId())
         .stream()
         .map(StudioParticipant::getStudioId)
         .toList();
@@ -57,7 +60,7 @@ public class StudioController {
         studioList.stream().map(studio -> StudioInfo.builder()
             .studioId(studio.getStudioId())
             .studioTitle(studio.getStudioTitle())
-            .isStudioOwner(user.getUserId().equals(studio.getStudioOwner()))
+            .isStudioOwner(user.getUserId().equals(studio.getStudioOwner().getUserId()))
             .isCompleted(studio.getIsCompleted())
             .thumbnailUrl("")
             .expireDate(studio.getExpireDate())
@@ -72,18 +75,18 @@ public class StudioController {
   // TODO - JPA 예외처리
   @GetMapping("/{studioId}")
   public ResponseEntity<SearchStudioDetailRes> searchStudioDetail(@PathVariable String studioId) {
-    Studio studio = studioService.searchStudioByStudioId(UUID.fromString(studioId));
+    Studio studio = studioService.searchStudioByStudioId(studioId);
 
     // TODO - studioId로 보유하고 있는 clipInfoList를 삽입.
     SearchStudioDetailRes result = SearchStudioDetailRes.builder()
         .studioId(studio.getStudioId())
         .studioTitle(studio.getStudioTitle())
         .isCompleted(studio.getIsCompleted())
-        .studioOwner(studio.getStudioOwner())
+        .studioOwner(studio.getStudioOwner().getUserId())
 //        .clipInfoList()
-        .studioFrameId(studio.getStudioFrameId())
-        .studioFontId(studio.getStudioFontId())
-        .studioBgmId(studio.getStudioBgmId())
+//        .studioFrameId(studio.getStudioFrame().getFrameId())
+//        .studioFontId(studio.getStudioFont().getFontId())
+//        .studioBgmId(studio.getStudioBgm().getBgmId())
         .build();
     
     return ResponseEntity.ok().body(result);
@@ -91,13 +94,23 @@ public class StudioController {
 
   // TODO - JPA 예외처리
   @PostMapping
-  public ResponseEntity<Void> createStudio(CreateStudioReq createStudioReq, @AuthenticationPrincipal User user) {
-    studioService.createStudio(Studio.builder()
-        .studioOwner(user.getUserId())
+  public ResponseEntity<Void> createStudio(@RequestBody CreateStudioReq createStudioReq, @AuthenticationPrincipal User user) {
+    // TODO - Frame 객체를 생성하여 삽입
+    log.debug(createStudioReq.toString());
+    log.debug("{}", Studio.builder()
+        .studioOwner(user)
         .studioTitle(createStudioReq.getStudioTitle())
         .expireDate(createStudioReq.getExpireDate())
-        .studioFrameId(createStudioReq.getStudioFrameId())
+//        .studioFrame(createStudioReq.getStudioFrameId())
         .build());
+    studioService.createStudio(Studio.builder()
+        .studioOwner(user)
+        .studioTitle(createStudioReq.getStudioTitle())
+        .expireDate(createStudioReq.getExpireDate())
+//        .studioFrame(createStudioReq.getStudioFrameId())
+        .build());
+
+
 
     return ResponseEntity.ok().build();
   }
@@ -105,7 +118,7 @@ public class StudioController {
   // TODO - JPA 예외처리
   @DeleteMapping("/{studioId}")
   public ResponseEntity<Void> deleteStudio(@PathVariable String studioId) {
-    studioService.deleteStudioByStudioId(UUID.fromString(studioId));
+    studioService.deleteStudioByStudioId(studioId);
 
     return ResponseEntity.ok().build();
   }
@@ -114,7 +127,7 @@ public class StudioController {
   @PostMapping("/{studioId}")
   public ResponseEntity<Void> joinStudio(@PathVariable String studioId, @AuthenticationPrincipal User user) {
     studioParticipantService.createStudioParticipant(StudioParticipant.builder()
-        .studioId(UUID.fromString(studioId))
+        .studioId(studioId)
         .userId(user.getUserId())
         .build()
     );
@@ -133,7 +146,7 @@ public class StudioController {
   @PutMapping("/studio/{studioId}/title")
   public ResponseEntity<Void> updateStudioTitle(@PathVariable String studioId,
       @RequestParam String studioTitle) {
-    studioService.updateStudioTitle(UUID.fromString(studioId), studioTitle);
+    studioService.updateStudioTitle(studioId, studioTitle);
 
     return ResponseEntity.ok().build();
   }

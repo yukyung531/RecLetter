@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @IdClass(StudioParticipantId.class)
 public class StudioParticipant implements Serializable {
   @Id
-  UUID studioId;
+  String studioId;
 
   @Id
   String userId;

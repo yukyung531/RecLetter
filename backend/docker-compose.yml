@@ -8,5 +8,20 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
+
+  mariadb:
+    image: mariadb:10.4
+    container_name: RecLetterTestMariaDB
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb-data:/lib/var/mysql
+    environment:
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${USER_NAME}
+      MARIADB_PASSWORD: ${USER_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
 volumes:
   redis-data:
+  mariadb-data:
+

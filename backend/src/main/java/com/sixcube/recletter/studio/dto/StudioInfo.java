@@ -14,7 +14,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StudioInfo {
-  private UUID studioId;
+  private String studioId;
   private String studioTitle;
   private Boolean isStudioOwner;
   private Boolean isCompleted;

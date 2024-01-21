@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS studio (
     studio_bgm_id int not null default 0,
     studio_volume int not null default 100 CHECK ( studio_volume between 1 and 200),
     is_completed bool not null default false,
-    FOREIGN KEY(studio_owner) REFERENCES user(user_id),
+    FOREIGN KEY(studio_owner) REFERENCES user(user_id) ON DELETE SET NULL ,
     FOREIGN KEY(studio_frame_id) REFERENCES frame(frame_id),
     FOREIGN KEY(studio_bgm_id) REFERENCES bgm(bgm_id)
-)
+) ENGINE innoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
