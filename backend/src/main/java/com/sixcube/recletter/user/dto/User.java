@@ -80,11 +80,11 @@ public class User implements UserDetails {
     return authorities;
   }
 
-  public User(RegistReq registReq) {
-    this.userId = registReq.getUserId();
-    this.userEmail = registReq.getUserEmail();
-    this.userPassword = registReq.getUserPassword();
-    this.userNickname = registReq.getUserName();
+  public User(CreateUserReq createUserReq) {
+    this.userId = createUserReq.getUserId();
+    this.userEmail = createUserReq.getUserEmail();
+    this.userPassword = createUserReq.getUserPassword();
+    this.userNickname = createUserReq.getUserNickname();
   }
   @Override
   public String getPassword() {

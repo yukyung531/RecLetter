@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.validator.constraints.Length;
 
 @Getter
 @Setter
@@ -17,7 +16,7 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class RegistReq {
+public class CreateUserReq {
 
   @NotBlank
   @Size(min = 8, max = 16)
@@ -33,5 +32,5 @@ public class RegistReq {
 
   @NotBlank
   @Size(min = 2, max = 16)
-  private String userName;
+  private String userNickname;
 }

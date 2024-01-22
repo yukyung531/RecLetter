@@ -21,6 +21,7 @@ public class UserService implements UserDetailsService {
     return new UserInfo(userRepository.findByUserId(userId));
   }
 
+  //회원가입
   public User createUser(User user) {
     String unencryptedPassword = user.getPassword();
     user.setUserPassword(passwordEncoder.encode(unencryptedPassword));

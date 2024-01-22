@@ -2,10 +2,12 @@ package com.sixcube.recletter.auth;
 
 import com.sixcube.recletter.auth.dto.Token;
 import com.sixcube.recletter.user.dto.User;
+
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -19,74 +21,78 @@ import org.springframework.stereotype.Component;
 @Component
 public class TokenGenerator {
 
-  @Autowired
-  JwtEncoder accessTokenEncoder;
+    @Autowired
+    JwtEncoder accessTokenEncoder;
 
-  @Autowired
-  @Qualifier("jwtRefreshTokenEncoder")
-  JwtEncoder refreshTokenEncoder;
+    @Autowired
+    @Qualifier("jwtRefreshTokenEncoder")
+    JwtEncoder refreshTokenEncoder;
 
-  private String createAccessToken(Authentication authentication) {
-    User user = (User) authentication.getPrincipal();
-    Instant now = Instant.now();
+    private String createAccessToken(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        Instant now = Instant.now();
 
-    JwtClaimsSet claimsSet = JwtClaimsSet.builder()
-        .issuer("SWT")
-        .issuedAt(now)
-        .expiresAt(now.plus(30, ChronoUnit.MINUTES))
-        .claim("userId", user.getUserId())
-        .build();
+        JwtClaimsSet claimsSet = JwtClaimsSet.builder()
+                .issuer("SWT")
+                .issuedAt(now)
+                .expiresAt(now.plus(30, ChronoUnit.MINUTES))
+                .claim("userId", user.getUserId())
+                .build();
 
-    return accessTokenEncoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue();
-  }
-
-  private String createRefreshToken(Authentication authentication) {
-    User user = (User) authentication.getPrincipal();
-    Instant now = Instant.now();
-
-    JwtClaimsSet claimsSet = JwtClaimsSet.builder()
-        .issuer("SWT")
-        .issuedAt(now)
-        .expiresAt(now.plus(30, ChronoUnit.DAYS))
-        .claim("userId", user.getUserId())
-        .build();
-
-    return refreshTokenEncoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue();
-  }
-
-  public Token createToken(Authentication authentication) {
-    Object getUserResult = authentication.getPrincipal();
-    User user = null;
-    if (!(getUserResult instanceof User)) {
-      throw new BadCredentialsException(
-          MessageFormat.format("principal {0} is not of User type",
-              authentication.getPrincipal().getClass())
-      );
-    } else {
-      user = (User) getUserResult;
+        return accessTokenEncoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue();
     }
 
-    Token tokenDTO = new Token();
-    tokenDTO.setUserId(user.getUserId());
-    tokenDTO.setAccessToken(createAccessToken(authentication));
+    private String createRefreshToken(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        Instant now = Instant.now();
 
-    String refreshToken;
-    if (authentication.getCredentials() instanceof Jwt) {
-      Jwt jwt = (Jwt) authentication.getCredentials();
-      Instant now = Instant.now();
-      Instant expiresAt = jwt.getExpiresAt();
-      Duration duration = Duration.between(now, expiresAt);
-      long daysUntilExpired = duration.toDays();
-      if (daysUntilExpired < 7) {
-        refreshToken = createRefreshToken(authentication);
-      } else {
-        refreshToken = jwt.getTokenValue();
-      }
-    } else {
-      refreshToken = createRefreshToken(authentication);
+        JwtClaimsSet claimsSet = JwtClaimsSet.builder()
+                .issuer("SWT")
+                .issuedAt(now)
+                .expiresAt(now.plus(30, ChronoUnit.DAYS))
+                .claim("userId", user.getUserId())
+                .build();
+
+        return refreshTokenEncoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue();
     }
-    tokenDTO.setRefreshToken(refreshToken);
 
-    return tokenDTO;
-  }
+    public Token createToken(Authentication authentication) {
+        Object getUserResult = authentication.getPrincipal();
+        User user = null;
+        if (!(getUserResult instanceof User)) { //인증되지 않은 사용자인 경우
+            throw new BadCredentialsException(
+                    MessageFormat.format("principal {0} is not of User type",
+                            authentication.getPrincipal().getClass())
+            );
+        } else {
+          //인증된 사용자인 경우 user에 저장
+            user = (User) getUserResult;
+        }
+
+        //인증된 사용자인 경우 (인증되지 않았으면 위에서 예외 발생)
+        //accessToken 생성 후 Token 객체에 저장
+        Token tokenDTO = new Token();
+        tokenDTO.setUserId(user.getUserId());
+        tokenDTO.setAccessToken(createAccessToken(authentication));
+
+        //accessToken 생성 후 Token 객체에 저장
+        String refreshToken;
+        if (authentication.getCredentials() instanceof Jwt) { //?
+            Jwt jwt = (Jwt) authentication.getCredentials();
+            Instant now = Instant.now();
+            Instant expiresAt = jwt.getExpiresAt();
+            Duration duration = Duration.between(now, expiresAt);
+            long daysUntilExpired = duration.toDays();
+            if (daysUntilExpired < 7) {
+                refreshToken = createRefreshToken(authentication);
+            } else {
+                refreshToken = jwt.getTokenValue();
+            }
+        } else {
+            refreshToken = createRefreshToken(authentication);
+        }
+        tokenDTO.setRefreshToken(refreshToken);
+
+        return tokenDTO;
+    }
 }
