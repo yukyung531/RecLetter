@@ -3,7 +3,6 @@ export type ImgFile = {
     example: string;
 };
 
-
 export interface StudioInfo {
     studioId: number;
     studioTitle: string;
@@ -35,4 +34,17 @@ export interface StudioDetail {
     studioFont: number;
     studioBGM: number;
     studioChecklist: number;
+}
+
+export interface User {
+    userId: string | null;
+    userPassword: string | null;
+}
+export interface LoginInfo {
+    userInfo: {
+        userId: string;
+        userName: string;
+    };
+    accessToken: string;
+    refreshToken: string;
 }
