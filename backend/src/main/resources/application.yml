@@ -33,11 +33,29 @@ spring:
     redis:
       host: localhost
       port: 6379
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+cloud:
+  aws:
+    s3:
+      bucket: sunjbucket
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+    credentials:
+      access-key: ${AWS_ACCESS}
+      secret-key: ${AWS_SECRET}
+
 logging:
   level:
     org:
       hibernate:
         SQL: DEBUG
+
 access-token:
   private: access-refresh-token-keys/access-token-private.key
   public: access-refresh-token-keys/access-token-public.key
