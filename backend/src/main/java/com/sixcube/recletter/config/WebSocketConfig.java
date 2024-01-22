@@ -1,4 +1,4 @@
-package com.sixcube.recletter.chat.config;
+package com.sixcube.recletter.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
