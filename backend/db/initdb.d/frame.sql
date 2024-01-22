@@ -8,3 +8,6 @@ CREATE TABLE IF NOT EXISTS frame (
     font_bold bool default false,
     FOREIGN KEY(font_id) REFERENCES font(font_id)
 ) ENGINE innoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+insert into S10P12A606.frame(frame_id, frame_title) value
+    (0,"프레임 없음");
