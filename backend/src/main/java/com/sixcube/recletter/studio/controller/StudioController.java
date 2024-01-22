@@ -42,6 +42,7 @@ public class StudioController {
   // TODO - JPA 예외처리
   @GetMapping
   public ResponseEntity<SearchStudioListRes> searchStudioList(@AuthenticationPrincipal User user) {
+    log.debug("StudioController.searchStudioList : start");
     // 참가중인 Studio의 studioId 불러오기
     List<String> participantStudioIdList = studioParticipantService.searchParticipantStudioByUserId(user.getUserId())
         .stream()
@@ -69,12 +70,14 @@ public class StudioController {
         ).toList()
     );
 
+    log.debug("StudioController.searchStudioList : end");
     return ResponseEntity.ok().body(result);
   }
 
   // TODO - JPA 예외처리
   @GetMapping("/{studioId}")
   public ResponseEntity<SearchStudioDetailRes> searchStudioDetail(@PathVariable String studioId) {
+    log.debug("StudioController.searchStudioDetail : start");
     Studio studio = studioService.searchStudioByStudioId(studioId);
 
     // TODO - studioId로 보유하고 있는 clipInfoList를 삽입.
@@ -88,7 +91,8 @@ public class StudioController {
 //        .studioFontId(studio.getStudioFont().getFontId())
 //        .studioBgmId(studio.getStudioBgm().getBgmId())
         .build();
-    
+
+    log.debug("StudioController.searchStudioDetail : end");
     return ResponseEntity.ok().body(result);
   }
 
@@ -96,13 +100,8 @@ public class StudioController {
   @PostMapping
   public ResponseEntity<Void> createStudio(@RequestBody CreateStudioReq createStudioReq, @AuthenticationPrincipal User user) {
     // TODO - Frame 객체를 생성하여 삽입
-    log.debug(createStudioReq.toString());
-    log.debug("{}", Studio.builder()
-        .studioOwner(user)
-        .studioTitle(createStudioReq.getStudioTitle())
-        .expireDate(createStudioReq.getExpireDate())
-//        .studioFrame(createStudioReq.getStudioFrameId())
-        .build());
+    log.debug("StudioController.createStudio : start");
+
     studioService.createStudio(Studio.builder()
         .studioOwner(user)
         .studioTitle(createStudioReq.getStudioTitle())
@@ -111,34 +110,42 @@ public class StudioController {
         .build());
 
 
-
+    log.debug("StudioController.createStudio : end");
     return ResponseEntity.ok().build();
   }
 
   // TODO - JPA 예외처리
   @DeleteMapping("/{studioId}")
   public ResponseEntity<Void> deleteStudio(@PathVariable String studioId) {
+    log.debug("StudioController.deleteStudio : start");
+
     studioService.deleteStudioByStudioId(studioId);
 
+    log.debug("StudioController.deleteStudio : end");
     return ResponseEntity.ok().build();
   }
 
   // TODO - JPA 예외처리
   @PostMapping("/{studioId}")
   public ResponseEntity<Void> joinStudio(@PathVariable String studioId, @AuthenticationPrincipal User user) {
+    log.debug("StudioController.joinStudio : start");
+
     studioParticipantService.createStudioParticipant(StudioParticipant.builder()
         .studioId(studioId)
         .userId(user.getUserId())
         .build()
     );
 
+    log.debug("StudioController.joinStudio : end");
     return ResponseEntity.ok().build();
   }
 
   // TODO - redis 예외처리
   @GetMapping("/{studioId}/active")
   public ResponseEntity<SearchActiveUserRes> searchActiveUser(@PathVariable String studioId) {
+    log.debug("StudioController.searchActiveUser : start");
     // TODO - 해당 studioId로 활성화된 챗팅방이 있는를 체크해서 반환
+    log.debug("StudioController.searchActiveUser : end");
     return ResponseEntity.ok().body(SearchActiveUserRes.builder().isActive(false).build());
   }
 
@@ -146,8 +153,11 @@ public class StudioController {
   @PutMapping("/studio/{studioId}/title")
   public ResponseEntity<Void> updateStudioTitle(@PathVariable String studioId,
       @RequestParam String studioTitle) {
+    log.debug("StudioController.updateStudioTitle : start");
+
     studioService.updateStudioTitle(studioId, studioTitle);
 
+    log.debug("StudioController.updateStudioTitle : end");
     return ResponseEntity.ok().build();
   }
 
