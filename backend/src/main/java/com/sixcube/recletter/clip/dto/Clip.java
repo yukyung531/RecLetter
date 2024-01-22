@@ -16,7 +16,7 @@ import java.io.Serializable;
 public class Clip implements Serializable {
     @Id
     @Column(name="clip_id")
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer clipId;
 
     @Column(name="clip_title")

@@ -24,19 +24,20 @@ public class ClipServiceImpl implements ClipService{
 
     @Override
     public void createClip(Clip clip, MultipartFile file) {
-        String fileName=file.getName(); //clip.getClipTitle()+"확장자";
+        String fileName=file.getOriginalFilename(); //clip.getClipTitle()+"확장자";
         String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-        String fileKey= clip.getStudioId()+"/"+clip.getClipId()+"/"+clip.getClipTitle()+"."+extension;
-
-        System.out.println(fileKey);
         try {
+            clipRepository.save(clip);
+            System.out.println(clip);
+            String fileKey= clip.getStudioId()+"/"+clip.getClipId()+"/"+clip.getClipTitle()+"."+extension;
+            System.out.println(fileKey);
+
             ObjectMetadata metadata= new ObjectMetadata();
             metadata.setContentType(file.getContentType());
             metadata.setContentLength(file.getSize());
             amazonS3Client.putObject(bucket,fileKey,file.getInputStream(),metadata);
             System.out.println("fileUpload OK");
 
-            clipRepository.save(clip);
         } catch (IOException e) {
             e.printStackTrace();
 
@@ -63,7 +64,10 @@ public class ClipServiceImpl implements ClipService{
 
     @Override
     public Clip searchClip(int clipId) {
-        return null;
+
+        Clip clip = clipRepository.findClipByClipId(clipId);
+        System.out.println(clip.toString());
+        return clip;
     }
 
     @Override

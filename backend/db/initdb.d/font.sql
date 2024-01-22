@@ -8,6 +8,6 @@ CREATE TABLE IF NOT EXISTS font (
 insert into S10P12A606.font(font_id, font_title, font_family, font_url) value
     (0,"오뮤다예쁨체(기본)", "omyu_pretty", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-01@1.0/omyu_pretty.woff2");
 
-insert into S10P12A606.font(font_id, font_title, font_family, font_url) value
+insert into S10P12A606.font(font_title, font_family, font_url) value
     ("프리텐다드", "Pretendard-Regular", "https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff");
 

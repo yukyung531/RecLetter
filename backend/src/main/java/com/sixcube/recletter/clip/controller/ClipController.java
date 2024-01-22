@@ -13,6 +13,7 @@ import com.sixcube.recletter.clip.dto.req.UpdateClipReq;
 import com.sixcube.recletter.clip.service.ClipService;
 import com.sixcube.recletter.user.dto.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,7 @@ import static org.springframework.web.servlet.function.RequestPredicates.content
 @RestController
 @RequestMapping("/clip")
 @RequiredArgsConstructor
+@Slf4j
 public class ClipController {
 
     private final ClipService clipService;
@@ -43,37 +45,59 @@ public class ClipController {
     private String bucket;
 
     @PostMapping()
-    public ResponseEntity<Void> createClip(@RequestBody CreateClipReq createClipReq, @AuthenticationPrincipal User user) {
+    public ResponseEntity<Void> createClip(@ModelAttribute CreateClipReq createClipReq, @AuthenticationPrincipal User user) {
+
+        log.debug(createClipReq.getClip().getContentType());
+
         Clip clip=Clip.builder()
                 .clipOwner(user.getUserId())
                 .studioId(createClipReq.getStudioId())
                 .clipTitle(createClipReq.getClipTitle())
                 .clipContent(createClipReq.getClipContent())
+                .clipVolume(100)
+                .clipOrder(-1)
                 .build();
+        log.debug(clip.toString());
         clipService.createClip(clip, createClipReq.getClip());
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{clipId}")
-    public ResponseEntity<Void> searchClip(@PathVariable int clipId, @AuthenticationPrincipal User user) {
+    public ResponseEntity<Clip> searchClip(@PathVariable int clipId, @AuthenticationPrincipal User user) {
         System.out.println(clipId);
         //편집 단계에 들어갈 때 기존 상세 정보 제공
-
-        return ResponseEntity.ok().build();
+        Clip clip=clipService.searchClip(clipId);
+        if(clip==null || clip.getClipOwner()!=user.getUserId()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        return ResponseEntity.ok(clip);
     }
 
     @PutMapping("/{clipId}")
     public ResponseEntity<Void> updateClip(@PathVariable int clipId, @RequestBody UpdateClipReq updateClipReq, @AuthenticationPrincipal User user) {
         updateClipReq.setClipId(clipId);
         //본인 영상인지 확인
-        //본인 영상이라면 편집
 
+        System.out.println(clipId);
+        Clip clip=clipService.searchClip(clipId);
+        if(clip==null || clip.getClipOwner()!=user.getUserId()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        //본인 영상이라면 편집
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{clipId}")
     public ResponseEntity<Void> deleteClip(@PathVariable int clipId, @AuthenticationPrincipal User user) {
         //본인 영상인지 확인
+        System.out.println(clipId);
+        Clip clip=clipService.searchClip(clipId);
+        if(clip==null || clip.getClipOwner()!=user.getUserId()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        clipService.deleteClip(clipId);
+
         //본인 영상이라면 삭제
 
         return ResponseEntity.ok().build();
