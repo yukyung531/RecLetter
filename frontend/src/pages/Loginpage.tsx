@@ -1,6 +1,6 @@
 import { BaseSyntheticEvent, useEffect, useState } from 'react';
-import { login } from '../api/user';
-import { LoginInfo, User } from '../types/type';
+import { login } from '../api/auth';
+import { User } from '../types/type';
 import loginData from '../dummy-datas/loginData.json';
 import { useNavigate } from 'react-router-dom';
 import { httpStatusCode } from '../util/http-status';
@@ -8,11 +8,6 @@ import { httpStatusCode } from '../util/http-status';
 export default function LoginPage() {
     const [inputId, setInputId] = useState<string>('');
     const [inputPw, setInputPw] = useState<string>('');
-    const [loginInfo, setLoginInfo] = useState<LoginInfo>({
-        userInfo: { userId: '', userName: '' },
-        accessToken: '',
-        refreshToken: '',
-    });
     useEffect(() => {}, []);
 
     const navigate = useNavigate();
@@ -33,15 +28,25 @@ export default function LoginPage() {
                 userId: inputId,
                 userPassword: inputPw,
             };
-            loginFunction(user);
+            loadLoginAPI(user);
         }
     };
-    const loginFunction = async (user: User) => {
+    const loadLoginAPI = async (user: User) => {
         await login(user)
             .then((res) => {
                 console.log(res);
                 if (res.status === httpStatusCode.OK) {
                     console.log('로그인이 성공했습니다.');
+                    if (res.data.accessToken) {
+                        localStorage.setItem(
+                            'login-token',
+                            res.data.accessToken
+                        );
+                        localStorage.setItem(
+                            'refresh-token',
+                            res.data.refreshToken
+                        );
+                    }
                     navigate(`/studiolist`);
                 } else if (res.status === httpStatusCode.BADREQUEST) {
                     console.log('bad request');

@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { httpStatusCode } from './http-status';
+import { tokenType } from '../types/type';
+import { token } from '../api/auth';
 
-// const { VITE_VUE_API_URL } = import.meta
-// .env;
+// VITE_REACT_API_URL 의 위치 : .env
 
 const VITE_REACT_API_URL = import.meta.env.VITE_REACT_API_URL;
 
@@ -10,13 +11,19 @@ const VITE_REACT_API_URL = import.meta.env.VITE_REACT_API_URL;
 export default function localAxios() {
     const instance = axios.create({
         baseURL: VITE_REACT_API_URL,
+        headers: {
+            'content-type': 'application/json;charset=UTF-8',
+            accept: 'application/json,',
+        },
+        withCredentials: true,
     });
-    // Request 발생 시 적용할 내용.
-    instance.defaults.headers.common['Authorization'] = '';
-    instance.defaults.headers.post['Content-Type'] = 'application/json';
-    instance.defaults.headers.put['Content-Type'] = 'application/json';
 
-    // Request, Response 시 설정한 내용을 적용.
+    if (localStorage.getItem('login-token')) {
+        instance.defaults.headers.common['Authorization'] =
+            'Bearer ' + localStorage.getItem('login-token');
+    }
+
+    // Request 시 설정한 내용을 적용.
     instance.interceptors.request.use((config) => {
         return config;
     }),
@@ -29,7 +36,7 @@ export default function localAxios() {
     // https://maruzzing.github.io/study/rnative/axios-interceptors%EB%A1%9C-%ED%86%A0%ED%81%B0-%EB%A6%AC%ED%94%84%EB%A0%88%EC%8B%9C-%ED%95%98%EA%B8%B0/
 
     let isTokenRefreshing = false;
-
+    // Reponse 시 설정한 내용을 적용.
     instance.interceptors.response.use(
         (response) => {
             return response;
@@ -53,24 +60,30 @@ export default function localAxios() {
 
                     // 에러가 발생했던 컴포넌트의 axios로 이동하고자하는 경우
                     // 반드시 return을 붙여주어야한다.
-                    return await instance
-                        .post('/user/token')
-                        .then((response) => {
-                            const newAccessToken = response.data.Authorization;
+                    const oldToken: tokenType = {
+                        accessToken: localStorage.getItem('login-token'),
+                        refreshToken: localStorage.getItem('refresh-token'),
+                    };
 
-                            instance.defaults.headers.common['Authorization'] =
-                                newAccessToken;
-                            originalRequest.headers.Authorization =
-                                newAccessToken;
+                    return await token(oldToken).then((res) => {
+                        const newAccessToken = res.data.Authorization;
 
-                            isTokenRefreshing = false;
+                        instance.defaults.headers.common['Authorization'] =
+                            newAccessToken;
+                        originalRequest.headers.Authorization = newAccessToken;
+                        localStorage.setItem('login-token', newAccessToken);
+                        localStorage.setItem(
+                            'refresh-token',
+                            res.data.refreshtoken
+                        );
+                        isTokenRefreshing = false;
 
-                            // 에러가 발생했던 원래의 요청을 다시 진행.
-                            return instance(originalRequest);
-                        });
+                        // 에러가 발생했던 원래의 요청을 다시 진행.
+                        return instance(originalRequest);
+                    });
                 }
             } else if (status == httpStatusCode.FORBIDDEN) {
-                alert(error.response.data.message);
+                alert(error.res.data.message);
             }
 
             return Promise.reject(error);
