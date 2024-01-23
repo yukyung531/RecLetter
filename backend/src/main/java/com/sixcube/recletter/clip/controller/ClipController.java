@@ -58,6 +58,7 @@ public class ClipController {
         return ResponseEntity.ok().build();
     }
 
+    //download 링크에 접속하면 웹에서 저장된 파일을 볼 수 있다!
     @GetMapping("/{clipId}")
     public ResponseEntity<SearchClipRes> searchClip(@PathVariable int clipId, @AuthenticationPrincipal User user) {
         System.out.println(clipId);
@@ -118,6 +119,7 @@ public class ClipController {
         return ResponseEntity.ok().build();
     }
 
+    //데이터를 웹에서 접근할 수 있는 링크 반환
     @GetMapping
     public ResponseEntity<Map> streamFile(){
         String file="testVideo.mp4";
@@ -128,17 +130,6 @@ public class ClipController {
         try{
             System.out.println("Ready to get:"+fileUrl);
             S3Object s3Object = amazonS3Client.getObject(new GetObjectRequest(bucket, file));
-            S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
-//            byte[] bytes = IOUtils.toByteArray(objectInputStream);
-//            System.out.println("get Object OK");
-//            HttpHeaders httpHeaders = new HttpHeaders();
-//            httpHeaders.setContentType(MediaType.IMAGE_PNG);
-//            httpHeaders.setContentLength(bytes.length);
-//            String[] arr = fileUrl.split("/");
-//            String type = arr[arr.length - 1];
-//            String fileName = URLEncoder.encode(type, "UTF-8").replaceAll("\\+", "%20");
-//            httpHeaders.setContentDispositionFormData("attachment", fileName); // 파일이름 지정
-//            System.out.println("Download OK");
             return ResponseEntity.ok(result);
         }
         catch (Exception e){
@@ -148,6 +139,7 @@ public class ClipController {
         }
     }
 
+    //테스트를 위한 다운로드 api (s3공부)
     @GetMapping("/download")
     public ResponseEntity<byte[]> downloadFile(@RequestParam("file") String file){
         String fileUrl= "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" +file;
