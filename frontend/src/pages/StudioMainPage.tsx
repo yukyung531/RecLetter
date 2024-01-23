@@ -65,9 +65,6 @@ export default function StudioMainPage() {
     const onDelete = (clipId : number) => {
         setIsDeleting(true);
         setDeleteStateId(clipId);
-
-
-        
     }
 
     const chooseDelete = () => {
@@ -165,6 +162,13 @@ export default function StudioMainPage() {
         }
     }
 
+    /** onClickRecodePage
+     * useNavigate를 이용하여 영상 녹화 화면으로 이동
+     */
+    const onClickRecodePage = () => {
+        navigator(`/cliprecode?title=${studioDetailInfo.studioTitle}&id=${studioDetailInfo.studioId}`);
+    }
+
 
 
 
@@ -202,13 +206,13 @@ export default function StudioMainPage() {
                 <div className="w-1/4 editor-height flex">
                     {/* 카테고리 */}
                     <div className="w-1/5 ">
-                        <div className={`h-28 bg-orange-100 flex flex-col justify-center items-center ${mode == 0 ? "categori-selected" : ""}`} onClick={onPressMovieEdit}>
+                        <div className={`h-28 bg-orange-100 flex flex-col justify-center items-center ${mode === 0 ? "categori-selected" : ""}`} onClick={onPressMovieEdit}>
                             <span className="material-symbols-outlined text-3xl">
                                 movie_edit
                             </span>
                             <p className="font-bold">영상</p>
                         </div>
-                        <div className={`h-28 bg-orange-100 flex flex-col justify-center items-center ${mode == 1 ? "categori-selected" : ""}`} onClick={onPressChecklist}>
+                        <div className={`h-28 bg-orange-100 flex flex-col justify-center items-center ${mode === 1 ? "categori-selected" : ""}`} onClick={onPressChecklist}>
                             <span className="material-symbols-outlined text-3xl">
                                 checklist
                             </span>
@@ -243,15 +247,15 @@ export default function StudioMainPage() {
                     {/* (영상 리스트, 참가자 관리) */}
                     <div className="w-1/4 bg-slate-100 p-2">
                         <div className="w-full px-2 flex flex-col justify-center items-center">
-                            <a
-                                href="/cliprecode"
+                            <div
                                 className="w-full h-24 mx-4 my-2 color-bg-blue3 text-white text-xl flex flex-col justify-center items-center border rounded-md"
+                                onClick={onClickRecodePage}
                             >
                                 <span className="material-symbols-outlined text-3xl">
                                     photo_camera
                                 </span>
                                 <p>새 영상 촬영하기</p>
-                            </a>
+                            </div>
                             <a
                                 href="/lettermake"
                                 className="w-full h-24 mx-4 my-2 color-border-blue3 color-text-blue3 text-xl flex flex-col justify-center items-center border rounded-md"
