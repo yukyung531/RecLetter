@@ -14,12 +14,12 @@ import lombok.ToString;
 public class UserInfo {
 
   private String userId;
-  private String userName;
+  private String userNickname;
 
   public UserInfo(User user) {
     if(user != null) {
       this.userId = user.getUserId();
-      this.userName = user.getUserNickname();
+      this.userNickname = user.getUserNickname();
     }
   }
 }
