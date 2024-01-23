@@ -8,10 +8,12 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
+    networks:
+      - recletter-network
 
   mariadb:
     image: mariadb:10.4
-    container_name: RecLetterTestMariaDB
+    container_name: RecLetterMariaDB
     ports:
       - "3306:3306"
     volumes:
@@ -21,7 +23,28 @@ services:
       MARIADB_USER: ${USER_NAME}
       MARIADB_PASSWORD: ${USER_PASSWORD}
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    networks:
+      - recletter-network
+
+  recletterBackend:
+    image: ssuyas/recletter_backend
+    container_name: RecLetterBackend
+    ports:
+      - "8081:8080"
+    networks:
+      - recletter-network
+
+  recletterFrontend:
+    image: ssuyas/recletter_frontend
+    container_name: RecLetterFrontend
+    ports:
+      - "80:80"
+    networks:
+      - recletter-network
 volumes:
   redis-data:
   mariadb-data:
+
+networks:
+  recletter-network:
 
