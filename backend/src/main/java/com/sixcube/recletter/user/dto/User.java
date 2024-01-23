@@ -1,5 +1,6 @@
 package com.sixcube.recletter.user.dto;
 
+import com.sixcube.recletter.user.dto.req.CreateUserReq;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

@@ -16,13 +16,22 @@
 <script>
 
     var myPlayer = videojs('video-player');
-    myPlayer.src("https://sunjbucket.s3.ap-northeast-2.amazonaws.com/testVideo.mp4")
+    // myPlayer.src("https://sunjbucket.s3.ap-northeast-2.amazonaws.com/testVideo.mp4")
+    // myPlayer.src("https://d3f9xm3snzk3an.cloudfront.net/testVideo.mp4")
 
     const videoBtn=document.querySelector("#getVideo");
     videoBtn.addEventListener("click",()=>{
         let srcUrl=fetch("http://localhost:8080/clip")
-            // .then((res)=> res.json())
-            .then((data)=>console.log(data))
+            .then((res)=> {
+                console.log("res:",res)
+                return res.json()
+            })
+            .then((data)=>{
+                console.log("data:",data)
+                myPlayer.src(data.fileUrl);
+                myPlayer.on('loadedmetadata', () => { console.log(myPlayer.duration())  })
+
+            })
         // myPlayer.src(srcUrl);
         // console.log("get info")
         //

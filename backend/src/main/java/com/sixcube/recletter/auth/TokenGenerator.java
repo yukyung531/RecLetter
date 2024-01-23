@@ -59,7 +59,9 @@ public class TokenGenerator {
     public Token createToken(Authentication authentication) {
         Object getUserResult = authentication.getPrincipal();
         User user = null;
-        if (!(getUserResult instanceof User)) { //인증되지 않은 사용자인 경우
+
+        //인증되지 않은 사용자인 경우 토큰 발급 x
+        if (!(getUserResult instanceof User)) {
             throw new BadCredentialsException(
                     MessageFormat.format("principal {0} is not of User type",
                             authentication.getPrincipal().getClass())
@@ -69,26 +71,35 @@ public class TokenGenerator {
             user = (User) getUserResult;
         }
 
-        //인증된 사용자인 경우 (인증되지 않았으면 위에서 예외 발생)
-        //accessToken 생성 후 Token 객체에 저장
+        //인증된 사용자인 경우 토큰 발급(인증되지 않았으면 위에서 예외 발생)
         Token tokenDTO = new Token();
         tokenDTO.setUserId(user.getUserId());
+
+        //accessToken 발급
         tokenDTO.setAccessToken(createAccessToken(authentication));
 
-        //accessToken 생성 후 Token 객체에 저장
+        //refreshToken 발급
         String refreshToken;
-        if (authentication.getCredentials() instanceof Jwt) { //?
+
+        //accessToken이 만료돼서 refreshToken 발급하는 경우
+        if (authentication.getCredentials() instanceof Jwt) {
             Jwt jwt = (Jwt) authentication.getCredentials();
             Instant now = Instant.now();
             Instant expiresAt = jwt.getExpiresAt();
             Duration duration = Duration.between(now, expiresAt);
             long daysUntilExpired = duration.toDays();
+            //refreshToken 만료일자가 7일 미만으로 남은 경우 refreshToken도 재발급
             if (daysUntilExpired < 7) {
                 refreshToken = createRefreshToken(authentication);
-            } else {
+            }
+            //refreshToken 만료일자가 7일 이상 남은 경우 기존 refreshToken 유지
+            else {
                 refreshToken = jwt.getTokenValue();
             }
-        } else {
+        }
+
+        //로그인할 때 refreshToken 발급하는 경우
+        else {
             refreshToken = createRefreshToken(authentication);
         }
         tokenDTO.setRefreshToken(refreshToken);

@@ -41,7 +41,10 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
 
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+    implementation 'javax.xml.bind:jaxb-api:2.3.0'
     implementation 'commons-io:commons-io:2.15.1'
+    // OpenVidu
+    implementation 'io.openvidu:openvidu-java-client:2.29.0'
 }
 
 tasks.named('test') {
