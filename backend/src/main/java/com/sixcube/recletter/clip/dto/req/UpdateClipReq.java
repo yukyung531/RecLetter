@@ -10,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 public class UpdateClipReq {
 
-    private Integer clipId;
     private String clipTitle;
     private String clipContent;
     private MultipartFile clip;

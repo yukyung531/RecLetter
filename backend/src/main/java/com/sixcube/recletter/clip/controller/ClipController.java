@@ -1,15 +1,14 @@
 package com.sixcube.recletter.clip.controller;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
 import com.sixcube.recletter.clip.dto.Clip;
 import com.sixcube.recletter.clip.dto.req.CreateClipReq;
 import com.sixcube.recletter.clip.dto.req.UpdateClipReq;
+import com.sixcube.recletter.clip.dto.res.SearchClipRes;
 import com.sixcube.recletter.clip.service.ClipService;
 import com.sixcube.recletter.user.dto.User;
 import lombok.RequiredArgsConstructor;
@@ -21,14 +20,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.springframework.web.servlet.function.RequestPredicates.contentType;
 
 @RestController
 @RequestMapping("/clip")
@@ -38,6 +33,7 @@ public class ClipController {
 
     private final ClipService clipService;
 
+    private final String cloudFront="https://d3f9xm3snzk3an.cloudfront.net/";
 
     private final AmazonS3Client amazonS3Client;
 
@@ -63,28 +59,41 @@ public class ClipController {
     }
 
     @GetMapping("/{clipId}")
-    public ResponseEntity<Clip> searchClip(@PathVariable int clipId, @AuthenticationPrincipal User user) {
+    public ResponseEntity<SearchClipRes> searchClip(@PathVariable int clipId, @AuthenticationPrincipal User user) {
         System.out.println(clipId);
         //편집 단계에 들어갈 때 기존 상세 정보 제공
         Clip clip=clipService.searchClip(clipId);
-        if(clip==null || clip.getClipOwner()!=user.getUserId()){
+        if(clip==null || !clip.getClipOwner().equals(user.getUserId())){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        return ResponseEntity.ok(clip);
+
+        String downloadUrl=cloudFront+clipService.getFileKey(clip);
+
+        SearchClipRes searchClipRes=SearchClipRes.builder()
+                .clipId(clip.getClipId())
+                .clipTitle(clip.getClipTitle())
+                .clipContent(clip.getClipContent())
+                .clipDownloadUrl(downloadUrl)
+                .build();
+        return ResponseEntity.ok(searchClipRes);
     }
 
     @PutMapping("/{clipId}")
-    public ResponseEntity<Void> updateClip(@PathVariable int clipId, @RequestBody UpdateClipReq updateClipReq, @AuthenticationPrincipal User user) {
-        updateClipReq.setClipId(clipId);
-        //본인 영상인지 확인
+    public ResponseEntity<Void> updateClip(@PathVariable int clipId, @ModelAttribute UpdateClipReq updateClipReq, @AuthenticationPrincipal User user) {
 
+        //본인 영상인지 확인
         System.out.println(clipId);
         Clip clip=clipService.searchClip(clipId);
-        if(clip==null || clip.getClipOwner()!=user.getUserId()){
+        if(clip==null || !clip.getClipOwner().equals(user.getUserId())){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
         //본인 영상이라면 편집
+        String prevTitle= clip.getClipTitle();
+        clip.setClipTitle(updateClipReq.getClipTitle());
+        clip.setClipContent(updateClipReq.getClipContent());
+
+        clipService.updateClip(clip, prevTitle,updateClipReq.getClip());
         return ResponseEntity.ok().build();
     }
 
@@ -93,10 +102,10 @@ public class ClipController {
         //본인 영상인지 확인
         System.out.println(clipId);
         Clip clip=clipService.searchClip(clipId);
-        if(clip==null || clip.getClipOwner()!=user.getUserId()){
+        if(clip==null || !clip.getClipOwner().equals(user.getUserId())){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        clipService.deleteClip(clipId);
+        clipService.deleteClip(clip);
 
         //본인 영상이라면 삭제
 

@@ -10,11 +10,13 @@ public interface ClipService
 {
     public void createClip(Clip clip, MultipartFile file);
 
-    public void updateClip(Clip clip);
+    public void updateClip(Clip clip, String preTitle, MultipartFile file);
 
-    public void deleteClip(int clipId);
+    public void deleteClip(Clip clip);
 
     public Clip searchClip(int clipId);
+
+    public String getFileKey(Clip clip);
 
     public boolean isClipOwner(String userId, int clipId);
 
