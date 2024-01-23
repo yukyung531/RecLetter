@@ -14,7 +14,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class LoginRes {
 
-  private UserInfo userInfo;
   private String accessToken;
   private String refreshToken;
 }
