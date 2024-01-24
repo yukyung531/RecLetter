@@ -1,35 +1,34 @@
 package com.sixcube.recletter.auth.controller;
 
-import com.sixcube.recletter.auth.TokenGenerator;
+import com.sixcube.recletter.redis.RedisService;
+import com.sixcube.recletter.auth.jwt.CustomJwtAuthenticationProvider;
+import com.sixcube.recletter.auth.jwt.TokenGenerator;
 import com.sixcube.recletter.auth.dto.req.LoginReq;
+import com.sixcube.recletter.auth.dto.req.SendCodeToEmailReq;
 import com.sixcube.recletter.auth.dto.req.TokenReq;
+import com.sixcube.recletter.auth.dto.req.VerifyCodeReq;
 import com.sixcube.recletter.auth.dto.res.LoginRes;
 import com.sixcube.recletter.auth.dto.Token;
 import com.sixcube.recletter.auth.dto.res.TokenRes;
+import com.sixcube.recletter.auth.service.AuthService;
 import com.sixcube.recletter.user.dto.User;
 import com.sixcube.recletter.user.dto.UserInfo;
+import com.sixcube.recletter.user.dto.res.CheckDuplicatedIdRes;
 import com.sixcube.recletter.user.service.UserService;
 
-import java.util.concurrent.TimeUnit;
-
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -38,12 +37,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final UserService userService;
+    private final AuthService authService;
     private final TokenGenerator tokenGenerator;
     private final DaoAuthenticationProvider daoAuthenticationProvider;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisService redisService;
 
     @Qualifier("jwtRefreshTokenAuthProvider")
-    private final JwtAuthenticationProvider refreshTokenAuthProvider;
+    private final CustomJwtAuthenticationProvider refreshTokenAuthProvider;
 
     @PostMapping("/login")
     public ResponseEntity<LoginRes> login(@RequestBody LoginReq loginReq) {
@@ -61,7 +61,7 @@ public class AuthController {
         UserInfo userInfo = userService.searchUserInfoByUserId(loginReq.getUserId());
 
         // redis에 refreshToken 저장
-        redisTemplate.opsForValue().set(userInfo.getUserId(), token.getRefreshToken());
+        redisService.setValues(userInfo.getUserId(), token.getRefreshToken());
 
         log.debug("AuthController.login: end");
 
@@ -75,8 +75,9 @@ public class AuthController {
     }
 
     @GetMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> logout(@AuthenticationPrincipal User user) {
-        redisTemplate.expire(user.getUserId(), 0, TimeUnit.SECONDS);
+        redisService.deleteValues(user.getUserId());
         return ResponseEntity.ok().build();
     }
 
@@ -89,21 +90,46 @@ public class AuthController {
         if (authentication.isAuthenticated()) {
             Jwt jwt = (Jwt) authentication.getCredentials();
             String userId = jwt.getClaim("userId");
-            ValueOperations<String, Object> values = redisTemplate.opsForValue();
 
-            String refreshToken = "";
-            if (values.get(userId) != null) {
-                refreshToken = (String) values.get(userId);
+            String refreshToken = (String) redisService.getValues(userId);
 
-                //refreshToken 같으면 token 재발급
-                if (tokenReq.getRefreshToken().equals(refreshToken)) {
-                    Token token = tokenGenerator.createToken((authentication));
-                    log.debug("AuthController.tokenRegenerate: end");
-                    return ResponseEntity.ok().body(new TokenRes(token));
-                }
+            //refreshToken 같으면 token 재발급
+            if (tokenReq.getRefreshToken().equals(refreshToken)) {
+                Token token = tokenGenerator.createToken((authentication));
+                log.debug("AuthController.tokenRegenerate: end");
+                return ResponseEntity.ok().body(new TokenRes(token));
             }
         }
         log.debug("AuthController.tokenRegenerate: end");
         return ResponseEntity.badRequest().build(); //리프레시 토큰 만료 또는 불일치 하는 경우
+    }
+
+    @GetMapping("/id/{userId}")
+    public ResponseEntity<CheckDuplicatedIdRes> checkDuplicatiedId(@PathVariable("userId") String userId) {
+        log.debug("AuthController.checkDuplicatiedId: start");
+        boolean isDuplicated = userService.checkDuplicatiedId(userId);
+        CheckDuplicatedIdRes checkDuplicatedIdRes = new CheckDuplicatedIdRes();
+        checkDuplicatedIdRes.setDuplicated(isDuplicated);
+        log.debug("AuthController.checkDuplicatiedId: end");
+        return ResponseEntity.ok().body(checkDuplicatedIdRes);
+    }
+
+
+    //이메일 인증 요청
+    @PostMapping("/email")
+    public ResponseEntity<Void> sendCodeToEmail(@Valid @RequestBody SendCodeToEmailReq sendCodeToEmailReq) throws Exception {
+        log.debug("AuthController.sendCodeToEmail: start");
+        authService.sendCodeToEmail(sendCodeToEmailReq.getUserEmail());
+        log.debug("AuthController.sendCodeToEmail: end");
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/email/code")
+    public boolean verifyCode(@Valid @RequestBody VerifyCodeReq verifyCodeReq) {
+        log.debug("AuthController.verifyCode: start");
+        boolean result = authService.verifyCode(verifyCodeReq.getUserEmail(), verifyCodeReq.getCode());
+        log.debug("AuthController.verifyCode: end");
+        return result;
+
     }
 }
