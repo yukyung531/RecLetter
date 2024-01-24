@@ -57,7 +57,7 @@ public class SpringSecurityConfiguration {
                 //요청에 대한 인가 규칙 설정
                 .authorizeHttpRequests(authorize ->
                         authorize.requestMatchers("/auth/**").permitAll() //해당 경로에 대한 요청은 모든 사용자에게 허용(인증 안해도 접근 가능)
-                                //.requestMatchers("/**").permitAll() //테스트 시에만 주석 풀기
+//                                .requestMatchers("/**").permitAll() //테스트 시에만 주석 풀기
                                 .requestMatchers("/static/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/user").permitAll() //회원가입
                                 .anyRequest().authenticated() //나머지 모든 요청은 인증을 필요로 함
