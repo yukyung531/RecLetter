@@ -6,11 +6,12 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import com.sixcube.recletter.auth.JwtToUserConverter;
-import com.sixcube.recletter.auth.KeyUtils;
+import com.sixcube.recletter.redis.RedisService;
+import com.sixcube.recletter.auth.jwt.CustomJwtAuthenticationProvider;
+import com.sixcube.recletter.auth.jwt.JwtToUserConverter;
+import com.sixcube.recletter.auth.jwt.KeyUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +30,6 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
@@ -47,6 +47,7 @@ public class SpringSecurityConfiguration {
     private final KeyUtils keyUtils;
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsService userDetailsService;
+    private final RedisService redisService;
 
     //HttpSecurity를 구성하여 보안 설정을 정의하는 함수
     @Bean
@@ -69,7 +70,8 @@ public class SpringSecurityConfiguration {
                 .exceptionHandling((exceptions) -> exceptions.authenticationEntryPoint(
                                 new BearerTokenAuthenticationEntryPoint())
                         .accessDeniedHandler(new BearerTokenAccessDeniedHandler()));
-        return http.build(); //설정대로 filter chain 생성 후 실행
+        SecurityFilterChain chain =http.build();
+        return chain; //설정대로 filter chain 생성 후 실행
     }
 
     @Bean
@@ -121,8 +123,8 @@ public class SpringSecurityConfiguration {
 
     @Bean
     @Qualifier("jwtRefreshTokenAuthProvider")
-    JwtAuthenticationProvider jwtRefreshTokenAuthProvider() {
-        JwtAuthenticationProvider provider = new JwtAuthenticationProvider(jwtRefreshTokenDecoder());
+    CustomJwtAuthenticationProvider jwtRefreshTokenAuthProvider() {
+        CustomJwtAuthenticationProvider provider = new CustomJwtAuthenticationProvider(jwtRefreshTokenDecoder(), redisService);
         provider.setJwtAuthenticationConverter(jwtToUserConverter);
         return provider;
     }
