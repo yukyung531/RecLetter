@@ -1,83 +1,95 @@
 package com.sixcube.recletter.chat.service;
 
 import com.sixcube.recletter.chat.dto.ChatMessage;
+import com.sixcube.recletter.user.dto.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ActiveProfiles("test")
 class ChatServiceImplTest {
 
     private ChatServiceImpl chatService;
 
+    private User testUser;
+
     @BeforeEach
     void setUp() {
         chatService = new ChatServiceImpl(); // 직접 인스턴스 생성
+
+        testUser = User.builder()
+                .userId("testUser")
+                .userEmail("test@ssafy.com")
+                .userPassword("unEncodedTestPassword")
+                .userNickname("test")
+                .createdAt(LocalDateTime.now())
+                .build();
     }
 
     @Test
     void joinChatTest() {
-        ChatMessage chatMessage = ChatMessage.builder()
-                .sender("user1")
-                .build();
 
-        ChatMessage result = chatService.joinChat("testStudio", chatMessage);
+        ChatMessage chatMessage = ChatMessage.builder().build();
+
+        ChatMessage result = chatService.joinChat("testStudio", chatMessage, testUser);
         assertEquals(chatMessage.getSender()+"님이 참여하였습니다.", result.getContent());
         // 채팅방에 사용자가 추가되었는지 검증
         List<String> users = chatService.searchChatUserList("testStudio");
-        assertTrue(users.contains("user1"));
+        assertTrue(users.contains(testUser.getUserNickname()));
     }
 
     @Test
     void sendMessageTest() {
         ChatMessage chatMessage = ChatMessage.builder()
-                .sender("user1")
                 .content("Hello")
                 .build();
 
-        ChatMessage result = chatService.sendMessage("testStudio", chatMessage);
+        ChatMessage result = chatService.sendMessage("testStudio", chatMessage, testUser);
         assertEquals("Hello", result.getContent());
     }
 
     @Test
     void leaveChatTest() {
         // 먼저 사용자를 채팅방에 추가
-        ChatMessage joinMessage = ChatMessage.builder()
-                .sender("user1")
-                .build();
-        chatService.joinChat("testStudio", joinMessage);
+        ChatMessage joinMessage = ChatMessage.builder().build();
+        chatService.joinChat("testStudio", joinMessage, testUser);
 
         // 사용자를 채팅방에서 퇴장시킴
-        ChatMessage leaveMessage = ChatMessage.builder()
-                .sender("user1")
-                .build();
-        ChatMessage result = chatService.leaveChat("testStudio", leaveMessage);
-        assertEquals("user1님이 퇴장하였습니다.", result.getContent());
+        ChatMessage leaveMessage = ChatMessage.builder().build();
+        ChatMessage result = chatService.leaveChat("testStudio", leaveMessage, testUser);
+        assertEquals(leaveMessage.getSender()+"님이 퇴장하였습니다.", result.getContent());
         // 채팅방에서 사용자가 제거되었는지 검증
         List<String> users = chatService.searchChatUserList("testStudio");
-        assertFalse(users.contains("user1"));
+        assertFalse(users.contains(leaveMessage.getSender()));
     }
 
     @Test
     void searchChatUserListTest() {
         // 먼저 사용자를 채팅방에 추가
-        ChatMessage joinMessage1 = ChatMessage.builder()
-                .sender("user1")
-                .build();
-        chatService.joinChat("testStudio", joinMessage1);
+        ChatMessage joinMessage1 = ChatMessage.builder().build();
+        chatService.joinChat("testStudio", joinMessage1, testUser);
 
-        ChatMessage joinMessage2 = ChatMessage.builder()
-                .sender("user2")
+        User testUser2 = User.builder()
+                .userId("testUser2")
+                .userEmail("test2@ssafy.com")
+                .userPassword("unEncodedTestPassword")
+                .userNickname("test2")
+                .createdAt(LocalDateTime.now())
                 .build();
-        chatService.joinChat("testStudio", joinMessage2);
+
+        ChatMessage joinMessage2 = ChatMessage.builder().build();
+        chatService.joinChat("testStudio", joinMessage2, testUser2);
 
         // 채팅방의 사용자 목록을 검색
         List<String> users = chatService.searchChatUserList("testStudio");
 
         // 사용자 목록에 추가한 사용자들이 모두 포함되어 있는지 확인
-        assertTrue(users.contains("user1"));
-        assertTrue(users.contains("user2"));
+        assertTrue(users.contains(testUser.getUserNickname()));
+        assertTrue(users.contains(testUser2.getUserNickname()));
     }
 }

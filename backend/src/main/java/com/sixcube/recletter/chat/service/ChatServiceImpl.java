@@ -2,7 +2,9 @@ package com.sixcube.recletter.chat.service;
 
 import com.sixcube.recletter.chat.dto.ChatMessage;
 import com.sixcube.recletter.chat.exhandler.ChatException;
+import com.sixcube.recletter.user.dto.User;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,13 +22,16 @@ public class ChatServiceImpl implements ChatService {
     private Map<String, List<String>> chattinglist = new HashMap<>();
 
     @Override
-    public ChatMessage joinChat(String studioId, ChatMessage chatMessage) {
+    public ChatMessage joinChat(String studioId, ChatMessage chatMessage, User user) {
         try {
             log.debug("ChatServiceImpl.joinChat : start");
-
+            // studioId가 없다면 예외처리
             if (studioId == null || studioId.isEmpty()) {
                 throw new ChatException("Invalid studioId: " + studioId);
             }
+
+            // 메시지 sender에 userNickname 등록
+            chatMessage.setSender(user.getUserNickname());
 
             // 채팅방 참여자 리스트에 추가
             List<String> users = chattinglist.getOrDefault(studioId, new ArrayList<>());
@@ -50,12 +55,15 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public ChatMessage sendMessage(String studioId, ChatMessage chatMessage) {
+    public ChatMessage sendMessage(String studioId, ChatMessage chatMessage, User user) {
         try {
             log.debug("ChatServiceImpl.sendMessage : start");
             if (studioId == null || studioId.isEmpty()) {
                 throw new ChatException("Invalid studioId: " + studioId);
             }
+            // 메시지 sender에 userNickname 등록
+            chatMessage.setSender(user.getUserNickname());
+
             // 메시지를 보낸 시간 설정
             chatMessage.setTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
 
@@ -68,12 +76,14 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public ChatMessage leaveChat(String studioId, ChatMessage chatMessage) {
+    public ChatMessage leaveChat(String studioId, ChatMessage chatMessage, User user) {
         try {
             log.debug("ChatServiceImpl.leaveChat : start");
             if (studioId == null || studioId.isEmpty()) {
                 throw new ChatException("Invalid studioId: " + studioId);
             }
+            // 메시지 sender에 userNickname 등록
+            chatMessage.setSender(user.getUserNickname());
             // 메시지를 보낸 시간 설정
             chatMessage.setTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
             // 퇴장 메시지 설정
