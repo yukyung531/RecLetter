@@ -11,7 +11,6 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-@RequiredArgsConstructor
 public class SearchScriptListRes {
 
     private List<Script> scriptTemplate;
