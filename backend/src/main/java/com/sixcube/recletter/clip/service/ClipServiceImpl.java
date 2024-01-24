@@ -5,12 +5,14 @@ import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.sixcube.recletter.clip.Repository.ClipRepository;
 import com.sixcube.recletter.clip.dto.Clip;
+import com.sixcube.recletter.clip.dto.ClipInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -19,6 +21,7 @@ public class ClipServiceImpl implements ClipService {
 
     private final ClipRepository clipRepository;
     private final AmazonS3Client amazonS3Client;
+    private final String cloudFront="";
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -108,7 +111,21 @@ public class ClipServiceImpl implements ClipService {
     }
 
     @Override
-    public List<Clip> searchStudioClipList(String studioId) {
-        return null;
+    public List<ClipInfo> searchClipInfoList(String studioId) {
+        List<Clip> clipList=clipRepository.findClipsByStudioId(studioId);
+        List<ClipInfo> clipInfoList=new ArrayList<>();
+        for(Clip clip: clipList){
+            ClipInfo clipInfo=ClipInfo.builder()
+                    .clipId(clip.getClipId())
+                    .clipTitle(clip.getClipContent())
+                    .clipVolume(clip.getClipVolume())
+                    .clipOwner(clip.getClipOwner())
+                    .clipContent(clip.getClipContent())
+                    .clipOrder(clip.getClipOrder())
+                    .clipUrl(cloudFront+getFileKey(clip))
+                    .build();
+            clipInfoList.add(clipInfo);
+        }
+        return clipInfoList;
     }
 }

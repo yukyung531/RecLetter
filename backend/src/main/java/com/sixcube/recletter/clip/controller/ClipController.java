@@ -8,6 +8,7 @@ import com.amazonaws.util.IOUtils;
 import com.sixcube.recletter.clip.dto.Clip;
 import com.sixcube.recletter.clip.dto.req.CreateClipReq;
 import com.sixcube.recletter.clip.dto.req.UpdateClipReq;
+import com.sixcube.recletter.clip.dto.res.SearchClipInfoListRes;
 import com.sixcube.recletter.clip.dto.res.SearchClipRes;
 import com.sixcube.recletter.clip.service.ClipService;
 import com.sixcube.recletter.user.dto.User;
@@ -118,6 +119,23 @@ public class ClipController {
 
         return ResponseEntity.ok().build();
     }
+
+
+
+/************************************/
+
+    //studioId에 따른 clipInfoList 조회 테스트
+    @GetMapping("/studio/{studioId}")
+    public ResponseEntity<SearchClipInfoListRes> searchClipInfoList(@PathVariable String studioId) {
+        System.out.println(studioId);
+        //편집 단계에 들어갈 때 기존 상세 정보 제공
+        SearchClipInfoListRes clipInfoListRes=new SearchClipInfoListRes();
+        clipInfoListRes.setClipInfoList(clipService.searchClipInfoList(studioId));
+
+        return ResponseEntity.ok(clipInfoListRes);
+    }
+
+
 
     //데이터를 웹에서 접근할 수 있는 링크 반환
     @GetMapping
