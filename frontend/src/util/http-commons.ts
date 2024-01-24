@@ -18,9 +18,9 @@ export default function localAxios() {
         withCredentials: true,
     });
 
-    if (localStorage.getItem('login-token')) {
+    if (localStorage.getItem('access-token')) {
         instance.defaults.headers.common['Authorization'] =
-            'Bearer ' + localStorage.getItem('login-token');
+            'Bearer ' + localStorage.getItem('access-token');
     }
 
     // Request 시 설정한 내용을 적용.
@@ -61,7 +61,7 @@ export default function localAxios() {
                     // 에러가 발생했던 컴포넌트의 axios로 이동하고자하는 경우
                     // 반드시 return을 붙여주어야한다.
                     const oldToken: tokenType = {
-                        accessToken: localStorage.getItem('login-token'),
+                        accessToken: localStorage.getItem('access-token'),
                         refreshToken: localStorage.getItem('refresh-token'),
                     };
                     instance.defaults.headers.common['Authorization'] = '';
@@ -71,7 +71,7 @@ export default function localAxios() {
                             'Bearer ' + newAccessToken;
                         originalRequest.headers.Authorization =
                             'Bearer ' + newAccessToken;
-                        localStorage.setItem('login-token', newAccessToken);
+                        localStorage.setItem('access-token', newAccessToken);
                         localStorage.setItem(
                             'refresh-token',
                             res.data.refreshtoken

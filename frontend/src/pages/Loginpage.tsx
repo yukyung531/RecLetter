@@ -1,16 +1,39 @@
 import { BaseSyntheticEvent, useEffect, useState } from 'react';
 import { login } from '../api/auth';
 import { User } from '../types/type';
-import loginData from '../dummy-datas/loginData.json';
 import { useNavigate } from 'react-router-dom';
 import { httpStatusCode } from '../util/http-status';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginState } from '../util/counter-slice';
 
 export default function LoginPage() {
     const [inputId, setInputId] = useState<string>('');
     const [inputPw, setInputPw] = useState<string>('');
-    useEffect(() => {}, []);
 
+    /** 리덕스 설정 */
+    const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const loginValue = localStorage.getItem('is-login');
+        if (loginValue) {
+            dispatch(loginState(true));
+        }
+        if (isLogin) {
+            navigate(`/studiolist`);
+        }
+    }, []);
+    useEffect(() => {
+        const loginValue = localStorage.getItem('is-login');
+        if (loginValue) {
+            dispatch(loginState(true));
+        }
+        if (isLogin) {
+            navigate(`/studiolist`);
+        }
+    }, [isLogin]);
+    /** 리덕스 설정 */
 
     const changeId = (e: BaseSyntheticEvent) => {
         setInputId(e.target.value);
@@ -39,14 +62,16 @@ export default function LoginPage() {
                     console.log('로그인이 성공했습니다.');
                     if (res.data.accessToken) {
                         localStorage.setItem(
-                            'login-token',
+                            'access-token',
                             res.data.accessToken
                         );
                         localStorage.setItem(
                             'refresh-token',
                             res.data.refreshToken
                         );
+                        localStorage.setItem('is-login', 'true');
                     }
+                    dispatch(loginState(true));
                     navigate(`/studiolist`);
                 } else if (res.status === httpStatusCode.BADREQUEST) {
                     console.log('bad request');
