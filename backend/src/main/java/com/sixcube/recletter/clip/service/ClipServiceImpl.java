@@ -45,7 +45,8 @@ public class ClipServiceImpl implements ClipService {
         if (!file.getContentType().equals("video/mp4")) {
             throw new InvalidClipFormatException();
         }
-        checkValidUserClip(clip);
+        //아직 studioParticipant Table이 동작하지 않아 실행을 위해 주석 처리. 추후 구현 완료되면 예외처리를 위해 주석 해제 예정
+//        checkValidUserClip(clip); 
         try {
             clipRepository.save(clip);
             System.out.println(clip);
