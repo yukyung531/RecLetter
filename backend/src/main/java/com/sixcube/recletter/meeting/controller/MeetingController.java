@@ -2,13 +2,16 @@ package com.sixcube.recletter.meeting.controller;
 
 import com.sixcube.recletter.studio.dto.Studio;
 import com.sixcube.recletter.studio.repository.StudioRepository;
+import com.sixcube.recletter.user.dto.User;
 import com.sixcube.recletter.user.repository.UserRepository;
 import io.openvidu.java.client.*;
 import jakarta.annotation.PostConstruct;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,32 +42,31 @@ public class MeetingController {
         this.openVidu = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET);
     }
 
-    /**
-     * 세션 초기화: 화면 공유를 할 수 있는 환경(세션)을 생성
-     *
-     * @param studioId  스튜디오마다 화면공유를 할 수 있는 환경을 생성하기 위한 param
-     * @param userToken 로그인한 유저인지 확인하기 위한 토큰
-     * @return sessionId
-     */
-    @PostMapping("/api/sessions/{studioId}")
-    public ResponseEntity<String> initializeSession(@PathVariable("studioId") String studioId, @RequestHeader("userToken") String userToken) throws OpenViduJavaClientException, OpenViduHttpException {
-        // TODO: userToken을 사용하여 사용자 인증 확인 로직 구현 필요
-
-        // 스튜디오 존재 확인
-        Studio studio = studioRepository.findById(studioId).orElseThrow(() -> new RuntimeException("Studio not found"));
-
-        // TODO: user기능이 다 구현되면 주석해제
-//        if (!studio.getStudioOwner().equals(user.getId())) {
-//            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-//        }
-
-        // session ID를 studioId로 설정
-        SessionProperties properties = new SessionProperties.Builder().customSessionId(studioId).build();
-
-        // 새 세션 생성
+//    /**
+//     * 세션 초기화: 화면 공유를 할 수 있는 환경(세션)을 생성
+//     *
+//     * @param studioId 스튜디오마다 화면공유를 할 수 있는 환경을 생성하기 위한 param
+//     * @param user     로그인한 유저인지 확인하기 위한 param
+//     * @return sessionId
+//     */
+//    @PostMapping("/api/sessions/{studioId}")
+//    public ResponseEntity<String> initializeSession(@PathVariable("studioId") String studioId) throws OpenViduJavaClientException, OpenViduHttpException {
+//        // 스튜디오 존재 확인
+////        Studio studio = studioRepository.findById(studioId).orElseThrow(() -> new RuntimeException("Studio not found"));
+//
+//        // session ID를 studioId로 설정
+//        SessionProperties properties = new SessionProperties.Builder().customSessionId(studioId).build();
+//
+//        // 새 세션 생성
+//        Session session = openVidu.createSession(properties);
+//
+//        // 세션ID 반환
+//        return new ResponseEntity<>(session.getSessionId(), HttpStatus.OK);
+//    }
+    @PostMapping("/api/sessions")
+    public ResponseEntity<String> initializeSession(@RequestBody(required = false) Map<String, Object> params) throws OpenViduJavaClientException, OpenViduHttpException {
+        SessionProperties properties = SessionProperties.fromJson(params).build();
         Session session = openVidu.createSession(properties);
-
-        // 세션ID 반환
         return new ResponseEntity<>(session.getSessionId(), HttpStatus.OK);
     }
 
@@ -76,7 +78,7 @@ public class MeetingController {
      * @return The Token associated to the Connection
      */
     @PostMapping("/api/sessions/{sessionId}/connections")
-    public ResponseEntity<String> createConnection(@PathVariable("sessionId") String sessionId, @RequestBody(required = false) Map<String, Object> params) throws OpenViduJavaClientException, OpenViduHttpException {
+    public ResponseEntity<Map> createConnection(@PathVariable("sessionId") String sessionId, @RequestBody(required = false) Map<String, Object> params) throws OpenViduJavaClientException, OpenViduHttpException {
         // 활성 세션을 가져옴
         Session session = openVidu.getActiveSession(sessionId);
         // 세션이 존재하지 않으면 404 에러 반환
@@ -87,8 +89,13 @@ public class MeetingController {
         ConnectionProperties properties = ConnectionProperties.fromJson(params).build();
         // 새 연결 생성
         Connection connection = session.createConnection(properties);
-        // 연결 토큰(프론트엔드에서 OpenVidu 세션에 참가하기 위해 사용) 반환
-        return new ResponseEntity<>(connection.getToken(), HttpStatus.OK);
+
+        // 연결 토큰(프론트엔드에서 OpenVidu 세션에 참가하기 위해 사용)과 connectionId를 프론트엔드에 전달
+        Map<String, String> response = new HashMap<>();
+        response.put("token", connection.getToken());
+        response.put("connectionId", connection.getConnectionId());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
@@ -130,4 +137,3 @@ public class MeetingController {
     }
 
 }
-
