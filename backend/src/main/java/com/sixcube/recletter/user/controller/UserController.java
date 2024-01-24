@@ -26,7 +26,7 @@ public class UserController {
 
     //회원가입
     @PostMapping
-    public ResponseEntity<Void> createUser(@Valid @RequestBody CreateUserReq createUserReq) {
+    public ResponseEntity<Void> createUser(@Valid @RequestBody CreateUserReq createUserReq) throws Exception {
         log.debug("UserController.createUser: start");
 
         User result = userService.createUser(new User(createUserReq));

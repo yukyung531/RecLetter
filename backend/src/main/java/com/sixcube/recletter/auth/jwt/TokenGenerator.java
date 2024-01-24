@@ -1,4 +1,4 @@
-package com.sixcube.recletter.auth;
+package com.sixcube.recletter.auth.jwt;
 
 import com.sixcube.recletter.auth.dto.Token;
 import com.sixcube.recletter.user.dto.User;
