@@ -9,6 +9,7 @@ import com.sixcube.recletter.template.dto.res.SearchFontListRes;
 import com.sixcube.recletter.template.dto.res.SearchFrameListRes;
 import com.sixcube.recletter.template.dto.res.SearchScriptListRes;
 import com.sixcube.recletter.template.service.TemplateService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,9 +19,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/template")
+@RequiredArgsConstructor
 public class TemplateController {
 
-    private TemplateService templateService;
+    private final TemplateService templateService;
     @GetMapping("/font")
     public ResponseEntity<SearchFontListRes> searchFontList() {
         List<Font> fontList= templateService.searchFontList();
