@@ -1,5 +1,7 @@
 package com.sixcube.recletter.user.service;
 
+import com.sixcube.recletter.redis.RedisService;
+import com.sixcube.recletter.auth.dto.Code;
 import com.sixcube.recletter.user.dto.User;
 import com.sixcube.recletter.user.dto.UserInfo;
 import com.sixcube.recletter.user.dto.req.UpdateUserPasswordReq;
@@ -20,6 +22,7 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RedisService redisService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -30,11 +33,25 @@ public class UserService implements UserDetailsService {
         return new UserInfo(userRepository.findByUserId(userId));
     }
 
-    public User createUser(User user) {
+    public User createUser(User user) throws Exception {
 
-        if(userRepository.findByUserId(user.getUserId())!=null){
-            // TODO - 이미 있는 아이디,비번..
+        if (userRepository.findByUserId(user.getUserId()) != null && user.getDeletedAt()!=null) {
+            throw new Exception("이미 존재하는 아이디입니다.");
         }
+        if (userRepository.findByUserEmail(user.getUserEmail()) != null && user.getDeletedAt()!=null) {
+            throw new Exception("이미 존재하는 이메일입니다.");
+        }
+        if(!redisService.hasKey(user.getUserEmail())){
+            throw new Exception("이메일 인증이 완료되지 않았습니다.");
+        }
+
+        Code redisAuthCode = (Code) redisService.getValues(user.getUserEmail());
+        if(!redisAuthCode.isFlag()){
+            throw new Exception("이메일 인증이 완료되지 않았습니다.");
+        }
+        //레디스에서 제거
+        redisService.deleteValues(user.getUserEmail());
+
         String unencryptedPassword = user.getPassword();
         user.setUserPassword(passwordEncoder.encode(unencryptedPassword));
         return userRepository.save(user);
@@ -52,7 +69,7 @@ public class UserService implements UserDetailsService {
 
     public boolean updateUserPassword(UpdateUserPasswordReq updateUserPasswordReq, User user) {
 
-        if (passwordEncoder.matches(updateUserPasswordReq.getOriginalPassword(),user.getUserPassword())) {
+        if (passwordEncoder.matches(updateUserPasswordReq.getOriginalPassword(), user.getUserPassword())) {
             String unencryptedPassword = updateUserPasswordReq.getNewPassword();
             System.out.println("새로운 비번=" + unencryptedPassword);
             String encryptedPassword = passwordEncoder.encode(unencryptedPassword);
@@ -69,5 +86,13 @@ public class UserService implements UserDetailsService {
     public void deleteUser(User user) {
         user.setDeletedAt(LocalDateTime.now());
         userRepository.save(user);
+    }
+
+    public boolean checkDuplicatiedId(String userId) {
+        User user = userRepository.findByUserId(userId);
+        if (user == null || user.getDeletedAt() != null) {
+            return false;
+        }
+        return true;
     }
 }
