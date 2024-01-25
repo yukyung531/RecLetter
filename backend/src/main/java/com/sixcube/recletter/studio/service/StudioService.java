@@ -8,12 +8,13 @@ import com.sixcube.recletter.studio.exception.StudioCreateFailureException;
 import com.sixcube.recletter.studio.exception.StudioDeleteFailureException;
 import com.sixcube.recletter.studio.exception.StudioNotFoundException;
 import com.sixcube.recletter.studio.exception.UnauthorizedToDeleteStudioException;
+import com.sixcube.recletter.studio.exception.UnauthorizedToSearchStudioException;
 import com.sixcube.recletter.user.dto.User;
 import java.util.List;
 
 public interface StudioService {
 
-  Studio searchStudioByStudioId(String studioId) throws StudioNotFoundException;
+  Studio searchStudioByStudioId(String studioId, User user) throws StudioNotFoundException, UnauthorizedToSearchStudioException;
 
   List<Studio> searchAllStudioByStudioIdList(List<String> studioIdList);
 

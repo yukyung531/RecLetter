@@ -5,6 +5,7 @@ import com.sixcube.recletter.studio.exception.StudioCreateFailureException;
 import com.sixcube.recletter.studio.exception.StudioDeleteFailureException;
 import com.sixcube.recletter.studio.exception.StudioNotFoundException;
 import com.sixcube.recletter.studio.exception.UnauthorizedToDeleteStudioException;
+import com.sixcube.recletter.studio.exception.UnauthorizedToSearchStudioException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
@@ -92,6 +93,19 @@ public class StudioExceptionHandler {
     makeErrorMessage(errorMessage, e);
 
     errorMessage.append("스튜디오를 삭제할 권한이 없습니다.");
+    return ResponseEntity.badRequest().body(errorMessage.toString());
+  }
+
+  @ExceptionHandler(UnauthorizedToSearchStudioException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  protected ResponseEntity<String> unauthorizedToSearchStudioExceptionHandler(
+      UnauthorizedToSearchStudioException e) {
+
+    StringBuilder errorMessage = new StringBuilder();
+
+    makeErrorMessage(errorMessage, e);
+
+    errorMessage.append("스튜디오 상세정보를 검색할 권한이 없습니다.");
     return ResponseEntity.badRequest().body(errorMessage.toString());
   }
 }

@@ -10,6 +10,7 @@ import com.sixcube.recletter.studio.exception.StudioCreateFailureException;
 import com.sixcube.recletter.studio.exception.StudioDeleteFailureException;
 import com.sixcube.recletter.studio.exception.StudioNotFoundException;
 import com.sixcube.recletter.studio.exception.UnauthorizedToDeleteStudioException;
+import com.sixcube.recletter.studio.exception.UnauthorizedToSearchStudioException;
 import com.sixcube.recletter.studio.repository.StudioRepository;
 import com.sixcube.recletter.template.dto.Frame;
 import com.sixcube.recletter.template.service.TemplateService;
@@ -38,8 +39,14 @@ public class StudioServiceImpl implements StudioService {
   private final int MAX_STUDIO_OWN_COUNT = 3;
 
   @Override
-  public Studio searchStudioByStudioId(String studioId) throws StudioNotFoundException {
-    return studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
+  public Studio searchStudioByStudioId(String studioId, User user) throws StudioNotFoundException {
+    Studio result = studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
+
+    if(result.getStudioOwner().getUserId().equals(user.getUserId())) {
+      return result;
+    } else {
+      throw new UnauthorizedToSearchStudioException();
+    }
   }
 
   @Override

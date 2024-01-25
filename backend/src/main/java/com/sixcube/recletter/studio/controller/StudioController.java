@@ -43,7 +43,8 @@ public class StudioController {
   public ResponseEntity<SearchStudioListRes> searchStudioList(@AuthenticationPrincipal User user) {
     log.debug("StudioController.searchStudioList : start");
     // 참가중인 studio의 studioId 불러오기
-    List<String> participantStudioIdList = studioParticipantService.searchParticipantStudioByUserId(user.getUserId())
+    List<String> participantStudioIdList = studioParticipantService.searchParticipantStudioByUserId(
+            user.getUserId())
         .stream()
         .map(StudioParticipant::getStudioId)
         .toList();
@@ -72,10 +73,11 @@ public class StudioController {
   }
 
   @GetMapping("/{studioId}")
-  public ResponseEntity<SearchStudioDetailRes> searchStudioDetail(@PathVariable String studioId) {
+  public ResponseEntity<SearchStudioDetailRes> searchStudioDetail(@PathVariable String studioId, @AuthenticationPrincipal User user) {
     log.debug("StudioController.searchStudioDetail : start");
-    // 찾을 수 없을 경우 StudioNotFoundException 예외
-    Studio studio = studioService.searchStudioByStudioId(studioId);
+    // 찾을 수 없을 경우 StudioNotFoundException 발생
+    // 자신이 참여하지 않은 Studio를 검색할 경우 UnauthorizedToSearchStudioException 발생
+    Studio studio = studioService.searchStudioByStudioId(studioId, user);
 
     SearchStudioDetailRes result = SearchStudioDetailRes.builder()
         .studioId(studio.getStudioId())
@@ -93,7 +95,8 @@ public class StudioController {
   }
 
   @PostMapping
-  public ResponseEntity<Void> createStudio(@RequestBody CreateStudioReq createStudioReq, @AuthenticationPrincipal User user) {
+  public ResponseEntity<Void> createStudio(@RequestBody CreateStudioReq createStudioReq,
+      @AuthenticationPrincipal User user) {
     log.debug("StudioController.createStudio : start");
 
     // 생성할 수 없는 경우 StudioCreateFailureException 발생
@@ -103,9 +106,9 @@ public class StudioController {
     return ResponseEntity.ok().build();
   }
 
-  // TODO - JPA 예외처리
   @DeleteMapping("/{studioId}")
-  public ResponseEntity<Void> deleteStudio(@PathVariable String studioId, @AuthenticationPrincipal User user) {
+  public ResponseEntity<Void> deleteStudio(@PathVariable String studioId,
+      @AuthenticationPrincipal User user) {
     log.debug("StudioController.deleteStudio : start");
 
     studioService.deleteStudioByStudioId(studioId, user);
@@ -116,7 +119,8 @@ public class StudioController {
 
   // TODO - JPA 예외처리
   @PostMapping("/{studioId}")
-  public ResponseEntity<Void> joinStudio(@PathVariable String studioId, @AuthenticationPrincipal User user) {
+  public ResponseEntity<Void> joinStudio(@PathVariable String studioId,
+      @AuthenticationPrincipal User user) {
     log.debug("StudioController.joinStudio : start");
 
     studioParticipantService.createStudioParticipant(StudioParticipant.builder()
