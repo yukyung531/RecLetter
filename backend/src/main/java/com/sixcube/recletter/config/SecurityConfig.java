@@ -41,7 +41,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity(prePostEnabled = true)
 @Slf4j
 @AllArgsConstructor
-public class SpringSecurityConfiguration {
+public class SecurityConfig {
 
     private final JwtToUserConverter jwtToUserConverter;
     private final KeyUtils keyUtils;
