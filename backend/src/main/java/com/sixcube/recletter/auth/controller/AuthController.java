@@ -1,5 +1,7 @@
 package com.sixcube.recletter.auth.controller;
 
+import com.sixcube.recletter.auth.dto.res.VerifyCodeRes;
+import com.sixcube.recletter.redis.RedisPrefix;
 import com.sixcube.recletter.redis.RedisService;
 import com.sixcube.recletter.auth.jwt.CustomJwtAuthenticationProvider;
 import com.sixcube.recletter.auth.jwt.TokenGenerator;
@@ -13,7 +15,7 @@ import com.sixcube.recletter.auth.dto.res.TokenRes;
 import com.sixcube.recletter.auth.service.AuthService;
 import com.sixcube.recletter.user.dto.User;
 import com.sixcube.recletter.user.dto.UserInfo;
-import com.sixcube.recletter.user.dto.res.CheckDuplicatedIdRes;
+import com.sixcube.recletter.auth.dto.res.CheckDuplicatedIdRes;
 import com.sixcube.recletter.user.service.UserService;
 
 import jakarta.validation.Valid;
@@ -61,7 +63,8 @@ public class AuthController {
         UserInfo userInfo = userService.searchUserInfoByUserId(loginReq.getUserId());
 
         // redis에 refreshToken 저장
-        redisService.setValues(userInfo.getUserId(), token.getRefreshToken());
+        String key = RedisPrefix.REFRESH_TOKEN.prefix() + userInfo.getUserId();
+        redisService.setValues(key, token.getRefreshToken());
 
         log.debug("AuthController.login: end");
 
@@ -77,7 +80,8 @@ public class AuthController {
     @GetMapping("/logout")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> logout(@AuthenticationPrincipal User user) {
-        redisService.deleteValues(user.getUserId());
+        String key = RedisPrefix.REFRESH_TOKEN.prefix() + user.getUserId();
+        redisService.deleteValues(key);
         return ResponseEntity.ok().build();
     }
 
@@ -90,8 +94,8 @@ public class AuthController {
         if (authentication.isAuthenticated()) {
             Jwt jwt = (Jwt) authentication.getCredentials();
             String userId = jwt.getClaim("userId");
-
-            String refreshToken = (String) redisService.getValues(userId);
+            String key = RedisPrefix.REFRESH_TOKEN.prefix() + userId;
+            String refreshToken = (String) redisService.getValues(key);
 
             //refreshToken 같으면 token 재발급
             if (tokenReq.getRefreshToken().equals(refreshToken)) {
@@ -106,30 +110,33 @@ public class AuthController {
 
     @GetMapping("/id/{userId}")
     public ResponseEntity<CheckDuplicatedIdRes> checkDuplicatiedId(@PathVariable("userId") String userId) {
-        log.debug("AuthController.checkDuplicatiedId: start");
+
         boolean isDuplicated = userService.checkDuplicatiedId(userId);
         CheckDuplicatedIdRes checkDuplicatedIdRes = new CheckDuplicatedIdRes();
-        checkDuplicatedIdRes.setDuplicated(isDuplicated);
-        log.debug("AuthController.checkDuplicatiedId: end");
+        checkDuplicatedIdRes.setIsDuplicated(isDuplicated);
+
         return ResponseEntity.ok().body(checkDuplicatedIdRes);
     }
 
 
     //이메일 인증 요청
     @PostMapping("/email")
-    public ResponseEntity<Void> sendCodeToEmail(@Valid @RequestBody SendCodeToEmailReq sendCodeToEmailReq) throws Exception {
-        log.debug("AuthController.sendCodeToEmail: start");
-        authService.sendCodeToEmail(sendCodeToEmailReq.getUserEmail());
-        log.debug("AuthController.sendCodeToEmail: end");
+    public ResponseEntity<Void> sendEmailToRegister(@Valid @RequestBody SendCodeToEmailReq sendCodeToEmailReq) throws Exception {
+
+        authService.sendEmailToRegister(sendCodeToEmailReq.getUserEmail());
+
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/email/code")
-    public boolean verifyCode(@Valid @RequestBody VerifyCodeReq verifyCodeReq) {
-        log.debug("AuthController.verifyCode: start");
-        boolean result = authService.verifyCode(verifyCodeReq.getUserEmail(), verifyCodeReq.getCode());
-        log.debug("AuthController.verifyCode: end");
-        return result;
+    public ResponseEntity<VerifyCodeRes>  verifyCode(@Valid @RequestBody VerifyCodeReq verifyCodeReq) {
+
+        boolean isValid = authService.verifyRegisterCode(verifyCodeReq.getUserEmail(), verifyCodeReq.getCode());
+
+        VerifyCodeRes verifyCodeRes = new VerifyCodeRes();
+        verifyCodeRes.setIsValid(isValid);
+
+        return ResponseEntity.ok().body(verifyCodeRes);
 
     }
 }
