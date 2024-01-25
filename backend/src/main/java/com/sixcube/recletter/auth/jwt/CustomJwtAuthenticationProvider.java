@@ -5,6 +5,7 @@
 
 package com.sixcube.recletter.auth.jwt;
 
+import com.sixcube.recletter.redis.RedisPrefix;
 import com.sixcube.recletter.redis.RedisService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,8 +52,9 @@ public final class CustomJwtAuthenticationProvider implements AuthenticationProv
             Jwt jwtToken = (Jwt) authentication.getCredentials();
             String userId = jwtToken.getClaim("userId");
         System.out.println("유저아이디는 "+userId);
+        String key = RedisPrefix.REFRESH_TOKEN.prefix()+userId;
 
-            if (Boolean.FALSE.equals(redisService.hasKey(userId))) {
+            if (Boolean.FALSE.equals(redisService.hasKey(key))) {
                 System.out.println("인증 실패!!!!!!!!!!!!!");
                 throw new AccountExpiredException("인증 실패");
             }
