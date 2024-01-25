@@ -73,7 +73,8 @@ public class StudioController {
   }
 
   @GetMapping("/{studioId}")
-  public ResponseEntity<SearchStudioDetailRes> searchStudioDetail(@PathVariable String studioId, @AuthenticationPrincipal User user) {
+  public ResponseEntity<SearchStudioDetailRes> searchStudioDetail(@PathVariable String studioId,
+      @AuthenticationPrincipal User user) {
     log.debug("StudioController.searchStudioDetail : start");
     // 찾을 수 없을 경우 StudioNotFoundException 발생
     // 자신이 참여하지 않은 Studio를 검색할 경우 UnauthorizedToSearchStudioException 발생
