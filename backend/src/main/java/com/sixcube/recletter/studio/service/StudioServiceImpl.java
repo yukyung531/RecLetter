@@ -5,6 +5,7 @@ import com.sixcube.recletter.clip.service.ClipService;
 import com.sixcube.recletter.studio.dto.Studio;
 import com.sixcube.recletter.studio.dto.StudioParticipant;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
+import com.sixcube.recletter.studio.exception.MaxStudioOwnCountExceedException;
 import com.sixcube.recletter.studio.exception.StudioCreateFailureException;
 import com.sixcube.recletter.studio.exception.StudioNotFoundException;
 import com.sixcube.recletter.studio.repository.StudioRepository;
@@ -32,6 +33,8 @@ public class StudioServiceImpl implements StudioService {
 
   private final ClipService clipService;
 
+  private final int MAX_STUDIO_OWN_COUNT = 3;
+
   @Override
   public Studio searchStudioByStudioId(String studioId) throws StudioNotFoundException {
     return studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
@@ -43,8 +46,13 @@ public class StudioServiceImpl implements StudioService {
   }
 
   @Override
+  public List<Studio> searchAllStudioByStudioOwner(User user) {
+    return studioRepository.findAllByStudioOwner(user);
+  }
+
+  @Override
   public void createStudio(CreateStudioReq createStudioReq, User user)
-      throws StudioCreateFailureException {
+      throws StudioCreateFailureException, MaxStudioOwnCountExceedException {
     Studio studio = Studio.builder()
         .studioOwner(user)
         .studioTitle(createStudioReq.getStudioTitle())
@@ -52,6 +60,14 @@ public class StudioServiceImpl implements StudioService {
         .studioFrame(Frame.builder().frameId(createStudioReq.getStudioFrameId()).build())
         .build();
 
+    List<Studio> myStudioList = studioRepository.findAllByStudioOwner(user);
+
+    // 최대 생성 가능 수 확인
+    if(myStudioList.size() >= MAX_STUDIO_OWN_COUNT) {
+      throw new MaxStudioOwnCountExceedException(myStudioList.size());
+    }
+
+    // 생성 시도
     try {
       Studio studioResult = studioRepository.save(studio);
       studioParticipantService.createStudioParticipant(

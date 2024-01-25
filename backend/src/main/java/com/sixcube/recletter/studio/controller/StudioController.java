@@ -92,12 +92,11 @@ public class StudioController {
     return ResponseEntity.ok().body(result);
   }
 
-  // TODO - JPA 예외처리
   @PostMapping
   public ResponseEntity<Void> createStudio(@RequestBody CreateStudioReq createStudioReq, @AuthenticationPrincipal User user) {
     log.debug("StudioController.createStudio : start");
-    // 생성할 수 없는 경우 StudioCreateFailureException 발생
 
+    // 생성할 수 없는 경우 StudioCreateFailureException 발생
     studioService.createStudio(createStudioReq, user);
 
     log.debug("StudioController.createStudio : end");
