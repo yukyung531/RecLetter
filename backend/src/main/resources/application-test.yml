@@ -6,7 +6,7 @@ spring:
     import:
       - optional:file:.env[.properties]
   datasource:
-    url: ${TEST_DB_URL}
+    url: ${DB_URL}
     username: ${USER_NAME}
     password: ${USER_PASSWORD}
     driver-class-name: org.mariadb.jdbc.Driver
@@ -37,6 +37,18 @@ spring:
           timeout: 5000
           writetimeout: 5000
     auth-code-expiration-millis: 600000  # 10분
+
+cloud:
+  aws:
+    s3:
+      bucket: sunjbucket
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+    credentials:
+      access-key: ${AWS_ACCESS}
+      secret-key: ${AWS_SECRET}
 
 logging:
   level:

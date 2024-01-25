@@ -5,7 +5,5 @@ CREATE TABLE IF NOT EXISTS bgm
     bgm_url varchar(8200)
 ) ENGINE innoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-set SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
-
-insert into S10P12A606.bgm(bgm_id, bgm_title) value
-    (0,"bgm 없음");
+insert into S10P12A606.bgm(bgm_title) value
+    ("bgm 없음");
