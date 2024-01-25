@@ -39,7 +39,6 @@ public class StudioController {
   private final StudioService studioService;
   private final StudioParticipantService studioParticipantService;
 
-  // TODO - JPA 예외처리
   @GetMapping
   public ResponseEntity<SearchStudioListRes> searchStudioList(@AuthenticationPrincipal User user) {
     log.debug("StudioController.searchStudioList : start");
@@ -72,22 +71,21 @@ public class StudioController {
     return ResponseEntity.ok().body(result);
   }
 
-  // TODO - JPA 예외처리
   @GetMapping("/{studioId}")
   public ResponseEntity<SearchStudioDetailRes> searchStudioDetail(@PathVariable String studioId) {
     log.debug("StudioController.searchStudioDetail : start");
+    // 찾을 수 없을 경우 StudioNotFoundException 예외
     Studio studio = studioService.searchStudioByStudioId(studioId);
 
-    // TODO - studioId로 보유하고 있는 clipInfoList를 삽입.
     SearchStudioDetailRes result = SearchStudioDetailRes.builder()
         .studioId(studio.getStudioId())
         .studioTitle(studio.getStudioTitle())
         .isCompleted(studio.getIsCompleted())
         .studioOwner(studio.getStudioOwner().getUserId())
-        .clipInfoList()
-//        .studioFrameId(studio.getStudioFrame().getFrameId())
-//        .studioFontId(studio.getStudioFont().getFontId())
-//        .studioBgmId(studio.getStudioBgm().getBgmId())
+        .clipInfoList(studioService.searchStudioClipInfoList(studioId))
+        .studioFrameId(studio.getStudioFrame().getFrameId())
+        .studioFontId(studio.getStudioFont().getFontId())
+        .studioBgmId(studio.getStudioBgm().getBgmId())
         .build();
 
     log.debug("StudioController.searchStudioDetail : end");
@@ -97,16 +95,10 @@ public class StudioController {
   // TODO - JPA 예외처리
   @PostMapping
   public ResponseEntity<Void> createStudio(@RequestBody CreateStudioReq createStudioReq, @AuthenticationPrincipal User user) {
-    // TODO - Frame 객체를 생성하여 삽입
     log.debug("StudioController.createStudio : start");
+    // 생성할 수 없는 경우 StudioCreateFailureException 발생
 
-    studioService.createStudio(Studio.builder()
-        .studioOwner(user)
-        .studioTitle(createStudioReq.getStudioTitle())
-        .expireDate(createStudioReq.getExpireDate())
-//        .studioFrame(createStudioReq.getStudioFrameId())
-        .build());
-
+    studioService.createStudio(createStudioReq, user);
 
     log.debug("StudioController.createStudio : end");
     return ResponseEntity.ok().build();
