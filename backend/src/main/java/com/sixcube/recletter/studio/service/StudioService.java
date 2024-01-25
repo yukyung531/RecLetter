@@ -9,6 +9,7 @@ import com.sixcube.recletter.studio.exception.StudioDeleteFailureException;
 import com.sixcube.recletter.studio.exception.StudioNotFoundException;
 import com.sixcube.recletter.studio.exception.UnauthorizedToDeleteStudioException;
 import com.sixcube.recletter.studio.exception.UnauthorizedToSearchStudioException;
+import com.sixcube.recletter.studio.exception.UnauthorizedToUpdateStudioException;
 import com.sixcube.recletter.user.dto.User;
 import java.util.List;
 
@@ -26,7 +27,7 @@ public interface StudioService {
   void deleteStudioByStudioId(String studioId, User user)
       throws StudioNotFoundException, UnauthorizedToDeleteStudioException, StudioDeleteFailureException;
 
-  void updateStudioTitle(String studioId, String studioTitle);
+  void updateStudioTitle(String studioId, String studioTitle, User user) throws StudioNotFoundException, UnauthorizedToUpdateStudioException;
 
   ClipInfo searchMainClipInfo(String studioId);
 

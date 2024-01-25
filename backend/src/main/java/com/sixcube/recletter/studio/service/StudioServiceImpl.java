@@ -11,6 +11,7 @@ import com.sixcube.recletter.studio.exception.StudioDeleteFailureException;
 import com.sixcube.recletter.studio.exception.StudioNotFoundException;
 import com.sixcube.recletter.studio.exception.UnauthorizedToDeleteStudioException;
 import com.sixcube.recletter.studio.exception.UnauthorizedToSearchStudioException;
+import com.sixcube.recletter.studio.exception.UnauthorizedToUpdateStudioException;
 import com.sixcube.recletter.studio.repository.StudioRepository;
 import com.sixcube.recletter.template.dto.Frame;
 import com.sixcube.recletter.template.service.TemplateService;
@@ -104,9 +105,19 @@ public class StudioServiceImpl implements StudioService {
   }
 
   @Override
-  public void updateStudioTitle(String studioId, String studioTitle) {
+  public void updateStudioTitle(String studioId, String studioTitle, User user)
+      throws StudioNotFoundException {
     Studio studio = studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
-    studio.setStudioTitle(studioTitle);
+
+    List<StudioParticipant> studioParticipantList = studioParticipantService.searchParticipantStudioByUserId(
+        user.getUserId());
+
+    if (studioParticipantList.stream().anyMatch(
+        studioParticipant -> studioParticipant.getStudio().getStudioId().equals(studioId))) {
+      studio.setStudioTitle(studioTitle);
+    } else {
+      throw new UnauthorizedToUpdateStudioException();
+    }
   }
 
   @Override
