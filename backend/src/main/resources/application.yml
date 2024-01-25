@@ -40,8 +40,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: recletter.official@gmail.com
-    password: mcti gkaj pbsp scox
+    username: ${MAIL_ID}
+    password: ${MAIL_SECRET}
     properties:
       mail:
         smtp:
@@ -71,6 +71,10 @@ logging:
     org:
       hibernate:
         SQL: DEBUG
+    com:
+      sixcube:
+        recletter: debug
+    "[org.springframework.security]": DEBUG
 
 access-token:
   private: access-refresh-token-keys/access-token-private.key
