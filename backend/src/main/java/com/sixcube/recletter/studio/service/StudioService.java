@@ -33,4 +33,5 @@ public interface StudioService {
   Boolean hasMyClip(String studioId, String userId);
 
   List<ClipInfo> searchStudioClipInfoList(String studioId);
+
 }

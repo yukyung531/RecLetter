@@ -97,9 +97,14 @@ public class StudioController {
   }
 
   @GetMapping("/{studioId}/thumbnail")
-  public ResponseEntity<SearchStudioThumbnailRes> searchStudioThumbnail(@PathVariable String studioId) {
+  public ResponseEntity<SearchStudioThumbnailRes> searchStudioThumbnail(
+      @PathVariable String studioId) {
 
-    return ResponseEntity.ok().body(SearchStudioThumbnailRes.builder().url("").build());
+    return ResponseEntity.ok()
+        .body(SearchStudioThumbnailRes
+            .builder()
+            .url(studioService.searchMainClipInfo(studioId).getClipUrl())
+            .build());
   }
 
   @PostMapping
