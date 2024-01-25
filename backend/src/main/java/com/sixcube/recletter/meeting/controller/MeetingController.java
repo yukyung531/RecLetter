@@ -1,139 +1,192 @@
 package com.sixcube.recletter.meeting.controller;
 
-import com.sixcube.recletter.studio.dto.Studio;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sixcube.recletter.studio.repository.StudioRepository;
 import com.sixcube.recletter.user.dto.User;
-import com.sixcube.recletter.user.repository.UserRepository;
-import io.openvidu.java.client.*;
+import io.openvidu.java.client.OpenVidu;
+import io.openvidu.java.client.OpenViduHttpException;
+import io.openvidu.java.client.OpenViduJavaClientException;
 import jakarta.annotation.PostConstruct;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @RestController
 public class MeetingController {
 
-    private StudioRepository studioRepository;
-    private UserRepository userRepository;
-
-    public MeetingController(StudioRepository studioRepository, UserRepository userRepository) {
-        this.studioRepository = studioRepository;
-        this.userRepository = userRepository;
-    }
+    @Autowired
+    StudioRepository studioRepository;
 
     // TODO: OPENVIDU_URL, OPENVIDU_SECRET => 나중에 application.yml에 넣을 예정
-    private static final String OPENVIDU_URL = "http://localhost:4443/";
+    private static final String OPENVIDU_URL = "http://localhost:4443/api/sessions";
     private static final String OPENVIDU_SECRET = "MY_SECRET";
 
-    // OpenVidu 객체 선언
-    private OpenVidu openVidu;
+    private RestTemplate restTemplate;
 
     /**
-     * OpenVidu 인스턴스 생성
-     */
-    @PostConstruct
-    public void init() {
-        this.openVidu = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET);
-    }
-
-//    /**
-//     * 세션 초기화: 화면 공유를 할 수 있는 환경(세션)을 생성
-//     *
-//     * @param studioId 스튜디오마다 화면공유를 할 수 있는 환경을 생성하기 위한 param
-//     * @param user     로그인한 유저인지 확인하기 위한 param
-//     * @return sessionId
-//     */
-//    @PostMapping("/api/sessions/{studioId}")
-//    public ResponseEntity<String> initializeSession(@PathVariable("studioId") String studioId) throws OpenViduJavaClientException, OpenViduHttpException {
-//        // 스튜디오 존재 확인
-////        Studio studio = studioRepository.findById(studioId).orElseThrow(() -> new RuntimeException("Studio not found"));
-//
-//        // session ID를 studioId로 설정
-//        SessionProperties properties = new SessionProperties.Builder().customSessionId(studioId).build();
-//
-//        // 새 세션 생성
-//        Session session = openVidu.createSession(properties);
-//
-//        // 세션ID 반환
-//        return new ResponseEntity<>(session.getSessionId(), HttpStatus.OK);
-//    }
-    @PostMapping("/api/sessions")
-    public ResponseEntity<String> initializeSession(@RequestBody(required = false) Map<String, Object> params) throws OpenViduJavaClientException, OpenViduHttpException {
-        SessionProperties properties = SessionProperties.fromJson(params).build();
-        Session session = openVidu.createSession(properties);
-        return new ResponseEntity<>(session.getSessionId(), HttpStatus.OK);
-    }
-
-    /**
-     * 특정 스튜디오에서 연결 생성
+     * 세션 초기화: 화면 공유를 할 수 있는 환경(세션)을 생성
+     * OpenVidu Server에서 세션을 초기화한다. 이는 OpenVidu 워크플로에서 수행하는 첫 번째 작업.
+     * 그 후, 이 세션에 대한 연결 개체가 생성되고 해당 토큰이 클라이언트 측에 전달될 수 있으므로, 클라이언트는 이를 사용하여 세션에 연결가능
      *
-     * @param sessionId The Session in which to create the Connection
-     * @param params    The Connection properties(프론트엔드로부터 받는 연결 속성을 나타내는 JSON 객체)
-     * @return The Token associated to the Connection
+     * @param studioId 스튜디오마다 화면공유를 할 수 있는 환경을 생성하기 위한 param
+     * @param user     로그인한 유저인지 확인하기 위한 param
+     * @return sessionId
      */
-    @PostMapping("/api/sessions/{sessionId}/connections")
-    public ResponseEntity<Map> createConnection(@PathVariable("sessionId") String sessionId, @RequestBody(required = false) Map<String, Object> params) throws OpenViduJavaClientException, OpenViduHttpException {
-        // 활성 세션을 가져옴
-        Session session = openVidu.getActiveSession(sessionId);
-        // 세션이 존재하지 않으면 404 에러 반환
-        if (session == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    @PostMapping("/meeting/sessions/{studioId}")
+    public ResponseEntity<String> initializeSession(@PathVariable("studioId") String studioId, @AuthenticationPrincipal User user) {
+        // 스튜디오 존재 확인
+        studioRepository.findById(studioId).orElseThrow(() -> new RuntimeException("Studio not found"));
+
+        // RestTemplate 생성
+        restTemplate = new RestTemplate();
+
+        // OpenVidu 서버에 직접 HTTP POST 요청 보내기
+        // 헤더 생성
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setBasicAuth("OPENVIDUAPP", OPENVIDU_SECRET);
+
+        // 요청 본문 생성
+        String requestJson = "{\"customSessionId\":\"" + studioId + "\"}";
+
+        // HttpEntity 생성 (헤더와 본문 포함)
+        HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
+
+        try {
+            // POST 요청 보내기
+            ResponseEntity<String> response = restTemplate.exchange(OPENVIDU_URL, HttpMethod.POST, entity, String.class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                // ObjectMapper 생성
+                ObjectMapper mapper = new ObjectMapper();
+
+                // 세션 정보를 Map으로 변환
+                Map<String, Object> sessionInfoMap = mapper.readValue(response.getBody(), new TypeReference<Map<String, Object>>(){});
+
+                // 세션 정보에 사용자 ID 추가
+                sessionInfoMap.put("editingUserId", user.getUserId());
+
+                // 세션 정보를 JSON 문자열로 변환
+                String sessionInfo = mapper.writeValueAsString(sessionInfoMap);
+
+                return new ResponseEntity<>(sessionInfo, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Error: " + response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        // 요청 본문에서 연결 속성 빌드
-        ConnectionProperties properties = ConnectionProperties.fromJson(params).build();
-        // 새 연결 생성
-        Connection connection = session.createConnection(properties);
-
-        // 연결 토큰(프론트엔드에서 OpenVidu 세션에 참가하기 위해 사용)과 connectionId를 프론트엔드에 전달
-        Map<String, String> response = new HashMap<>();
-        response.put("token", connection.getToken());
-        response.put("connectionId", connection.getConnectionId());
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
-     * 화면 공유를 중지하거나, 화면 공유를 보는 방을 나가기
-     *
-     * @param sessionId    The Session from which to disconnect
-     * @param connectionId The Connection to disconnect(특정 OpenVidu 세션에 참여하는 사용자를 식별하는 데 사용되는 값, 사용자가 세션에 참여할 때마다 새로 생성)
+     * 세션에서 새 연결 생성
+     * @param sessionId 스튜디오마다 화면공유를 할 수 있는 환경을 생성하기 위한 param
+     * @param params
+     * @param user 로그인한 유저인지 확인하기 위한 param
+     * @return
      */
-    @PostMapping("/api/sessions/{sessionId}/disconnect")
-    public ResponseEntity<String> disconnect(@PathVariable("sessionId") String sessionId, String connectionId) throws OpenViduJavaClientException, OpenViduHttpException {
-        // 활성 세션을 가져옴
-        Session session = openVidu.getActiveSession(sessionId);
-        // 세션이 존재하지 않으면 404 에러 반환
-        if (session == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    @PostMapping("/meeting/sessions/{sessionId}/connections")
+    public ResponseEntity<String> createConnection(@PathVariable("sessionId") String sessionId, @RequestBody(required = false) Map<String, Object> params, @AuthenticationPrincipal User user) {
+        try {
+            // RestTemplate 생성
+            restTemplate = new RestTemplate();
+
+            // 헤더 생성
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+            headers.setBasicAuth("OPENVIDUAPP", OPENVIDU_SECRET);
+
+            // HttpEntity 생성 (헤더 포함)
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            // GET 요청 보내기
+            ResponseEntity<String> response = restTemplate.exchange(OPENVIDU_URL + "/" + sessionId, HttpMethod.GET, entity, String.class);
+
+            // 세션 정보 파싱
+            String sessionInfo = response.getBody();
+
+            // ObjectMapper 생성
+            ObjectMapper mapper = new ObjectMapper();
+
+            // sessionInfo를 Map으로 변환
+            Map<String, Object> sessionInfoMap = mapper.readValue(sessionInfo, new TypeReference<Map<String, Object>>(){});
+
+            // 요청 본문 생성 (params를 사용하여 연결 속성 설정)
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("sessionInfo", sessionInfoMap);
+            if (params != null) {
+                requestBody.put("params", params);
+            }
+
+            // 요청 본문을 JSON 문자열로 변환
+            String requestJson = mapper.writeValueAsString(requestBody);
+            // HttpEntity 생성 (헤더와 본문 포함)
+            HttpEntity<String> postEntity = new HttpEntity<>(requestJson, headers);
+
+            // POST 요청 보내기
+            ResponseEntity<String> postResponse = restTemplate.exchange(OPENVIDU_URL + "/" + sessionId + "/connection", HttpMethod.POST, postEntity, String.class);
+
+            // 연결 정보 파싱
+            String connectionInfo = postResponse.getBody();
+
+            // 연결 정보를 Map으로 변환
+            Map<String, Object> connectionInfoMap = mapper.readValue(connectionInfo, new TypeReference<Map<String, Object>>(){});
+
+            // 연결 정보에 사용자 ID 추가
+            connectionInfoMap.put("userId", user.getUserId());
+
+            // 연결 정보를 JSON 문자열로 변환
+            connectionInfo = mapper.writeValueAsString(connectionInfoMap);
+
+            return new ResponseEntity<>(connectionInfo, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        // 활성 세션에서 모든 연결을 가져옴
-        List<Connection> activeConnections = session.getActiveConnections();
+    }
 
-        // 연결 ID가 connectionId인 연결을 찾음
-        Connection connection = activeConnections.stream()
-                // 각 연결의 연결 ID가 connectionId와 같은지 확인
-                .filter(c -> c.getConnectionId().equals(connectionId))
-                // 첫 번째로 일치하는 연결을 선택
-                .findFirst()
-                // 일치하는 연결이 없으면 null을 반환
-                .orElse(null);
-        // 연결이 존재하지 않으면 404 에러 반환
-        if (connection == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    /**
+     * 세션 종료(해당 세션의 모든 프로세스가 중지됨. 모든 연결, 스트림 및 녹음이 닫힘)
+     * @param sessionId 스튜디오마다 화면공유를 할 수 있는 환경을 생성하기 위한 param
+     * @param user 로그인한 유저인지 확인하기 위한 param
+     * @return
+     */
+    @DeleteMapping("/meeting/sessions/{sessionId}")
+    public ResponseEntity<String> deleteSession(@PathVariable("sessionId") String sessionId, @AuthenticationPrincipal User user) {
+        // RestTemplate 생성
+        restTemplate = new RestTemplate();
+
+        // 헤더 생성
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setBasicAuth("OPENVIDUAPP", OPENVIDU_SECRET);
+
+        // HttpEntity 생성 (헤더 포함)
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        try {
+            // DELETE 요청 보내기
+            ResponseEntity<String> response = restTemplate.exchange(OPENVIDU_URL + "/" + sessionId, HttpMethod.DELETE, entity, String.class);
+
+            if (response.getStatusCode() == HttpStatus.NO_CONTENT) {
+                return new ResponseEntity<>("Session deleted successfully", HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Error: " + response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        // 연결을 끊음
-        //모든 사용자가 세션에서 나가면 세션은 자동으로 종료되는 것이 아니라, 해당 세션에 다른 사용자가 재접속할 수 있는 상태가 유지됨
-        session.forceDisconnect(connection);
-
-        // 성공 메시지 반환
-        return new ResponseEntity<>("Disconnected successfully", HttpStatus.OK);
     }
 
 }
