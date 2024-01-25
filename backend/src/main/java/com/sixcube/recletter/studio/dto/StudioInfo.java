@@ -20,5 +20,5 @@ public class StudioInfo {
   private Boolean isCompleted;
   private String thumbnailUrl;
   private LocalDateTime expireDate;
-  private Boolean isUpload;
+  private Boolean hasMyClip;
 }

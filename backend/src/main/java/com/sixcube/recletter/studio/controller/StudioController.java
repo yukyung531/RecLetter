@@ -43,7 +43,7 @@ public class StudioController {
   @GetMapping
   public ResponseEntity<SearchStudioListRes> searchStudioList(@AuthenticationPrincipal User user) {
     log.debug("StudioController.searchStudioList : start");
-    // 참가중인 Studio의 studioId 불러오기
+    // 참가중인 studio의 studioId 불러오기
     List<String> participantStudioIdList = studioParticipantService.searchParticipantStudioByUserId(user.getUserId())
         .stream()
         .map(StudioParticipant::getStudioId)
@@ -54,8 +54,6 @@ public class StudioController {
 
     SearchStudioListRes result = new SearchStudioListRes();
 
-    // TODO - 가지고 있는 clip을 불러오고, 그중 처음에 위치하는 clip의 thumbnailUrl 가져와 삽입
-    // TODO - studioId로 clip을 조회하고, 그 중에 clipOwner가 userId인 clip이 있는지 확인하여 isUpload에 삽입
     // 불러온 Studio들을 통해 StudioInfo List 생성후 할당.
     result.setStudioInfoList(
         studioList.stream().map(studio -> StudioInfo.builder()
@@ -63,9 +61,9 @@ public class StudioController {
             .studioTitle(studio.getStudioTitle())
             .isStudioOwner(user.getUserId().equals(studio.getStudioOwner().getUserId()))
             .isCompleted(studio.getIsCompleted())
-            .thumbnailUrl("")
+            .thumbnailUrl(studioService.searchMainClipInfo(studio.getStudioId()).getClipUrl())
             .expireDate(studio.getExpireDate())
-            .isUpload(false)
+            .hasMyClip(studioService.hasMyClip(studio.getStudioId(), user.getUserId()))
             .build()
         ).toList()
     );
@@ -86,7 +84,7 @@ public class StudioController {
         .studioTitle(studio.getStudioTitle())
         .isCompleted(studio.getIsCompleted())
         .studioOwner(studio.getStudioOwner().getUserId())
-//        .clipInfoList()
+        .clipInfoList()
 //        .studioFrameId(studio.getStudioFrame().getFrameId())
 //        .studioFontId(studio.getStudioFont().getFontId())
 //        .studioBgmId(studio.getStudioBgm().getBgmId())

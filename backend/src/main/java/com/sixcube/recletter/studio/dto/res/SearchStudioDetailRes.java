@@ -1,5 +1,6 @@
 package com.sixcube.recletter.studio.dto.res;
 
+import com.sixcube.recletter.clip.dto.ClipInfo;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,7 @@ public class SearchStudioDetailRes {
   private String studioTitle;
   private Boolean isCompleted;
   private String studioOwner;
-//  private List<ClipInfo> clipInfoList;
+  private List<ClipInfo> clipInfoList;
   private Integer studioFrameId;
   private Integer studioFontId;
   private Integer studioBgmId;
