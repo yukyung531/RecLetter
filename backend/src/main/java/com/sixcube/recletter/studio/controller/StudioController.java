@@ -7,6 +7,7 @@ import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.dto.res.SearchActiveUserRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioDetailRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioListRes;
+import com.sixcube.recletter.studio.dto.res.SearchStudioThumbnailRes;
 import com.sixcube.recletter.studio.repository.StudioParticipantRepository;
 import com.sixcube.recletter.studio.repository.StudioRepository;
 import com.sixcube.recletter.studio.service.StudioParticipantService;
@@ -46,7 +47,7 @@ public class StudioController {
     List<String> participantStudioIdList = studioParticipantService.searchParticipantStudioByUserId(
             user.getUserId())
         .stream()
-        .map(StudioParticipant::getStudioId)
+        .map(studioParticipant -> studioParticipant.getStudio().getStudioId())
         .toList();
 
     // 참가중인 Studio 정보 불러오기
@@ -95,6 +96,12 @@ public class StudioController {
     return ResponseEntity.ok().body(result);
   }
 
+  @GetMapping("/{studioId}/thumbnail")
+  public ResponseEntity<SearchStudioThumbnailRes> searchStudioThumbnail(@PathVariable String studioId) {
+
+    return ResponseEntity.ok().body(SearchStudioThumbnailRes.builder().url("").build());
+  }
+
   @PostMapping
   public ResponseEntity<Void> createStudio(@RequestBody CreateStudioReq createStudioReq,
       @AuthenticationPrincipal User user) {
@@ -118,17 +125,12 @@ public class StudioController {
     return ResponseEntity.ok().build();
   }
 
-  // TODO - JPA 예외처리
   @PostMapping("/{studioId}")
   public ResponseEntity<Void> joinStudio(@PathVariable String studioId,
       @AuthenticationPrincipal User user) {
     log.debug("StudioController.joinStudio : start");
 
-    studioParticipantService.createStudioParticipant(StudioParticipant.builder()
-        .studioId(studioId)
-        .userId(user.getUserId())
-        .build()
-    );
+    studioParticipantService.createStudioParticipant(studioId, user);
 
     log.debug("StudioController.joinStudio : end");
     return ResponseEntity.ok().build();

@@ -1,5 +1,6 @@
 package com.sixcube.recletter.studio.exhandler;
 
+import com.sixcube.recletter.studio.exception.AlreadyJoinedStudioException;
 import com.sixcube.recletter.studio.exception.MaxStudioOwnCountExceedException;
 import com.sixcube.recletter.studio.exception.StudioCreateFailureException;
 import com.sixcube.recletter.studio.exception.StudioDeleteFailureException;
@@ -108,6 +109,19 @@ public class StudioExceptionHandler {
     makeErrorMessage(errorMessage, e);
 
     errorMessage.append("스튜디오 상세정보를 검색할 권한이 없습니다.");
+    return ResponseEntity.badRequest().body(errorMessage.toString());
+  }
+
+  @ExceptionHandler(AlreadyJoinedStudioException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  protected ResponseEntity<String> alreadyJoinedStudioExceptionHandler(
+      AlreadyJoinedStudioException e) {
+
+    StringBuilder errorMessage = new StringBuilder();
+
+    makeErrorMessage(errorMessage, e);
+
+    errorMessage.append("이미 참여중인 스튜디오입니다.");
     return ResponseEntity.badRequest().body(errorMessage.toString());
   }
 }

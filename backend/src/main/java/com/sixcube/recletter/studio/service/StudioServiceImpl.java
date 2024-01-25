@@ -42,7 +42,7 @@ public class StudioServiceImpl implements StudioService {
   public Studio searchStudioByStudioId(String studioId, User user) throws StudioNotFoundException {
     Studio result = studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
 
-    if(result.getStudioOwner().getUserId().equals(user.getUserId())) {
+    if (result.getStudioOwner().getUserId().equals(user.getUserId())) {
       return result;
     } else {
       throw new UnauthorizedToSearchStudioException();
@@ -79,12 +79,7 @@ public class StudioServiceImpl implements StudioService {
     // 생성 시도
     try {
       Studio studioResult = studioRepository.save(studio);
-      studioParticipantService.createStudioParticipant(
-          StudioParticipant.builder()
-              .studioId(studioResult.getStudioId())
-              .userId(user.getUserId())
-              .build()
-      );
+      studioParticipantService.createStudioParticipant(studioResult.getStudioId(), user);
     } catch (Exception e) {
       throw new StudioCreateFailureException(e);
     }
