@@ -7,7 +7,9 @@ import com.sixcube.recletter.studio.dto.StudioParticipant;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.exception.MaxStudioOwnCountExceedException;
 import com.sixcube.recletter.studio.exception.StudioCreateFailureException;
+import com.sixcube.recletter.studio.exception.StudioDeleteFailureException;
 import com.sixcube.recletter.studio.exception.StudioNotFoundException;
+import com.sixcube.recletter.studio.exception.UnauthorizedToDeleteStudioException;
 import com.sixcube.recletter.studio.repository.StudioRepository;
 import com.sixcube.recletter.template.dto.Frame;
 import com.sixcube.recletter.template.service.TemplateService;
@@ -63,8 +65,8 @@ public class StudioServiceImpl implements StudioService {
     List<Studio> myStudioList = studioRepository.findAllByStudioOwner(user);
 
     // 최대 생성 가능 수 확인
-    if(myStudioList.size() >= MAX_STUDIO_OWN_COUNT) {
-      throw new MaxStudioOwnCountExceedException(myStudioList.size());
+    if (myStudioList.size() >= MAX_STUDIO_OWN_COUNT) {
+      throw new MaxStudioOwnCountExceedException();
     }
 
     // 생성 시도
@@ -82,8 +84,21 @@ public class StudioServiceImpl implements StudioService {
   }
 
   @Override
-  public void deleteStudioByStudioId(String studioId) {
-    studioRepository.deleteById(studioId);
+  public void deleteStudioByStudioId(String studioId, User user)
+      throws StudioNotFoundException, UnauthorizedToDeleteStudioException, UnauthorizedToDeleteStudioException {
+
+    Studio result = studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
+
+    if (result.getStudioOwner().getUserId().equals(user.getUserId())) {
+      try {
+        studioRepository.deleteById(studioId);
+      } catch (Exception e) {
+        throw new StudioDeleteFailureException(e);
+      }
+    } else {
+      throw new UnauthorizedToDeleteStudioException();
+    }
+
   }
 
   @Override

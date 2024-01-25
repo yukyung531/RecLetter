@@ -105,10 +105,10 @@ public class StudioController {
 
   // TODO - JPA 예외처리
   @DeleteMapping("/{studioId}")
-  public ResponseEntity<Void> deleteStudio(@PathVariable String studioId) {
+  public ResponseEntity<Void> deleteStudio(@PathVariable String studioId, @AuthenticationPrincipal User user) {
     log.debug("StudioController.deleteStudio : start");
 
-    studioService.deleteStudioByStudioId(studioId);
+    studioService.deleteStudioByStudioId(studioId, user);
 
     log.debug("StudioController.deleteStudio : end");
     return ResponseEntity.ok().build();

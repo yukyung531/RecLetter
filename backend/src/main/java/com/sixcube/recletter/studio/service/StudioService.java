@@ -5,7 +5,9 @@ import com.sixcube.recletter.studio.dto.Studio;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.exception.MaxStudioOwnCountExceedException;
 import com.sixcube.recletter.studio.exception.StudioCreateFailureException;
+import com.sixcube.recletter.studio.exception.StudioDeleteFailureException;
 import com.sixcube.recletter.studio.exception.StudioNotFoundException;
+import com.sixcube.recletter.studio.exception.UnauthorizedToDeleteStudioException;
 import com.sixcube.recletter.user.dto.User;
 import java.util.List;
 
@@ -17,9 +19,11 @@ public interface StudioService {
 
   List<Studio> searchAllStudioByStudioOwner(User user);
 
-  void createStudio(CreateStudioReq createStudioReq, User user) throws StudioCreateFailureException, MaxStudioOwnCountExceedException;
+  void createStudio(CreateStudioReq createStudioReq, User user)
+      throws StudioCreateFailureException, MaxStudioOwnCountExceedException;
 
-  void deleteStudioByStudioId(String studioId);
+  void deleteStudioByStudioId(String studioId, User user)
+      throws StudioNotFoundException, UnauthorizedToDeleteStudioException, StudioDeleteFailureException;
 
   void updateStudioTitle(String studioId, String studioTitle);
 
