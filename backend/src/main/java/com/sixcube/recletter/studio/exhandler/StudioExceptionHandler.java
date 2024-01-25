@@ -35,7 +35,7 @@ public class StudioExceptionHandler {
     return ResponseEntity.badRequest().body(errorMessage.toString());
   }
 
-  @ExceptionHandler(StudioNotFoundException.class)
+  @ExceptionHandler(StudioCreateFailureException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   protected ResponseEntity<String> studioCreateFailureExceptionHandler(
       StudioCreateFailureException e) {

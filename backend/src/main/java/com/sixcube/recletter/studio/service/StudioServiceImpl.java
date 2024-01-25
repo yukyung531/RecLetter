@@ -3,6 +3,7 @@ package com.sixcube.recletter.studio.service;
 import com.sixcube.recletter.clip.dto.ClipInfo;
 import com.sixcube.recletter.clip.service.ClipService;
 import com.sixcube.recletter.studio.dto.Studio;
+import com.sixcube.recletter.studio.dto.StudioParticipant;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.exception.StudioCreateFailureException;
 import com.sixcube.recletter.studio.exception.StudioNotFoundException;
@@ -23,6 +24,8 @@ public class StudioServiceImpl implements StudioService {
 
   private final StudioRepository studioRepository;
 
+  private final StudioParticipantService studioParticipantService;
+
   private final TemplateService templateService;
 
   private final UserService userService;
@@ -40,15 +43,23 @@ public class StudioServiceImpl implements StudioService {
   }
 
   @Override
-  public void createStudio(CreateStudioReq createStudioReq, User user) {
+  public void createStudio(CreateStudioReq createStudioReq, User user)
+      throws StudioCreateFailureException {
     Studio studio = Studio.builder()
         .studioOwner(user)
         .studioTitle(createStudioReq.getStudioTitle())
         .expireDate(createStudioReq.getExpireDate())
         .studioFrame(Frame.builder().frameId(createStudioReq.getStudioFrameId()).build())
         .build();
+
     try {
-      studioRepository.save(studio);
+      Studio studioResult = studioRepository.save(studio);
+      studioParticipantService.createStudioParticipant(
+          StudioParticipant.builder()
+              .studioId(studioResult.getStudioId())
+              .userId(user.getUserId())
+              .build()
+      );
     } catch (Exception e) {
       throw new StudioCreateFailureException(e);
     }

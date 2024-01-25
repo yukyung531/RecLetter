@@ -1,6 +1,7 @@
 package com.sixcube.recletter.studio.service;
 
 import com.sixcube.recletter.studio.dto.StudioParticipant;
+import com.sixcube.recletter.studio.exception.StudioParticipantCreateFailureException;
 import com.sixcube.recletter.studio.repository.StudioParticipantRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,10 @@ public class StudioParticipantServiceImpl implements StudioParticipantService {
 
   @Override
   public void createStudioParticipant(StudioParticipant studioParticipant) {
-    studioParticipantRepository.save(studioParticipant);
+    try {
+      studioParticipantRepository.save(studioParticipant);
+    } catch (Exception e) {
+      throw new StudioParticipantCreateFailureException(e);
+    }
   }
 }
