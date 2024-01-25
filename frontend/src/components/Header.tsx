@@ -1,24 +1,72 @@
+import { Link } from 'react-router-dom';
 import '../assets/css/3_components/Header.css';
-
+import { useEffect, useState } from 'react';
+import { logout } from '../api/auth';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginState } from '../util/counter-slice';
 
 export default function Header() {
+    /** 리덕스 함수 */
+    const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
+    const dispatch = useDispatch();
 
-    //로그아웃 함수
+    useEffect(() => {
+        const loginValue = localStorage.getItem('is-login');
+        if (loginValue) {
+            dispatch(loginState(true));
+        } else {
+            dispatch(loginState(false));
+        }
+    }, []);
+    /** 로그아웃 */
     const onLogout = () => {
-        if(localStorage.getItem("userId")){
-            localStorage.removeItem("userId");
-        }
-        if(localStorage.getItem("usernickname")){
-            localStorage.removeItem("usernickname");
-        }
-        if(localStorage.getItem("accessToken")){
-            localStorage.removeItem("accessToken");
-        }
-        if(localStorage.getItem("refreshToken")){
-            localStorage.removeItem("refreshToken");
-        }
+        logoutAPI();
         //이거 한 후, main page로 이동하도록 만들어야 함.
-    }
+    };
+    /** 로그아웃 API */
+    const logoutAPI = async () => {
+        await logout()
+            .then(() => {
+                if (localStorage.getItem('access-token')) {
+                    localStorage.removeItem('access-token');
+                }
+                if (localStorage.getItem('refresh-token')) {
+                    localStorage.removeItem('refresh-token');
+                }
+                if (localStorage.getItem('is-login')) {
+                    localStorage.removeItem('is-login');
+                }
+                alert('로그아웃이 되었습니다.');
+                dispatch(loginState(false));
+            })
+            .catch((e: Error) => {
+                console.log(e);
+            });
+    };
+    const loginStateElement = () => {
+        if (isLogin) {
+            return (
+                <div
+                    className="flex mx-2 text-xl justify-center items-center cursor-pointer"
+                    onClick={onLogout}
+                >
+                    <span className="material-symbols-outlined mx-1">
+                        logout
+                    </span>
+                    <p>로그아웃</p>
+                </div>
+            );
+        } else {
+            return (
+                <div className="flex mx-2 text-xl justify-center items-center cursor-pointer">
+                    <span className="material-symbols-outlined mx-1">
+                        login
+                    </span>
+                    <a href="login">로그인</a>
+                </div>
+            );
+        }
+    };
 
     if (
         window.location.pathname === '/' ||
@@ -49,12 +97,7 @@ export default function Header() {
                         </span>
                         <p>마이페이지</p>
                     </a>
-                    <div className="flex mx-2 text-xl justify-center items-center cursor-pointer" onClick={onLogout}>
-                        <span className="material-symbols-outlined mx-1">
-                            logout
-                        </span>
-                        <p>로그아웃</p>
-                    </div>
+                    {loginStateElement()}
                 </div>
             </div>
         );
