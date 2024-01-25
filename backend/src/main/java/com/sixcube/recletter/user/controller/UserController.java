@@ -1,6 +1,5 @@
 package com.sixcube.recletter.user.controller;
 
-import com.sixcube.recletter.auth.dto.res.LoginRes;
 import com.sixcube.recletter.user.dto.UserInfo;
 import com.sixcube.recletter.user.dto.req.CreateUserReq;
 import com.sixcube.recletter.user.dto.req.UpdateUserPasswordReq;
@@ -13,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
