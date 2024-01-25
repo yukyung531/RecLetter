@@ -1,4 +1,4 @@
-package com.sixcube.recletter.user.dto.res;
+package com.sixcube.recletter.auth.dto.res;
 
 import com.sixcube.recletter.user.dto.UserInfo;
 import lombok.*;
@@ -9,6 +9,6 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CheckDuplicatedIdRes {
-    private boolean isDuplicated;
+    private Boolean isDuplicated;
 
 }
