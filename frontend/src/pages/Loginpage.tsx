@@ -48,7 +48,6 @@ export default function LoginPage() {
     const loadLoginAPI = async (user: User) => {
         await login(user)
             .then((res) => {
-                console.log(res);
                 if (res.status === httpStatusCode.OK) {
                     console.log('로그인이 성공했습니다.');
                     localStorage.setItem('access-token', res.data.accessToken);

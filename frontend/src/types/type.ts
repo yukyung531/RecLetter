@@ -99,7 +99,7 @@ export interface ClipUpload {
     studioId: string;
     clipTitle: string;
     clipContent: string;
-    clip: string;
+    clip: FormData;
 }
 export interface ClipModify {
     clipTitle: string;
@@ -131,4 +131,12 @@ export interface FrameType {
     frameTitle: string;
     thumbnail: string;
     frameBody: string;
+}
+
+
+//template 타입
+export interface ScriptTemplate {
+    scriptId: number,
+    scriptTitle: string,
+    scriptContent: string
 }

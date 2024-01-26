@@ -1,10 +1,14 @@
 import {useState, useEffect, useRef, BaseSyntheticEvent} from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ClipInfo } from '../types/type';
+import { ClipInfo, ScriptTemplate } from '../types/type';
 import MyClipCard from '../components/MyClipCard';
 import getBlobDuration from 'get-blob-duration';
 import DeleteCheckWindow from '../components/DeleteCheckWindow';
 
+//axios
+import { getScript } from '../api/template';
+import { httpStatusCode } from '../util/http-status';
+import ScriptTemplateCard from '../components/ScriptTemplateCard';
 
 interface Const {
     audio: boolean,
@@ -12,6 +16,7 @@ interface Const {
 }
 
 export default function ClipRecodePage() {
+
     //모드 0:영상, 1:스크립트
     const [mode, setMode] = useState<number>(0);
 
@@ -19,9 +24,12 @@ export default function ClipRecodePage() {
 
     const [myClipList, setMyClipList] = useState<ClipInfo[]>([]);
 
+
     //스크립트 선택된 것
     const [selectedScript, setSelectedScript] = useState<string>("");
     const scriptRef = useRef<HTMLTextAreaElement>(null);
+
+    const [scriptList, setScriptList] = useState<ScriptTemplate[]>([]);
 
     //인코딩 옵션
     const encoderOptions = {
@@ -121,7 +129,28 @@ export default function ClipRecodePage() {
                 //촬영되는 화면 미리보기 코드끝
                 setMS(mediaStream);
             }
-        })
+        });
+
+
+        /**loadScript()
+         * 스크립트 템플릿 불러오기
+         */
+        const loadScript = async () => {
+            getScript()
+                .then((res) => {
+                    if(res.status === httpStatusCode.OK){
+                        const arr = [...res.data.scriptTemplate];
+                        setScriptList(arr);
+                    } else {
+                        console.log('네트워크는 올바르나 응답이 문제')
+                    }
+                })
+                .catch((err) => {
+                    console.log('네트워크 에러');
+                    console.log(err);
+                })
+        }
+        loadScript();
     }, [])
     
     /**startRecord()
@@ -427,12 +456,12 @@ async function blobToBase64(blobUrl : string, videoInfo : ClipInfo) {
             URL.revokeObjectURL(clip.clipUrl);
         })
         //navigate
+        const studioId : string|null = new URLSearchParams(location.search).get("studioid");
         if(base64 && typeof base64 === 'string'){
-            navigate(`/clipEdit`, { state : {videoInfo, base64}});
+            navigate(`/clipEdit?studioid=${studioId}`, { state : {videoInfo, base64}});
         }
     }
 }
-
 
 
 
@@ -505,6 +534,10 @@ async function blobToBase64(blobUrl : string, videoInfo : ClipInfo) {
                             <p>스크립트</p>
                         </div>
                         <textarea ref={scriptRef} onChange={handleScript} rows={4} className='text-xl text-black w-full border-black border-solid border-2 rounded'></textarea>
+                        {scriptList.map((script) => {
+                            console.log(script)
+                            return <ScriptTemplateCard key={script.scriptId} props={script} onClick={() => setSelectedScript(script.scriptContent)} />
+                        })}
                     </div>
                     }
                 </div>

@@ -1,8 +1,12 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
 import { BaseSyntheticEvent, useEffect, useRef, useState } from "react";
-import { ClipInfo } from "../types/type";
+import { ClipInfo, ClipUpload } from "../types/type";
+
+//axios
+import { uploadClip } from "../api/clip";
+import { httpStatusCode } from "../util/http-status";
 
 
 export default function ClipEditPage() {
@@ -13,17 +17,22 @@ export default function ClipEditPage() {
     const videoInfo : ClipInfo = location.state.videoInfo;
     const base64 : string = location.state.base64;
 
+    const studioId : string|null = new URLSearchParams(location.search).get("studioid");
+
 //////////////////////////로딩 직후 초기 설정///////////////////////////////////////////////////////
     const [loaded, setLoaded] = useState<boolean>(false);
     const ffmpegRef = useRef(new FFmpeg());
     const videoRef = useRef<HTMLVideoElement>(null);
-
+    const navigate = useNavigate();
 
     //시작, 끝 시간 설정
     const [startTime, setStartTime] = useState<number>(0);
     const [endTime, setEndTime] = useState<number>(59);
 
     const [endMaxtime, setEndMaxTime] = useState<number>(59);
+
+    //텍스트 연동 설정
+    const [inputText, setInputText] = useState<string>('');
 
     /**ffmpegload()
      * 영상을 인코딩하는데 사용하는 ffmpeg을 불러오는 곳이다.
@@ -126,14 +135,38 @@ export default function ClipEditPage() {
             await ffmpeg.exec(['-i', 'input.mp4', '-ss', startTimeString, '-to', endTimeString, '-c', 'copy', 'final.mp4']);
             const data = await ffmpeg.readFile('final.mp4');
             const newBlob = new Blob([data], {type: 'video/mp4'});
-            if(videoRef.current){
-                videoRef.current.src = URL.createObjectURL(newBlob);
+
+            //make formdata
+            const clipForm = new FormData();
+            clipForm.append("clip", newBlob);
+
+            //axios 전송
+            if(studioId){
+                const sendData : ClipUpload = {
+                    studioId: studioId,
+                    clipTitle: name,
+                    clipContent: inputText,
+                    clip: clipForm,
+                }
+                await uploadClip(sendData)
+                .then((response) => {
+                    if(response && response.status === httpStatusCode.OK){
+                        console.log('영상이 성공적으로 전달되었습니다.')
+                        navigate(`/studiomain?id=${studioId}`);
+                    } else {
+                        console.log('영상 전송에 실패하였습니다.')
+                    }
+                }).catch((err : Error) => {
+                    console.log(err)
+                })
             }
+            
 
             //revokeURL
             URL.revokeObjectURL(prevURL);
         }
     }
+
 
     //////////////////////////////////////////////재생시간 제한///////////////////////////////////
     const timeChange = (event: BaseSyntheticEvent) => {
@@ -154,6 +187,78 @@ export default function ClipEditPage() {
     }
 
 
+///영상 재생//////////////////////////////////////////////////////////////////////////////
+
+    /** playVideo()
+     * 영상 재생 버튼을 누르면 나오는 함수다.
+     * 영상이 재생된다.
+     */
+    const playVideo = () => {
+        //영상재생
+        if(videoRef.current){
+            videoRef.current.play();
+        }
+    }
+
+
+    /** pauseVideo()
+     * 일시정지 버튼을 누르면 호출되는 함수다.
+     * 영상 재생이 일시정지된다.
+     */
+    const pauseVideo = () => {
+        //영상정지
+        if(videoRef.current){
+            videoRef.current.pause();
+        }
+    }
+
+    /** stopVideo()
+     *  영상 정지 버튼 누르면 호출되는 함수다.
+     *  영상 재생이 정지되고, 처음으로 돌아간다.
+     */
+    const stopVideo = () => {
+        //영상정지
+        if(videoRef.current){
+            videoRef.current.pause();
+            videoRef.current.currentTime = startTime;
+        }
+    }
+
+    //프로그레스 바의 현재 상태를 위한 state다.
+    const [progress, setProgress] = useState(0);
+
+    /**handleProgress(event)
+     * 프로그레스 바와 영상을 동기화한다.
+     * @param event 
+     * 영상이 재생되는 이벤트다.
+     * @returns 
+     * 영상이 만들어진 직후에는 이 값이 없다. 그래서 그냥 생략한다.
+     */
+    const handleProgress = (event : BaseSyntheticEvent) => {
+        if(isNaN(event.target.duration)){ return ;}
+        else {
+            setProgress((event.target.currentTime / event.target.duration) * 100)
+        }
+    }
+
+
+    //////////////////////////////////서브 텍스트 입력/////////////////////////////////////////////////
+    const changeText = (event: BaseSyntheticEvent) => {
+        setInputText(event.target.value);
+    }
+
+
+
+////////////////////////////////////영상 이름 편집///////////////////////////////////////////////////////////
+    const [isEditingName, setIsEditingName] = useState<boolean>(false);
+    const [name, setName] = useState<string>(videoInfo.clipTitle);
+
+
+
+
+
+///////////////////////////////////////렌더링 부분////////////////////////////////////////////////////////////////
+
     return (
         <section className="relative section-top">
             <div className="h-20 w-full px-12 color-text-black flex justify-between items-center">
@@ -161,15 +266,32 @@ export default function ClipEditPage() {
                     <span className="material-symbols-outlined">
                         arrow_back_ios
                     </span>
-                    {/* <input
+                    {isEditingName?
+                    // 수정전
+                    <>
+                        <input
                         className="text-2xl border-2 pl-2"
                         type="text"
-                        value="제목을 입력해주세요"
-                    /> */}
-                    <div className="ml-20" />
-                    <span className="material-symbols-outlined mx-2 text-3xl">
-                        edit
-                    </span>
+                        value={name}
+                        onChange={(event : BaseSyntheticEvent) => {
+                            setName(event.target.value);
+                        }}
+                        />
+                        <div className="ml-20" />
+                        <span className="material-symbols-outlined mx-2 text-3xl" onClick={() => (setIsEditingName(false))}>
+                            check_box
+                        </span>
+                    </>
+                    :
+                    // 수정중
+                    <>
+                        <div className="text-2xl border-2 pl-2">{name}</div>
+                        <div className="ml-20" />
+                        <span className="material-symbols-outlined mx-2 text-3xl" onClick={() => (setIsEditingName(true))}>
+                            edit
+                        </span>
+                    </>
+                    }
                     <span className="material-symbols-outlined mx-2 text-3xl">
                         group_add
                     </span>
@@ -226,6 +348,8 @@ export default function ClipEditPage() {
                         <input
                             className="w-56 my-2 p-2 border border-black rounded"
                             placeholder="텍스트를 입력해주세요."
+                            onChange={changeText}
+                            value={inputText}
                         ></input>
                     </div> 
                     :
@@ -238,26 +362,36 @@ export default function ClipEditPage() {
                 {/* 우측부분 */}
                 <div className="w-3/4 editor-height bg-gray-50 flex justify-between">
                     <div className="w-full px-4 py-4 flex flex-col justify-center items-center">
+                        {/* 입력 텍스트 */}
+                        <p>{inputText}</p>
+                        {/* 비디오 */}
                         <video
                             className="bg-white border my-2"
                             style={{ width: '640px', height: '480px', display: 'block' }}
                             ref={videoRef}
-                            onTimeUpdate={timeChange}
+                            onTimeUpdate={(event : BaseSyntheticEvent) => {
+                                timeChange(event);
+                                handleProgress(event);
+                            }}
                             controls
                         />
                         <div className="w-full flex flex-col justify-center items-center my-4">
+                            {/* 재생버튼 */}
                             <div>
-                                <span className="material-symbols-outlined me-1 text-4xl">
+                                <span className="material-symbols-outlined me-1 text-4xl cursor-pointer" onClick={playVideo}>
                                     play_circle
                                 </span>
-                                <span className="material-symbols-outlined me-1 text-4xl cursor-pointer">
+                                <span className="material-symbols-outlined me-1 text-4xl cursor-pointer" onClick={pauseVideo}>
                                         pause_circle
                                     </span>
-                                <span className="material-symbols-outlined me-1 text-4xl">
+                                <span className="material-symbols-outlined me-1 text-4xl cursor-pointer" onClick={stopVideo}>
                                     stop_circle
                                 </span>
                             </div>
-                            <div className="w-3/4 h-2 bg-black"></div>
+                            {/* 프로그레스 바 */}
+                            <progress id='progress' max={100} value={progress} className='w-full rounded -webkit-progress-bar:bg-black -webkit-progress-value:bg-red'>
+                                Progress
+                            </progress>
                         </div>
                     </div>
                 </div>
