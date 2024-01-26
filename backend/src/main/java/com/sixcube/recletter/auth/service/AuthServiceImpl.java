@@ -1,5 +1,8 @@
 package com.sixcube.recletter.auth.service;
 
+import com.sixcube.recletter.auth.exception.CodeCreateException;
+import com.sixcube.recletter.auth.exception.EmailAlreadyExistsException;
+import com.sixcube.recletter.auth.exception.NoEmailException;
 import com.sixcube.recletter.redis.RedisPrefix;
 import com.sixcube.recletter.redis.RedisService;
 import com.sixcube.recletter.auth.dto.Code;
@@ -32,7 +35,7 @@ public class AuthServiceImpl implements AuthService {
     @Value("${spring.mail.auth-code-expiration-millis}")
     private long authCodeExpirationMillis;
 
-    public void sendEmail(String toEmail, String emailType) throws Exception {
+    public void sendEmail(String toEmail, String emailType) {
         String title = "";
         String key = "";
         if (emailType.equals("REGIST")) {
@@ -51,12 +54,12 @@ public class AuthServiceImpl implements AuthService {
         redisService.setValues(key, code, Duration.ofMillis(this.authCodeExpirationMillis));
     }
 
-    public void sendEmailToFindId(String toEmail) throws Exception {
+    public void sendEmailToFindId(String toEmail) {
 
         this.checkExistEmail(toEmail);
         String title = "Recletter 아이디 찾기";
         String userId = userRepository.findByUserEmail(toEmail).getUserId();
-        String content = "아이디 : "+userId;
+        String content = "아이디 : " + userId;
         mailService.sendEmail(toEmail, title, content);
 
     }
@@ -92,23 +95,23 @@ public class AuthServiceImpl implements AuthService {
         return isValid;
     }
 
-    public void checkDuplicatedEmail(String email) throws Exception {
+    public void checkDuplicatedEmail(String email) throws EmailAlreadyExistsException {
         User user = userRepository.findByUserEmail(email);
         if (user != null && user.getDeletedAt() == null) {
-            throw new Exception("이미 존재하는 이메일입니다.");
+            throw new EmailAlreadyExistsException();
         }
     }
 
-    public void checkExistEmail(String email) throws Exception {
+    public void checkExistEmail(String email) throws NoEmailException {
         User user = userRepository.findByUserEmail(email);
         if (user == null) {
-            throw new Exception("존재하지 않는 이메일입니다.");
+            throw new NoEmailException();
         } else if (user.getDeletedAt() != null) {
-            throw new Exception("존재하지 않는 이메일입니다.");
+            throw new NoEmailException();
         }
     }
 
-    public String createCode() throws Exception {
+    public String createCode() throws CodeCreateException {
         int length = 6;
         try {
             Random random = SecureRandom.getInstanceStrong();
@@ -116,9 +119,11 @@ public class AuthServiceImpl implements AuthService {
             for (int i = 0; i < length; i++) {
                 builder.append(random.nextInt(10));
             }
+
             return builder.toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new Exception();
+            throw new CodeCreateException();
         }
+
     }
 }

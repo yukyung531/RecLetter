@@ -121,7 +121,7 @@ public class AuthController {
 
     //이메일 발송 요청(회원가입)
     @PostMapping("/email")
-    public ResponseEntity<Void> sendEmailToRegister(@Valid @RequestBody SendCodeToEmailReq sendCodeToEmailReq) throws Exception {
+    public ResponseEntity<Void> sendEmailToRegister(@Valid @RequestBody SendCodeToEmailReq sendCodeToEmailReq) {
 
         authService.sendEmail(sendCodeToEmailReq.getUserEmail(), REGIST);
 
@@ -143,7 +143,7 @@ public class AuthController {
 
     //이메일 발송 요청(아이디 찾기)
     @PostMapping("/id")
-    public ResponseEntity<Void> sendEmailToFindId(@Valid @RequestBody SendCodeToEmailReq sendCodeToEmailReq) throws Exception {
+    public ResponseEntity<Void> sendEmailToFindId(@Valid @RequestBody SendCodeToEmailReq sendCodeToEmailReq) {
 
         authService.sendEmailToFindId(sendCodeToEmailReq.getUserEmail());
 
@@ -153,7 +153,7 @@ public class AuthController {
 
     //이메일 발송 요청(비밀번호 초기화)
     @PostMapping("/password")
-    public ResponseEntity<Void> sendEmailToResetPassword(@Valid @RequestBody SendCodeToEmailReq sendCodeToEmailReq) throws Exception {
+    public ResponseEntity<Void> sendEmailToResetPassword(@Valid @RequestBody SendCodeToEmailReq sendCodeToEmailReq) {
 
         authService.sendEmail(sendCodeToEmailReq.getUserEmail(), RESET_PASSWORD);
 
