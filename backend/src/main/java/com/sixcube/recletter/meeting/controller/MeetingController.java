@@ -22,12 +22,11 @@ public class MeetingController {
     StudioRepository studioRepository;
 
     // TODO: OPENVIDU_URL, OPENVIDU_SECRET => 나중에 .env에 넣을 예정
-    @Value("openvidu.url")
+    @Value("${openvidu.url}")
     private String OPENVIDU_URL;
 
-    @Value("openvidu.secret")
+    @Value("${openvidu.secret}")
     private String OPENVIDU_SECRET;
-
     private RestTemplate restTemplate;
 
     /**
@@ -41,7 +40,7 @@ public class MeetingController {
     @PostMapping("/meeting/{studioId}")
     public ResponseEntity<String> initializeSession(@PathVariable("studioId") String studioId, @AuthenticationPrincipal User user) {
         // 스튜디오 존재 확인
-        studioRepository.findById(studioId).orElseThrow(() -> new RuntimeException("Studio not found"));
+//        studioRepository.findById(studioId).orElseThrow(() -> new RuntimeException("Studio not found"));
 
         // RestTemplate 생성
         restTemplate = new RestTemplate();
@@ -94,7 +93,7 @@ public class MeetingController {
     @PostMapping("/meeting/{sessionId}/connections")
     public ResponseEntity<String> createConnection(@PathVariable("sessionId") String sessionId, @AuthenticationPrincipal User user) {
         // 스튜디오 존재 확인
-        studioRepository.findById(sessionId).orElseThrow(() -> new RuntimeException("Studio not found"));
+//        studioRepository.findById(sessionId).orElseThrow(() -> new RuntimeException("Studio not found"));
 
         // RestTemplate 객체를 생성하여 HTTP 요청을 보낼 준비
         restTemplate = new RestTemplate();
@@ -152,7 +151,7 @@ public class MeetingController {
     @DeleteMapping("/meeting/{sessionId}")
     public ResponseEntity<String> deleteSession(@PathVariable("sessionId") String sessionId, @AuthenticationPrincipal User user) {
         // 스튜디오 존재 확인
-        studioRepository.findById(sessionId).orElseThrow(() -> new RuntimeException("Studio not found"));
+//        studioRepository.findById(sessionId).orElseThrow(() -> new RuntimeException("Studio not found"));
 
         // RestTemplate 생성
         restTemplate = new RestTemplate();

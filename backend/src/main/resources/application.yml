@@ -86,4 +86,4 @@ refresh-token:
 
 openvidu:
   url: ${OPENVIDU_URL}
-  secret: ${MY_SECRET}
+  secret: ${OPENVIDU_SECRET}
