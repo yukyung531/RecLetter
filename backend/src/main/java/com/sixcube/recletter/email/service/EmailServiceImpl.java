@@ -22,13 +22,10 @@ public class EmailServiceImpl implements EmailService {
     public void sendEmailToRegister(String toEmail, String title, String text) throws Exception {
 
         SimpleMailMessage emailForm = createEmailForm(toEmail, title, text);
-        System.out.println("emailSender = " + emailSender);
-        System.out.println("emailForm = " + emailForm);
+
         try {
             emailSender.send(emailForm);
         } catch (RuntimeException e) {
-            log.debug("MailService.sendEmail exception occur toEmail: {}, " +
-                    "title: {}, text: {}", toEmail, title, text);
             //throw new BusinessLogicException(ExceptionCode.UNABLE_TO_SEND_EMAIL);
             throw new Exception(e.getMessage());
         }
