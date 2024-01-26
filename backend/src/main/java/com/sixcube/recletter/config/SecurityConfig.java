@@ -7,7 +7,6 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.sixcube.recletter.redis.RedisService;
-import com.sixcube.recletter.auth.jwt.CustomJwtAuthenticationProvider;
 import com.sixcube.recletter.auth.jwt.JwtToUserConverter;
 import com.sixcube.recletter.auth.jwt.KeyUtils;
 import lombok.AllArgsConstructor;
@@ -30,6 +29,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
@@ -57,11 +57,12 @@ public class SecurityConfig {
                 .cors(CorsConfigurer::disable) //cors 관련 필터
                 //요청에 대한 인가 규칙 설정
                 .authorizeHttpRequests(authorize ->
-                        authorize.requestMatchers("/auth/**").permitAll() //해당 경로에 대한 요청은 모든 사용자에게 허용(인증 안해도 접근 가능)
+                                authorize.requestMatchers("/auth/**").permitAll() //해당 경로에 대한 요청은 모든 사용자에게 허용(인증 안해도 접근 가능)
 //                                .requestMatchers("/**").permitAll() //테스트 시에만 주석 풀기
-                                .requestMatchers("/static/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/user").permitAll() //회원가입
-                                .anyRequest().authenticated() //나머지 모든 요청은 인증을 필요로 함
+                                        .requestMatchers("/static/**").permitAll()
+                                        .requestMatchers(HttpMethod.POST, "/user").permitAll() //회원가입
+                                        .requestMatchers(HttpMethod.POST, "/user/password").permitAll() //비밀번호 재설정
+                                        .anyRequest().authenticated() //나머지 모든 요청은 인증을 필요로 함
                 )
                 .oauth2ResourceServer(
                         (oauth2) -> oauth2.jwt((jwt) -> jwt.jwtAuthenticationConverter(jwtToUserConverter)))
@@ -70,7 +71,7 @@ public class SecurityConfig {
                 .exceptionHandling((exceptions) -> exceptions.authenticationEntryPoint(
                                 new BearerTokenAuthenticationEntryPoint())
                         .accessDeniedHandler(new BearerTokenAccessDeniedHandler()));
-        SecurityFilterChain chain =http.build();
+        SecurityFilterChain chain = http.build();
         return chain; //설정대로 filter chain 생성 후 실행
     }
 
@@ -123,8 +124,8 @@ public class SecurityConfig {
 
     @Bean
     @Qualifier("jwtRefreshTokenAuthProvider")
-    CustomJwtAuthenticationProvider jwtRefreshTokenAuthProvider() {
-        CustomJwtAuthenticationProvider provider = new CustomJwtAuthenticationProvider(jwtRefreshTokenDecoder(), redisService);
+    JwtAuthenticationProvider jwtRefreshTokenAuthProvider() {
+        JwtAuthenticationProvider provider = new JwtAuthenticationProvider(jwtRefreshTokenDecoder());
         provider.setJwtAuthenticationConverter(jwtToUserConverter);
         return provider;
     }
