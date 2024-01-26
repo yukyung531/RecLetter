@@ -30,7 +30,6 @@ export interface PasswordChange {
 }
 
 export interface PasswordReset {
-    userId: string;
     userEmail: string;
 }
 
@@ -38,9 +37,18 @@ export interface EmailRequest {
     userEmail: string;
     code: string;
 }
+export interface PasswordCode {
+    userEmail: string;
+    code: string;
+}
+
+/** 새로운 비밀번호 재설정 타입 */
+export interface NewPassword {
+    userEmail: string;
+    newPassword: string;
+}
 
 export interface tokenType {
-    accessToken: string | null;
     refreshToken: string | null;
 }
 

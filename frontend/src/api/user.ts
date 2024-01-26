@@ -1,4 +1,9 @@
-import { PasswordChange, RegistUser, UserModify } from '../types/type';
+import {
+    NewPassword,
+    PasswordChange,
+    RegistUser,
+    UserModify,
+} from '../types/type';
 import localAxios from '../util/http-commons';
 
 const local = localAxios();
@@ -10,6 +15,11 @@ export async function registUser(user: RegistUser) {
 /**  GET 유저 정보 조회 */
 export async function getUser() {
     return await local.get(`/api/user`);
+}
+
+/** POST 비밀번호 초기화 후 비밀번호 재설정 */
+export async function settingNewPassword(password: NewPassword) {
+    return await local.post(`/api/user/password`, password, {});
 }
 
 /**  PUT 회원 정보 수정 */
