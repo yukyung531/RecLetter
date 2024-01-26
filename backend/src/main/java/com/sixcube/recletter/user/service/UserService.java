@@ -96,4 +96,25 @@ public class UserService implements UserDetailsService {
         }
         return true;
     }
+
+    public void resetPassword(String password,String email) throws Exception {
+
+        String key = RedisPrefix.RESET_PASSOWRD.prefix() + email;
+        if (!redisService.hasKey(key)) {
+            throw new Exception("이메일 인증이 완료되지 않았습니다.");
+        }
+        Code redisAuthCode = (Code) redisService.getValues(key);
+        if (!redisAuthCode.isFlag()) {
+            throw new Exception("이메일 인증이 완료되지 않았습니다.");
+        }
+        //레디스에서 제거
+        redisService.deleteValues(key);
+
+        String unencryptedPassword = password;
+        String encryptedPassword = passwordEncoder.encode(unencryptedPassword);
+        User user = userRepository.findByUserEmail(email);
+        user.setUserPassword(encryptedPassword);
+        userRepository.save(user);
+
+    }
 }

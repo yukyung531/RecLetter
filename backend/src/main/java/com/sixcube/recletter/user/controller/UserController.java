@@ -2,6 +2,7 @@ package com.sixcube.recletter.user.controller;
 
 import com.sixcube.recletter.user.dto.UserInfo;
 import com.sixcube.recletter.user.dto.req.CreateUserReq;
+import com.sixcube.recletter.user.dto.req.ResetPasswordReq;
 import com.sixcube.recletter.user.dto.req.UpdateUserPasswordReq;
 import com.sixcube.recletter.user.dto.User;
 import com.sixcube.recletter.user.dto.req.UpdateUserReq;
@@ -25,34 +26,25 @@ public class UserController {
     //회원가입
     @PostMapping
     public ResponseEntity<Void> createUser(@Valid @RequestBody CreateUserReq createUserReq) throws Exception {
-        log.debug("UserController.createUser: start");
-
         User result = userService.createUser(new User(createUserReq));
 
         if (result == null) {
-            log.debug("UserController.createUser: end");
             return ResponseEntity.internalServerError().build();
         } else {
-            log.debug("UserController.createUser: end");
             return ResponseEntity.ok().build();
         }
     }
 
     @PutMapping
     public ResponseEntity<Void> updateUser(@RequestBody UpdateUserReq updateUserReq, @AuthenticationPrincipal User user) {
-        log.debug("UserController.updateUser: start");
         userService.updateUser(updateUserReq, user);
-
-        log.debug("UserController.updateUser: end");
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/password")
     public ResponseEntity<Void> updateUserPassword(@RequestBody UpdateUserPasswordReq updateUserPasswordReq, @AuthenticationPrincipal User user) {
-        log.debug("UserController.updateUserPassword: start");
         boolean passwordCorrect = userService.updateUserPassword(updateUserPasswordReq, user);
-        log.debug("UserController.updateUserPassword: end");
-        if(passwordCorrect){
+        if (passwordCorrect) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();
@@ -60,23 +52,28 @@ public class UserController {
 
     @DeleteMapping
     public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal User user) {
-        log.debug("UserController.deleteUser: start");
         userService.deleteUser(user);
-        log.debug("UserController.deleteUser: end");
         return ResponseEntity.ok().build();
     }
 
     @GetMapping
     public ResponseEntity<SearchUserInfoRes> searchUserInfo(@AuthenticationPrincipal User user) {
-        log.debug("UserController.searchUserInfo: start");
         UserInfo userInfo = new UserInfo(user);
-        log.debug("UserController.searchUserInfo: end");
-
         return ResponseEntity.ok()
                 .body(
                         SearchUserInfoRes.builder()
                                 .userInfo(userInfo)
                                 .build()
                 );
+    }
+
+    @PostMapping("/password")
+    public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordReq resetPasswordReq) throws Exception {
+        String password = resetPasswordReq.getNewPassword();
+        String email=resetPasswordReq.getUserEmail();
+        userService.resetPassword(password, email);
+
+        return ResponseEntity.ok().build();
+
     }
 }
