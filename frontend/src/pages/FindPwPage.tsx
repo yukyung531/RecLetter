@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginState } from '../util/counter-slice';
 import { settingNewPassword } from '../api/user';
+import { deleteStorageData } from '../util/initialLocalStorage';
 
 export default function FindPwPage() {
     const [inputEmail, setInputEmail] = useState<string>('');
@@ -14,20 +15,6 @@ export default function FindPwPage() {
 
     const [isCodeAuth, setIsCodeAuth] = useState<boolean>(false);
     const navigate = useNavigate();
-
-    /** 리덕스 설정 */
-    const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
-    const dispatch = useDispatch();
-
-    useEffect(() => {
-        const loginValue = localStorage.getItem('is-login');
-        if (loginValue === 'true') {
-            dispatch(loginState(true));
-        }
-        if (loginValue === 'false' || !loginValue) {
-            navigate(`/`);
-        }
-    }, [isLogin]);
 
     /** 이메일 변화 감지 */
     const changeEmail = (e: BaseSyntheticEvent) => {
@@ -78,6 +65,7 @@ export default function FindPwPage() {
             }).then((res) => {
                 if (res.status === httpStatusCode.OK) {
                     alert('비밀번호가 재설정되었습니다.');
+                    deleteStorageData();
                     navigate('/');
                 } else {
                     console.log('인증코드 관련이 잘못되었습니다');
@@ -91,7 +79,7 @@ export default function FindPwPage() {
                 <div>
                     <input
                         className="w-88 py-2 px-3 my-6 mt-2 border-2 rounded text-xl"
-                        type="text"
+                        type="password"
                         placeholder="새로운 비밀번호를 입력해주세요."
                         onChange={(e) => {
                             changePassword(e);
@@ -99,7 +87,7 @@ export default function FindPwPage() {
                     />
                     <input
                         className="w-88 py-2 px-3 my-6 border-2 rounded text-xl"
-                        type="text"
+                        type="password"
                         placeholder="한 번 더 입력해주세요."
                         onChange={(e) => {
                             changePasswordConfirm(e);

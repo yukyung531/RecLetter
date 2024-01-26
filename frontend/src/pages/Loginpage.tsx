@@ -1,7 +1,7 @@
 import { BaseSyntheticEvent, useEffect, useState } from 'react';
 import { login } from '../api/auth';
 import { User } from '../types/type';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { httpStatusCode } from '../util/http-status';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginState } from '../util/counter-slice';
@@ -15,15 +15,6 @@ export default function LoginPage() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const loginValue = localStorage.getItem('is-login');
-        if (loginValue === 'true') {
-            dispatch(loginState(true));
-        }
-        if (isLogin) {
-            navigate(`/studiolist`);
-        }
-    }, []);
     useEffect(() => {
         const loginValue = localStorage.getItem('is-login');
         if (loginValue === 'true') {
@@ -95,7 +86,7 @@ export default function LoginPage() {
                     />
                     <input
                         className="w-88 py-2 px-3 bg-slate-100 my-2 border-2 rounded text-xl"
-                        type="pasword"
+                        type="password"
                         placeholder="비밀번호"
                         value={inputPw}
                         onChange={(e) => {
@@ -125,9 +116,9 @@ export default function LoginPage() {
                         아이디 찾기
                     </a>
                     <p>/</p>
-                    <a className="mx-4 my-2 text-2xl" href="./findpw">
+                    <Link to="/findpw" className="mx-4 my-2 text-2xl">
                         비밀번호 찾기
-                    </a>
+                    </Link>
                     <p>/</p>
                     <a className="mx-4 my-2 text-2xl" href="./regist">
                         회원가입

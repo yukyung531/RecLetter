@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { logout } from '../api/auth';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginState } from '../util/counter-slice';
+import { deleteStorageData } from '../util/initialLocalStorage';
 
 export default function Header() {
     /** 리덕스 함수 */
@@ -27,15 +28,7 @@ export default function Header() {
     const logoutAPI = async () => {
         await logout()
             .then(() => {
-                if (localStorage.getItem('access-token')) {
-                    localStorage.removeItem('access-token');
-                }
-                if (localStorage.getItem('refresh-token')) {
-                    localStorage.removeItem('refresh-token');
-                }
-                if (localStorage.getItem('is-login')) {
-                    localStorage.removeItem('is-login');
-                }
+                deleteStorageData();
                 alert('로그아웃이 되었습니다.');
                 dispatch(loginState(false));
             })

@@ -1,15 +1,23 @@
-import { BaseSyntheticEvent, useState } from 'react';
+import { BaseSyntheticEvent, useEffect, useState } from 'react';
 import AddMemberWindow from '../components/AddMemberWindow';
-import { StudioMake } from '../types/type';
+import { FrameType, StudioMake } from '../types/type';
 import moment from 'moment';
 import { makeStudio } from '../api/studio';
 import { httpStatusCode } from '../util/http-status';
 import { useNavigate } from 'react-router-dom';
+import { getTemplate } from '../api/template';
 
 export default function StudioCreatePage() {
     const [isInviteActive, setIsInviteActive] = useState<boolean>(false);
     const [studioTitle, setStudioTitle] = useState<string>('');
+    const [framelist, setFrameList] = useState<FrameType[]>([]);
+    const [frame, setFrame] = useState<number>(1);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        loadFrameTemplateAPI();
+    }, []);
+
     const onPressAddMember = () => {
         setIsInviteActive(true);
     };
@@ -27,6 +35,7 @@ export default function StudioCreatePage() {
         const studioParameter: StudioMake = {
             studioTitle: studioTitle,
             expireDate: moment().format('YYYY-MM-DDTHH:mm:ss'),
+            studioFrameId: frame,
         };
         loadMakeStudioAPI(studioParameter);
     };
@@ -44,6 +53,20 @@ export default function StudioCreatePage() {
             .catch((error) => {
                 console.log('오류', error);
             });
+    };
+
+    /** GET 프레임 템플릿 리스트 조회 */
+    const loadFrameTemplateAPI = async () => {
+        await getTemplate().then((res) => {
+            if (res.status === httpStatusCode.OK) {
+                setFrameList(res.data.frameTemplate);
+                console.log(res.data.frameTemplate);
+            }
+        });
+    };
+    const selectFrame = (frameId: number) => {
+        setFrame(frameId);
+        console.log(frameId);
     };
 
     return (
@@ -75,22 +98,23 @@ export default function StudioCreatePage() {
                 </p>
                 <h5 className="text-3xl font-bold mt-16">영상 프레임</h5>
                 <div className="flex">
-                    <img
-                        className="image-select-size"
-                        src="/src/assets/images/nothumb.png"
-                    />
-                    <img
-                        className="image-select-size"
-                        src="/src/assets/images/nothumb.png"
-                    />
-                    <img
-                        className="image-select-size"
-                        src="/src/assets/images/nothumb.png"
-                    />
-                    <img
-                        className="image-select-size"
-                        src="/src/assets/images/nothumb.png"
-                    />
+                    {framelist.map((item, index) => {
+                        return (
+                            <div
+                                key={'frameId :' + index}
+                                className="flex flex-col justify-center items-center"
+                                onClick={() => {
+                                    selectFrame(item.frameId);
+                                }}
+                            >
+                                <img
+                                    className="image-select-size"
+                                    src="/src/assets/images/nothumb.png"
+                                />
+                                <p>{item.frameTitle}</p>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 
