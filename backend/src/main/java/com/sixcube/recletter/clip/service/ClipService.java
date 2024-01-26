@@ -17,6 +17,8 @@ public interface ClipService
 
     public Clip searchClip(int clipId);
 
+    public String searchClipUrl(int clipId);
+
     public String getFileKey(Clip clip);
 
     public boolean isClipOwner(String userId, int clipId);
