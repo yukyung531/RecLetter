@@ -22,29 +22,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice(basePackages = "com.sixcube.recletter.user.controller")
 public class UserExceptionHandler {
 
-  private final MessageSource messageSource;
-
-  @ExceptionHandler(MethodArgumentNotValidException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  protected ResponseEntity<String> handleConstraintViolationException(MethodArgumentNotValidException ex) {
-    BindingResult bindingResult = ex.getBindingResult();
-    StringBuilder errorMessage = new StringBuilder(bindingResult.getObjectName() + " : ");
-
-    for (FieldError fieldError : bindingResult.getFieldErrors()) {
-      errorMessage.append(fieldError.getField())
-          .append(" ")
-          .append(messageSource.getMessage(fieldError, LocaleContextHolder.getLocale()))
-          .append(fieldError.getCode())
-          .append(", ");
-    }
-
-    // Remove the trailing comma and space
-    errorMessage.delete(errorMessage.length() - 2, errorMessage.length());
-
-    log.info(errorMessage.toString());
-    return ResponseEntity.badRequest().body(errorMessage.toString());
-  }
-
   private void makeErrorMessage(StringBuilder errorMessage, Exception e) {
     StackTraceElement[] stackTrace = e.getStackTrace();
 
