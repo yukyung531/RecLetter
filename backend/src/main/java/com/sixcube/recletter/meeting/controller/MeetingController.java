@@ -1,22 +1,17 @@
 package com.sixcube.recletter.meeting.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sixcube.recletter.studio.repository.StudioRepository;
 import com.sixcube.recletter.user.dto.User;
-import io.openvidu.java.client.OpenVidu;
-import io.openvidu.java.client.OpenViduHttpException;
-import io.openvidu.java.client.OpenViduJavaClientException;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 @CrossOrigin(origins = "*")
@@ -26,9 +21,12 @@ public class MeetingController {
     @Autowired
     StudioRepository studioRepository;
 
-    // TODO: OPENVIDU_URL, OPENVIDU_SECRET => 나중에 application.yml에 넣을 예정
-    private static final String OPENVIDU_URL = "http://localhost:4443/api/sessions";
-    private static final String OPENVIDU_SECRET = "MY_SECRET";
+    // TODO: OPENVIDU_URL, OPENVIDU_SECRET => 나중에 .env에 넣을 예정
+    @Value("${OPENVIDU_URL}")
+    private String OPENVIDU_URL;
+
+    @Value("${OPENVIDU_SECRET}")
+    private String OPENVIDU_SECRET;
 
     private RestTemplate restTemplate;
 
@@ -90,12 +88,11 @@ public class MeetingController {
     /**
      * 세션에서 새 연결 생성(화면 공유를 시작하는 사용자 포함 화면공유 세션에 참여하려면 실행)
      * @param sessionId 세션의 ID
-     * @param params    연결 설정에 사용할 매개변수 (옵션)
      * @param user      현재 인증된 사용자
      * @return 연결 정보가 포함된 ResponseEntity 객체
      */
     @PostMapping("/meeting/{sessionId}/connections")
-    public ResponseEntity<String> createConnection(@PathVariable("sessionId") String sessionId, @RequestBody(required = false) Map<String, Object> params, @AuthenticationPrincipal User user) {
+    public ResponseEntity<String> createConnection(@PathVariable("sessionId") String sessionId, @AuthenticationPrincipal User user) {
         // 스튜디오 존재 확인
         studioRepository.findById(sessionId).orElseThrow(() -> new RuntimeException("Studio not found"));
 
@@ -118,26 +115,6 @@ public class MeetingController {
             // 응답받은 세션 정보의 본문 가져오기
             String sessionInfo = response.getBody();
 
-
-            // TODO - params를 안쓸 것 같아서 주석처리해둠 .인자에서도 params를 지우고 테스트해보자.
-//            // JSON 문자열을 파싱하기 위해 ObjectMapper 객체를 생성
-//            ObjectMapper mapper = new ObjectMapper();
-//            // 세션 정보를 JSON 문자열에서 Map 객체로 변환
-//            Map<String, Object> sessionInfoMap = mapper.readValue(sessionInfo, new TypeReference<Map<String, Object>>(){});
-//
-//            // 요청 본문 생성 (params를 사용하여 연결 속성 설정)
-//            Map<String, Object> requestBody = new HashMap<>();
-//            requestBody.put("sessionInfo", sessionInfoMap);
-//            if (params != null) {
-//                requestBody.put("params", params);
-//            }
-//
-//            // 요청 본문을 JSON 문자열로 변환
-//            String requestJson = mapper.writeValueAsString(requestBody);
-//            // HttpEntity 생성 (헤더와 본문 포함)
-//            HttpEntity<String> postEntity = new HttpEntity<>(requestJson, headers);
-
-            // TODO - 새로 추가한 것. params를 지우고 테스트 했을 때 잘 되면 놔두기
             HttpEntity<String> postEntity = new HttpEntity<>(sessionInfo, headers);
 
             // POST 요청 보내기
