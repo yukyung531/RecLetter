@@ -3,10 +3,13 @@ package com.sixcube.recletter.user.service;
 import com.sixcube.recletter.redis.RedisPrefix;
 import com.sixcube.recletter.redis.RedisService;
 import com.sixcube.recletter.auth.dto.Code;
+import com.sixcube.recletter.user.exception.EmailNotVerifiedException;
 import com.sixcube.recletter.user.dto.User;
 import com.sixcube.recletter.user.dto.UserInfo;
 import com.sixcube.recletter.user.dto.req.UpdateUserPasswordReq;
 import com.sixcube.recletter.user.dto.req.UpdateUserReq;
+import com.sixcube.recletter.user.exception.IdAlreadyExistsException;
+import com.sixcube.recletter.user.exception.WrongPasswordException;
 import com.sixcube.recletter.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,21 +37,21 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return new UserInfo(userRepository.findByUserId(userId));
     }
 
-    public User createUser(User user) throws Exception {
+    public User createUser(User user){
 
         if (userRepository.findByUserId(user.getUserId()) != null && user.getDeletedAt() != null) {
-            throw new Exception("이미 존재하는 아이디입니다.");
+            throw new IdAlreadyExistsException();
         }
         if (userRepository.findByUserEmail(user.getUserEmail()) != null && user.getDeletedAt() != null) {
-            throw new Exception("이미 존재하는 이메일입니다.");
+            throw new IdAlreadyExistsException();
         }
         String key = RedisPrefix.REGIST.prefix() + user.getUserEmail();
         if (!redisService.hasKey(key)) {
-            throw new Exception("이메일 인증이 완료되지 않았습니다.");
+            throw new EmailNotVerifiedException();
         }
         Code redisAuthCode = (Code) redisService.getValues(key);
         if (!redisAuthCode.isFlag()) {
-            throw new Exception("이메일 인증이 완료되지 않았습니다.");
+            throw new EmailNotVerifiedException();
         }
         //레디스에서 제거
         redisService.deleteValues(key);
@@ -77,8 +80,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
             userRepository.save(user);
             return true;
         } else {
-            // TODO - 기존 비밀번호를 잘못 입력 -> 예외 처리
-            return false;
+            throw new WrongPasswordException();
         }
     }
 
@@ -95,15 +97,15 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return true;
     }
 
-    public void resetPassword(String password, String email) throws Exception {
+    public void resetPassword(String password, String email) {
 
         String key = RedisPrefix.RESET_PASSOWRD.prefix() + email;
         if (!redisService.hasKey(key)) {
-            throw new Exception("이메일 인증이 완료되지 않았습니다.");
+            throw new EmailNotVerifiedException();
         }
         Code redisAuthCode = (Code) redisService.getValues(key);
         if (!redisAuthCode.isFlag()) {
-            throw new Exception("이메일 인증이 완료되지 않았습니다.");
+            throw new EmailNotVerifiedException();
         }
         //레디스에서 제거
         redisService.deleteValues(key);

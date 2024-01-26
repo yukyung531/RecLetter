@@ -9,7 +9,7 @@ public interface UserService {
 
     public UserInfo searchUserInfoByUserId(String userId);
 
-    public User createUser(User user) throws Exception;
+    public User createUser(User user);
 
     public void updateUser(UpdateUserReq updateUserReq, User user);
 
@@ -19,5 +19,5 @@ public interface UserService {
 
     public boolean checkDuplicatiedId(String userId);
 
-    public void resetPassword(String password, String email) throws Exception;
+    public void resetPassword(String password, String email);
 }

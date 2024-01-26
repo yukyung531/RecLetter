@@ -25,7 +25,7 @@ public class UserController {
 
     //회원가입
     @PostMapping
-    public ResponseEntity<Void> createUser(@Valid @RequestBody CreateUserReq createUserReq) throws Exception {
+    public ResponseEntity<Void> createUser(@Valid @RequestBody CreateUserReq createUserReq){
         User result = userService.createUser(new User(createUserReq));
 
         if (result == null) {
@@ -69,7 +69,7 @@ public class UserController {
     }
 
     @PostMapping("/password")
-    public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordReq resetPasswordReq) throws Exception {
+    public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordReq resetPasswordReq) {
         String password = resetPasswordReq.getNewPassword();
         String email=resetPasswordReq.getUserEmail();
         userService.resetPassword(password, email);
