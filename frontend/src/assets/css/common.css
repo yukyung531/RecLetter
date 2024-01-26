@@ -5,9 +5,13 @@
 #root {
     width: 100%;
 }
-
+.base-weight,
+.section-top,
+.section-center,
+.section-start {
+    width: 100%;
+}
 .base-weight {
-    width: 1536px;
 }
 .base-height {
     height: 864px;
@@ -22,7 +26,6 @@
     width: 450px;
 }
 .section-top {
-    width: 1536px;
     height: 864px;
     margin: 0 auto;
     display: flex;
@@ -31,7 +34,6 @@
     align-items: center;
 }
 .section-center {
-    width: 1536px;
     height: 864px;
     margin: 0 auto;
     display: flex;
@@ -41,7 +43,6 @@
     align-items: center;
 }
 .section-start {
-    width: 1536px;
     height: 864px;
     margin: 0 auto;
     display: flex;
