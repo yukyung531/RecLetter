@@ -134,7 +134,7 @@ public class MeetingController {
             // HttpEntity 객체를 생성(본문, 헤더 포함)
             HttpEntity<String> postEntity = new HttpEntity<>(sessionInfo, headers);
 
-            // POST 요청 보내기
+            // POST 요청 보내기git
             ResponseEntity<String> postResponse = restTemplate.exchange(OPENVIDU_URL + "/" + sessionId + "/connection", HttpMethod.POST, postEntity, String.class);
 
             // 응답받은 연결 정보의 본문 가져오기
