@@ -42,6 +42,10 @@ public class AuthServiceImpl implements AuthService {
             this.checkDuplicatedEmail(toEmail);
             title = "Recletter 이메일 인증 번호";
             key = RedisPrefix.REGIST.prefix() + toEmail;
+        } else if (emailType.equals("CHANGE_EMAIL")) {
+            this.checkExistEmail(toEmail);
+            title = "Recletter 이메일 변경";
+            key = RedisPrefix.CHANGE_EMAIL.prefix() + toEmail;
         } else { //emailType.equals("RESET")
             this.checkExistEmail(toEmail);
             title = "Recletter 비밀번호 재설정";
@@ -72,6 +76,10 @@ public class AuthServiceImpl implements AuthService {
         //회원가입 이메일 인증인 경우
         if (emailType.equals("REGIST")) {
             key = RedisPrefix.REGIST.prefix() + email;
+        }
+        //이메일 정보 수정 이메일 인증인 경우
+        else if (emailType.equals("CHANGE_EMAIL")){
+            key = RedisPrefix.CHANGE_EMAIL.prefix() + email;
         }
         //비밀번호 초기화 이메일 인증인 경우
         else {

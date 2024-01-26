@@ -49,6 +49,7 @@ public class AuthController {
 
     private final String REGIST = "REGIST";
     private final String RESET_PASSWORD = "RESET_PASSWORD";
+    private final String CHANGE_EMAIL = "CHANGE_EMAIL";
 
     @PostMapping("/login")
     public ResponseEntity<LoginRes> login(@RequestBody LoginReq loginReq) {
@@ -68,7 +69,6 @@ public class AuthController {
         String key = RedisPrefix.REFRESH_TOKEN.prefix() + userInfo.getUserId();
         redisService.setValues(key, token.getRefreshToken());
 
-
         return ResponseEntity.ok()
                 .body(
                         LoginRes.builder()
@@ -85,7 +85,6 @@ public class AuthController {
         redisService.deleteValues(key);
         return ResponseEntity.ok().build();
     }
-
 
     @PostMapping("/token")
     public ResponseEntity<TokenRes> tokenRegenerate(@RequestBody TokenReq tokenReq) {
@@ -105,7 +104,8 @@ public class AuthController {
                         .builder()
                         .accessToken(token.getAccessToken())
                         .refreshToken(token.getRefreshToken())
-                        .build());
+                        .build()
+                );
             }
         }
         return ResponseEntity.badRequest().build(); //리프레시 토큰 만료 또는 불일치 하는 경우
@@ -119,9 +119,9 @@ public class AuthController {
         return ResponseEntity.ok().body(CheckDuplicatedIdRes
                 .builder()
                 .isDuplicated(isDuplicated)
-                .build());
+                .build()
+        );
     }
-
 
     //이메일 발송 요청(회원가입)
     @PostMapping("/email")
@@ -141,7 +141,8 @@ public class AuthController {
         return ResponseEntity.ok().body(VerifyCodeRes
                 .builder()
                 .isValid(isValid)
-                .build());
+                .build()
+        );
     }
 
     //이메일 발송 요청(아이디 찾기)
@@ -172,6 +173,31 @@ public class AuthController {
         return ResponseEntity.ok().body(VerifyCodeRes
                 .builder()
                 .isValid(isValid)
-                .build());
+                .build()
+        );
+    }
+
+    //이메일 발송 요청(이메일 변경)
+    @PostMapping("/info")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> sendEmailToChangeEmail(@Valid @RequestBody SendCodeToEmailReq sendCodeToEmailReq) {
+
+        authService.sendEmail(sendCodeToEmailReq.getUserEmail(), CHANGE_EMAIL);
+
+        return ResponseEntity.ok().build();
+    }
+
+    //인증코드 검증(이메일 변경)
+    @PostMapping("/info/code")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<VerifyCodeRes> verifyCodeToChangeEmail(@Valid @RequestBody VerifyCodeReq verifyCodeReq) {
+
+        boolean isValid = authService.verifyCode(verifyCodeReq.getUserEmail(), verifyCodeReq.getCode(), CHANGE_EMAIL);
+
+        return ResponseEntity.ok().body(VerifyCodeRes
+                .builder()
+                .isValid(isValid)
+                .build()
+        );
     }
 }
