@@ -126,8 +126,6 @@ public class MeetingController {
             // 현재 세션의 참가자 수 가져오기
             int currentParticipantCount = (int) ((Map<String, Object>) sessionInfoMap.get("connections")).get("numberOfElements");
 
-            System.out.println(currentParticipantCount);
-
             // 참가자 수 제한 확인(6명이 이미 들어와있다면 들어올 수 없음)
             if (currentParticipantCount >= PARTICIPANT_LIMIT) {
                 return new ResponseEntity<>("Error: Participant limit has been reached", HttpStatus.FORBIDDEN);
