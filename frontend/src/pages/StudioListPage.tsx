@@ -10,8 +10,6 @@ import { loginState } from '../util/counter-slice';
 export default function StudioListPage() {
     const [studioList, setStudioList] = useState<StudioInfo[]>([]);
 
-    const navigator = useNavigate();
-
     /** 리덕스 설정 */
     const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
     const dispatch = useDispatch();
@@ -22,8 +20,8 @@ export default function StudioListPage() {
         if (loginValue) {
             dispatch(loginState(true));
         }
-        if (isLogin) {
-            navigate(`/studiolist`);
+        if (!isLogin) {
+            navigate(`/`);
         }
     }, []);
     useEffect(() => {
@@ -31,9 +29,7 @@ export default function StudioListPage() {
         if (loginValue) {
             dispatch(loginState(true));
         }
-        if (isLogin) {
-            navigate(`/studiolist`);
-        } else if (!isLogin) {
+        if (!isLogin) {
             navigate(`/`);
         }
     }, [isLogin]);
@@ -42,7 +38,7 @@ export default function StudioListPage() {
     /** 카드를 클릭 했을 때 */
     const onClickSCard = (studioId: number) => {
         // viewStudioDetailAPI(studioId);
-        navigator(`/studiomain?id=${studioId}`);
+        navigate(`/studiomain?id=${studioId}`);
     };
 
     /** GET 스튜디오 리스트 조회 API */

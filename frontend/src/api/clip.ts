@@ -9,7 +9,7 @@ export async function uploadClip(clipUpload: ClipUpload) {
 }
 /** GET 클립 상세 정보 조회 */
 export async function getClip(clipId: string) {
-    return await local.get(`/api/clip`, { params: clipId });
+    return await local.get(`/api/clip/${clipId}`);
 }
 /** PUT 클립 수정 */
 export async function modifyClip(clipId: string, clip: ClipModify) {

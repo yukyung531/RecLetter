@@ -17,7 +17,7 @@ export default function LoginPage() {
 
     useEffect(() => {
         const loginValue = localStorage.getItem('is-login');
-        if (loginValue) {
+        if (loginValue === 'true') {
             dispatch(loginState(true));
         }
         if (isLogin) {
@@ -26,7 +26,7 @@ export default function LoginPage() {
     }, []);
     useEffect(() => {
         const loginValue = localStorage.getItem('is-login');
-        if (loginValue) {
+        if (loginValue === 'true') {
             dispatch(loginState(true));
         }
         if (isLogin) {
@@ -60,17 +60,12 @@ export default function LoginPage() {
                 console.log(res);
                 if (res.status === httpStatusCode.OK) {
                     console.log('로그인이 성공했습니다.');
-                    if (res.data.accessToken) {
-                        localStorage.setItem(
-                            'access-token',
-                            res.data.accessToken
-                        );
-                        localStorage.setItem(
-                            'refresh-token',
-                            res.data.refreshToken
-                        );
-                        localStorage.setItem('is-login', 'true');
-                    }
+                    localStorage.setItem('access-token', res.data.accessToken);
+                    localStorage.setItem(
+                        'refresh-token',
+                        res.data.refreshToken
+                    );
+                    localStorage.setItem('is-login', 'true');
                     dispatch(loginState(true));
                     navigate(`/studiolist`);
                 } else if (res.status === httpStatusCode.BADREQUEST) {

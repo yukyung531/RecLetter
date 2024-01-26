@@ -25,7 +25,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: recletter.official@gmail.com
-    password: mcti gkaj pbsp scox
+    password: leuz rhvx vumw cvdt
     properties:
       mail:
         smtp:

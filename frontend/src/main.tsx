@@ -21,6 +21,7 @@ import MyPage from './pages/MyPage.tsx';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import store from './util/store.ts';
+import ChattingBox from './components/ChattingBox.tsx';
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                             element={<LetterFinishPage />}
                         ></Route>
                     </Routes>
+                    <ChattingBox />
                 </BrowserRouter>
             </QueryClientProvider>
         </Provider>

@@ -17,7 +17,7 @@ export default function Header() {
         } else {
             dispatch(loginState(false));
         }
-    }, []);
+    }, [isLogin]);
     /** 로그아웃 */
     const onLogout = () => {
         logoutAPI();
@@ -46,47 +46,6 @@ export default function Header() {
     const loginStateElement = () => {
         if (isLogin) {
             return (
-                <div
-                    className="flex mx-2 text-xl justify-center items-center cursor-pointer"
-                    onClick={onLogout}
-                >
-                    <span className="material-symbols-outlined mx-1">
-                        logout
-                    </span>
-                    <p>로그아웃</p>
-                </div>
-            );
-        } else {
-            return (
-                <div className="flex mx-2 text-xl justify-center items-center cursor-pointer">
-                    <span className="material-symbols-outlined mx-1">
-                        login
-                    </span>
-                    <a href="login">로그인</a>
-                </div>
-            );
-        }
-    };
-
-    if (
-        window.location.pathname === '/' ||
-        window.location.pathname === '/cliprecode' ||
-        window.location.pathname === '/clipedit' ||
-        window.location.pathname === '/lettermake'
-    )
-        return null;
-    else
-        return (
-            <div className="header w-full flex h-16 items-center justify-between px-8 z-10">
-                <div className=" w-72 text cursor-pointer">
-                    <a href="/" className="">
-                        <img
-                            className="h-6"
-                            src="/src/assets/images/logo.png"
-                            alt=""
-                        />
-                    </a>
-                </div>
                 <div className="flex justify-center items-center">
                     <a
                         href="/mypage"
@@ -97,8 +56,43 @@ export default function Header() {
                         </span>
                         <p>마이페이지</p>
                     </a>
-                    {loginStateElement()}
+                    <div
+                        className="flex mx-2 text-xl justify-center items-center cursor-pointer"
+                        onClick={onLogout}
+                    >
+                        <span className="material-symbols-outlined mx-1">
+                            logout
+                        </span>
+                        <p>로그아웃</p>
+                    </div>
                 </div>
+            );
+        } else {
+            return (
+                <div className="flex justify-center items-center">
+                    <div className="flex mx-2 text-xl justify-center items-center cursor-pointer">
+                        <span className="material-symbols-outlined mx-1">
+                            login
+                        </span>
+                        <a href="login">로그인</a>
+                    </div>
+                </div>
+            );
+        }
+    };
+
+    return (
+        <div className="header w-full flex h-16 items-center justify-between px-8 z-10">
+            <div className=" w-72 text cursor-pointer">
+                <a href="/" className="">
+                    <img
+                        className="h-6"
+                        src="/src/assets/images/logo.png"
+                        alt=""
+                    />
+                </a>
             </div>
-        );
+            {loginStateElement()}
+        </div>
+    );
 }

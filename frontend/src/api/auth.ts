@@ -1,4 +1,10 @@
-import { EmailRequest, PasswordReset, User, tokenType } from '../types/type';
+import {
+    EmailRequest,
+    PasswordCode,
+    PasswordReset,
+    User,
+    tokenType,
+} from '../types/type';
 import localAxios from '../util/http-commons';
 
 const local = localAxios();
@@ -18,17 +24,22 @@ export async function verifyEmail(email: EmailRequest) {
 }
 /** GET 아이디 중복 검사 */
 export async function checkId(userid: string) {
-    return await local.get(`/api/auth/id`, { params: userid });
+    return await local.get(`/api/auth/id/${userid}`);
 }
 
-/** POST 비밀번호 초기화 요청 */
-export async function resetPassword(password: PasswordReset) {
+/** POST 비밀번호 초기화 이메일 발송 요청 */
+export async function requestPasswordEmail(password: PasswordReset) {
     return await local.post(`/api/auth/password`, password, {});
+}
+
+/** POST 비밀번호 초기화 인증코드 검증 */
+export async function verifyPassword(password: PasswordCode) {
+    return await local.post(`/api/auth/password/code`, password, {});
 }
 
 /** GET 비밀번호 초기화 */
 export async function resetPasswordReq(key: string) {
-    return await local.get(`/api/auth/password`, { params: key });
+    return await local.get(`/api/auth/password/${key}`);
 }
 
 /** GET 로그아웃 */

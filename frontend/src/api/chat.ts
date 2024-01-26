@@ -4,7 +4,5 @@ const local = localAxios();
 
 /** GET 채팅방에 참여중인 사용자 조회 */
 export async function enterMeeting(studioId: string) {
-    return await local.get(`/api/chat/${studioId}/userList`, {
-        params: studioId,
-    });
+    return await local.get(`/api/chat/${studioId}/userList`);
 }

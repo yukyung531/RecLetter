@@ -10,7 +10,7 @@ export async function getStudio() {
 
 /** GET 스튜디오 상세 정보 조회 */
 export async function studioDetail(studioId: string) {
-    return await local.get(`/api/studio`, { params: studioId });
+    return await local.get(`/api/studio/${studioId}`);
 }
 /** GET 스튜디오 썸네일 조회 */
 export async function getStudioThumbnail(studioId: string) {
@@ -22,17 +22,17 @@ export async function makeStudio(studio: StudioMake) {
 }
 /** DELETE 스튜디오 삭제 */
 export async function deleteStudio(studioId: string) {
-    return await local.delete(`/api/studio`, { params: studioId });
+    return await local.delete(`/api/studio/${studioId}`);
 }
 /** POST 스튜디오 참가 */
 export async function enterStudio(studioId: string) {
-    return await local.post(`/api/studio`, { params: studioId });
+    return await local.post(`/api/studio/${studioId}`);
 }
 /** GET 스튜디오에 접속중인 사용자 정보 조회 */
 export async function getCurrentStudioUser(studioId: string) {
     return await local.get(`/api/studio/${studioId}/active`);
 }
 /** PUT 스튜디오 제목 수정 */
-export async function modifyStudioTitle(studioTitle: string) {
-    return await local.put(`/api/studio/${studioTitle}/title`);
+export async function modifyStudioTitle(studioId: string, studioTitle: string) {
+    return await local.put(`/api/studio/${studioId}/title`, studioTitle, {});
 }
