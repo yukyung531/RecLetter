@@ -1,8 +1,10 @@
 import {useState, useEffect, useRef, BaseSyntheticEvent} from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ClipInfo } from '../types/type';
 import MyClipCard from '../components/MyClipCard';
 import getBlobDuration from 'get-blob-duration';
 import DeleteCheckWindow from '../components/DeleteCheckWindow';
+
 
 interface Const {
     audio: boolean,
@@ -21,6 +23,14 @@ export default function ClipRecodePage() {
     const [selectedScript, setSelectedScript] = useState<string>("");
     const scriptRef = useRef<HTMLTextAreaElement>(null);
 
+    //인코딩 옵션
+    const encoderOptions = {
+        audioBitsPerSecond: 256000,
+        videoBitsPerSecond: 7500000,
+        mimeType : "video/webm; codecs=vp9"
+    };
+
+
     /**handleScript()
      * 사이드바 textarea에 작성한 script를 중앙 상단의 출력창에 바인딩한다.
      */
@@ -31,8 +41,9 @@ export default function ClipRecodePage() {
     }
 
     //유저 아이디, 닉네임 불러오기
-    const userId : string|null = localStorage.getItem("userId")
-    const usernickname : string|null = localStorage.getItem("usernickname")
+    //반드시 고칠 것
+    const userId : string|null = "ssafy_default"
+    const usernickname : string|null = "default!반드시고쳐"
 
     //url로부터 스튜디오 제목 불러오기
     const studioTitle : string|null = new URLSearchParams(location.search).get("title");
@@ -78,9 +89,7 @@ export default function ClipRecodePage() {
     const [mS, setMS] = useState<MediaStream>(defaultMS);
 
     //미디어레코더 저장 변수
-    const defaultMrecorder = new MediaRecorder(defaultMS, {
-        mimeType: "video/webm; codecs=vp9"
-    });
+    const defaultMrecorder = new MediaRecorder(defaultMS, encoderOptions);
 
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder>(defaultMrecorder);
 
@@ -127,9 +136,7 @@ export default function ClipRecodePage() {
         const mediaData : Blob[] = [];
 
         //MediaRecorder 생성자 호출, webm형식 저장
-        const newMediaRecorder = new MediaRecorder(mS, {
-            mimeType: "video/webm; codecs=vp9"
-        });
+        const newMediaRecorder = new MediaRecorder(mS, encoderOptions);
 
 
         //전달받은 데이터 등록
@@ -145,6 +152,10 @@ export default function ClipRecodePage() {
             clipNumber++;//클립번호 추가
             async function getBlobInfo() {
                 const blob = new Blob(mediaData, {type: "video/webm; codecs=vp9"});
+                const duration = await getBlobDuration(blob);
+
+                //webm객체에 정보 추가 후 변환
+                //영상 미리보기 출력
                 const newURL : string = URL.createObjectURL(blob);
                 const recording = videoOutputRef.current;
                 const preview = videoPreviewRef.current;
@@ -154,8 +165,6 @@ export default function ClipRecodePage() {
                     recording.style.display = 'none';
                 }
                 
-
-                const duration = await getBlobDuration(newURL);
                 //새 클립 정보 생성
                 if(userId){
                     const newClip : ClipInfo = {
@@ -373,6 +382,59 @@ const handleProgress = (event : BaseSyntheticEvent) => {
     }
 }
 
+/////////////////////////////클립 편집 페이지로 이동//////////////////////////////
+
+const navigate = useNavigate();
+
+/**goToClipEdit()
+ * 영상 편집 페이지로 이동한다.
+ */
+const goToClipEdit = () => {
+    console.log('Hello')
+    const preview = videoPreviewRef.current;
+    console.log(myClipList)
+    if(preview){
+        if(preview.src){
+            //url기반 영상 정보 검색
+            //이렇게 해주는 이유는 State로 관리하기에는 복잡하고, 영상 편집하기 버튼 눌렀을 때만 필요해, 굳이 평소에 일일이 관리할 필요 없어서
+            for(let i = 0; i < myClipList.length; i++){
+                if(myClipList[i].clipUrl === preview.src){
+                    const videoInfo : ClipInfo = myClipList[i]
+                    blobToBase64(preview.src, videoInfo);
+                }
+            }
+            //navigate 직전에 blob url 정리할 것
+        } else {
+            //에러창 출력
+            console.log('선택된 영상이 없습니다. 영상을 선택해 주세요.')
+        }
+    }
+}
+
+/**blob객체를 base64로 바꾸는 함수 */
+async function blobToBase64(blobUrl : string, videoInfo : ClipInfo) {
+    // Blob URL에서 데이터 불러오기
+    const response = await fetch(blobUrl);
+    const blob = await response.blob();
+    console.log(blob);
+    // Blob 데이터를 Base64로 변환
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    reader.onloadend = () => {
+        const base64 = reader.result;
+        //url 초기화
+        myClipList.map((clip) => {
+            URL.revokeObjectURL(clip.clipUrl);
+        })
+        //navigate
+        if(base64 && typeof base64 === 'string'){
+            navigate(`/clipEdit`, { state : {videoInfo, base64}});
+        }
+    }
+}
+
+
+
 
 
 
@@ -389,12 +451,12 @@ const handleProgress = (event : BaseSyntheticEvent) => {
                     <div className="ml-20" />
                     <p>2024-01-14-02:12AM</p>
                 </div>
-                <a
-                    href="/clipedit"
+                <div
+                    onClick={goToClipEdit}
                     className="btn-cover color-bg-blue3 text-white"
                 >
                     편집하기
-                </a>
+                </div>
             </div>
 
             {/* 중앙 섹션 */}
