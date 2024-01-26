@@ -112,12 +112,12 @@ public class ChatServiceImpl implements ChatService {
                     .orElseThrow(() -> new ChatException("Studio not found: " + studioId));
             // 스튜디오에 참여하고 있는 참여자들 가져오기
             List<StudioParticipant> participants = studioParticipantRepository.findAllByStudio(studio);
-            // userId 리스트 만들기
+            // userNickname 리스트 만들기
             List<String> users = participants.stream()
-                    .map(participant -> participant.getUser().getUserId())
+                    .map(participant -> participant.getUser().getUserNickname())
                     .collect(Collectors.toList());
             log.debug("ChatServiceImpl.searchChatUserList : end");
-            // userId 리스트 반환
+            // userNickname 리스트 반환
             return users;
         } catch(Exception e) {
             log.error("ChatServiceImpl.searchChatUserList : Exception", e);
