@@ -19,7 +19,7 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender emailSender;
 
-    public void sendEmailToRegister(String toEmail, String title, String text) throws Exception {
+    public void sendEmail(String toEmail, String title, String text) throws Exception {
 
         SimpleMailMessage emailForm = createEmailForm(toEmail, title, text);
 
