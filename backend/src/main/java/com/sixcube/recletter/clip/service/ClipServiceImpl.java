@@ -7,6 +7,7 @@ import com.sixcube.recletter.clip.Repository.ClipRepository;
 import com.sixcube.recletter.clip.dto.Clip;
 import com.sixcube.recletter.clip.dto.ClipInfo;
 import com.sixcube.recletter.clip.exception.InvalidClipFormatException;
+import com.sixcube.recletter.clip.exception.NoSuchClipException;
 import com.sixcube.recletter.clip.exception.SaveClipFailException;
 import com.sixcube.recletter.clip.exception.WeirdClipUserException;
 import com.sixcube.recletter.studio.dto.StudioParticipant;
@@ -89,7 +90,15 @@ public class ClipServiceImpl implements ClipService {
 
     @Override
     public Clip searchClip(int clipId) {
-        return clipRepository.findClipByClipId(clipId);
+        return clipRepository.findClipByClipId(clipId).orElseThrow(NoSuchClipException::new);
+    }
+
+    @Override
+    public String searchClipUrl(int clipId){
+        Clip clip=searchClip(clipId);
+        StringBuilder clipUrl=new StringBuilder();
+        clipUrl.append(cloudFront).append(getFileKey(clip));
+        return clipUrl.toString();
     }
 
     @Override
