@@ -22,12 +22,11 @@ public class MeetingController {
     StudioRepository studioRepository;
 
     // TODO: OPENVIDU_URL, OPENVIDU_SECRET => 나중에 .env에 넣을 예정
-    @Value("openvidu.url")
+    @Value("${openvidu.url}")
     private String OPENVIDU_URL;
 
-    @Value("openvidu.secret")
+    @Value("${openvidu.secret}")
     private String OPENVIDU_SECRET;
-
     private RestTemplate restTemplate;
 
     /**
@@ -93,6 +92,9 @@ public class MeetingController {
      */
     @PostMapping("/meeting/{sessionId}/connections")
     public ResponseEntity<String> createConnection(@PathVariable("sessionId") String sessionId, @AuthenticationPrincipal User user) {
+        // 참가자 제한 수 설정
+        final int PARTICIPANT_LIMIT = 6;
+
         // 스튜디오 존재 확인
         studioRepository.findById(sessionId).orElseThrow(() -> new RuntimeException("Studio not found"));
 
@@ -105,7 +107,7 @@ public class MeetingController {
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         headers.setBasicAuth("OPENVIDUAPP", OPENVIDU_SECRET);
 
-        // HttpEntity 객체를 생성하여 헤더를 포함
+        // HttpEntity 객체를 생성(헤더 포함)
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
@@ -115,6 +117,21 @@ public class MeetingController {
             // 응답받은 세션 정보의 본문 가져오기
             String sessionInfo = response.getBody();
 
+            // JSON 문자열을 파싱하기 위해 ObjectMapper 객체를 생성
+            ObjectMapper mapper = new ObjectMapper();
+
+            // 세션 정보를 JSON 문자열에서 Map 객체로 변환
+            Map<String, Object> sessionInfoMap = mapper.readValue(sessionInfo, new TypeReference<Map<String, Object>>(){});
+
+            // 현재 세션의 참가자 수 가져오기
+            int currentParticipantCount = (int) ((Map<String, Object>) sessionInfoMap.get("connections")).get("numberOfElements");
+
+            // 참가자 수 제한 확인(6명이 이미 들어와있다면 들어올 수 없음)
+            if (currentParticipantCount >= PARTICIPANT_LIMIT) {
+                return new ResponseEntity<>("Error: Participant limit has been reached", HttpStatus.FORBIDDEN);
+            }
+
+            // HttpEntity 객체를 생성(본문, 헤더 포함)
             HttpEntity<String> postEntity = new HttpEntity<>(sessionInfo, headers);
 
             // POST 요청 보내기
@@ -122,9 +139,6 @@ public class MeetingController {
 
             // 응답받은 연결 정보의 본문 가져오기
             String connectionInfo = postResponse.getBody();
-
-            // JSON 문자열을 파싱하기 위해 ObjectMapper 객체를 생성
-            ObjectMapper mapper = new ObjectMapper();
 
             // 연결 정보를 JSON 문자열에서 Map 객체로 변환
             Map<String, Object> connectionInfoMap = mapper.readValue(connectionInfo, new TypeReference<Map<String, Object>>(){});
@@ -142,6 +156,7 @@ public class MeetingController {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     /**
      * 세션 종료(해당 세션의 모든 프로세스가 중지됨. 모든 연결, 스트림 및 녹음이 닫힘)
