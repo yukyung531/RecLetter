@@ -1,9 +1,7 @@
 package com.sixcube.recletter.user.exhandler;
 
 import com.sixcube.recletter.auth.exception.EmailAlreadyExistsException;
-import com.sixcube.recletter.user.exception.EmailNotVerifiedException;
-import com.sixcube.recletter.user.exception.IdAlreadyExistsException;
-import com.sixcube.recletter.user.exception.WrongPasswordException;
+import com.sixcube.recletter.user.exception.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
@@ -64,6 +62,28 @@ public class UserExceptionHandler {
     makeErrorMessage(errorMessage, e);
 
     errorMessage.append("기존 비밀번호를 잘못 입력하였습니다.");
+    return ResponseEntity.badRequest().body(errorMessage.toString());
+  }
+
+  @ExceptionHandler(EmailNullException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  protected ResponseEntity<String> emailNullExceptionHandler(EmailNullException e) {
+    StringBuilder errorMessage = new StringBuilder();
+
+    makeErrorMessage(errorMessage, e);
+
+    errorMessage.append("이메일을 입력하지 않았습니다.");
+    return ResponseEntity.badRequest().body(errorMessage.toString());
+  }
+
+  @ExceptionHandler(NicknameNullException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  protected ResponseEntity<String> nicknameNullExceptionHandler(NicknameNullException e) {
+    StringBuilder errorMessage = new StringBuilder();
+
+    makeErrorMessage(errorMessage, e);
+
+    errorMessage.append("이름을 입력하지 않았습니다.");
     return ResponseEntity.badRequest().body(errorMessage.toString());
   }
 }
