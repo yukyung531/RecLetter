@@ -1,13 +1,11 @@
 package com.sixcube.recletter.auth.dto.res;
 
 import com.sixcube.recletter.auth.dto.Token;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TokenRes {

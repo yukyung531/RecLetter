@@ -9,6 +9,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SearchUserInfoRes {
-    private UserInfo userInfo;
+    private String userId;
+    private String userNickname;
+    private String userEmail;
 
 }
