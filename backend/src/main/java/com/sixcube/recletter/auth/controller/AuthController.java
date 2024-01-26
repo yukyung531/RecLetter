@@ -101,10 +101,13 @@ public class AuthController {
             if (tokenReq.getRefreshToken().equals(refreshToken)) {
                 Token token = tokenGenerator.createToken((authentication));
 
-                return ResponseEntity.ok().body(new TokenRes(token));
+                return ResponseEntity.ok().body(TokenRes
+                        .builder()
+                        .accessToken(token.getAccessToken())
+                        .refreshToken(token.getRefreshToken())
+                        .build());
             }
         }
-
         return ResponseEntity.badRequest().build(); //리프레시 토큰 만료 또는 불일치 하는 경우
     }
 
@@ -112,10 +115,11 @@ public class AuthController {
     public ResponseEntity<CheckDuplicatedIdRes> checkDuplicatiedId(@PathVariable("userId") String userId) {
 
         boolean isDuplicated = userService.checkDuplicatiedId(userId);
-        CheckDuplicatedIdRes checkDuplicatedIdRes = new CheckDuplicatedIdRes();
-        checkDuplicatedIdRes.setIsDuplicated(isDuplicated);
 
-        return ResponseEntity.ok().body(checkDuplicatedIdRes);
+        return ResponseEntity.ok().body(CheckDuplicatedIdRes
+                .builder()
+                .isDuplicated(isDuplicated)
+                .build());
     }
 
 
@@ -134,11 +138,10 @@ public class AuthController {
 
         boolean isValid = authService.verifyCode(verifyCodeReq.getUserEmail(), verifyCodeReq.getCode(), REGIST);
 
-        VerifyCodeRes verifyCodeRes = new VerifyCodeRes();
-        verifyCodeRes.setIsValid(isValid);
-
-        return ResponseEntity.ok().body(verifyCodeRes);
-
+        return ResponseEntity.ok().body(VerifyCodeRes
+                .builder()
+                .isValid(isValid)
+                .build());
     }
 
     //이메일 발송 요청(아이디 찾기)
@@ -166,9 +169,9 @@ public class AuthController {
 
         boolean isValid = authService.verifyCode(verifyCodeReq.getUserEmail(), verifyCodeReq.getCode(), RESET_PASSWORD);
 
-        VerifyCodeRes verifyCodeRes = new VerifyCodeRes();
-        verifyCodeRes.setIsValid(isValid);
-
-        return ResponseEntity.ok().body(verifyCodeRes);
+        return ResponseEntity.ok().body(VerifyCodeRes
+                .builder()
+                .isValid(isValid)
+                .build());
     }
 }
