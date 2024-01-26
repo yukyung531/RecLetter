@@ -1,6 +1,7 @@
 package com.sixcube.recletter.auth.controller;
 
 import com.sixcube.recletter.auth.dto.res.VerifyCodeRes;
+import com.sixcube.recletter.auth.service.AuthService;
 import com.sixcube.recletter.redis.RedisPrefix;
 import com.sixcube.recletter.redis.RedisService;
 import com.sixcube.recletter.auth.jwt.TokenGenerator;
@@ -11,7 +12,6 @@ import com.sixcube.recletter.auth.dto.req.VerifyCodeReq;
 import com.sixcube.recletter.auth.dto.res.LoginRes;
 import com.sixcube.recletter.auth.dto.Token;
 import com.sixcube.recletter.auth.dto.res.TokenRes;
-import com.sixcube.recletter.auth.service.AuthService;
 import com.sixcube.recletter.user.dto.User;
 import com.sixcube.recletter.user.dto.UserInfo;
 import com.sixcube.recletter.auth.dto.res.CheckDuplicatedIdRes;
@@ -52,7 +52,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginRes> login(@RequestBody LoginReq loginReq) {
-        log.debug("AuthController.login: start");
 
         //인증 완료된 객체를 최종적으로 저장
         Authentication authentication = daoAuthenticationProvider.authenticate(
@@ -141,6 +140,16 @@ public class AuthController {
         return ResponseEntity.ok().body(verifyCodeRes);
 
     }
+
+    //이메일 발송 요청(아이디 찾기)
+    @PostMapping("/id")
+    public ResponseEntity<Void> sendEmailToFindId(@Valid @RequestBody SendCodeToEmailReq sendCodeToEmailReq) throws Exception {
+
+        authService.sendEmailToFindId(sendCodeToEmailReq.getUserEmail());
+
+        return ResponseEntity.ok().build();
+    }
+
 
     //이메일 발송 요청(비밀번호 초기화)
     @PostMapping("/password")
