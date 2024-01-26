@@ -11,6 +11,8 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "@ffmpeg/ffmpeg": "^0.12.10",
+        "@ffmpeg/util": "^0.12.1",
         "@reduxjs/toolkit": "^2.0.1",
         "axios": "^1.6.5",
         "get-blob-duration": "^1.2.0",
