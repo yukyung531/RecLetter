@@ -1,4 +1,4 @@
-package com.sixcube.recletter.auth.exception;
+package com.sixcube.recletter.auth.exhandler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
