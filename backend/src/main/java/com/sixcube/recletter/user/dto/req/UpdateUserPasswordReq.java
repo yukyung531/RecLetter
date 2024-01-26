@@ -1,5 +1,7 @@
 package com.sixcube.recletter.user.dto.req;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,5 +13,7 @@ import lombok.NoArgsConstructor;
 public class UpdateUserPasswordReq {
 
     private String originalPassword;
+    @NotBlank
+    @Size(min = 8, max = 16)
     private String newPassword;
 }
