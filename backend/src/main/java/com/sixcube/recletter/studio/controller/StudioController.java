@@ -2,23 +2,17 @@ package com.sixcube.recletter.studio.controller;
 
 import com.sixcube.recletter.studio.dto.Studio;
 import com.sixcube.recletter.studio.dto.StudioInfo;
-import com.sixcube.recletter.studio.dto.StudioParticipant;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.dto.res.SearchActiveUserRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioDetailRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioListRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioThumbnailRes;
-import com.sixcube.recletter.studio.repository.StudioParticipantRepository;
-import com.sixcube.recletter.studio.repository.StudioRepository;
 import com.sixcube.recletter.studio.service.StudioParticipantService;
 import com.sixcube.recletter.studio.service.StudioService;
 import com.sixcube.recletter.user.dto.User;
-import jakarta.transaction.Transactional;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -44,8 +38,7 @@ public class StudioController {
   public ResponseEntity<SearchStudioListRes> searchStudioList(@AuthenticationPrincipal User user) {
     log.debug("StudioController.searchStudioList : start");
     // 참가중인 studio의 studioId 불러오기
-    List<String> participantStudioIdList = studioParticipantService.searchParticipantStudioByUserId(
-            user.getUserId())
+    List<String> participantStudioIdList = studioParticipantService.searchParticipantStudioByUser(user)
         .stream()
         .map(studioParticipant -> studioParticipant.getStudio().getStudioId())
         .toList();

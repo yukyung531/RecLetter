@@ -22,10 +22,10 @@ public class MeetingController {
     StudioRepository studioRepository;
 
     // TODO: OPENVIDU_URL, OPENVIDU_SECRET => 나중에 .env에 넣을 예정
-    @Value("${OPENVIDU_URL}")
+    @Value("openvidu.url")
     private String OPENVIDU_URL;
 
-    @Value("${OPENVIDU_SECRET}")
+    @Value("openvidu.secret")
     private String OPENVIDU_SECRET;
 
     private RestTemplate restTemplate;

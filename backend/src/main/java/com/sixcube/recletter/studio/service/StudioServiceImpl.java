@@ -109,8 +109,8 @@ public class StudioServiceImpl implements StudioService {
       throws StudioNotFoundException {
     Studio studio = studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
 
-    List<StudioParticipant> studioParticipantList = studioParticipantService.searchParticipantStudioByUserId(
-        user.getUserId());
+    List<StudioParticipant> studioParticipantList = studioParticipantService.searchParticipantStudioByUser(
+        user);
 
     if (studioParticipantList.stream().anyMatch(
         studioParticipant -> studioParticipant.getStudio().getStudioId().equals(studioId))) {
