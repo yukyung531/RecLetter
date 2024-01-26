@@ -1,5 +1,8 @@
-package com.sixcube.recletter.clip.exception;
+package com.sixcube.recletter.clip.exhandler;
 
+import com.sixcube.recletter.clip.exception.InvalidClipFormatException;
+import com.sixcube.recletter.clip.exception.SaveClipFailException;
+import com.sixcube.recletter.clip.exception.WeirdClipUserException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
