@@ -7,6 +7,7 @@ import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.dto.res.SearchActiveUserRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioDetailRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioListRes;
+import com.sixcube.recletter.studio.dto.res.SearchStudioThumbnailRes;
 import com.sixcube.recletter.studio.repository.StudioParticipantRepository;
 import com.sixcube.recletter.studio.repository.StudioRepository;
 import com.sixcube.recletter.studio.service.StudioParticipantService;
@@ -39,14 +40,14 @@ public class StudioController {
   private final StudioService studioService;
   private final StudioParticipantService studioParticipantService;
 
-  // TODO - JPA 예외처리
   @GetMapping
   public ResponseEntity<SearchStudioListRes> searchStudioList(@AuthenticationPrincipal User user) {
     log.debug("StudioController.searchStudioList : start");
-    // 참가중인 Studio의 studioId 불러오기
-    List<String> participantStudioIdList = studioParticipantService.searchParticipantStudioByUserId(user.getUserId())
+    // 참가중인 studio의 studioId 불러오기
+    List<String> participantStudioIdList = studioParticipantService.searchParticipantStudioByUserId(
+            user.getUserId())
         .stream()
-        .map(StudioParticipant::getStudioId)
+        .map(studioParticipant -> studioParticipant.getStudio().getStudioId())
         .toList();
 
     // 참가중인 Studio 정보 불러오기
@@ -54,8 +55,6 @@ public class StudioController {
 
     SearchStudioListRes result = new SearchStudioListRes();
 
-    // TODO - 가지고 있는 clip을 불러오고, 그중 처음에 위치하는 clip의 thumbnailUrl 가져와 삽입
-    // TODO - studioId로 clip을 조회하고, 그 중에 clipOwner가 userId인 clip이 있는지 확인하여 isUpload에 삽입
     // 불러온 Studio들을 통해 StudioInfo List 생성후 할당.
     result.setStudioInfoList(
         studioList.stream().map(studio -> StudioInfo.builder()
@@ -63,9 +62,9 @@ public class StudioController {
             .studioTitle(studio.getStudioTitle())
             .isStudioOwner(user.getUserId().equals(studio.getStudioOwner().getUserId()))
             .isCompleted(studio.getIsCompleted())
-            .thumbnailUrl("")
+            .thumbnailUrl(studioService.searchMainClipInfo(studio.getStudioId()).getClipUrl())
             .expireDate(studio.getExpireDate())
-            .isUpload(false)
+            .hasMyClip(studioService.hasMyClip(studio.getStudioId(), user.getUserId()))
             .build()
         ).toList()
     );
@@ -74,67 +73,71 @@ public class StudioController {
     return ResponseEntity.ok().body(result);
   }
 
-  // TODO - JPA 예외처리
   @GetMapping("/{studioId}")
-  public ResponseEntity<SearchStudioDetailRes> searchStudioDetail(@PathVariable String studioId) {
+  public ResponseEntity<SearchStudioDetailRes> searchStudioDetail(@PathVariable String studioId,
+      @AuthenticationPrincipal User user) {
     log.debug("StudioController.searchStudioDetail : start");
-    Studio studio = studioService.searchStudioByStudioId(studioId);
+    // 찾을 수 없을 경우 StudioNotFoundException 발생
+    // 자신이 참여하지 않은 Studio를 검색할 경우 UnauthorizedToSearchStudioException 발생
+    Studio studio = studioService.searchStudioByStudioId(studioId, user);
 
-    // TODO - studioId로 보유하고 있는 clipInfoList를 삽입.
     SearchStudioDetailRes result = SearchStudioDetailRes.builder()
         .studioId(studio.getStudioId())
         .studioTitle(studio.getStudioTitle())
         .isCompleted(studio.getIsCompleted())
         .studioOwner(studio.getStudioOwner().getUserId())
-//        .clipInfoList()
-//        .studioFrameId(studio.getStudioFrame().getFrameId())
-//        .studioFontId(studio.getStudioFont().getFontId())
-//        .studioBgmId(studio.getStudioBgm().getBgmId())
+        .clipInfoList(studioService.searchStudioClipInfoList(studioId))
+        .studioFrameId(studio.getStudioFrame().getFrameId())
+        .studioFontId(studio.getStudioFont().getFontId())
+        .studioBgmId(studio.getStudioBgm().getBgmId())
         .build();
 
     log.debug("StudioController.searchStudioDetail : end");
     return ResponseEntity.ok().body(result);
   }
 
-  // TODO - JPA 예외처리
+  @GetMapping("/{studioId}/thumbnail")
+  public ResponseEntity<SearchStudioThumbnailRes> searchStudioThumbnail(
+      @PathVariable String studioId) {
+    log.debug("StudioController.searchStudioThumbnail : start");
+
+    log.debug("StudioController.searchStudioThumbnail : end");
+    return ResponseEntity.ok()
+        .body(SearchStudioThumbnailRes
+            .builder()
+            .url(studioService.searchMainClipInfo(studioId).getClipUrl())
+            .build());
+  }
+
   @PostMapping
-  public ResponseEntity<Void> createStudio(@RequestBody CreateStudioReq createStudioReq, @AuthenticationPrincipal User user) {
-    // TODO - Frame 객체를 생성하여 삽입
+  public ResponseEntity<Void> createStudio(@RequestBody CreateStudioReq createStudioReq,
+      @AuthenticationPrincipal User user) {
     log.debug("StudioController.createStudio : start");
 
-    studioService.createStudio(Studio.builder()
-        .studioOwner(user)
-        .studioTitle(createStudioReq.getStudioTitle())
-        .expireDate(createStudioReq.getExpireDate())
-//        .studioFrame(createStudioReq.getStudioFrameId())
-        .build());
-
+    // 생성할 수 없는 경우 StudioCreateFailureException 발생
+    studioService.createStudio(createStudioReq, user);
 
     log.debug("StudioController.createStudio : end");
     return ResponseEntity.ok().build();
   }
 
-  // TODO - JPA 예외처리
   @DeleteMapping("/{studioId}")
-  public ResponseEntity<Void> deleteStudio(@PathVariable String studioId) {
+  public ResponseEntity<Void> deleteStudio(@PathVariable String studioId,
+      @AuthenticationPrincipal User user) {
     log.debug("StudioController.deleteStudio : start");
 
-    studioService.deleteStudioByStudioId(studioId);
+    studioService.deleteStudioByStudioId(studioId, user);
 
     log.debug("StudioController.deleteStudio : end");
     return ResponseEntity.ok().build();
   }
 
-  // TODO - JPA 예외처리
   @PostMapping("/{studioId}")
-  public ResponseEntity<Void> joinStudio(@PathVariable String studioId, @AuthenticationPrincipal User user) {
+  public ResponseEntity<Void> joinStudio(@PathVariable String studioId,
+      @AuthenticationPrincipal User user) {
     log.debug("StudioController.joinStudio : start");
 
-    studioParticipantService.createStudioParticipant(StudioParticipant.builder()
-        .studioId(studioId)
-        .userId(user.getUserId())
-        .build()
-    );
+    studioParticipantService.createStudioParticipant(studioId, user);
 
     log.debug("StudioController.joinStudio : end");
     return ResponseEntity.ok().build();
@@ -152,10 +155,12 @@ public class StudioController {
   // TODO - JPA 예외처리
   @PutMapping("/studio/{studioId}/title")
   public ResponseEntity<Void> updateStudioTitle(@PathVariable String studioId,
-      @RequestParam String studioTitle) {
+      @RequestParam String studioTitle, @AuthenticationPrincipal User user) {
     log.debug("StudioController.updateStudioTitle : start");
 
-    studioService.updateStudioTitle(studioId, studioTitle);
+    // 해당 스튜디오에 참여하지 않은 사용자의 경우 UnauthorizedToUpdateStudioException 발생
+    // 스튜디오를 찾지 못한 경우 StudioNotFoundException 발생
+    studioService.updateStudioTitle(studioId, studioTitle, user);
 
     log.debug("StudioController.updateStudioTitle : end");
     return ResponseEntity.ok().build();

@@ -1,5 +1,8 @@
 package com.sixcube.recletter.studio.dto;
 
+import com.sixcube.recletter.template.dto.BGM;
+import com.sixcube.recletter.template.dto.Font;
+import com.sixcube.recletter.template.dto.Frame;
 import com.sixcube.recletter.user.dto.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -46,13 +49,13 @@ public class Studio implements Serializable {
   @Column(nullable = false)
   private LocalDateTime expireDate;
 
-//  @ManyToOne
-//  @JoinColumn(name = "studio_frame_id", referencedColumnName = "frame_id")
-//  private Frame studioFrame;
+  @ManyToOne
+  @JoinColumn(name = "studio_frame_id", referencedColumnName = "frame_id")
+  private Frame studioFrame;
 
-//  @ManyToOne
-//  @JoinColumn(name = "studio_font_id", referencedColumnName = "font_id")
-//  private Font studioFontId;
+  @ManyToOne
+  @JoinColumn(name = "studio_font_id", referencedColumnName = "font_id")
+  private Font studioFont;
 
   @Column(name = "studio_font_size")
   private Integer studioFontSize;
@@ -60,9 +63,9 @@ public class Studio implements Serializable {
   @Column(name = "studio_font_bold")
   private Boolean studioFontBold;
 
-//  @ManyToOne
-//  @JoinColumn(name = "studio_bgm_id", referencedColumnName = "bgm_id")
-//  private Bgm studioBgm;
+  @ManyToOne
+  @JoinColumn(name = "studio_bgm_id", referencedColumnName = "bgm_id")
+  private BGM studioBgm;
 
   @Column(name = "studio_volume")
   private Integer studioVolume;
