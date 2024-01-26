@@ -58,11 +58,12 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<SearchUserInfoRes> searchUserInfo(@AuthenticationPrincipal User user) {
-        UserInfo userInfo = new UserInfo(user);
         return ResponseEntity.ok()
                 .body(
                         SearchUserInfoRes.builder()
-                                .userInfo(userInfo)
+                                .userId(user.getUserId())
+                                .userNickname(user.getUserNickname())
+                                .userEmail(user.getUserEmail())
                                 .build()
                 );
     }
