@@ -5,14 +5,11 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * 회원 비밀번호 수정 시에 사용할 RequestBody
- */
 @NoArgsConstructor
 @Getter
-public class UpdateUserPasswordReq {
+public class ResetPasswordReq {
 
-    private String originalPassword;
+    private String userEmail;
     @NotBlank
     @Size(min = 8, max = 16)
     private String newPassword;

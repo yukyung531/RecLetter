@@ -1,5 +1,6 @@
 package com.sixcube.recletter.user.service;
 
+import com.sixcube.recletter.redis.RedisPrefix;
 import com.sixcube.recletter.redis.RedisService;
 import com.sixcube.recletter.auth.dto.Code;
 import com.sixcube.recletter.user.dto.User;
@@ -35,22 +36,22 @@ public class UserService implements UserDetailsService {
 
     public User createUser(User user) throws Exception {
 
-        if (userRepository.findByUserId(user.getUserId()) != null && user.getDeletedAt()!=null) {
+        if (userRepository.findByUserId(user.getUserId()) != null && user.getDeletedAt() != null) {
             throw new Exception("이미 존재하는 아이디입니다.");
         }
-        if (userRepository.findByUserEmail(user.getUserEmail()) != null && user.getDeletedAt()!=null) {
+        if (userRepository.findByUserEmail(user.getUserEmail()) != null && user.getDeletedAt() != null) {
             throw new Exception("이미 존재하는 이메일입니다.");
         }
-        if(!redisService.hasKey(user.getUserEmail())){
+        String key = RedisPrefix.REGIST.prefix() + user.getUserEmail();
+        if (!redisService.hasKey(key)) {
             throw new Exception("이메일 인증이 완료되지 않았습니다.");
         }
-
-        Code redisAuthCode = (Code) redisService.getValues(user.getUserEmail());
-        if(!redisAuthCode.isFlag()){
+        Code redisAuthCode = (Code) redisService.getValues(key);
+        if (!redisAuthCode.isFlag()) {
             throw new Exception("이메일 인증이 완료되지 않았습니다.");
         }
         //레디스에서 제거
-        redisService.deleteValues(user.getUserEmail());
+        redisService.deleteValues(key);
 
         String unencryptedPassword = user.getPassword();
         user.setUserPassword(passwordEncoder.encode(unencryptedPassword));
@@ -94,5 +95,26 @@ public class UserService implements UserDetailsService {
             return false;
         }
         return true;
+    }
+
+    public void resetPassword(String password,String email) throws Exception {
+
+        String key = RedisPrefix.RESET_PASSOWRD.prefix() + email;
+        if (!redisService.hasKey(key)) {
+            throw new Exception("이메일 인증이 완료되지 않았습니다.");
+        }
+        Code redisAuthCode = (Code) redisService.getValues(key);
+        if (!redisAuthCode.isFlag()) {
+            throw new Exception("이메일 인증이 완료되지 않았습니다.");
+        }
+        //레디스에서 제거
+        redisService.deleteValues(key);
+
+        String unencryptedPassword = password;
+        String encryptedPassword = passwordEncoder.encode(unencryptedPassword);
+        User user = userRepository.findByUserEmail(email);
+        user.setUserPassword(encryptedPassword);
+        userRepository.save(user);
+
     }
 }

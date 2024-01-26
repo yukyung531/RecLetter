@@ -19,15 +19,15 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender emailSender;
 
-    public void sendEmail(String toEmail, String title, String text) throws Exception {
+    public void sendEmailToRegister(String toEmail, String title, String text) throws Exception {
+
         SimpleMailMessage emailForm = createEmailForm(toEmail, title, text);
+
         try {
             emailSender.send(emailForm);
         } catch (RuntimeException e) {
-            log.debug("MailService.sendEmail exception occur toEmail: {}, " +
-                    "title: {}, text: {}", toEmail, title, text);
             //throw new BusinessLogicException(ExceptionCode.UNABLE_TO_SEND_EMAIL);
-            throw new Exception();
+            throw new Exception(e.getMessage());
         }
     }
 
