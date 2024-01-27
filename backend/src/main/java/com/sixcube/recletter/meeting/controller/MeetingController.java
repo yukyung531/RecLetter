@@ -17,7 +17,6 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Collections;
 import java.util.Map;
 
-//@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/meeting")
 @RequiredArgsConstructor
@@ -64,11 +63,11 @@ public class MeetingController {
      * @return 종료 성공 메시지
      */
     @DeleteMapping("/{sessionId}")
-    public ResponseEntity<String> deleteSession(@PathVariable("sessionId") String sessionId, @AuthenticationPrincipal User user) {
+    public ResponseEntity<Void> deleteSession(@PathVariable("sessionId") String sessionId, @AuthenticationPrincipal User user) {
         log.debug("MeetingServiceImpl.deleteSession : start");
         meetingService.deleteSession(sessionId, user);
         log.debug("MeetingServiceImpl.deleteSession : end");
-        return ResponseEntity.ok().body("Session deleted successfully");
+        return ResponseEntity.ok().build();
     }
 
 }
