@@ -32,7 +32,7 @@ public class MeetingServiceImpl implements MeetingService {
 
     private RestTemplate restTemplate;
 
-    public String initializeSession(String studioId, User user) throws StudioNotFoundException {
+    public String initializeSession(String studioId, User user) throws StudioNotFoundException, MeetingInitializeSessionFailureException {
         // 스튜디오 존재 확인
         studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
 
@@ -75,7 +75,7 @@ public class MeetingServiceImpl implements MeetingService {
         }
     }
 
-    public String createConnection(String sessionId, User user) throws StudioNotFoundException, MaxMeetingParticipantException {
+    public String createConnection(String sessionId, User user) throws StudioNotFoundException, MaxMeetingParticipantException, MeetingCreateConnectionFailureException {
         // 참가자 제한 수 설정
         final int PARTICIPANT_LIMIT = 6;
 
@@ -142,7 +142,7 @@ public class MeetingServiceImpl implements MeetingService {
         }
     }
 
-    public void deleteSession(String sessionId, User user) {
+    public void deleteSession(String sessionId, User user) throws StudioNotFoundException, MeetingDeleteSessionFailureException{
         // 스튜디오 존재 확인
         studioRepository.findById(sessionId).orElseThrow(StudioNotFoundException::new);
 
@@ -160,7 +160,7 @@ public class MeetingServiceImpl implements MeetingService {
 
         try {
             // DELETE 요청 보내기
-            ResponseEntity<String> response = restTemplate.exchange(OPENVIDU_URL + "/" + sessionId, HttpMethod.DELETE, entity, String.class);
+            restTemplate.exchange(OPENVIDU_URL + "/" + sessionId, HttpMethod.DELETE, entity, String.class);
         } catch (Exception e) {
             throw new MeetingDeleteSessionFailureException(e);
         }
