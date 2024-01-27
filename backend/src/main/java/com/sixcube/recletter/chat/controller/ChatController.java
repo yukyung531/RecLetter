@@ -20,7 +20,6 @@ import java.util.List;
 
 
 @Controller
-@Slf4j
 public class ChatController {
 
     private ChatService chatService;
