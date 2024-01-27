@@ -33,10 +33,9 @@ public class ChatServiceImpl implements ChatService {
     public ChatMessage joinChat(String studioId, ChatMessage chatMessage, User user) {
         try {
             log.debug("ChatServiceImpl.joinChat : start");
-            // studioId가 없다면 예외처리
-            if (studioId == null || studioId.isEmpty()) {
-                throw new ChatException("Invalid studioId: " + studioId);
-            }
+            // studioId에 해당하는 studio가 존재하는지 확인
+            studioRepository.findById(studioId)
+                    .orElseThrow(() -> new ChatException("Studio not found: " + studioId));
 
             // 메시지 sender에 userNickname 등록
             chatMessage.setSender(user.getUserNickname());
@@ -59,9 +58,10 @@ public class ChatServiceImpl implements ChatService {
     public ChatMessage sendMessage(String studioId, ChatMessage chatMessage, User user) {
         try {
             log.debug("ChatServiceImpl.sendMessage : start");
-            if (studioId == null || studioId.isEmpty()) {
-                throw new ChatException("Invalid studioId: " + studioId);
-            }
+            // studioId에 해당하는 studio가 존재하는지 확인
+            studioRepository.findById(studioId)
+                    .orElseThrow(() -> new ChatException("Studio not found: " + studioId));
+
             // 메시지 sender에 userNickname 등록
             chatMessage.setSender(user.getUserNickname());
 
@@ -80,9 +80,10 @@ public class ChatServiceImpl implements ChatService {
     public ChatMessage leaveChat(String studioId, ChatMessage chatMessage, User user) {
         try {
             log.debug("ChatServiceImpl.leaveChat : start");
-            if (studioId == null || studioId.isEmpty()) {
-                throw new ChatException("Invalid studioId: " + studioId);
-            }
+            // studioId에 해당하는 studio가 존재하는지 확인
+            studioRepository.findById(studioId)
+                    .orElseThrow(() -> new ChatException("Studio not found: " + studioId));
+
             // 메시지 sender에 userNickname 등록
             chatMessage.setSender(user.getUserNickname());
             // 메시지를 보낸 시간 설정

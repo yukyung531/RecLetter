@@ -123,9 +123,9 @@ function onMessageReceived(payload) {
         messageElement.classList.add('chat-message');
 
         var avatarElement = document.createElement('i'); // 아바타 요소 생성.
-        var avatarText = document.createTextNode(message.sender[0]); // 아바타 텍스트 생성.
-        avatarElement.appendChild(avatarText); // 아바타 요소에 텍스트 추가.
-        avatarElement.style['background-color'] = getAvatarColor(message.sender); // 아바타 요소의 배경색을 설정.
+        // var avatarText = document.createTextNode(message.sender[0]); // 아바타 텍스트 생성.
+        // avatarElement.appendChild(avatarText); // 아바타 요소에 텍스트 추가.
+        // avatarElement.style['background-color'] = getAvatarColor(message.sender); // 아바타 요소의 배경색을 설정.
 
         messageElement.appendChild(avatarElement); // 메시지 요소에 아바타 요소 추가.
 
@@ -151,14 +151,14 @@ function onMessageReceived(payload) {
 }
 
 // 사용자의 아바타 색상을 가져오는 함수
-function getAvatarColor(messageSender) {
-    var hash = 0;
-    for (var i = 0; i < messageSender.length; i++) {
-        hash = 31 * hash + messageSender.charCodeAt(i);
-    }
-    var index = Math.abs(hash % colors.length);
-    return colors[index];
-}
+// function getAvatarColor(messageSender) {
+//     var hash = 0;
+//     for (var i = 0; i < messageSender.length; i++) {
+//         hash = 31 * hash + messageSender.charCodeAt(i);
+//     }
+//     var index = Math.abs(hash % colors.length);
+//     return colors[index];
+// }
 
 // 채팅방을 나가는 함수
 function leaveRoom() {
