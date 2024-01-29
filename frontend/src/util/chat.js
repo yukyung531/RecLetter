@@ -1,59 +1,98 @@
-import { Client, Stomp } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
+// import SockJS from 'sockjs-client';
+import * as StompJs from '@stomp/stompjs';
+import axios from 'axios';
 
-// const websocketUrl = 'http://localhost:8080/ws';
 const websocketUrl = 'ws://localhost:8080/ws';
-const topic = '/topic/1ade6e43-e16e-4e2d-b331-b40f199a9ce3';
-const app = '/app/chat/1ade6e43-e16e-4e2d-b331-b40f199a9ce3/sendMessage';
-var client = null;
+const topic = '/topic';
+const app = '/app/chat';
+let client = null;
+let studioId = 0;
+let chatList;
+let firstEnter = false;
 
 /** create-react-app환경 */
 export function connect(id, setChattingList) {
-    const sock = new WebSocket(websocketUrl);
-    client = Stomp.over(function () {
-        return new WebSocket('ws://localhost:8080/ws');
+    client = new StompJs.Client({
+        brokerURL: websocketUrl,
+        onConnect: () => {
+            studioId = id;
+            console.log('success');
+            chatList = setChattingList;
+            subscribe();
+            if (!firstEnter) {
+                firstChatJoin(studioId);
+                firstEnter = true;
+            }
+        },
     });
-    // client = new Client({ brokerURL: 'ws://localhost:5173/ws' });
-    client.connect({}, () => {
-        client.subscribe(topic, (payload) => {
-            console.log('구독완료');
-            console.log(JSON.parse(payload.body).content);
-            showMessage(
-                '은수',
-                '1',
-                JSON.parse(payload.body).content,
-                setChattingList
-            );
-        });
+    client.activate();
+}
+
+export function firstChatJoin(studioId) {
+    client.publish({
+        destination: app + `/${studioId}/join`,
+        body: JSON.stringify({
+            type: 'JOIN',
+            studioId: studioId,
+        }),
     });
-    client.onConnect = () => {
-        console.log('열렸습니다');
-    };
+}
+
+export function subscribe() {
+    client.subscribe(topic + `/${studioId}`, (payload) => {
+        console.log(payload);
+        onMeesageReceived(payload);
+        console.log('구독이 되었습니다');
+        showMessage('은수', '1', JSON.parse(payload.body).content);
+    });
 }
 
 export function disconnect() {
-    if (client !== null) {
-        client.disconnect();
-        console.log('Disconnected');
+    if (client) {
+        client.deactivate();
+        console.log('채팅이 종료되었습니다.');
     }
 }
 
-function showMessage(userName, time, content, setChattingList) {
-    setChattingList((props) => [
+function showMessage(userName, time, content) {
+    chatList((props) => [
         ...props,
         { userName: userName, time: time, content: content },
     ]);
 }
 
-export function sendMessage(userName, time, content, setChattingList) {
-    client.send(
-        app,
-        {},
-        JSON.stringify({
+function onMeesageReceived(payload) {
+    let message = JSON.parse(payload.body); // 메시지 객체를 파싱
+    console.log(message);
+
+    // 본인이 보낸 입장 메시지는 본인에게 렌더링하지 않음
+    if (message.type === 'JOIN' && message.sender === username) {
+        console.log('작동해야지!!!정은수 핑크색 쓰지마라');
+
+        return;
+    }
+    if (message.type === 'JOIN') {
+        showMessage(message.sender, message.time, message.content);
+    }
+    // 메시지를 출력할 요소를 생성
+    let messageElement = document.createElement('li');
+
+    // 참여하고 퇴장하였을 때, css 적용
+    if (message.type === 'JOIN' || message.type === 'LEAVE') {
+        messageElement.classList.add('event-message');
+        showMessage(message.sender, message.time, message.content);
+        console.log(message.content + message.sender + message.time);
+    }
+}
+
+export function sendMessage(userName, content) {
+    client.publish({
+        destination: app + `/${studioId}/sendMessage`,
+        body: JSON.stringify({
             sender: userName,
             content: content,
             type: 'CHAT',
-            studioId: '1ade6e43-e16e-4e2d-b331-b40f199a9ce3',
-        })
-    );
+            studioId: studioId,
+        }),
+    });
 }

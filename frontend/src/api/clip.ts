@@ -4,7 +4,7 @@ import localAxios from '../util/http-commons';
 const local = localAxios();
 
 /** POST 촬영한 클립 업로드 */
-export async function uploadClip(clipUpload: ClipUpload) {
+export async function uploadClip(clipUpload: FormData) {
     return await local.post(`/api/clip`, clipUpload, {});
 }
 /** GET 클립 상세 정보 조회 */

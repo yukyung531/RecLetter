@@ -40,15 +40,15 @@ export default function Header() {
         if (isLogin) {
             return (
                 <div className="flex justify-center items-center">
-                    <a
-                        href="/mypage"
+                    <Link
+                        to="/mypage"
                         className="flex mx-2 text-xl justify-center items-center"
                     >
                         <span className="material-symbols-outlined mx-1">
                             account_circle
                         </span>
                         <p>마이페이지</p>
-                    </a>
+                    </Link>
                     <div
                         className="flex mx-2 text-xl justify-center items-center cursor-pointer"
                         onClick={onLogout}
@@ -67,7 +67,7 @@ export default function Header() {
                         <span className="material-symbols-outlined mx-1">
                             login
                         </span>
-                        <a href="login">로그인</a>
+                        <Link to="login">로그인</Link>
                     </div>
                 </div>
             );
@@ -77,13 +77,13 @@ export default function Header() {
     return (
         <div className="header w-full flex h-16 items-center justify-between px-8 z-10">
             <div className=" w-72 text cursor-pointer">
-                <a href="/" className="">
+                <Link to="/">
                     <img
                         className="h-6"
                         src="/src/assets/images/logo.png"
                         alt=""
                     />
-                </a>
+                </Link>
             </div>
             {loginStateElement()}
         </div>

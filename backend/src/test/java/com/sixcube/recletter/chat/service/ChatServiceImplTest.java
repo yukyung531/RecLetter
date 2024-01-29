@@ -1,10 +1,13 @@
 package com.sixcube.recletter.chat.service;
 
+import com.sixcube.recletter.RecLetterApplication;
 import com.sixcube.recletter.chat.dto.ChatMessage;
 import com.sixcube.recletter.user.dto.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,16 +15,16 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
+@ContextConfiguration(classes = RecLetterApplication.class)
 class ChatServiceImplTest {
 
+    @Autowired
     private ChatServiceImpl chatService;
 
     private User testUser;
 
     @BeforeEach
     void setUp() {
-        chatService = new ChatServiceImpl(); // 직접 인스턴스 생성
-
         testUser = User.builder()
                 .userId("testUser")
                 .userEmail("test@ssafy.com")
