@@ -33,12 +33,6 @@ export default function ChattingBox() {
         };
     }, [studioCurrentId]);
 
-    //send 유저 이름 바꾸기
-    const changeUser = (user: string) => {
-        setUserSelect(user);
-        console.log('유저를 바꾼다. ' + user);
-    };
-
     // 채팅 토글 바꾸기
     const changeChatToggle = () => {
         setChatToggle(!chatToggle);
@@ -62,22 +56,26 @@ export default function ChattingBox() {
                     if (item.userName === userSelect) {
                         console.log('은수작동');
                         return (
-                            <p
-                                className=" text-left h-14 bg-yellow-100"
-                                key={'chat' + index}
-                            >
-                                {item.content}
-                            </p>
+                            <div className="flex flex-col items-end py-2">
+                                <p
+                                    className="w-3/4 text-right h-14 bg-sky-500 text-white rounded-lg px-2 py-1"
+                                    key={'chat' + index}
+                                >
+                                    {item.content}
+                                </p>
+                            </div>
                         );
                     } else {
                         console.log('연수작동');
                         return (
-                            <p
-                                className=" text-right h-14 bg-sky-100"
-                                key={'chat' + index}
-                            >
-                                {item.content}
-                            </p>
+                            <div className="flex flex-col items-start py-2">
+                                <p
+                                    className="w-3/4 text-left h-14 bg-gray-400 text-black rounded-lg px-2 py-1"
+                                    key={'chat' + index}
+                                >
+                                    {item.content}
+                                </p>
+                            </div>
                         );
                     }
                 })}
@@ -88,27 +86,11 @@ export default function ChattingBox() {
     const showChattingRoom = () => {
         if (chatToggle) {
             return (
-                <div className="w-52 h-96 fixed flex flex-col justify-between items-center  bottom-8 right-8 p-2 bg-white border border-sky-400 z-30 ">
-                    <div className="w-full rounded bg-slate-100">
+                <div className="w-60 h-96 fixed flex flex-col justify-between items-center  bottom-8 right-8 p-2 bg-white border z-30 ">
+                    <div className="w-full rounded">
                         <div className="flex">
-                            <p
-                                className="w-fit mx-2 border border-black px-2 py-1 rounded cursor-pointer"
-                                onClick={() => {
-                                    changeUser('은수');
-                                }}
-                            >
-                                은수
-                            </p>
-                            <p
-                                className="w-fit mx-2 border border-black px-2 py-1 rounded  cursor-pointer"
-                                onClick={() => {
-                                    changeUser('연수');
-                                }}
-                            >
-                                연수
-                            </p>
                             <div
-                                className="w-fit border border-black px-2 py-1 rounded"
+                                className="w-fit border border-black px-2 py-1 rounded cursor-pointer"
                                 onClick={() => {
                                     changeChatToggle();
                                 }}
@@ -120,7 +102,7 @@ export default function ChattingBox() {
                     </div>
                     <div className="flex bg-white cursor-pointer">
                         <input
-                            className=" w-32 border mr-2"
+                            className=" w-40 border mr-2"
                             type="text"
                             value={comment}
                             onChange={(e) => {

@@ -113,7 +113,8 @@ export interface Letter {
     studioId: string;
     usedClipList: ClipList[];
     unusedClipList: string[];
-    studioFont: FontType[];
+    studioFrameId: string;
+    studioFont: FontType;
     studioBGM: string;
     studioVolume: number;
 }
@@ -134,17 +135,16 @@ export interface FrameType {
     frameBody: string;
 }
 
-
 //template 타입
 export interface ScriptTemplate {
-    scriptId: number,
-    scriptTitle: string,
-    scriptContent: string
+    scriptId: number;
+    scriptTitle: string;
+    scriptContent: string;
 }
 
 export interface fontTemplate {
-    fontId: number,
-    fontTitle: string,
-    fontFamily: string, 
-    fontUrl: string
+    fontId: number;
+    fontTitle: string;
+    fontFamily: string;
+    fontUrl: string;
 }

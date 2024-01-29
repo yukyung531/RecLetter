@@ -63,7 +63,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                             element={<ClipEditPage />}
                         ></Route>
                         <Route
-                            path="/lettermake"
+                            path="/lettermake/:studioId"
                             element={<LetterMakePage />}
                         ></Route>
                         <Route
