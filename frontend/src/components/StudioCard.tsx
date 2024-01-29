@@ -17,6 +17,8 @@ export default function StudioCard({props, onClick} : StudioCardProp) {
     }
 
     const studioId : string = props.studioId + "";
+
+    const expireDate : Date = new Date(props.expireDate);
     
     return(
         <div className="relative flex flex-col justify-around items-center hover:bg-[#88D1F4]" id={studioId} onClick={onClick}>
@@ -30,7 +32,7 @@ export default function StudioCard({props, onClick} : StudioCardProp) {
                     {props.studioTitle}
                 </div>
                 <p>|</p>
-                <p>D-{Math.floor((props.expireDate.getTime() - Date.now()) / (1000*60*60*24))}</p>
+                <p>D-{Math.floor((expireDate.getTime() - Date.now()) / (1000*60*60*24))}</p>
             </div>
         </div>
     )

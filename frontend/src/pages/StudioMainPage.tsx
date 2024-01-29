@@ -1,15 +1,12 @@
 import VideoCard from "../components/VideoCard";
-import studioDetail from "../dummy-datas/studioDetail.json";
 import { useState, useEffect, BaseSyntheticEvent } from "react";
 import { StudioDetail, ClipInfo } from "../types/type";
 import { useNavigate } from "react-router-dom";
 import DeleteCheckWindow from "../components/DeleteCheckWindow";
+import { studioDetail } from "../api/studio";
 
 export default function StudioMainPage() {
     const navigator = useNavigate();
-
-    //로그인 유저 정보 불러오기
-    const userId: string | null = localStorage.getItem("userId");
 
 
     //mode 0: 영상, 1: 관리
@@ -25,15 +22,14 @@ export default function StudioMainPage() {
     //영상 정보 불러오기
     // const [clipInfoList, setClipInfoList] = useState<ClipInfo[]>([]);
     const [studioDetailInfo, setStudioDetailInfo] = useState<StudioDetail>({
-        studioId: -1,
+        studioId: '',
         studioTitle: '',
-        studioStatus: false,
+        isCompleted: false,
         studioOwner: '',
         clipInfoList: [],
-        studioFrame: -1,
-        studioFont: -1,
-        studioBGM: -1,
-        studioChecklist: -1
+        studioFrameId: -1,
+        studioFontId: -1,
+        studioBGMId: -1
     });
 
 
@@ -41,17 +37,16 @@ export default function StudioMainPage() {
     useEffect(() => {
         //API 불러오는 함수로 clipInfo를 받아옴
         //우선 url query String으로부터 스튜디오 상세 정보 받아오기
-        const studioId : string|null = new URLSearchParams(location.search).get("id");
+        const splitUrl = document.location.href.split('/');
+        const studioId = splitUrl[splitUrl.length - 1];
         if(studioId !== null){
-            const studioIdNum : number = Number(studioId);
-            for(let i = 0; i < studioDetail.length; i++){
-                if(studioDetail[i].studioId === studioIdNum) {
-                    //해당되는 유저 정보 찾아 업데이트
-                    setStudioDetailInfo(studioDetail[i]);
-                    // setClipInfoList(studioDetail[i].clipInfoList);
-                    break;
-                }
+            const getDetail =async (studioId : string) => {
+                const res = await studioDetail(studioId);
+                setStudioDetailInfo({...res.data});
+                return;
             }
+
+            getDetail(studioId);
         }
 
     }, [])
@@ -94,6 +89,7 @@ export default function StudioMainPage() {
     }
 
 
+
     //좌측 사이드바
     let leftSideBar = <div className="w-4/5 flex flex-col items-center p-6 overflow-y-scroll">
                         <div className="w-full flex justify-start text-xl ">
@@ -107,22 +103,27 @@ export default function StudioMainPage() {
                                 전체 편지 자동 재생
                             </p>
                         </div>
-                        {
+                        {studioDetailInfo.clipInfoList ?
                             studioDetailInfo.clipInfoList.map((clip) => {
                                 if(clip.clipOrder != -1){
                                     return <VideoCard key={clip.clipId} onDelete={() => {onDelete(clip.clipId)}} onClick={() => {onClickEdit(clip.clipId)}} props={clip} />
                                 }
                             })
+                            :
+                            <></>
                         }
                         <div className="w-full flex justify-start text-xl ">
                             <p>선택되지 않은 영상</p>
                         </div>
                         {
+                            studioDetailInfo ?
                             studioDetailInfo.clipInfoList.map((clip) => {
                                 if(clip.clipOrder == -1){
                                     return <VideoCard key={clip.clipId} onDelete={() => {onDelete(clip.clipId)}} onClick={() => {onClickEdit(clip.clipId)}} props={clip} />
                                 }
                             })
+                            :
+                            <></>
                         }
                     </div>
 
@@ -272,11 +273,14 @@ export default function StudioMainPage() {
                                 <p>나의 영상</p>
                             </div>
                             {
+                            studioDetailInfo.clipInfoList?
                             studioDetailInfo.clipInfoList.map((clip) => {
-                                if(clip.clipOwner === userId){
+                                if(clip.clipOwner === ''){
                                     return <VideoCard key={clip.clipId} onDelete={() => {onDelete(clip.clipId)}} onClick={() => {onClickEdit(clip.clipId)}} props={clip} />
                                 }
                             })
+                            :
+                            <></>
                         }
                         </div>
                     </div>

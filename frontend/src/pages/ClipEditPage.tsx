@@ -136,19 +136,18 @@ export default function ClipEditPage() {
             const data = await ffmpeg.readFile('final.mp4');
             const newBlob = new Blob([data], {type: 'video/mp4'});
 
-            //make formdata
-            const clipForm = new FormData();
-            clipForm.append("clip", newBlob);
 
             //axios 전송
             if(studioId){
-                const sendData : ClipUpload = {
-                    studioId: studioId,
-                    clipTitle: name,
-                    clipContent: inputText,
-                    clip: clipForm,
-                }
-                await uploadClip(sendData)
+                //make formdata
+                const clipForm = new FormData();
+                clipForm.append("studioId", studioId);
+                clipForm.append("clipTitle", name);
+                clipForm.append("clipContent", inputText);
+                clipForm.append("clip", newBlob);
+                console.log(clipForm);
+
+                await uploadClip(clipForm)
                 .then((response) => {
                     if(response && response.status === httpStatusCode.OK){
                         console.log('영상이 성공적으로 전달되었습니다.')
