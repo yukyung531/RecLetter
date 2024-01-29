@@ -1,6 +1,7 @@
 package com.sixcube.recletter.auth.controller;
 
 import com.sixcube.recletter.auth.dto.res.VerifyCodeRes;
+import com.sixcube.recletter.auth.service.AuthService;
 import com.sixcube.recletter.redis.RedisPrefix;
 import com.sixcube.recletter.redis.RedisService;
 import com.sixcube.recletter.auth.jwt.TokenGenerator;
@@ -11,7 +12,6 @@ import com.sixcube.recletter.auth.dto.req.VerifyCodeReq;
 import com.sixcube.recletter.auth.dto.res.LoginRes;
 import com.sixcube.recletter.auth.dto.Token;
 import com.sixcube.recletter.auth.dto.res.TokenRes;
-import com.sixcube.recletter.auth.service.AuthService;
 import com.sixcube.recletter.user.dto.User;
 import com.sixcube.recletter.user.dto.UserInfo;
 import com.sixcube.recletter.auth.dto.res.CheckDuplicatedIdRes;
@@ -49,10 +49,10 @@ public class AuthController {
 
     private final String REGIST = "REGIST";
     private final String RESET_PASSWORD = "RESET_PASSWORD";
+    private final String CHANGE_EMAIL = "CHANGE_EMAIL";
 
     @PostMapping("/login")
     public ResponseEntity<LoginRes> login(@RequestBody LoginReq loginReq) {
-        log.debug("AuthController.login: start");
 
         //인증 완료된 객체를 최종적으로 저장
         Authentication authentication = daoAuthenticationProvider.authenticate(
@@ -68,7 +68,6 @@ public class AuthController {
         // redis에 refreshToken 저장
         String key = RedisPrefix.REFRESH_TOKEN.prefix() + userInfo.getUserId();
         redisService.setValues(key, token.getRefreshToken());
-
 
         return ResponseEntity.ok()
                 .body(
@@ -87,7 +86,6 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-
     @PostMapping("/token")
     public ResponseEntity<TokenRes> tokenRegenerate(@RequestBody TokenReq tokenReq) {
 
@@ -102,10 +100,14 @@ public class AuthController {
             if (tokenReq.getRefreshToken().equals(refreshToken)) {
                 Token token = tokenGenerator.createToken((authentication));
 
-                return ResponseEntity.ok().body(new TokenRes(token));
+                return ResponseEntity.ok().body(TokenRes
+                        .builder()
+                        .accessToken(token.getAccessToken())
+                        .refreshToken(token.getRefreshToken())
+                        .build()
+                );
             }
         }
-
         return ResponseEntity.badRequest().build(); //리프레시 토큰 만료 또는 불일치 하는 경우
     }
 
@@ -113,16 +115,17 @@ public class AuthController {
     public ResponseEntity<CheckDuplicatedIdRes> checkDuplicatiedId(@PathVariable("userId") String userId) {
 
         boolean isDuplicated = userService.checkDuplicatiedId(userId);
-        CheckDuplicatedIdRes checkDuplicatedIdRes = new CheckDuplicatedIdRes();
-        checkDuplicatedIdRes.setIsDuplicated(isDuplicated);
 
-        return ResponseEntity.ok().body(checkDuplicatedIdRes);
+        return ResponseEntity.ok().body(CheckDuplicatedIdRes
+                .builder()
+                .isDuplicated(isDuplicated)
+                .build()
+        );
     }
-
 
     //이메일 발송 요청(회원가입)
     @PostMapping("/email")
-    public ResponseEntity<Void> sendEmailToRegister(@Valid @RequestBody SendCodeToEmailReq sendCodeToEmailReq) throws Exception {
+    public ResponseEntity<Void> sendEmailToRegister(@Valid @RequestBody SendCodeToEmailReq sendCodeToEmailReq) {
 
         authService.sendEmail(sendCodeToEmailReq.getUserEmail(), REGIST);
 
@@ -135,16 +138,26 @@ public class AuthController {
 
         boolean isValid = authService.verifyCode(verifyCodeReq.getUserEmail(), verifyCodeReq.getCode(), REGIST);
 
-        VerifyCodeRes verifyCodeRes = new VerifyCodeRes();
-        verifyCodeRes.setIsValid(isValid);
-
-        return ResponseEntity.ok().body(verifyCodeRes);
-
+        return ResponseEntity.ok().body(VerifyCodeRes
+                .builder()
+                .isValid(isValid)
+                .build()
+        );
     }
+
+    //이메일 발송 요청(아이디 찾기)
+    @PostMapping("/id")
+    public ResponseEntity<Void> sendEmailToFindId(@Valid @RequestBody SendCodeToEmailReq sendCodeToEmailReq) {
+
+        authService.sendEmailToFindId(sendCodeToEmailReq.getUserEmail());
+
+        return ResponseEntity.ok().build();
+    }
+
 
     //이메일 발송 요청(비밀번호 초기화)
     @PostMapping("/password")
-    public ResponseEntity<Void> sendEmailToResetPassword(@Valid @RequestBody SendCodeToEmailReq sendCodeToEmailReq) throws Exception {
+    public ResponseEntity<Void> sendEmailToResetPassword(@Valid @RequestBody SendCodeToEmailReq sendCodeToEmailReq) {
 
         authService.sendEmail(sendCodeToEmailReq.getUserEmail(), RESET_PASSWORD);
 
@@ -157,9 +170,34 @@ public class AuthController {
 
         boolean isValid = authService.verifyCode(verifyCodeReq.getUserEmail(), verifyCodeReq.getCode(), RESET_PASSWORD);
 
-        VerifyCodeRes verifyCodeRes = new VerifyCodeRes();
-        verifyCodeRes.setIsValid(isValid);
+        return ResponseEntity.ok().body(VerifyCodeRes
+                .builder()
+                .isValid(isValid)
+                .build()
+        );
+    }
 
-        return ResponseEntity.ok().body(verifyCodeRes);
+    //이메일 발송 요청(이메일 변경)
+    @PostMapping("/info")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> sendEmailToChangeEmail(@Valid @RequestBody SendCodeToEmailReq sendCodeToEmailReq) {
+
+        authService.sendEmail(sendCodeToEmailReq.getUserEmail(), CHANGE_EMAIL);
+
+        return ResponseEntity.ok().build();
+    }
+
+    //인증코드 검증(이메일 변경)
+    @PostMapping("/info/code")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<VerifyCodeRes> verifyCodeToChangeEmail(@Valid @RequestBody VerifyCodeReq verifyCodeReq) {
+
+        boolean isValid = authService.verifyCode(verifyCodeReq.getUserEmail(), verifyCodeReq.getCode(), CHANGE_EMAIL);
+
+        return ResponseEntity.ok().body(VerifyCodeRes
+                .builder()
+                .isValid(isValid)
+                .build()
+        );
     }
 }

@@ -115,9 +115,9 @@ public class ClipController {
     }
 
     @GetMapping("/{clipId}/thumbnail")
-    public ResponseEntity<Void> searchClipThumbnail(@PathVariable int clipId) {
-
-        return ResponseEntity.ok().build();
+    public ResponseEntity<String> searchClipThumbnail(@PathVariable int clipId) {
+        String clipUrl=clipService.searchClipUrl(clipId);
+        return ResponseEntity.ok(clipUrl);
     }
 
 

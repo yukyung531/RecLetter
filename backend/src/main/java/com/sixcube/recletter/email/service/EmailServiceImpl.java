@@ -1,5 +1,6 @@
 package com.sixcube.recletter.email.service;
 
+import com.sixcube.recletter.auth.exception.EmailSendException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
@@ -19,15 +20,14 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender emailSender;
 
-    public void sendEmailToRegister(String toEmail, String title, String text) throws Exception {
+    public void sendEmail(String toEmail, String title, String text) throws EmailSendException {
 
         SimpleMailMessage emailForm = createEmailForm(toEmail, title, text);
 
         try {
             emailSender.send(emailForm);
         } catch (RuntimeException e) {
-            //throw new BusinessLogicException(ExceptionCode.UNABLE_TO_SEND_EMAIL);
-            throw new Exception(e.getMessage());
+            throw new EmailSendException();
         }
     }
 

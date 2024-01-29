@@ -19,7 +19,7 @@ import lombok.ToString;
 public class CreateUserReq {
 
   @NotBlank
-  @Size(min = 8, max = 16)
+  @Size(min = 6, max = 16)
   private String userId;
 
   @NotBlank

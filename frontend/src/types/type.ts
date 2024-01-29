@@ -24,6 +24,10 @@ export interface UserModify {
     userNickname: string;
 }
 
+export interface EmailSend {
+    userEmail: string;
+}
+
 export interface PasswordChange {
     originalPassword: string;
     newPassword: string;
@@ -56,6 +60,7 @@ export interface tokenType {
 export interface StudioMake {
     studioTitle: string;
     expireDate: string;
+    studioFrameId: number;
 }
 
 export interface StudioInfo {
@@ -94,7 +99,7 @@ export interface ClipUpload {
     studioId: string;
     clipTitle: string;
     clipContent: string;
-    clip: string;
+    clip: FormData;
 }
 export interface ClipModify {
     clipTitle: string;
@@ -119,4 +124,19 @@ export interface FontType {
     fontId: string;
     fontSize: number;
     isBold: boolean;
+}
+
+export interface FrameType {
+    frameId: number;
+    frameTitle: string;
+    thumbnail: string;
+    frameBody: string;
+}
+
+
+//template 타입
+export interface ScriptTemplate {
+    scriptId: number,
+    scriptTitle: string,
+    scriptContent: string
 }

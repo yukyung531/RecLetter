@@ -91,7 +91,12 @@ export default function ChattingBox() {
                             >
                                 연수
                             </p>
-                            <div className="w-fit border border-black px-2 py-1 rounded">
+                            <div
+                                className="w-fit border border-black px-2 py-1 rounded"
+                                onClick={() => {
+                                    changeChatToggle();
+                                }}
+                            >
                                 닫기
                             </div>
                         </div>

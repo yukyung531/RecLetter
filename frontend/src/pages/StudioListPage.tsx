@@ -2,7 +2,7 @@ import studio from '../dummy-datas/studioList.json';
 import StudioCard from '../components/StudioCard';
 import { useState, useEffect } from 'react';
 import { StudioInfo } from '../types/type';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getStudio, studioDetail } from '../api/studio';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginState } from '../util/counter-slice';
@@ -17,19 +17,11 @@ export default function StudioListPage() {
 
     useEffect(() => {
         const loginValue = localStorage.getItem('is-login');
-        if (loginValue) {
+        if (loginValue === 'true') {
             dispatch(loginState(true));
+            console.log(isLogin);
         }
-        if (!isLogin) {
-            navigate(`/`);
-        }
-    }, []);
-    useEffect(() => {
-        const loginValue = localStorage.getItem('is-login');
-        if (loginValue) {
-            dispatch(loginState(true));
-        }
-        if (!isLogin) {
+        if (loginValue === 'false' || !loginValue) {
             navigate(`/`);
         }
     }, [isLogin]);
@@ -73,12 +65,12 @@ export default function StudioListPage() {
                 <li className="text-2xl">
                     <p className="font-bold">내가 생성한 스튜디오</p>
                     <div className="flex my-4">
-                        <a
-                            href="/create"
+                        <Link
+                            to="/create"
                             className="border-dotted border-4 border-gray-600 image-select-size flex items-center justify-center"
                         >
                             + 방 생성
-                        </a>
+                        </Link>
                         {studioList.map((studio) => {
                             if (studio.isStudioOwner && !studio.studioStatus) {
                                 return (

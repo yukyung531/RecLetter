@@ -1,5 +1,6 @@
 import {
     EmailRequest,
+    EmailSend,
     PasswordCode,
     PasswordReset,
     User,
@@ -14,7 +15,7 @@ export async function login(user: User) {
     return await local.post(`/api/auth/login`, user, {});
 }
 /** POST 이메일 인증코드 요청 */
-export async function requestEmail(userEmail: string) {
+export async function requestEmail(userEmail: EmailSend) {
     return await local.post(`/api/auth/email`, userEmail, {});
 }
 

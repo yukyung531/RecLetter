@@ -14,18 +14,22 @@ export default function RegistPage() {
     const [inputNickname, setInputNickName] = useState<string>('');
     const [idCheck, setIdCheck] = useState<boolean>(false);
     const [emailCheck, setEmailCheck] = useState<boolean>(false);
+    const [codeCheck, setCodeCheck] = useState<boolean>(false);
     const navigate = useNavigate();
     /** ID 변화 감지 */
     const changeId = (e: BaseSyntheticEvent) => {
         setInputId(e.target.value);
+        setIdCheck(false);
     };
     /** 이메일 변화 감지 */
     const changeEmail = (e: BaseSyntheticEvent) => {
         setInputEmail(e.target.value);
+        setEmailCheck(false);
     };
     /** 코드 변화 감지 */
     const changeCode = (e: BaseSyntheticEvent) => {
         setInputCode(e.target.value);
+        setCodeCheck(false);
     };
     /** 비밀번호 변화 감지 */
     const changePassword = (e: BaseSyntheticEvent) => {
@@ -56,7 +60,7 @@ export default function RegistPage() {
     };
     /** 이메일 체크 함수 */
     const checkEmailAPI = async () => {
-        await requestEmail(inputEmail)
+        await requestEmail({ userEmail: inputEmail })
             .then((res) => {
                 if (res.status === httpStatusCode.OK) {
                     console.log('이메일을 보냈습니다.');
@@ -69,52 +73,12 @@ export default function RegistPage() {
                 console.log('오류가 발생했습니다.' + e);
             });
     };
-    /** ID 컴포넌트 */
-    const checkIdElement = () => {
-        if (idCheck) {
-            return <div>사용 가능합니다</div>;
-        } else {
-            return <div>사용 할 수 없습니다</div>;
-        }
-    };
-    /** Email 컴포넌트 */
-    const checkEmailElement = () => {
-        if (emailCheck) {
-            return <div>이메일을 보냈습니다.</div>;
-        } else {
-            return <div>사용 할 수 없습니다</div>;
-        }
-    };
-    const registAccount = async () => {
+    /** 코드 체크 함수 */
+    const checkCodeAPI = async () => {
         await verifyEmail({ userEmail: inputEmail, code: inputCode })
             .then(async (res) => {
                 if (res.status === httpStatusCode.OK) {
-                    if (inputPassword !== inputPasswordConfirm) {
-                        console.log('비밀번호가 다릅니다');
-                    } else if (!idCheck) {
-                        console.log('아이디 중복검사를 해주세요');
-                    } else if (!emailCheck) {
-                        console.log('이메일을 다시 확인해주세요');
-                    } else {
-                        console.log('인증번호는 대따');
-                        console.log(
-                            inputId,
-                            inputNickname,
-                            inputPassword,
-                            inputEmail
-                        );
-                        await registUser({
-                            userId: inputId,
-                            userNickname: inputNickname,
-                            userPassword: inputPassword,
-                            userEmail: inputEmail,
-                        }).then((res) => {
-                            if (res.status === httpStatusCode.OK) {
-                                console.log('회원가입이 완료되었습니다');
-                                navigate('/');
-                            }
-                        });
-                    }
+                    setCodeCheck(true);
                 } else {
                     console.log('회원가입에 실패하였습니다.');
                 }
@@ -122,6 +86,53 @@ export default function RegistPage() {
             .catch((e: Error) => {
                 console.log('오류가 발생했습니다.' + e);
             });
+    };
+    /** ID 컴포넌트 */
+    const checkIdElement = () => {
+        if (idCheck) {
+            return <div className=" text-green-600">사용 가능합니다</div>;
+        } else {
+            return <div>아이디 검증이 필요합니다.</div>;
+        }
+    };
+    /** Email 컴포넌트 */
+    const checkEmailElement = () => {
+        if (emailCheck) {
+            return <div className=" text-green-600">이메일을 보냈습니다.</div>;
+        } else {
+            return <div>사용 할 수 없습니다</div>;
+        }
+    };
+    /** Code 컴포넌트 */
+    const checkCodeElement = () => {
+        if (codeCheck) {
+            return <div className=" text-green-600">코드가 맞습니다.</div>;
+        } else {
+            return <div>코드를 다시 확인해주세요</div>;
+        }
+    };
+    const registAccount = async () => {
+        if (inputPassword !== inputPasswordConfirm) {
+            console.log('비밀번호가 다릅니다');
+        } else if (!idCheck) {
+            console.log('아이디 중복검사를 해주세요');
+        } else if (!emailCheck) {
+            console.log('이메일을 다시 확인해주세요');
+        } else if (!codeCheck) {
+            console.log('코드를 다시 확인해주세요');
+        } else {
+            await registUser({
+                userId: inputId,
+                userNickname: inputNickname,
+                userPassword: inputPassword,
+                userEmail: inputEmail,
+            }).then((res) => {
+                if (res.status === httpStatusCode.OK) {
+                    console.log('회원가입이 완료되었습니다');
+                    navigate('/');
+                }
+            });
+        }
     };
     return (
         <section className="section-center">
@@ -174,12 +185,15 @@ export default function RegistPage() {
                             changeCode(e);
                         }}
                     />
-                    <button className="border">인증하기</button>
+                    <button className="border" onClick={checkCodeAPI}>
+                        인증하기
+                    </button>
+                    {checkCodeElement()}
                 </li>
                 <li className="flex my-4">
                     <p className="mx-4">비밀번호</p>
                     <input
-                        type="text"
+                        type="password"
                         className="border"
                         onChange={(e) => {
                             changePassword(e);
@@ -189,7 +203,7 @@ export default function RegistPage() {
                 <li className="flex my-4">
                     <p className="mx-4">비밀번호 확인</p>
                     <input
-                        type="text"
+                        type="password"
                         className="border"
                         onChange={(e) => {
                             changePasswordConfig(e);
