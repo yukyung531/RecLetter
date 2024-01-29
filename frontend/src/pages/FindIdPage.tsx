@@ -1,4 +1,12 @@
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { studioState } from '../util/counter-slice';
+
 export default function FindIdPage() {
+    const dispatch = useDispatch();
+    useEffect(() => {
+        dispatch(studioState(''));
+    }, []);
     return (
         <section className="section-center">
             <p className="text-3xl font-bold mx-4 my-6">아이디 찾기</p>

@@ -1,4 +1,14 @@
+import { useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { studioState } from '../util/counter-slice';
+import { useEffect } from 'react';
+
 export default function Mainpage() {
+    const dispatch = useDispatch();
+    useEffect(() => {
+        dispatch(studioState(''));
+    }, []);
+
     return (
         <div className="relative color-bg-yellow1 z-10">
             <div className="color-bg-black h-20 absolute top-0 w-full z-30 flex justify-around items-center text-white">
@@ -21,13 +31,13 @@ export default function Mainpage() {
                         src="/src/assets/images/logo.png"
                         alt=""
                     />
-                    <a
-                        href="./login"
+                    <Link
+                        to="./login"
                         className="w-60 bg-white cursor-pointer my-6 p-4 flex justify-center items-center border border-black rounded-md"
                     >
                         <span className="material-symbols-outlined">login</span>
                         <p className="text-3xl mx-4">시작하기</p>
-                    </a>
+                    </Link>
                 </div>
             </section>
             <div className="color-bg-black h-20 absolute bottom-0 w-full z-30 flex justify-around items-center text-white"></div>

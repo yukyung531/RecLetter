@@ -1,8 +1,10 @@
-import { BaseSyntheticEvent, useState } from 'react';
+import { BaseSyntheticEvent, useEffect, useState } from 'react';
 import { checkId, requestEmail, verifyEmail } from '../api/auth';
 import { getUser, registUser } from '../api/user';
 import { httpStatusCode } from '../util/http-status';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { studioState } from '../util/counter-slice';
 
 export default function RegistPage() {
     const [inputId, setInputId] = useState<string>('');
@@ -16,6 +18,12 @@ export default function RegistPage() {
     const [emailCheck, setEmailCheck] = useState<boolean>(false);
     const [codeCheck, setCodeCheck] = useState<boolean>(false);
     const navigate = useNavigate();
+
+    const dispatch = useDispatch();
+    useEffect(() => {
+        dispatch(studioState(''));
+    }, []);
+
     /** ID 변화 감지 */
     const changeId = (e: BaseSyntheticEvent) => {
         setInputId(e.target.value);

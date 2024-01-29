@@ -4,7 +4,7 @@ import { User } from '../types/type';
 import { Link, useNavigate } from 'react-router-dom';
 import { httpStatusCode } from '../util/http-status';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginState } from '../util/counter-slice';
+import { loginState, studioState } from '../util/counter-slice';
 
 export default function LoginPage() {
     const [inputId, setInputId] = useState<string>('');
@@ -14,6 +14,10 @@ export default function LoginPage() {
     const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        dispatch(studioState(''));
+    }, []);
 
     useEffect(() => {
         const loginValue = localStorage.getItem('is-login');
