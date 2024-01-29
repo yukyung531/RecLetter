@@ -6,12 +6,14 @@ import { makeStudio } from '../api/studio';
 import { httpStatusCode } from '../util/http-status';
 import { useNavigate } from 'react-router-dom';
 import { getTemplate } from '../api/template';
+import ReactDatePicker from 'react-datepicker';
 
 export default function StudioCreatePage() {
     const [isInviteActive, setIsInviteActive] = useState<boolean>(false);
     const [studioTitle, setStudioTitle] = useState<string>('');
     const [framelist, setFrameList] = useState<FrameType[]>([]);
     const [frame, setFrame] = useState<number>(1);
+    // const [startDate, setStartDate] = useState<Date | null>(new Date());
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -28,13 +30,14 @@ export default function StudioCreatePage() {
 
     const changeTitle = (e: BaseSyntheticEvent) => {
         setStudioTitle(e.target.value);
-        console.log(moment().format('YYYY-MM-DDTHH:mm:ss'));
     };
 
     const makeOnClick = () => {
+        moment().format('YYYY-MM-DDTHH:mm:ss');
+        let time = moment().add(13, 'days').format().substring(0, 19);
         const studioParameter: StudioMake = {
             studioTitle: studioTitle,
-            expireDate: moment().format('YYYY-MM-DDTHH:mm:ss'),
+            expireDate: time,
             studioFrameId: frame,
         };
         loadMakeStudioAPI(studioParameter);
@@ -46,6 +49,7 @@ export default function StudioCreatePage() {
                 console.log(res);
                 if (res.status === httpStatusCode.OK) {
                     console.log('방생성이 성공했습니다.');
+                    navigate('/studiolist');
                 } else if (res.status === httpStatusCode.BADREQUEST) {
                     console.log('bad request');
                 }
@@ -84,6 +88,10 @@ export default function StudioCreatePage() {
                     placeholder="Placeholder"
                     onChange={changeTitle}
                 />
+                {/* <ReactDatePicker
+                    selected={startDate}
+                    onChange={(date) => setStartDate(date)}
+                /> */}
                 <h5 className="text-3xl font-bold">마감 일자</h5>
                 <input
                     className="w-120 py-3 px-3 my-4 border-2 rounded text-xl"

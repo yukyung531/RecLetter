@@ -1,5 +1,6 @@
 import { BaseSyntheticEvent, useEffect, useState } from 'react';
-import { connect, sendMessage } from '../util/chat';
+import { connect, disconnect, firstChatJoin, sendMessage } from '../util/chat';
+import { useDispatch, useSelector } from 'react-redux';
 
 type chattingType = {
     userName: string;
@@ -8,19 +9,29 @@ type chattingType = {
 };
 export default function ChattingBox() {
     const [chatToggle, setChatToggle] = useState<boolean>(false);
-    const [chattingList, setChattingList] = useState<chattingType[]>([
-        { userName: '은수', time: '시간', content: '내용' },
-        { userName: '연수', time: '시간', content: '내용2' },
-    ]);
+    const [chattingList, setChattingList] = useState<chattingType[]>([]);
     const [comment, setComment] = useState<string>();
     //test용 유저 선택
     const [userSelect, setUserSelect] = useState<string>('은수');
-    //test용 방 번호
-    const roomNum = 1;
+
+    /** 리덕스 함수 */
+    const studioCurrentId = useSelector(
+        (state: any) => state.loginFlag.studioId
+    );
+    const dispatch = useDispatch();
 
     useEffect(() => {
-        // connect(1, setChattingList);
-    }, []);
+        if (studioCurrentId !== '') {
+            console.log(studioCurrentId);
+            connect(studioCurrentId, setChattingList);
+            setChatToggle(false);
+            setChattingList([]);
+        }
+
+        return () => {
+            disconnect();
+        };
+    }, [studioCurrentId]);
 
     //send 유저 이름 바꾸기
     const changeUser = (user: string) => {
@@ -40,7 +51,7 @@ export default function ChattingBox() {
 
     // 채팅 보내기
     const sendChatting = () => {
-        sendMessage(userSelect, '1234', comment, setChattingList);
+        sendMessage(userSelect, comment);
     };
 
     // 채팅 리스트 표시
@@ -48,18 +59,23 @@ export default function ChattingBox() {
         return (
             <>
                 {chattingList.map((item, index) => {
-                    console.log(item);
                     if (item.userName === userSelect) {
                         console.log('은수작동');
                         return (
-                            <p className=" text-left h-14 bg-yellow-100">
+                            <p
+                                className=" text-left h-14 bg-yellow-100"
+                                key={'chat' + index}
+                            >
                                 {item.content}
                             </p>
                         );
                     } else {
                         console.log('연수작동');
                         return (
-                            <p className=" text-right h-14 bg-sky-100">
+                            <p
+                                className=" text-right h-14 bg-sky-100"
+                                key={'chat' + index}
+                            >
                                 {item.content}
                             </p>
                         );
@@ -130,14 +146,25 @@ export default function ChattingBox() {
         }
     };
 
+    /** 리덕스에따라 활성화되는 채팅방 */
+    const activeChatting = () => {
+        if (studioCurrentId) {
+            return (
+                <div
+                    className="w-16 h-16 fixed flex justify-center items-center bottom-8 right-8 bg-sky-400 rounded-full cursor-pointer z-20"
+                    onClick={changeChatToggle}
+                >
+                    <span className="material-symbols-outlined text-4xl">
+                        chat
+                    </span>
+                </div>
+            );
+        }
+    };
+
     return (
         <>
-            <div
-                className="w-16 h-16 fixed flex justify-center items-center bottom-8 right-8 bg-sky-400 rounded-full cursor-pointer z-20"
-                onClick={changeChatToggle}
-            >
-                <span className="material-symbols-outlined text-4xl">chat</span>
-            </div>
+            {activeChatting()}
             {showChattingRoom()}
         </>
     );

@@ -5,7 +5,7 @@ import { StudioInfo } from '../types/type';
 import { Link, useNavigate } from 'react-router-dom';
 import { getStudio, studioDetail } from '../api/studio';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginState } from '../util/counter-slice';
+import { loginState, studioState } from '../util/counter-slice';
 
 export default function StudioListPage() {
     const [studioList, setStudioList] = useState<StudioInfo[]>([]);
@@ -57,6 +57,7 @@ export default function StudioListPage() {
     useEffect(() => {
         const newStudioList: StudioInfo[] = [];
         makeStudioListAPI();
+        dispatch(studioState(''));
     }, []);
 
     return (

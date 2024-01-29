@@ -29,8 +29,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
         <Provider store={store}>
             <QueryClientProvider client={queryClient}>
-                <Header />
                 <BrowserRouter>
+                    <Header />
                     <Routes>
                         <Route path="/" element={<Mainpage />}></Route>
                         <Route path="/login" element={<LoginPage />}></Route>
