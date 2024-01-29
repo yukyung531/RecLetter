@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, BaseSyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ClipInfo, ScriptTemplate } from '../types/type';
+import { ClipInfo, ScriptTemplate, UserInfo } from '../types/type';
 import MyClipCard from '../components/MyClipCard';
 import getBlobDuration from 'get-blob-duration';
 import DeleteCheckWindow from '../components/DeleteCheckWindow';
@@ -9,6 +9,7 @@ import DeleteCheckWindow from '../components/DeleteCheckWindow';
 import { getScript } from '../api/template';
 import { httpStatusCode } from '../util/http-status';
 import ScriptTemplateCard from '../components/ScriptTemplateCard';
+import { getUser } from '../api/user';
 
 interface Const {
     audio: boolean;
@@ -45,10 +46,11 @@ export default function ClipRecodePage() {
         }
     };
 
-    //유저 아이디, 닉네임 불러오기
-    //반드시 고칠 것
-    const userId: string | null = 'ssafy_default';
-    const usernickname: string | null = 'default!반드시고쳐';
+    //유저 정보
+    const [userInfo, setUserInfo] = useState<UserInfo>({
+        userId: '',
+        userNickname: '',
+    });
 
     //url로부터 스튜디오 제목 불러오기
     const studioTitle: string | null = new URLSearchParams(location.search).get(
@@ -143,6 +145,17 @@ export default function ClipRecodePage() {
                 });
         };
         loadScript();
+
+        //+유저 정보 불러오기
+        const getUserInfo = async () => {
+            const resuser = await getUser();
+            const tempObj = { ...resuser.data };
+            setUserInfo({
+                userId: tempObj.userId,
+                userNickname: tempObj.userNickname,
+            });
+        };
+        getUserInfo();
     }, []);
 
     /**startRecord()
@@ -188,17 +201,17 @@ export default function ClipRecodePage() {
                 }
 
                 //새 클립 정보 생성
-                if (userId) {
+                if (userInfo.userId) {
                     const newClip: ClipInfo = {
                         clipId: clipNumber,
-                        clipTitle: usernickname + ' ' + clipNumber,
-                        clipOwner: userId,
+                        clipTitle: userInfo.userNickname + ' ' + clipNumber,
+                        clipOwner: userInfo.userId,
                         clipLength: Math.floor(duration),
                         clipThumbnail: '/src/assets/images/nothumb.png',
                         clipUrl: newURL,
                         clipOrder: 0,
                         clipVolume: 50,
-                        clipContent: '',
+                        clipContent: 'S',
                     };
 
                     const newArray = [...myClipList, newClip];
@@ -294,6 +307,7 @@ export default function ClipRecodePage() {
         setMyClipList((prevList) => {
             for (let i = 0; i < prevList.length; i++) {
                 if (prevList[i].clipId === deleteStateId) {
+                    URL.revokeObjectURL(prevList[i].clipUrl); //url 삭제
                     prevList.splice(i, 1);
                     break;
                 }
@@ -405,9 +419,7 @@ export default function ClipRecodePage() {
      * 영상 편집 페이지로 이동한다.
      */
     const goToClipEdit = () => {
-        console.log('Hello');
         const preview = videoPreviewRef.current;
-        console.log(myClipList);
         if (preview) {
             if (preview.src) {
                 //url기반 영상 정보 검색
@@ -431,7 +443,6 @@ export default function ClipRecodePage() {
         // Blob URL에서 데이터 불러오기
         const response = await fetch(blobUrl);
         const blob = await response.blob();
-        console.log(blob);
         // Blob 데이터를 Base64로 변환
         const reader = new FileReader();
         reader.readAsDataURL(blob);
@@ -442,11 +453,10 @@ export default function ClipRecodePage() {
                 URL.revokeObjectURL(clip.clipUrl);
             });
             //navigate
-            const studioId: string | null = new URLSearchParams(
-                location.search
-            ).get('studioid');
+            const splitUrl = document.location.href.split('/');
+            const studioId = splitUrl[splitUrl.length - 1];
             if (base64 && typeof base64 === 'string') {
-                navigate(`/clipEdit?studioid=${studioId}`, {
+                navigate(`/clipEdit/${studioId}`, {
                     state: { videoInfo, base64 },
                 });
             }
@@ -559,7 +569,6 @@ export default function ClipRecodePage() {
                                 className="text-xl text-black w-full border-black border-solid border-2 rounded"
                             ></textarea>
                             {scriptList.map((script) => {
-                                console.log(script);
                                 return (
                                     <ScriptTemplateCard
                                         key={script.scriptId}
@@ -579,7 +588,7 @@ export default function ClipRecodePage() {
                 <div className="w-3/4 editor-height bg-gray-50 flex justify-between">
                     <div className="w-full px-4 py-4 flex flex-col justify-center items-center">
                         <div className="movie-width flex justify-start items-center mt-0">
-                            <p className="text-2xl">{usernickname}</p>
+                            <p className="text-2xl">{userInfo.userNickname}</p>
                         </div>
                         <p className="my-3 py-3 rounded-full border-2 border-black movie-width text-center text-xl whitespace-pre-wrap">
                             {selectedScript}

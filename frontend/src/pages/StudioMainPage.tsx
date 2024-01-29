@@ -1,12 +1,15 @@
 import VideoCard from '../components/VideoCard';
 import { useState, useEffect, BaseSyntheticEvent } from 'react';
-import { StudioDetail, ClipInfo } from '../types/type';
-import { Link, useNavigate } from 'react-router-dom';
+import { StudioDetail, ClipInfo, UserInfo } from '../types/type';
+import { useNavigate } from 'react-router-dom';
 import DeleteCheckWindow from '../components/DeleteCheckWindow';
 import { connect } from '../util/chat';
 import { useDispatch, useSelector } from 'react-redux';
 import { studioState } from '../util/counter-slice';
 import { studioDetail } from '../api/studio';
+import { getUser } from '../api/user';
+import { deleteClip } from '../api/clip';
+import { httpStatusCode } from '../util/http-status';
 
 export default function StudioMainPage() {
     const navigator = useNavigate();
@@ -33,6 +36,25 @@ export default function StudioMainPage() {
         studioBGMId: -1,
     });
 
+    //유저 정보
+    const [userInfo, setUserInfo] = useState<UserInfo>({
+        userId: '',
+        userNickname: '',
+    });
+
+    //현재 선택한 비디오(비디오 미리보기)
+    const [selectedVideo, setSelectedVideo] = useState<ClipInfo>({
+        clipId: -1,
+        clipTitle: '',
+        clipOwner: '',
+        clipLength: -1,
+        clipThumbnail: '',
+        clipUrl: '',
+        clipOrder: -1,
+        clipVolume: -1,
+        clipContent: '',
+    });
+
     /** 리덕스 함수 */
     // const studioCurrentId = useSelector(
     //     (state: any) => state.loginFlag.studioId
@@ -49,12 +71,25 @@ export default function StudioMainPage() {
             dispatch(studioState(studioId));
             const getDetail = async (studioId: string) => {
                 const res = await studioDetail(studioId);
+                console.log(res.data);
                 setStudioDetailInfo({ ...res.data });
                 return;
             };
 
             getDetail(studioId);
         }
+
+        //유저정보 불러오기
+        const getUserInfo = async () => {
+            const resuser = await getUser();
+            const tempObj = { ...resuser.data };
+            // console.log(tempObj);
+            setUserInfo({
+                userId: tempObj.userId,
+                userNickname: tempObj.userNickname,
+            });
+        };
+        getUserInfo();
     }, []);
 
     //편집창으로 이동
@@ -68,6 +103,10 @@ export default function StudioMainPage() {
         setDeleteStateId(clipId);
     };
 
+    /** chooseDelete()
+     * 삭제창에서 삭제를 선택한 경우
+     * 삭제를 하도록 한다.
+     */
     const chooseDelete = () => {
         if (
             studioDetailInfo !== null &&
@@ -75,8 +114,21 @@ export default function StudioMainPage() {
         ) {
             setStudioDetailInfo((prevValue) => {
                 const prevList: ClipInfo[] = prevValue?.clipInfoList;
+                //탐색 시작
                 for (let i = 0; i < prevList.length; i++) {
                     if (prevList[i].clipId === deleteStateId) {
+                        //발견하면, axios 삭제 요청 보낸 후 삭제
+                        deleteClip(prevList[i].clipId)
+                            .then((res) => {
+                                if (res.status === httpStatusCode.OK) {
+                                    console.log('삭제 완료');
+                                } else {
+                                    console.log('오류');
+                                }
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                            });
                         prevList.splice(i, 1);
                         break;
                     }
@@ -92,9 +144,28 @@ export default function StudioMainPage() {
         setIsDeleting(false);
     };
 
+    /** chooseNotDelete()
+     * 삭제 확인 창에서 취소를 선택할 경우
+     * 삭제창을 닫기만 한다.
+     */
     const chooseNotDelete = () => {
         setDeleteStateId(-1);
         setIsDeleting(false);
+    };
+
+    /**selectVideo(clipId : number)
+     * 비디오 카드를 눌렀을 때, 해당 비디오가 미리보기로 보여지도록 합니다.
+     * @param clipId
+     * @returns
+     */
+    const selectVideo = (clipId: number) => {
+        console.log(clipId);
+        for (let i = 0; i < studioDetailInfo.clipInfoList.length; i++) {
+            if (studioDetailInfo.clipInfoList[i].clipId === clipId) {
+                setSelectedVideo(studioDetailInfo.clipInfoList[i]);
+                return;
+            }
+        }
     };
 
     //좌측 사이드바
@@ -123,7 +194,11 @@ export default function StudioMainPage() {
                                 onClick={() => {
                                     onClickEdit(clip.clipId);
                                 }}
+                                selectVideo={() => {
+                                    selectVideo(clip.clipId);
+                                }}
                                 props={clip}
+                                presentUser={userInfo.userId}
                             />
                         );
                     }
@@ -146,7 +221,11 @@ export default function StudioMainPage() {
                                 onClick={() => {
                                     onClickEdit(clip.clipId);
                                 }}
+                                selectVideo={() => {
+                                    selectVideo(clip.clipId);
+                                }}
                                 props={clip}
+                                presentUser={userInfo.userId}
                             />
                         );
                     }
@@ -197,15 +276,7 @@ export default function StudioMainPage() {
      * useNavigate를 이용하여 영상 녹화 화면으로 이동
      */
     const onClickRecodePage = () => {
-        navigator(
-            `/cliprecode?title=${studioDetailInfo.studioTitle}&id=${studioDetailInfo.studioId}`
-        );
-    };
-    /** onClickRecodePage
-     * useNavigate를 이용하여 단체 편집 화면으로 이동
-     */
-    const onClickLetterPage = () => {
-        navigator(`/lettermake/${studioDetailInfo.studioId}`);
+        navigator(`/cliprecode/${studioDetailInfo.studioId}`);
     };
 
     return (
@@ -263,13 +334,13 @@ export default function StudioMainPage() {
             </div>
 
             {/* 중앙 섹션 */}
-            <div className="flex w-full base-height">
+            <div className="flex w-full">
                 {/* 좌측부분 */}
                 <div className="w-1/4 editor-height flex">
                     {/* 카테고리 */}
                     <div className="w-1/5 ">
                         <div
-                            className={`h-28 bg-orange-100 flex flex-col justify-center items-center cursor-pointer hover:bg-orange-200 ${
+                            className={`h-28 bg-orange-100 flex flex-col justify-center items-center ${
                                 mode === 0 ? 'categori-selected' : ''
                             }`}
                             onClick={onPressMovieEdit}
@@ -280,7 +351,7 @@ export default function StudioMainPage() {
                             <p className="font-bold">영상</p>
                         </div>
                         <div
-                            className={`h-28 bg-orange-100 flex flex-col justify-center items-center cursor-pointer hover:bg-orange-200 ${
+                            className={`h-28 bg-orange-100 flex flex-col justify-center items-center ${
                                 mode === 1 ? 'categori-selected' : ''
                             }`}
                             onClick={onPressChecklist}
@@ -294,16 +365,18 @@ export default function StudioMainPage() {
                     {/* 카테고리 선택에 따라 */}
                     {leftSideBar}
                 </div>
-                {/* 우측부분 */}
-                <div className="w-3/4 bg-gray-50 flex justify-between">
+                ;{/* 우측부분 */}
+                <div className="w-3/4 editor-height bg-gray-50 flex justify-between">
                     <div className="w-3/4 px-4 py-4 flex flex-col justify-center items-center">
                         <div className="movie-width flex justify-start items-center">
-                            <p className="text-2xl">은쮸</p>
+                            <p className="text-2xl">
+                                {selectedVideo.clipTitle}
+                            </p>
                         </div>
-                        <img
-                            className="bg-white border my-2"
-                            style={{ width: '720px', height: '450px' }}
-                            src="/src/assets/images/nothumb.png"
+                        <video
+                            src={selectedVideo.clipUrl}
+                            controls
+                            style={{ width: '640px', height: '480px' }}
                         />
                         <div className="w-full flex justify-center items-center my-4">
                             <span className="material-symbols-outlined me-1 text-4xl">
@@ -320,7 +393,7 @@ export default function StudioMainPage() {
                     <div className="w-1/4 bg-slate-100 p-2">
                         <div className="w-full px-2 flex flex-col justify-center items-center">
                             <div
-                                className="w-full h-24 mx-4 my-2 color-bg-blue3 text-white text-xl flex flex-col justify-center items-center border rounded-md cursor-pointer hover:bg-sky-500"
+                                className="w-full h-24 mx-4 my-2 color-bg-blue3 text-white text-xl flex flex-col justify-center items-center border rounded-md"
                                 onClick={onClickRecodePage}
                             >
                                 <span className="material-symbols-outlined text-3xl">
@@ -328,15 +401,15 @@ export default function StudioMainPage() {
                                 </span>
                                 <p>새 영상 촬영하기</p>
                             </div>
-                            <div
-                                className="w-full h-24 mx-4 my-2 color-border-blue3 color-text-blue3 text-xl flex flex-col justify-center items-center border rounded-md cursor-pointer hover:bg-sky-500 hover:text-white"
-                                onClick={onClickLetterPage}
+                            <a
+                                href="/lettermake"
+                                className="w-full h-24 mx-4 my-2 color-border-blue3 color-text-blue3 text-xl flex flex-col justify-center items-center border rounded-md"
                             >
                                 <span className="material-symbols-outlined text-3xl">
                                     theaters
                                 </span>
                                 <p>영상편지 편집하기</p>
-                            </div>
+                            </a>
                         </div>
                         {/* 할당된 영상 리스트 */}
                         <div className="px-4">
@@ -345,7 +418,7 @@ export default function StudioMainPage() {
                             </div>
                             {studioDetailInfo.clipInfoList ? (
                                 studioDetailInfo.clipInfoList.map((clip) => {
-                                    if (clip.clipOwner === '') {
+                                    if (clip.clipOwner === userInfo.userId) {
                                         return (
                                             <VideoCard
                                                 key={clip.clipId}
@@ -355,7 +428,11 @@ export default function StudioMainPage() {
                                                 onClick={() => {
                                                     onClickEdit(clip.clipId);
                                                 }}
+                                                selectVideo={() => {
+                                                    selectVideo(clip.clipId);
+                                                }}
                                                 props={clip}
+                                                presentUser={userInfo.userId}
                                             />
                                         );
                                     }
