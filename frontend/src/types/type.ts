@@ -74,15 +74,15 @@ export interface StudioInfo {
 }
 
 export interface StudioDetail {
-    studioId: number;
+    studioId: string;
     studioTitle: string;
-    studioStatus: boolean;
+    isCompleted: boolean;
     studioOwner: string;
     clipInfoList: ClipInfo[];
-    studioFrame: number;
-    studioFont: number;
-    studioBGM: number;
-    studioChecklist: number;
+    studioFrameId: number;
+    studioFontId: number;
+    studioBGMId: number;
+    // studioChecklist: number;
 }
 // clip 타입
 export interface ClipInfo {
@@ -94,6 +94,7 @@ export interface ClipInfo {
     clipUrl: string;
     clipOrder: number;
     clipVolume: number;
+    clipContent: string;
 }
 export interface ClipUpload {
     studioId: string;
@@ -139,4 +140,11 @@ export interface ScriptTemplate {
     scriptId: number,
     scriptTitle: string,
     scriptContent: string
+}
+
+export interface fontTemplate {
+    fontId: number,
+    fontTitle: string,
+    fontFamily: string, 
+    fontUrl: string
 }

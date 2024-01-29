@@ -47,7 +47,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                             element={<StudioListPage />}
                         ></Route>
                         <Route
-                            path="/studiomain"
+                            path="/studiomain/:studioId"
                             element={<StudioMainPage />}
                         ></Route>
                         <Route

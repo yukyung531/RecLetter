@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import VideoCard from '../components/VideoCard';
 import studioDetail from '../dummy-datas/studioDetail.json';
 import { useState, useEffect, BaseSyntheticEvent } from 'react';
@@ -7,12 +8,23 @@ import DeleteCheckWindow from '../components/DeleteCheckWindow';
 import { connect } from '../util/chat';
 import { useDispatch, useSelector } from 'react-redux';
 import { studioState } from '../util/counter-slice';
+=======
+import VideoCard from "../components/VideoCard";
+import { useState, useEffect, BaseSyntheticEvent } from "react";
+import { StudioDetail, ClipInfo } from "../types/type";
+import { useNavigate } from "react-router-dom";
+import DeleteCheckWindow from "../components/DeleteCheckWindow";
+import { studioDetail } from "../api/studio";
+>>>>>>> origin/front/videoEditPage
 
 export default function StudioMainPage() {
     const navigator = useNavigate();
 
+<<<<<<< HEAD
     //로그인 유저 정보 불러오기
     const userId: string | null = localStorage.getItem('userId');
+=======
+>>>>>>> origin/front/videoEditPage
 
     //mode 0: 영상, 1: 관리
     const [mode, setMode] = useState<number>(0);
@@ -27,15 +39,21 @@ export default function StudioMainPage() {
     //영상 정보 불러오기
     // const [clipInfoList, setClipInfoList] = useState<ClipInfo[]>([]);
     const [studioDetailInfo, setStudioDetailInfo] = useState<StudioDetail>({
-        studioId: -1,
+        studioId: '',
         studioTitle: '',
-        studioStatus: false,
+        isCompleted: false,
         studioOwner: '',
         clipInfoList: [],
+<<<<<<< HEAD
         studioFrame: -1,
         studioFont: -1,
         studioBGM: -1,
         studioChecklist: -1,
+=======
+        studioFrameId: -1,
+        studioFontId: -1,
+        studioBGMId: -1
+>>>>>>> origin/front/videoEditPage
     });
 
     /** 리덕스 함수 */
@@ -48,6 +66,7 @@ export default function StudioMainPage() {
     useEffect(() => {
         //API 불러오는 함수로 clipInfo를 받아옴
         //우선 url query String으로부터 스튜디오 상세 정보 받아오기
+<<<<<<< HEAD
         const studioId: string | null = new URLSearchParams(
             location.search
         ).get('id');
@@ -62,7 +81,18 @@ export default function StudioMainPage() {
                     // setClipInfoList(studioDetail[i].clipInfoList);
                     break;
                 }
+=======
+        const splitUrl = document.location.href.split('/');
+        const studioId = splitUrl[splitUrl.length - 1];
+        if(studioId !== null){
+            const getDetail =async (studioId : string) => {
+                const res = await studioDetail(studioId);
+                setStudioDetailInfo({...res.data});
+                return;
+>>>>>>> origin/front/videoEditPage
             }
+
+            getDetail(studioId);
         }
     }, []);
 
@@ -106,7 +136,9 @@ export default function StudioMainPage() {
         setIsDeleting(false);
     };
 
+
     //좌측 사이드바
+<<<<<<< HEAD
     let leftSideBar = (
         <div className="w-4/5 flex flex-col items-center p-6 overflow-y-scroll">
             <div className="w-full flex justify-start text-xl ">
@@ -157,6 +189,43 @@ export default function StudioMainPage() {
             })}
         </div>
     );
+=======
+    let leftSideBar = <div className="w-4/5 flex flex-col items-center p-6 overflow-y-scroll">
+                        <div className="w-full flex justify-start text-xl ">
+                            <p>선택된 영상</p>
+                        </div>
+                        <div className="px-6 my-2 flex items-center justify-center border-2 rounded-md color-border-blue1 cursor-pointer">
+                            <span className="material-symbols-outlined text-4xl color-text-blue3">
+                                arrow_right
+                            </span>
+                            <p className="text-xl font-bold color-text-blue3">
+                                전체 편지 자동 재생
+                            </p>
+                        </div>
+                        {studioDetailInfo.clipInfoList ?
+                            studioDetailInfo.clipInfoList.map((clip) => {
+                                if(clip.clipOrder != -1){
+                                    return <VideoCard key={clip.clipId} onDelete={() => {onDelete(clip.clipId)}} onClick={() => {onClickEdit(clip.clipId)}} props={clip} />
+                                }
+                            })
+                            :
+                            <></>
+                        }
+                        <div className="w-full flex justify-start text-xl ">
+                            <p>선택되지 않은 영상</p>
+                        </div>
+                        {
+                            studioDetailInfo ?
+                            studioDetailInfo.clipInfoList.map((clip) => {
+                                if(clip.clipOrder == -1){
+                                    return <VideoCard key={clip.clipId} onDelete={() => {onDelete(clip.clipId)}} onClick={() => {onClickEdit(clip.clipId)}} props={clip} />
+                                }
+                            })
+                            :
+                            <></>
+                        }
+                    </div>
+>>>>>>> origin/front/videoEditPage
 
     if (mode == 1) {
         leftSideBar = (
@@ -339,6 +408,7 @@ export default function StudioMainPage() {
                             <div className="w-full flex justify-start text-xl ">
                                 <p>나의 영상</p>
                             </div>
+<<<<<<< HEAD
                             {studioDetailInfo.clipInfoList.map((clip) => {
                                 if (clip.clipOwner === userId) {
                                     return (
@@ -355,6 +425,18 @@ export default function StudioMainPage() {
                                     );
                                 }
                             })}
+=======
+                            {
+                            studioDetailInfo.clipInfoList?
+                            studioDetailInfo.clipInfoList.map((clip) => {
+                                if(clip.clipOwner === ''){
+                                    return <VideoCard key={clip.clipId} onDelete={() => {onDelete(clip.clipId)}} onClick={() => {onClickEdit(clip.clipId)}} props={clip} />
+                                }
+                            })
+                            :
+                            <></>
+                        }
+>>>>>>> origin/front/videoEditPage
                         </div>
                     </div>
                 </div>

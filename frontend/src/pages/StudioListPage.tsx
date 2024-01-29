@@ -30,7 +30,7 @@ export default function StudioListPage() {
     /** 카드를 클릭 했을 때 */
     const onClickSCard = (studioId: number) => {
         // viewStudioDetailAPI(studioId);
-        navigate(`/studiomain?id=${studioId}`);
+        navigate(`/studiomain/${studioId}`);
     };
 
     /** GET 스튜디오 리스트 조회 API */
