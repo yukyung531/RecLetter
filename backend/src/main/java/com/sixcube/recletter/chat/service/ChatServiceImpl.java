@@ -41,15 +41,12 @@ public class ChatServiceImpl implements ChatService {
             // studioId에 해당하는 studio가 존재하는지 확인
             studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
 
-            // 이미 해당 스튜디오에 참여한 상태인지 확인
-            studioParticipantRepository.findById(new StudioParticipantId(studioId, user.getUserId())).ifPresent(studioParticipant -> {
-                throw new AlreadyJoinedStudioException();
-            });
             // 메시지 sender에 userNickname 등록
             chatMessage.setSender(user.getUserNickname());
 
             // 메시지를 보낸 시간 설정
             chatMessage.setTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+
             // 참여 메시지 설정
             chatMessage.setContent(chatMessage.getSender() + "님이 참여하였습니다.");
 
