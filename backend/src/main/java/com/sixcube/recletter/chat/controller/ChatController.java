@@ -20,7 +20,6 @@ import java.util.List;
 
 
 @Controller
-@Slf4j
 public class ChatController {
 
     private ChatService chatService;
@@ -66,7 +65,7 @@ public class ChatController {
      */
     @GetMapping("/chat/{studioId}/userList")
     public ResponseEntity<List<String>> searchChatUserList(@PathVariable String studioId) {
-        List<String> users = chatService.searchChatUserList(studioId);
-        return new ResponseEntity<>(users, HttpStatus.OK);
+        List<String> userList = chatService.searchChatUserList(studioId);
+        return new ResponseEntity<>(userList, HttpStatus.OK);
     }
 }

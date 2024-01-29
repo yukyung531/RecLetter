@@ -30,7 +30,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // "/ws"라는 endpoint를 등록하고, 모든 도메인에서의 접근을 허용함
         // SockJS는 WebSocket을 지원하지 않는 브라우저에 대한 대안을 제공함
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*")
-                .withSockJS();
+                .setAllowedOriginPatterns("*");
     }
 }
