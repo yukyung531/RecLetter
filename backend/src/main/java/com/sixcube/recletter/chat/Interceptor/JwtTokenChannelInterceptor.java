@@ -3,7 +3,6 @@ package com.sixcube.recletter.chat.Interceptor;
 import com.sixcube.recletter.auth.jwt.JwtToUserConverter;
 import com.sixcube.recletter.chat.exception.ChatTokenInvalidFailureException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -11,7 +10,6 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
@@ -34,7 +32,7 @@ public class JwtTokenChannelInterceptor implements ChannelInterceptor {
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        // 만약 메시지의 종류가 CONNECT(연결 요청)라면
+        // 만약 메시지의 종류가 CONNECT(WebSocket 연결을 시작하는 요청)라면
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             // 메시지 헤더에서 "Authorization" 정보를 가져온다. 이 정보는 JWT 토큰을 포함하고 있다.
             String authToken = accessor.getFirstNativeHeader("Authorization");
