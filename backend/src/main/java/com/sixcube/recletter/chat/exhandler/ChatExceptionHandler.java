@@ -1,9 +1,6 @@
 package com.sixcube.recletter.chat.exhandler;
 
-import com.sixcube.recletter.chat.exception.ChatJoinFailureException;
-import com.sixcube.recletter.chat.exception.ChatLeaveFailureException;
-import com.sixcube.recletter.chat.exception.ChatSendMessageFailureException;
-import com.sixcube.recletter.chat.exception.SearchChatUserListFailureException;
+import com.sixcube.recletter.chat.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -65,6 +62,17 @@ public class ChatExceptionHandler{
         makeErrorMessage(errorMessage, e);
 
         errorMessage.append("채팅 참여자 리스트를 가져오는 데 실패했습니다.");
+        return ResponseEntity.badRequest().body(errorMessage.toString());
+    }
+
+    @ExceptionHandler(ChatTokenInvalidFailureException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ResponseEntity<String> ChatTokenInvalidFailureExceptionHandler (ChatTokenInvalidFailureException e) {
+        StringBuilder errorMessage = new StringBuilder();
+
+        makeErrorMessage(errorMessage, e);
+
+        errorMessage.append("유효하지 않은 토큰입니다.");
         return ResponseEntity.badRequest().body(errorMessage.toString());
     }
 }

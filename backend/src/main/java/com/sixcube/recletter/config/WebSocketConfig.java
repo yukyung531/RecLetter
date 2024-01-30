@@ -20,6 +20,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final JwtTokenChannelInterceptor jwtTokenChannelInterceptor;
 
+    // 클라이언트로부터 들어오는 메시지를 처리할 인터셉터를 설정
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(jwtTokenChannelInterceptor);
