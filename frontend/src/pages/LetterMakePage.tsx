@@ -326,7 +326,7 @@ export default function LetterMakePage() {
      * @param videoElement
      * @param connection
      */
-    const appendUserData = (connection: any) => {
+    const appendUserData = (videoElement, connection) => {
         let userData;
         let nodeId;
         //유저데이터, 노드 아이디 받아오기
@@ -352,7 +352,7 @@ export default function LetterMakePage() {
      *  유저를 지우는 함수입니다.
      * @param connection
      */
-    const removeUserData = (connection: any) => {
+    const removeUserData = (connection) => {
         setUsers((prev) => {
             return prev.filter((user) => {
                 user.nodeId !== connection.connectionId;

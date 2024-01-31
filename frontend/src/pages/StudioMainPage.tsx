@@ -410,6 +410,7 @@ export default function StudioMainPage() {
                         </div>
                         <video
                             src={selectedVideo.clipUrl}
+                            crossOrigin="anonymous"
                             controls
                             style={{ width: '640px', height: '480px' }}
                         />
