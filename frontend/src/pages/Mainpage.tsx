@@ -1,13 +1,28 @@
-import { useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { studioState } from '../util/counter-slice';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+import { loginState, studioState } from '../util/counter-slice';
 import { useEffect } from 'react';
 
 export default function Mainpage() {
+    /** 리덕스 설정 */
+    const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
     const dispatch = useDispatch();
+    const navigator = useNavigate();
+
     useEffect(() => {
         dispatch(studioState(''));
     }, []);
+
+    useEffect(() => {
+        const loginValue = localStorage.getItem('is-login');
+        if (loginValue === 'true') {
+            dispatch(loginState(true));
+        }
+        if (isLogin && loginValue) {
+            navigator(`/studiolist`);
+        }
+    }, [isLogin]);
+    /** 리덕스 설정 */
 
     return (
         <div className="relative color-bg-yellow1 z-10">

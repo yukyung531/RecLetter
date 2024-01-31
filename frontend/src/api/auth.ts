@@ -29,8 +29,8 @@ export async function checkId(userid: string) {
 }
 
 /** POST 비밀번호 초기화 이메일 발송 요청 */
-export async function requestPasswordEmail(password: PasswordReset) {
-    return await local.post(`/api/auth/password`, password, {});
+export async function requestPasswordEmail(userEmail: PasswordReset) {
+    return await local.post(`/api/auth/password`, userEmail, {});
 }
 
 /** POST 비밀번호 초기화 인증코드 검증 */

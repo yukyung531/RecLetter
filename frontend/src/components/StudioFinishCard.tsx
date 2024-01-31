@@ -5,7 +5,7 @@ interface StudioCardProp {
     onClick: React.MouseEventHandler<HTMLParagraphElement>;
 }
 
-export default function StudioCard({ props, onClick }: StudioCardProp) {
+export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
     //참여 여부
     let isUploadUi = (
         <p className="absolute px-3 top-2 right-2 border-2 color-bg-blue3 text-center text-lg rounded-xl text-white">
@@ -26,27 +26,28 @@ export default function StudioCard({ props, onClick }: StudioCardProp) {
 
     return (
         <div
-            className="relative w-30per flex flex-col mx-2 my-2 justify-around items-center hover:bg-[#88D1F4]"
+            className="relative w-5/6 flex mx-2 my-2 items-center hover:bg-[#88D1F4] bg-white rounded-lg shadow-lg"
             id={studioId}
             onClick={onClick}
         >
-            {isUploadUi}
             <img
-                className="w-full h-32 color-bg-sublight rounded-lg"
+                className="w-full h-32 mx-2 my-2 color-bg-sublight rounded-lg"
                 src={props.thumbnailUrl}
             />
-            <div className="flex justify-center w-full px-4 text-xl">
-                <div className="flex items-center justify-center">
-                    {props.studioTitle}
+            <div className="flex w-full h-full flex-col justify-between px-4 py-3">
+                <div className="text-xl">{props.studioTitle}</div>
+                <div className="flex justify-between items-center">
+                    <p className="color-text-darkgray">
+                        D-
+                        {Math.floor(
+                            (expireDate.getTime() - Date.now()) /
+                                (1000 * 60 * 60 * 24)
+                        )}
+                    </p>
+                    <span className="relative material-symbols-outlined top-1">
+                        attach_email
+                    </span>
                 </div>
-                <p className="mx-5">|</p>
-                <p>
-                    D-
-                    {Math.floor(
-                        (expireDate.getTime() - Date.now()) /
-                            (1000 * 60 * 60 * 24)
-                    )}
-                </p>
             </div>
         </div>
     );

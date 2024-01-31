@@ -66,11 +66,11 @@ export interface StudioMake {
 export interface StudioInfo {
     studioId: number;
     studioTitle: string;
+    isCompleted: boolean;
     isStudioOwner: boolean;
-    studioStatus: boolean;
+    hasMyClip: boolean;
     thumbnailUrl: string;
     expireDate: Date;
-    isUpload: boolean;
 }
 
 export interface StudioDetail {

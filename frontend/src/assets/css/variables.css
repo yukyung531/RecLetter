@@ -1,24 +1,82 @@
 :root {
     --color-black: #363636;
-    --color-lightgrey1: #f5f5f5;
-    --color-lightgrey2: #e9e9e9;
-    --color-grey: #d5d5d5;
-    --color-darkgrey: #626262;
-    --color-red1: #ffa9a9;
-    --color-red2: #ff777f;
-    --color-red3: #ff4954;
+    --color-lightgray1: #f5f5f5;
+    --color-lightgray2: #e9e9e9;
+    --color-gray: #d5d5d5;
+    --color-darkgray: #626262;
+    --color-main: #ff777f;
+    --color-sublight: #ffa9a9;
+    --color-subbold: #ff4954;
     --color-blue1: #9ccaff;
     --color-blue2: #65a6f2;
     --color-blue3: #2c75e2;
     --color-yellow1: #fffacf;
     --color-yellow2: #fff593;
     --color-yellow3: #ffc165;
+    --color-yellowbg: #fffacf;
+    --color-ivory: #fafaf0;
 }
 .color-bg-black {
     background-color: var(--color-black);
 }
 .color-text-black {
     color: var(--color-black);
+}
+.color-bg-main {
+    background-color: var(--color-main);
+}
+.hover\:color-bg-main:hover {
+    --tw-text-opacity: 1;
+    background-color: var(--color-main);
+}
+.color-text-main {
+    color: var(--color-main);
+}
+.hover\:color-text-main:hover {
+    --tw-text-opacity: 1;
+    color: var(--color-main);
+}
+.color-border-main {
+    border-color: var(--color-main);
+}
+.hover\:color-border-main:hover {
+    --tw-text-opacity: 1;
+    border-color: var(--color-main);
+}
+
+.color-bg-sublight {
+    background-color: var(--color-sublight);
+}
+.hover\:color-bg-sublight:hover {
+    --tw-text-opacity: 1;
+    background-color: var(--color-sublight);
+}
+.color-text-sublight {
+    color: var(--color-sublight);
+}
+.hover\:color-text-subbold:hover {
+    --tw-text-opacity: 1;
+    color: var(--color-subbold);
+}
+.color-border-sublight {
+    border-color: var(--color-sublight);
+}
+.hover\:color-border-sublight:hover {
+    --tw-text-opacity: 1;
+    border-color: var(--color-sublight);
+}
+.color-bg-subbold {
+    background-color: var(--color-subbold);
+}
+.hover\:color-bg-subbold:hover {
+    --tw-text-opacity: 1;
+    background-color: var(--color-subbold);
+}
+.color-text-subbold {
+    color: var(--color-subbold);
+}
+.color-border-subbold {
+    border-color: var(--color-subbold);
 }
 .color-bg-yellow1 {
     background-color: var(--color-yellow1);
@@ -31,6 +89,15 @@
 }
 .color-text-yellow2 {
     color: var(--color-yellow2);
+}
+.color-bg-yellow3 {
+    background-color: var(--color-yellow3);
+}
+.color-text-yellow3 {
+    color: var(--color-yellow3);
+}
+.color-bg-yellowbg {
+    background-color: var(--color-yellowbg);
 }
 .color-bg-blue1 {
     background-color: var(--color-blue1);
@@ -59,21 +126,34 @@
 .color-border-blue3 {
     border-color: var(--color-blue3);
 }
-.color-bg-red1 {
-    background-color: var(--color-red1);
+
+.color-bg-ivory {
+    background-color: var(--color-ivory);
 }
-.color-text-red1 {
-    color: var(--color-red1);
+.color-text-ivory {
+    color: var(--color-ivory);
 }
-.color-bg-red2 {
-    background-color: var(--color-red2);
+.color-border-ivory {
+    border-color: var(--color-ivory);
 }
-.color-text-red2 {
-    color: var(--color-red2);
+.color-bg-darkgray {
+    background-color: var(--color-darkgray);
 }
-.color-bg-red3 {
-    background-color: var(--color-red3);
+.color-text-darkgray {
+    color: var(--color-darkgray);
 }
-.color-text-red3 {
-    color: var(--color-red3);
+.color-border-darkgray {
+    border-color: var(--color-darkgray);
+}
+.color-bg-lightgray1 {
+    background-color: var(--color-lightgray1);
+}
+.color-bg-gray {
+    background-color: var(--color-gray);
+}
+.color-text-gray {
+    color: var(--color-gray);
+}
+.color-border-gray {
+    border-color: var(--color-gray);
 }
