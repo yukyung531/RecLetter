@@ -31,7 +31,13 @@ export default function StudioCard({ props, onClick }: StudioCardProp) {
             onClick={onClick}
         >
             {isUploadUi}
-            <img className="image-select-size" src={props.thumbnailUrl} />
+            <video
+                className="image-select-size"
+                src={props.thumbnailUrl}
+                crossOrigin="anonymous"
+                controlsList="nodownload"
+            />{' '}
+            {/*"https://d3kbsbmyfcnq5r.cloudfront.net/favicon.png" */}
             <div className="flex justify-around w-full px-4">
                 <div className="flex items-center justify-center">
                     {props.studioTitle}

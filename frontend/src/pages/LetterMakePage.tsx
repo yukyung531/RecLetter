@@ -371,6 +371,7 @@ export default function LetterMakePage() {
     const createSession = async (sessionId: string) => {
         const response = await axios.post(
             APPLICATION_SERVER_URL + 'api/sessions',
+            { customSessionId: sessionId },
             {
                 headers: { 'Content-Type': 'application/json' },
             }
