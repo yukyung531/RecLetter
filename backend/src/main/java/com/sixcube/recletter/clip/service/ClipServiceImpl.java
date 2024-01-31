@@ -1,7 +1,11 @@
 package com.sixcube.recletter.clip.service;
 
+import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.sixcube.recletter.clip.Repository.ClipRepository;
 import com.sixcube.recletter.clip.dto.Clip;
@@ -20,9 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.net.URL;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -31,10 +34,14 @@ public class ClipServiceImpl implements ClipService {
     private final ClipRepository clipRepository;
     private final StudioParticipantRepository studioParticipantRepository;
     private final AmazonS3Client amazonS3Client;
-    private final String cloudFront = "https://d3f9xm3snzk3an.cloudfront.net/";
+//    private final String cloudFront = "https://d3f9xm3snzk3an.cloudfront.net/";
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
+
+//    @Value("${cloudfront}")
+    @Value("${AWS_FRONT}")
+    private String cloudFront;
     private final String extension = ".mp4";
 
     private StudioParticipant checkValidUserClip(Clip clip) {
@@ -47,7 +54,7 @@ public class ClipServiceImpl implements ClipService {
             throw new InvalidClipFormatException();
         }
         //아직 studioParticipant Table이 동작하지 않아 실행을 위해 주석 처리. 추후 구현 완료되면 예외처리를 위해 주석 해제 예정
-//        checkValidUserClip(clip); 
+        checkValidUserClip(clip);
         try {
             clipRepository.save(clip);
             System.out.println(clip);
@@ -121,7 +128,8 @@ public class ClipServiceImpl implements ClipService {
     }
 
     public void saveS3Object(Clip clip, MultipartFile file) throws IOException,AmazonS3Exception {
-        String fileKey = getFileKey(clip);
+//        String fileKey = "test/"+clip.getClipTitle()+".mp4";
+        String fileKey= getFileKey(clip);
         System.out.println(fileKey);
 
         ObjectMetadata metadata = new ObjectMetadata();
@@ -143,7 +151,7 @@ public class ClipServiceImpl implements ClipService {
         for (Clip clip : clipList) {
             ClipInfo clipInfo = ClipInfo.builder()
                     .clipId(clip.getClipId())
-                    .clipTitle(clip.getClipContent())
+                    .clipTitle(clip.getClipTitle())
                     .clipVolume(clip.getClipVolume())
                     .clipOwner(clip.getClipOwner())
                     .clipContent(clip.getClipContent())
@@ -153,5 +161,58 @@ public class ClipServiceImpl implements ClipService {
             clipInfoList.add(clipInfo);
         }
         return clipInfoList;
+    }
+
+    public String getPreSignedUrl(String fileName){
+        GeneratePresignedUrlRequest generatePresignedUrlRequest=getGeneratePreSignedUrlRequest(bucket,fileName);
+        URL url=amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest);
+        return url.toString();
+    }
+
+    /**
+     * 파일 업로드용(PUT) presigned url 생성
+     * @param bucket 버킷 이름
+     * @param fileName S3 업로드용 파일 이름
+     * @return presigned url
+     */
+    private GeneratePresignedUrlRequest getGeneratePreSignedUrlRequest(String bucket, String fileName) {
+        GeneratePresignedUrlRequest generatePresignedUrlRequest =
+                new GeneratePresignedUrlRequest(bucket, fileName)
+                        .withMethod(HttpMethod.PUT)
+                        .withExpiration(getPreSignedUrlExpiration());
+        generatePresignedUrlRequest.addRequestParameter(
+                Headers.S3_CANNED_ACL,
+                CannedAccessControlList.PublicRead.toString());
+        return generatePresignedUrlRequest;
+    }
+
+    /**
+     * presigned url 유효 기간 설정
+     * @return 유효기간
+     */
+    private Date getPreSignedUrlExpiration() {
+        Date expiration = new Date();
+        long expTimeMillis = expiration.getTime();
+        expTimeMillis += 1000 * 60 * 3;
+        expiration.setTime(expTimeMillis);
+        return expiration;
+    }
+
+    /**
+     * 파일 고유 ID를 생성
+     * @return 36자리의 UUID
+     */
+    private String createFileId() {
+        return UUID.randomUUID().toString();
+    }
+
+    /**
+     * 파일의 전체 경로를 생성
+     * @param prefix 디렉토리 경로
+     * @return 파일의 전체 경로
+     */
+    private String createPath(String prefix, String fileName) {
+        String fileId = createFileId();
+        return String.format("%s/%s", prefix, fileId + fileName);
     }
 }

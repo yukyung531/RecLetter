@@ -34,8 +34,10 @@ public class ClipController {
 
     private final ClipService clipService;
 
-    private final String cloudFront="https://d3f9xm3snzk3an.cloudfront.net/";
+//    private final String cloudFront="https://d3f9xm3snzk3an.cloudfront.net/";
 
+    @Value("${AWS_FRONT}")
+    private String cloudFront;
     private final AmazonS3Client amazonS3Client;
 
     @Value("${cloud.aws.s3.bucket}")
@@ -123,6 +125,16 @@ public class ClipController {
 
 
 /************************************/
+
+    @GetMapping("/url/{title}")
+    public ResponseEntity<Map> getPresignedUrl(@PathVariable String title){
+        Map<String,Object> res=new HashMap<>();
+        res.put("title",title);
+        res.put("url",clipService.getPreSignedUrl(title));
+        return ResponseEntity.ok(res);
+    }
+
+
 
     //studioId에 따른 clipInfoList 조회 테스트
     @GetMapping("/studio/{studioId}")
