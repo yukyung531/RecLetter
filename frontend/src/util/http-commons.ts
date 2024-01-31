@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { httpStatusCode } from './http-status';
 import { tokenType } from '../types/type';
 import { token } from '../api/auth';
@@ -6,7 +6,6 @@ import { token } from '../api/auth';
 // VITE_REACT_API_URL 의 위치 : .env
 
 const VITE_REACT_API_URL = import.meta.env.VITE_REACT_API_URL;
-
 // api axios 환경
 export default function localAxios() {
     const instance = axios.create({

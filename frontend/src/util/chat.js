@@ -12,8 +12,14 @@ let firstEnter = false;
 
 /** create-react-app환경 */
 export function connect(id, setChattingList) {
+    const token = localStorage.getItem('access-token');
+    console.log(token);
+
     client = new StompJs.Client({
         brokerURL: websocketUrl,
+        connectHeaders: {
+            Authorization: `Bearer ${token}`, // JWT 토큰을 헤더에 추가
+        },
         onConnect: () => {
             studioId = id;
             console.log('success');
@@ -29,6 +35,7 @@ export function connect(id, setChattingList) {
 }
 
 export function firstChatJoin(studioId) {
+    console.log('조인 실행대쪄');
     client.publish({
         destination: app + `/${studioId}/join`,
         body: JSON.stringify({
@@ -51,6 +58,7 @@ export function disconnect() {
     if (client) {
         client.deactivate();
         console.log('채팅이 종료되었습니다.');
+        firstEnter = false;
     }
 }
 
@@ -66,11 +74,11 @@ function onMeesageReceived(payload) {
     console.log(message);
 
     // 본인이 보낸 입장 메시지는 본인에게 렌더링하지 않음
-    if (message.type === 'JOIN' && message.sender === username) {
-        console.log('작동해야지!!!정은수 핑크색 쓰지마라');
+    // if (message.type === 'JOIN' && message.sender === username) {
+    //     console.log('작동해야지!!!정은수 핑크색 쓰지마라');
 
-        return;
-    }
+    //     return;
+    // }
     if (message.type === 'JOIN') {
         showMessage(message.sender, message.time, message.content);
     }

@@ -6,7 +6,7 @@ import DeleteCheckWindow from '../components/DeleteCheckWindow';
 import { connect } from '../util/chat';
 import { useDispatch, useSelector } from 'react-redux';
 import { studioState } from '../util/counter-slice';
-import { studioDetail } from '../api/studio';
+import { enterStudio, modifyStudioTitle, studioDetail } from '../api/studio';
 import { getUser } from '../api/user';
 import { deleteClip } from '../api/clip';
 import { httpStatusCode } from '../util/http-status';
@@ -70,13 +70,28 @@ export default function StudioMainPage() {
         if (studioId !== null) {
             dispatch(studioState(studioId));
             const getDetail = async (studioId: string) => {
-                const res = await studioDetail(studioId);
-                console.log(res.data);
-                setStudioDetailInfo({ ...res.data });
+                await studioDetail(studioId).then((res) => {
+                    if (res.status === httpStatusCode.OK) {
+                        console.log('겱국 바다와쪄');
+                        console.log(res.data);
+                        setStudioDetailInfo(res.data);
+                    }
+                });
                 return;
             };
 
-            getDetail(studioId);
+            const enterStudioAPI = async (studioId: string) => {
+                await enterStudio(studioId)
+                    .then((res) => {
+                        console.log(res);
+                        getDetail(studioId);
+                    })
+                    .catch(() => {
+                        console.log('오류떠서 재실행');
+                        getDetail(studioId);
+                    });
+            };
+            enterStudioAPI(studioId);
         }
 
         //유저정보 불러오기
@@ -170,17 +185,15 @@ export default function StudioMainPage() {
 
     //좌측 사이드바
     let leftSideBar = (
-        <div className="w-4/5 flex flex-col items-center p-6 overflow-y-scroll">
+        <div className="w-4/5 h-full flex flex-col items-center px-6 py-4 overflow-y-scroll color-bg-lightgray1">
             <div className="w-full flex justify-start text-xl ">
                 <p>선택된 영상</p>
             </div>
-            <div className="px-6 my-2 flex items-center justify-center border-2 rounded-md color-border-blue1 cursor-pointer">
-                <span className="material-symbols-outlined text-4xl color-text-blue3">
+            <div className="px-6 my-2 flex items-center justify-center bg-white border-2 rounded-md color-text-main color-border-main cursor-pointer hover:color-bg-sublight hover:text-white hover:color-border-sublight">
+                <span className="material-symbols-outlined text-4xl">
                     arrow_right
                 </span>
-                <p className="text-xl font-bold color-text-blue3">
-                    전체 편지 자동 재생
-                </p>
+                <p className="text-xl font-bold">전체 편지 자동 재생</p>
             </div>
             {studioDetailInfo.clipInfoList ? (
                 studioDetailInfo.clipInfoList.map((clip) => {
@@ -261,6 +274,7 @@ export default function StudioMainPage() {
 
     const handleStudioName = () => {
         //DB에 변경 요청
+        putStudiotitleAPI();
         setIsEditingName(false);
     };
 
@@ -272,6 +286,17 @@ export default function StudioMainPage() {
         }
     };
 
+    /** 스튜디오 제목 수정 API */
+    const putStudiotitleAPI = async () => {
+        const id = studioDetailInfo.studioId;
+        const title = studioDetailInfo.studioTitle;
+        await modifyStudioTitle(id, title).then((res) => {
+            if (res.status === httpStatusCode.OK) {
+                console.log('제목이 수정되었습니닷!!!!');
+            }
+        });
+    };
+
     /** onClickRecodePage
      * useNavigate를 이용하여 영상 녹화 화면으로 이동
      */
@@ -279,8 +304,13 @@ export default function StudioMainPage() {
         navigator(`/cliprecode/${studioDetailInfo.studioId}`);
     };
 
+    /** 리스트로 이동 */
+    const moveStudioList = () => {
+        navigator(`/studiolist`);
+    };
+
     return (
-        <section className="relative section-top pt-16 ">
+        <section className="relative section-top pt-14 ">
             {isDeleting ? (
                 <DeleteCheckWindow
                     onClickOK={chooseDelete}
@@ -289,13 +319,16 @@ export default function StudioMainPage() {
             ) : (
                 <></>
             )}
-            <div className="h-20 w-full px-12 bg-black text-white flex justify-between items-center">
+            <div className="h-16 w-full px-12 bg-black text-white flex justify-between items-center">
                 <div className="flex items-center">
-                    <span className="material-symbols-outlined">
+                    <span
+                        className="test-2xl material-symbols-outlined cursor-pointer"
+                        onClick={moveStudioList}
+                    >
                         arrow_back_ios
                     </span>
                     {!isEditingName ? (
-                        <p className="text-3xl w-64">
+                        <p className="text-2xl w-64 ms-6 cursor-default">
                             {studioDetailInfo
                                 ? studioDetailInfo.studioTitle
                                 : 'new studio'}
@@ -304,7 +337,7 @@ export default function StudioMainPage() {
                         <input
                             type="text"
                             value={studioDetailInfo?.studioTitle}
-                            className="text-3xl text-black w-64"
+                            className="text-2xl text-black w-64"
                             onChange={updateStudioName}
                         />
                     )}
@@ -312,35 +345,37 @@ export default function StudioMainPage() {
 
                     {!isEditingName ? (
                         <span
-                            className="material-symbols-outlined mx-2 text-3xl"
+                            className="material-symbols-outlined mx-2 text-2xl cursor-pointer"
                             onClick={handleStudioEditing}
                         >
                             edit
                         </span>
                     ) : (
                         <span
-                            className="material-symbols-outlined mx-2 text-3xl"
+                            className="material-symbols-outlined mx-2 text-2xl cursor-pointer"
                             onClick={handleStudioName}
                         >
                             check_box
                         </span>
                     )}
 
-                    <span className="material-symbols-outlined mx-2 text-3xl">
+                    <span className="material-symbols-outlined mx-2 text-2xl cursor-pointer">
                         group_add
                     </span>
                 </div>
-                <a className="btn-cover color-bg-red3">영상편지 완성하기</a>
+                <a className=" w-52 text-center p-1 rounded-lg text-xl color-bg-yellow2 text-black">
+                    영상편지 완성하기
+                </a>
             </div>
 
             {/* 중앙 섹션 */}
-            <div className="flex w-full">
+            <div className="flex w-full h-full">
                 {/* 좌측부분 */}
-                <div className="w-1/4 editor-height flex">
+                <div className="w-1/4 h-full flex">
                     {/* 카테고리 */}
-                    <div className="w-1/5 ">
+                    <div className="w-1/6 color-text-main ">
                         <div
-                            className={`h-28 bg-orange-100 flex flex-col justify-center items-center ${
+                            className={`h-16  flex flex-col justify-center items-center cursor-pointer ${
                                 mode === 0 ? 'categori-selected' : ''
                             }`}
                             onClick={onPressMovieEdit}
@@ -351,7 +386,7 @@ export default function StudioMainPage() {
                             <p className="font-bold">영상</p>
                         </div>
                         <div
-                            className={`h-28 bg-orange-100 flex flex-col justify-center items-center ${
+                            className={`h-16 flex flex-col justify-center items-center cursor-pointer ${
                                 mode === 1 ? 'categori-selected' : ''
                             }`}
                             onClick={onPressChecklist}
@@ -365,8 +400,8 @@ export default function StudioMainPage() {
                     {/* 카테고리 선택에 따라 */}
                     {leftSideBar}
                 </div>
-                ;{/* 우측부분 */}
-                <div className="w-3/4 editor-height bg-gray-50 flex justify-between">
+                {/* 우측부분 */}
+                <div className="w-3/4 h-full flex justify-between">
                     <div className="w-3/4 px-4 py-4 flex flex-col justify-center items-center">
                         <div className="movie-width flex justify-start items-center">
                             <p className="text-2xl">
@@ -390,10 +425,10 @@ export default function StudioMainPage() {
                     </div>
 
                     {/* (영상 리스트, 참가자 관리) */}
-                    <div className="w-1/4 bg-slate-100 p-2">
+                    <div className="w-1/4 color-bg-lightgray1 p-2">
                         <div className="w-full px-2 flex flex-col justify-center items-center">
                             <div
-                                className="w-full h-24 mx-4 my-2 color-bg-blue3 text-white text-xl flex flex-col justify-center items-center border rounded-md"
+                                className="w-full h-24 mx-4 my-2 color-bg-main text-white text-xl flex flex-col justify-center items-center border rounded-md cursor-pointer hover:color-bg-subbold"
                                 onClick={onClickRecodePage}
                             >
                                 <span className="material-symbols-outlined text-3xl">
@@ -403,7 +438,7 @@ export default function StudioMainPage() {
                             </div>
                             <a
                                 href="/lettermake"
-                                className="w-full h-24 mx-4 my-2 color-border-blue3 color-text-blue3 text-xl flex flex-col justify-center items-center border rounded-md"
+                                className="w-full h-24 mx-4 my-2 color-border-main bg-white color-text-main text-xl flex flex-col justify-center items-center border rounded-md cursor-pointer hover:color-bg-sublight hover:text-white hover:color-border-sublight"
                             >
                                 <span className="material-symbols-outlined text-3xl">
                                     theaters
@@ -412,7 +447,7 @@ export default function StudioMainPage() {
                             </a>
                         </div>
                         {/* 할당된 영상 리스트 */}
-                        <div className="px-4">
+                        <div className="px-4 mt-16">
                             <div className="w-full flex justify-start text-xl ">
                                 <p>나의 영상</p>
                             </div>

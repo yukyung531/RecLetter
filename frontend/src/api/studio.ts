@@ -4,8 +4,10 @@ import localAxios from '../util/http-commons';
 const local = localAxios();
 
 /** GET 스튜디오 리스트 조회 */
-export async function getStudio() {
-    return await local.get(`/api/studio`);
+export async function getStudio(token: string) {
+    return await local.get(`/api/studio`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
 }
 
 /** GET 스튜디오 상세 정보 조회 */

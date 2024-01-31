@@ -74,60 +74,78 @@ export default function StudioCreatePage() {
     };
 
     return (
-        <section className="relative section-top pt-20 mt-20 ml-16">
+        <section className="relative w-full flex flex-col justify-center items-center pt-12 mt-12">
             {isInviteActive ? (
                 <AddMemberWindow onClose={onPressCloseWindow} />
             ) : (
                 <></>
             )}
-            <div>
-                <h5 className="text-3xl font-bold">스튜디오 제목</h5>
-                <input
-                    className="w-120 py-3 px-3 my-4 border-2 rounded text-xl"
-                    type="text"
-                    placeholder="Placeholder"
-                    onChange={changeTitle}
-                />
-                {/* <ReactDatePicker
-                    selected={startDate}
-                    onChange={(date) => setStartDate(date)}
-                /> */}
-                <h5 className="text-3xl font-bold">마감 일자</h5>
-                <input
-                    className="w-120 py-3 px-3 my-4 border-2 rounded text-xl"
-                    type="text"
-                    placeholder="Placeholder"
-                />
-                <p
-                    className="btn-cover color-bg-yellow2"
-                    onClick={onPressAddMember}
-                >
-                    멤버추가
-                </p>
-                <h5 className="text-3xl font-bold mt-16">영상 프레임</h5>
-                <div className="flex">
-                    {framelist.map((item, index) => {
-                        return (
-                            <div
-                                key={'frameId :' + index}
-                                className="flex flex-col justify-center items-center"
-                                onClick={() => {
-                                    selectFrame(item.frameId);
-                                }}
-                            >
-                                <img
-                                    className="image-select-size"
-                                    src="/src/assets/images/nothumb.png"
-                                />
-                                <p>{item.frameTitle}</p>
-                            </div>
-                        );
-                    })}
+            <div className="w-3/4 flex flex-col justify-center items-center">
+                <div className="flex w-full justify-between">
+                    <div>
+                        <h5 className="text-2xl font-bold">스튜디오 제목</h5>
+                        <input
+                            className="w-128 py-2 px-3 my-4 border-2 rounded-xl text-xl"
+                            type="text"
+                            placeholder="Placeholder"
+                            onChange={changeTitle}
+                        />
+                    </div>
+                    <div>
+                        <h5 className="text-2xl font-bold">
+                            마감일자 (최대 14일 뒤)
+                        </h5>
+                        <input
+                            className="w-105 py-2 px-3 my-4 border-2 rounded-xl text-xl"
+                            type="number"
+                            max={14}
+                            min={1}
+                            placeholder="Placeholder"
+                        />
+                        {/* <p
+                            className="btn-cover color-bg-yellow2"
+                            onClick={onPressAddMember}
+                        >
+                            멤버추가
+                        </p> */}
+                    </div>
                 </div>
-            </div>
-
-            <div className="w-full flex justify-end pe-32 py-12">
-                <div className="btn-cover color-bg-blue1" onClick={makeOnClick}>
+                <div>
+                    <h5 className="text-2xl font-bold mt-8">영상 프레임</h5>
+                    <div className="flex flex-wrap h-96 overflow-y-scroll">
+                        {framelist.map((item, index) => {
+                            const frameSrc =
+                                '/src/assets/frames/frame' +
+                                item.frameId +
+                                '.png';
+                            return (
+                                <div
+                                    key={'frameId :' + index}
+                                    className="flex flex-col justify-center items-center py-1 rounded-lg"
+                                    onClick={() => {
+                                        selectFrame(item.frameId);
+                                    }}
+                                    style={{
+                                        border:
+                                            index + 1 === frame
+                                                ? '2px solid #ff777f'
+                                                : '2px solid white',
+                                    }}
+                                >
+                                    <img
+                                        className="image-select-size rounded-lg"
+                                        src={frameSrc}
+                                    />
+                                    <p>{item.frameTitle}</p>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+                <div
+                    className="w-72 w- py-3 my-12 text-center color-bg-main text-xl cursor-pointer text-white rounded-lg hover:color-bg-subbold"
+                    onClick={makeOnClick}
+                >
                     스튜디오 생성
                 </div>
             </div>
