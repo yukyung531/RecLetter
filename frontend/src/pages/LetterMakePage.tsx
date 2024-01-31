@@ -6,12 +6,12 @@ import {
     fontTemplate,
     UserInfo,
 } from '../types/type';
-import { getTemplate, getFont, getBgm } from '../api/template';
+import { getTemplate, getFont } from '../api/template';
 import { httpStatusCode } from '../util/http-status';
 import { OpenVidu, Session } from 'openvidu-browser';
 // import { connectSession, createSession, endSession } from '../api/openvidu';
 import { getUser } from '../api/user';
-import { connect } from '../util/chat';
+// import { connect } from '../util/chat';
 import axios from 'axios';
 
 export default function LetterMakePage() {
@@ -20,37 +20,37 @@ export default function LetterMakePage() {
 
     ///////////////////////////////////////////////초기 설정////////////////////////////////////////////////////////
 
-    //영상리스트 with 스튜디오 정보
-    const [studioDetailInfo, setStudioDetailInfo] = useState<StudioDetail>({
-        studioId: '',
-        studioTitle: '',
-        studioOwner: '',
-        isCompleted: false,
-        clipInfoList: [],
-        studioFrameId: -1,
-        studioFontId: -1,
-        studioBGMId: -1,
-    });
+    // //영상리스트 with 스튜디오 정보
+    // const [studioDetailInfo, setStudioDetailInfo] = useState<StudioDetail>({
+    //     studioId: '',
+    //     studioTitle: '',
+    //     studioOwner: '',
+    //     isCompleted: false,
+    //     clipInfoList: [],
+    //     studioFrameId: -1,
+    //     studioFontId: -1,
+    //     studioBGMId: -1,
+    // });
 
-    // 수정 정보
-    const [studioModify, setStudioModify] = useState<Letter>({
-        studioId: '',
-        usedClipList: [
-            {
-                clipId: '',
-                clipVolume: 0,
-            },
-        ],
-        unusedClipList: [''],
-        studioFrameId: '',
-        studioFont: {
-            fontId: '',
-            fontSize: 10,
-            isBold: false,
-        },
-        studioBGM: '',
-        studioVolume: 50,
-    });
+    // // 수정 정보
+    // const [studioModify, setStudioModify] = useState<Letter>({
+    //     studioId: '',
+    //     usedClipList: [
+    //         {
+    //             clipId: '',
+    //             clipVolume: 0,
+    //         },
+    //     ],
+    //     unusedClipList: [''],
+    //     studioFrameId: '',
+    //     studioFont: {
+    //         fontId: '',
+    //         fontSize: 10,
+    //         isBold: false,
+    //     },
+    //     studioBGM: '',
+    //     studioVolume: 50,
+    // });
 
     //프레임 리스트
     const [frameList, setFrameList] = useState<FrameType[]>([]);
@@ -59,7 +59,7 @@ export default function LetterMakePage() {
     const [fontList, setFontList] = useState<fontTemplate[]>([]);
 
     //BGM 리스트
-    const [bgmList, setBGMList] = useState([]); //추후 구현
+    // const [bgmList, setBGMList] = useState([]); //추후 구현
 
     // 선택한 프레임
     const [selectImgUrl, setSelectImgUrl] = useState<string>(
@@ -222,7 +222,7 @@ export default function LetterMakePage() {
     const splitUrl = document.location.href.split('/');
     const studioId = splitUrl[splitUrl.length - 1];
 
-    const videoContainerRef = useRef<HTMLDivElement>(null);
+    // const videoContainerRef = useRef<HTMLDivElement>(null);
     const subVideoRef = useRef<HTMLVideoElement>(null);
 
     const [users, setUsers] = useState<any[]>([]);
@@ -312,7 +312,9 @@ export default function LetterMakePage() {
                     session.unpublish(publisherScreen);
                 });
             session.publish(publisherScreen);
-            publisherScreen.addVideoElement(mainVideoRef.current);
+            if (mainVideoRef.current) {
+                publisherScreen.addVideoElement(mainVideoRef.current);
+            }
             // console.log('Admin: session- ', session);
         });
 
@@ -324,7 +326,7 @@ export default function LetterMakePage() {
      * @param videoElement
      * @param connection
      */
-    const appendUserData = (videoElement, connection) => {
+    const appendUserData = (connection: any) => {
         let userData;
         let nodeId;
         //유저데이터, 노드 아이디 받아오기
@@ -350,7 +352,7 @@ export default function LetterMakePage() {
      *  유저를 지우는 함수입니다.
      * @param connection
      */
-    const removeUserData = (connection) => {
+    const removeUserData = (connection: any) => {
         setUsers((prev) => {
             return prev.filter((user) => {
                 user.nodeId !== connection.connectionId;

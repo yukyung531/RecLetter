@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import { BaseSyntheticEvent, useEffect, useRef, useState } from 'react';
-import { ClipInfo, ClipUpload } from '../types/type';
+import { ClipInfo } from '../types/type';
 
 //axios
 import { uploadClip } from '../api/clip';
@@ -165,9 +165,14 @@ export default function ClipEditPage() {
                 clipForm.append('clipContent', inputText);
                 clipForm.append('clip', newBlob);
 
+                type ObjectType = {
+                    [key: string]: FormDataEntryValue;
+                };
                 //formdata to json
-                const object = {};
-                clipForm.forEach((value, key) => (object[key] = value));
+                const object: ObjectType = {};
+                clipForm.forEach((value, key) => {
+                    object[key.toString()] = value;
+                });
                 console.log(object);
 
                 await uploadClip(object)
