@@ -25,4 +25,6 @@ public interface ClipService
 
     public List<ClipInfo> searchClipInfoList(String studioId);
 
+    public String getPreSignedUrl(String fileName);
+
 }

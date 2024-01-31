@@ -43,6 +43,11 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
 
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+    implementation 'org.bouncycastle:bcprov-jdk15to18:1.76'
+    implementation(platform("software.amazon.awssdk:bom:2.21.1"))
+    implementation("software.amazon.awssdk:s3")
+    implementation("software.amazon.awssdk:cloudfront")
+
     implementation 'javax.xml.bind:jaxb-api:2.3.0'
     implementation 'commons-io:commons-io:2.15.1'
     // OpenVidu
