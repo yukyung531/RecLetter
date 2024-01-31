@@ -126,11 +126,11 @@ public class ClipController {
 
 /************************************/
 
-    @GetMapping("/url/{title}")
-    public ResponseEntity<Map> getPresignedUrl(@PathVariable String title){
+    @PostMapping("/url")
+    public ResponseEntity<Map> getPresignedUrl(String fileName){
         Map<String,Object> res=new HashMap<>();
-        res.put("title",title);
-        res.put("url",clipService.getPreSignedUrl(title));
+        res.put("title",fileName);
+        res.put("url",clipService.getPreSignedUrl(fileName));
         return ResponseEntity.ok(res);
     }
 
