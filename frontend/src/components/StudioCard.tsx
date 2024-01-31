@@ -31,10 +31,13 @@ export default function StudioCard({ props, onClick }: StudioCardProp) {
             onClick={onClick}
         >
             {isUploadUi}
-            <img
+            <video
                 className="w-full h-32 color-bg-sublight rounded-lg"
                 src={props.thumbnailUrl}
-            />
+                crossOrigin="anonymous"
+                controlsList="nodownload"
+            />{' '}
+            {/*"https://d3kbsbmyfcnq5r.cloudfront.net/favicon.png" */}
             <div className="flex justify-center w-full px-4 text-xl">
                 <div className="flex items-center justify-center">
                     {props.studioTitle}

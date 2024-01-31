@@ -1,7 +1,7 @@
 import VideoCard from '../components/VideoCard';
 import { useState, useEffect, BaseSyntheticEvent } from 'react';
 import { StudioDetail, ClipInfo, UserInfo } from '../types/type';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import DeleteCheckWindow from '../components/DeleteCheckWindow';
 import { connect } from '../util/chat';
 import { useDispatch, useSelector } from 'react-redux';
@@ -436,15 +436,15 @@ export default function StudioMainPage() {
                                 </span>
                                 <p>새 영상 촬영하기</p>
                             </div>
-                            <a
-                                href="/lettermake"
-                                className="w-full h-24 mx-4 my-2 color-border-main bg-white color-text-main text-xl flex flex-col justify-center items-center border rounded-md cursor-pointer hover:color-bg-sublight hover:text-white hover:color-border-sublight"
+                            <Link
+                                to={`/lettermake/${studioDetailInfo.studioId}`}
+                                className="w-full h-24 mx-4 my-2 color-border-blue3 color-text-blue3 text-xl flex flex-col justify-center items-center border rounded-md"
                             >
                                 <span className="material-symbols-outlined text-3xl">
                                     theaters
                                 </span>
                                 <p>영상편지 편집하기</p>
-                            </a>
+                            </Link>
                         </div>
                         {/* 할당된 영상 리스트 */}
                         <div className="px-4 mt-16">
