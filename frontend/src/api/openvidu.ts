@@ -23,7 +23,9 @@ export async function createSession(studioId: string) {
  * @returns
  */
 export async function connectSession(sessionId: string) {
-    return await local.post(`/api/meeting/${sessionId}/connections`);
+    return await local.post(`/api/meeting/${sessionId}/connections`, {
+        headers: { 'Content-Type': 'application/json' },
+    });
 }
 
 /** endSession(studioId : string)
