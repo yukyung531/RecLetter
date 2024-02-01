@@ -26,10 +26,17 @@ public class StudioParticipantServiceImpl implements StudioParticipantService {
   @Override
   public void createStudioParticipant(String studioId, User user)
       throws StudioParticipantCreateFailureException, AlreadyJoinedStudioException {
-    studioParticipantRepository.findById(
-            new StudioParticipantId(studioId, user.getUserId()))
-        .ifPresent(studioParticipant -> {
-          throw new AlreadyJoinedStudioException();
+    studioParticipantRepository.findById(new StudioParticipantId(studioId, user.getUserId()))
+        .orElseGet(() -> {
+          try {
+            return studioParticipantRepository.save(
+                StudioParticipant.builder()
+                    .studio(Studio.builder().studioId(studioId).build())
+                    .user(user)
+                    .build());
+          } catch (Exception e) {
+            throw new StudioParticipantCreateFailureException(e);
+          }
         });
 
     try {
