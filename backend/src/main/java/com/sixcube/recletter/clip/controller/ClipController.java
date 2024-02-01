@@ -34,8 +34,6 @@ public class ClipController {
 
     private final ClipService clipService;
 
-//    private final String cloudFront="https://d3f9xm3snzk3an.cloudfront.net/";
-
     @Value("${AWS_FRONT}")
     private String cloudFront;
     private final AmazonS3Client amazonS3Client;
@@ -61,15 +59,12 @@ public class ClipController {
         return ResponseEntity.ok().build();
     }
 
-    //download 링크에 접속하면 웹에서 저장된 파일을 볼 수 있다!
+
     @GetMapping("/{clipId}")
     public ResponseEntity<SearchClipRes> searchClip(@PathVariable int clipId, @AuthenticationPrincipal User user) {
         System.out.println(clipId);
         //편집 단계에 들어갈 때 기존 상세 정보 제공
-        Clip clip=clipService.searchClip(clipId);
-        if(clip==null || !clip.getClipOwner().equals(user.getUserId())){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        Clip clip=clipService.searchMyClip(user.getUserId(), clipId);
 
         String downloadUrl=cloudFront+clipService.getFileKey(clip);
 
@@ -77,7 +72,7 @@ public class ClipController {
                 .clipId(clip.getClipId())
                 .clipTitle(clip.getClipTitle())
                 .clipContent(clip.getClipContent())
-                .clipDownloadUrl(downloadUrl)
+                .clipDownloadUrl(downloadUrl) //download 링크에 접속하면 웹에서 저장된 파일을 볼 수 있다!
                 .build();
         return ResponseEntity.ok(searchClipRes);
     }
@@ -85,12 +80,9 @@ public class ClipController {
     @PutMapping("/{clipId}")
     public ResponseEntity<Void> updateClip(@PathVariable int clipId, @ModelAttribute UpdateClipReq updateClipReq, @AuthenticationPrincipal User user) {
 
-        //본인 영상인지 확인
+        //보장된 본인 영상 준비
         System.out.println(clipId);
-        Clip clip=clipService.searchClip(clipId);
-        if(clip==null || !clip.getClipOwner().equals(user.getUserId())){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        Clip clip=clipService.searchMyClip(user.getUserId(), clipId);
 
         //본인 영상이라면 편집
         String prevTitle= clip.getClipTitle();
@@ -103,15 +95,11 @@ public class ClipController {
 
     @DeleteMapping("/{clipId}")
     public ResponseEntity<Void> deleteClip(@PathVariable int clipId, @AuthenticationPrincipal User user) {
-        //본인 영상인지 확인
+        //본인 영상인지 확인 -> 본인 영상이라면 삭제
         System.out.println(clipId);
-        Clip clip=clipService.searchClip(clipId);
-        if(clip==null || !clip.getClipOwner().equals(user.getUserId())){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-        clipService.deleteClip(clip);
 
-        //본인 영상이라면 삭제
+        Clip clip=clipService.searchMyClip(user.getUserId(), clipId);
+        clipService.deleteClip(clip);
 
         return ResponseEntity.ok().build();
     }

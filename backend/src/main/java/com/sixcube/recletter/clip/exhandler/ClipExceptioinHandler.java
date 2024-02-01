@@ -1,6 +1,7 @@
 package com.sixcube.recletter.clip.exhandler;
 
 import com.sixcube.recletter.clip.exception.InvalidClipFormatException;
+import com.sixcube.recletter.clip.exception.NotClipOwnerException;
 import com.sixcube.recletter.clip.exception.SaveClipFailException;
 import com.sixcube.recletter.clip.exception.WeirdClipUserException;
 import lombok.extern.slf4j.Slf4j;
@@ -36,5 +37,11 @@ public class ClipExceptioinHandler {
     public ResponseEntity<String> handleWeirdClipUserException(){
 
         return ResponseEntity.badRequest().body("본인이 참여 중인 스튜디오의 영상에만 접근 가능합니다.");
+    }
+
+    @ExceptionHandler(NotClipOwnerException.class)
+    public ResponseEntity<String> handleNotClipOwnerException(){
+
+        return ResponseEntity.badRequest().body("자신의 영상만 수정 가능합니다.");
     }
 }
