@@ -1,6 +1,5 @@
 package com.sixcube.recletter.user.controller;
 
-import com.sixcube.recletter.user.dto.UserInfo;
 import com.sixcube.recletter.user.dto.req.CreateUserReq;
 import com.sixcube.recletter.user.dto.req.ResetPasswordReq;
 import com.sixcube.recletter.user.dto.req.UpdateUserPasswordReq;
@@ -26,7 +25,7 @@ public class UserController {
     //회원가입
     @PostMapping
     public ResponseEntity<Void> createUser(@Valid @RequestBody CreateUserReq createUserReq){
-        User result = userService.createUser(new User(createUserReq));
+        User result = userService.createUser(createUserReq);
 
         if (result == null) {
             return ResponseEntity.internalServerError().build();
@@ -61,7 +60,6 @@ public class UserController {
         return ResponseEntity.ok()
                 .body(
                         SearchUserInfoRes.builder()
-                                .userId(user.getUserId())
                                 .userNickname(user.getUserNickname())
                                 .userEmail(user.getUserEmail())
                                 .build()

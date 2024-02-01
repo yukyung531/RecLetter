@@ -4,11 +4,11 @@ import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.SecurityContext;
+import com.sixcube.recletter.auth.jwt.JWTFilter;
+import com.sixcube.recletter.auth.jwt.JWTUtil;
+import com.sixcube.recletter.auth.jwt.LoginFilter;
 import com.sixcube.recletter.redis.RedisService;
-import com.sixcube.recletter.auth.jwt.JwtToUserConverter;
-import com.sixcube.recletter.auth.jwt.KeyUtils;
+import com.sixcube.recletter.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,26 +16,23 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
-import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
-import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
-import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Collections;
 
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true)
@@ -43,37 +40,48 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @AllArgsConstructor
 public class SecurityConfig {
 
-    private final JwtToUserConverter jwtToUserConverter;
-    private final KeyUtils keyUtils;
-    private final PasswordEncoder passwordEncoder;
-    private final UserDetailsService userDetailsService;
+    private final AuthenticationConfiguration authenticationConfiguration;
+    private final JWTUtil jwtUtil;
+    private final UserRepository userRepository;
     private final RedisService redisService;
 
-    //HttpSecurity를 구성하여 보안 설정을 정의하는 함수
+    //AuthenticationManager Bean 등록
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.httpBasic(HttpBasicConfigurer::disable) //Basic 인증을 사용하지 않음
-                .csrf(CsrfConfigurer::disable) //CSRF(Cross-Site Request Forgery) 보안을 비활성화
-                .cors(CorsConfigurer::disable) //cors 관련 필터
-                //요청에 대한 인가 규칙 설정
-                .authorizeHttpRequests(authorize ->
-                                authorize.requestMatchers("/auth/**").permitAll() //해당 경로에 대한 요청은 모든 사용자에게 허용(인증 안해도 접근 가능)
-//                                .requestMatchers("/**").permitAll() //테스트 시에만 주석 풀기
-                                        .requestMatchers("/static/**").permitAll()
-                                        .requestMatchers(HttpMethod.POST, "/user").permitAll() //회원가입
-                                        .requestMatchers(HttpMethod.POST, "/user/password").permitAll() //비밀번호 재설정
-                                        .anyRequest().authenticated() //나머지 모든 요청은 인증을 필요로 함
-                )
-                .oauth2ResourceServer(
-                        (oauth2) -> oauth2.jwt((jwt) -> jwt.jwtAuthenticationConverter(jwtToUserConverter)))
-                .sessionManagement(
-                        (session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling((exceptions) -> exceptions.authenticationEntryPoint(
-                                new BearerTokenAuthenticationEntryPoint())
-                        .accessDeniedHandler(new BearerTokenAccessDeniedHandler()));
-        SecurityFilterChain chain = http.build();
-        return chain; //설정대로 filter chain 생성 후 실행
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, redisService);
+        loginFilter.setFilterProcessesUrl("/auth/login");
+        // UsernamePasswordAuthenticationFilter의 정의에 따라서 /login 경로로 오는 POST 요청을 검증함.
+        // 로그인은 기본 경로가 /login으로 되어 있어서 다른 경로에서 작동하게 하고 싶으면 위와 같이 작성해야 함.
+
+        http
+                .csrf((auth) -> auth.disable())
+                .formLogin((auth) -> auth.disable())
+                .httpBasic((auth) -> auth.disable());
+        http
+                .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/user").permitAll()  //회원가입
+                        .requestMatchers("/auth/email", "/auth/email/code", "/auth/password", "/auth/password/code").permitAll()  //이메일 인증(회원가입)
+                        .requestMatchers("/auth/password", "/auth/password/code","/user/password").permitAll()  //비밀번호 초기화
+                        .anyRequest().authenticated());
+        //JWTFilter 등록
+        http
+                .addFilterBefore(new JWTFilter(jwtUtil, userRepository), LoginFilter.class);
+        //LoginFilter 등록
+        http
+                .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class);
+        http
+                .sessionManagement((session) -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        return http.build();
+    }
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -90,51 +98,5 @@ public class SecurityConfig {
         return source;
     }
 
-    @Bean
-    @Primary
-    JwtDecoder jwtAccessTokenDecoder() {
-        //공개키로 jwt 토큰의 서명 검증하는 디코더 반환
-        return NimbusJwtDecoder.withPublicKey(keyUtils.getAccessTokenPublicKey()).build();
-    }
 
-    @Bean
-    @Primary
-    JwtEncoder jwtAccessTokenEncoder() {
-        //jwt를 생성하는 인코더 (여기서 private key는 서명하는 데 사용됨)
-        JWK jwk = new RSAKey.Builder(keyUtils.getAccessTokenPublicKey()).privateKey(
-                keyUtils.getAccessTokenPrivateKey()).build();
-        JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
-        return new NimbusJwtEncoder(jwks);
-    }
-
-    @Bean
-    @Qualifier("jwtRefreshTokenDecoder")
-    JwtDecoder jwtRefreshTokenDecoder() {
-        return NimbusJwtDecoder.withPublicKey(keyUtils.getRefreshTokenPublicKey()).build();
-    }
-
-    @Bean
-    @Qualifier("jwtRefreshTokenEncoder")
-    JwtEncoder jwtRefreshTokenEncoder() {
-        JWK jwk = new RSAKey.Builder(keyUtils.getRefreshTokenPublicKey()).privateKey(
-                keyUtils.getRefreshTokenPrivateKey()).build();
-        JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
-        return new NimbusJwtEncoder(jwks);
-    }
-
-    @Bean
-    @Qualifier("jwtRefreshTokenAuthProvider")
-    JwtAuthenticationProvider jwtRefreshTokenAuthProvider() {
-        JwtAuthenticationProvider provider = new JwtAuthenticationProvider(jwtRefreshTokenDecoder());
-        provider.setJwtAuthenticationConverter(jwtToUserConverter);
-        return provider;
-    }
-
-    @Bean
-    DaoAuthenticationProvider daoAuthenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setPasswordEncoder(passwordEncoder);
-        provider.setUserDetailsService(userDetailsService);
-        return provider;
-    }
 }

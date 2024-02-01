@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS clip (
     clip_id int primary key auto_increment,
     clip_title varchar(50) not null,
-    clip_owner varchar(16),
+    clip_owner char(36),
     clip_order int not null default -1,
     clip_volume int not null default 100 CHECK ( clip_volume BETWEEN 1 AND 200),
     studio_id char(36),

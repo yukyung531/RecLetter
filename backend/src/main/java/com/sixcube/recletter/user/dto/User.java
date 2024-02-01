@@ -1,101 +1,74 @@
 package com.sixcube.recletter.user.dto;
 
-import com.sixcube.recletter.user.dto.req.CreateUserReq;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.SourceType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.UUID;
+
 @Getter
 @Setter
-@ToString
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
-@Table(name = "user")
-@DynamicInsert
 public class User implements UserDetails {
 
-//  @Id @GeneratedValue(strategy = GenerationType.UUID)
-//  private UUID uuid;
-
-  //  @Column(nullable = false, unique = true)
-  @NotBlank
   @Id
   @Column(name = "user_id")
-  private String userId;
+  @Builder.Default
+  private String userId = UUID.randomUUID().toString();
 
   @Email
-  @NotBlank
-  @Column(nullable = false)
+  @Column(name = "user_email", nullable = false)
   private String userEmail;
 
-  @NotBlank
-  @Column(nullable = false)
-  private String userNickname;
-
-  @NotBlank
-  @Column(nullable = false)
+  @Column(name = "user_password", nullable = false)
   private String userPassword;
 
+  @NotBlank
+  @Column(name = "user_nickname", nullable = false)
+  private String userNickname;
+
   @CreationTimestamp(source = SourceType.DB)
-  @Column(nullable = false)
+  @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
 
+  @Column(name = "deleted_at", nullable = false)
   private LocalDateTime deletedAt;
+
+  @Column(name = "user_role", nullable = false)
+  private String userRole;
 
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    Collection<GrantedAuthority> authorities = new ArrayList<>();
-    // 해당 사용자 객체가 가지게 될 역할을 부여.
-    // 역할은 여려개를 가질 수 있고, 각 역할에 각각의 권한(Authority)를 부여할 수 있다.
-//    switch (userType) {
-//      case 0:
-//        authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-//        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-//        break;
-//      case 1:
-//        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-//        break;
-//      default:
-//    }
-
-    return authorities;
+    Collection<GrantedAuthority> collection = new ArrayList<>();
+    collection.add(new GrantedAuthority() {
+      @Override
+      public String getAuthority() {
+        return userRole;
+      }
+    });
+    return collection;
   }
 
-  public User(CreateUserReq createUserReq) {
-    this.userId = createUserReq.getUserId();
-    this.userEmail = createUserReq.getUserEmail();
-    this.userPassword = createUserReq.getUserPassword();
-    this.userNickname = createUserReq.getUserNickname();
-  }
   @Override
   public String getPassword() {
     return userPassword;
   }
 
-  // Spring Security에서 userName은 id를 의미함
   @Override
   public String getUsername() {
-    return userId;
+    return userEmail;
   }
 
   @Override
@@ -117,4 +90,5 @@ public class User implements UserDetails {
   public boolean isEnabled() {
     return true;
   }
+
 }

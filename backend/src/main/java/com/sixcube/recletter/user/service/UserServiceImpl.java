@@ -1,11 +1,12 @@
 package com.sixcube.recletter.user.service;
 
+import com.sixcube.recletter.auth.exception.EmailAlreadyExistsException;
 import com.sixcube.recletter.redis.RedisPrefix;
 import com.sixcube.recletter.redis.RedisService;
 import com.sixcube.recletter.auth.dto.Code;
+import com.sixcube.recletter.user.dto.req.CreateUserReq;
 import com.sixcube.recletter.user.exception.*;
 import com.sixcube.recletter.user.dto.User;
-import com.sixcube.recletter.user.dto.UserInfo;
 import com.sixcube.recletter.user.dto.req.UpdateUserPasswordReq;
 import com.sixcube.recletter.user.dto.req.UpdateUserReq;
 import com.sixcube.recletter.user.repository.UserRepository;
@@ -27,23 +28,24 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     private final RedisService redisService;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUserId(username);
+    public UserDetails loadUserByUsername(String userEmail) throws UsernameNotFoundException {
+
+        //DB에서 조회
+        User user = userRepository.findByUserEmailAndDeletedAtIsNull(userEmail).orElseThrow(()->new UserNotExistException());
+
+        System.out.println("userEmail-------- = "+user.getUserEmail());
+
+        return user;
     }
 
-    public UserInfo searchUserInfoByUserId(String userId) {
-        return new UserInfo(userRepository.findByUserId(userId));
-    }
 
-    public User createUser(User user) {
+    public User createUser(CreateUserReq createUserReq) {
+        String userEmail = createUserReq.getUserEmail();
 
-        if (userRepository.findByUserId(user.getUserId()) != null && user.getDeletedAt() != null) {
-            throw new IdAlreadyExistsException();
+        if (userRepository.findByUserEmailAndDeletedAtIsNull(userEmail).isPresent()) {
+            throw new EmailAlreadyExistsException();
         }
-        if (userRepository.findByUserEmail(user.getUserEmail()) != null && user.getDeletedAt() != null) {
-            throw new IdAlreadyExistsException();
-        }
-        String key = RedisPrefix.REGIST.prefix() + user.getUserEmail();
+        String key = RedisPrefix.REGIST.prefix() + userEmail;
         if (!redisService.hasKey(key)) {
             throw new EmailNotVerifiedException();
         }
@@ -54,33 +56,25 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         //레디스에서 제거
         redisService.deleteValues(key);
 
-        String unencryptedPassword = user.getPassword();
+        User user = User.builder()
+                .userEmail(userEmail)
+                .userNickname(createUserReq.getUserNickname())
+                .userRole("ROLE_USER")
+                .build();
+
+        String unencryptedPassword = createUserReq.getUserPassword();
         user.setUserPassword(passwordEncoder.encode(unencryptedPassword));
         return userRepository.save(user);
     }
 
     public void updateUser(UpdateUserReq updateUserReq, User user) {
-        String email = updateUserReq.getUserEmail();
         String name = updateUserReq.getUserNickname();
-        if (email == null) {
-            throw new EmailNullException();
-        }
         if (name == null) {
             throw new NicknameNullException();
-        }
-
-        //코드 인증된 경우에만 이메일 변경(인증 안됐으면 기존 이메일 유지)
-        String key = RedisPrefix.CHANGE_EMAIL.prefix() + email;
-        if (redisService.hasKey(key)) {
-            Code redisAuthCode = (Code) redisService.getValues(key);
-            if (redisAuthCode.isFlag()) {
-                user.setUserEmail(updateUserReq.getUserEmail());
-            }
         }
         //이름 변경
         user.setUserNickname(updateUserReq.getUserNickname());
 
-        redisService.deleteValues(key); //레디스에서 제거
         userRepository.save(user); //수정사항 반영
     }
 
@@ -98,17 +92,25 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     public void deleteUser(User user) {
+
+        //관련 토큰 모두 레디스에서 제거
+        String key = RedisPrefix.REFRESH_TOKEN.prefix() + user.getUserId();
+        if(redisService.hasKey(key)){
+            redisService.deleteValues(key);
+        }
+        key = RedisPrefix.REGIST.prefix() + user.getUserEmail();
+        if(redisService.hasKey(key)){
+            redisService.deleteValues(key);
+        }
+        key = RedisPrefix.RESET_PASSOWRD.prefix() + user.getUserEmail();
+        if(redisService.hasKey(key)){
+            redisService.deleteValues(key);
+        }
+
         user.setDeletedAt(LocalDateTime.now());
         userRepository.save(user);
     }
 
-    public boolean checkDuplicatiedId(String userId) {
-        User user = userRepository.findByUserId(userId);
-        if (user == null || user.getDeletedAt() != null) {
-            return false;
-        }
-        return true;
-    }
 
     public void resetPassword(String password, String email) {
 
@@ -125,7 +127,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
         String unencryptedPassword = password;
         String encryptedPassword = passwordEncoder.encode(unencryptedPassword);
-        User user = userRepository.findByUserEmail(email);
+        User user = userRepository.findByUserEmail(email).orElseThrow();
         user.setUserPassword(encryptedPassword);
         userRepository.save(user);
     }

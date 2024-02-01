@@ -12,14 +12,9 @@ import java.util.Random;
 public interface AuthService {
     public void sendEmail(String toEmail, String emailType);
 
-    public void sendEmailToFindId(String toEmail);
-
     //이메일 인증 코드 검증
     public boolean verifyCode(String email, String authCode, String emailType);
 
-    public void checkDuplicatedEmail(String email);
-
-    public void checkExistEmail(String email);
 
     public String createCode() throws NoSuchAlgorithmException;
 }

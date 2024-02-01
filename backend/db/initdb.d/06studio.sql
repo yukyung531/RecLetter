@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS studio (
     studio_id char(36) primary key,
     studio_title varchar(50) not null,
-    studio_owner varchar(16),
+    studio_owner char(36),
     expire_date timestamp not null,
     studio_frame_id int not null default 1,
     studio_font_id int not null default 1,

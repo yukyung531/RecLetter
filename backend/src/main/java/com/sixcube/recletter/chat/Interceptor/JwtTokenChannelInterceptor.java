@@ -1,7 +1,9 @@
 package com.sixcube.recletter.chat.Interceptor;
 
-import com.sixcube.recletter.auth.jwt.JwtToUserConverter;
+import com.sixcube.recletter.auth.jwt.JWTUtil;
 import com.sixcube.recletter.chat.exception.ChatTokenInvalidFailureException;
+import com.sixcube.recletter.user.dto.User;
+import com.sixcube.recletter.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -9,6 +11,7 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -20,8 +23,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtTokenChannelInterceptor implements ChannelInterceptor {
 
-    private final JwtToUserConverter jwtToUserConverter;
-    private final JwtDecoder jwtDecoder;
+    private final JWTUtil jwtUtil;
+    private final UserRepository userRepository;
 
     /**
      * 메시지를 보내기 전에 실행되는 인터셉터 메소드
@@ -41,10 +44,27 @@ public class JwtTokenChannelInterceptor implements ChannelInterceptor {
                 // "Bearer " 다음에 오는 부분을 토큰으로 저장한다.
                 String jwtToken = authToken.substring(7);
                 try {
-                    // 토큰을 디코딩한다.
-                    Jwt jwt = jwtDecoder.decode(jwtToken);
-                    // 디코딩된 토큰을 사용자 정보로 변환한다.
-                    Authentication authentication = jwtToUserConverter.convert(jwt);
+//                    // 토큰을 디코딩한다.
+//                    Jwt jwt = jwtDecoder.decode(jwtToken);
+//                    // 디코딩된 토큰을 사용자 정보로 변환한다.
+//                    Authentication authentication = jwtToUserConverter.convert(jwt);
+//------------------------------
+                    //토큰 소멸 시간 검증
+                    if (jwtUtil.isExpired(jwtToken)) {
+                        throw new JwtException("토큰이 만료되었습니다.");
+                    }
+                    //토큰에서 username과 role 획득
+                    String userId = jwtUtil.getUserId(jwtToken);
+                    String role = jwtUtil.getRole(jwtToken);
+
+                    //user를 생성하여 값 set
+                    User user = userRepository.findByUserId(userId).orElseThrow(()-> new JwtException("올바르지 않은 토큰입니다."));
+                    user.setUserRole(role);
+
+                    //스프링 시큐리티 인증 토큰 생성
+                    Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+//------------------------------------
+
                     // 사용자 정보를 메시지 헤더에 저장한다.
                     accessor.setUser(authentication);
                 } catch (JwtException e) {

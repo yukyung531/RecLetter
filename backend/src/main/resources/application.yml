@@ -57,6 +57,8 @@ spring:
           timeout: 5000
           writetimeout: 5000
     auth-code-expiration-millis: 600000  # 10분
+  jwt:
+    secret: ${JWT_KEY}
 
 cloud:
   aws:
@@ -79,14 +81,6 @@ logging:
       sixcube:
         recletter: debug
     "[org.springframework.security]": DEBUG
-
-access-token:
-  private: access-refresh-token-keys/access-token-private.key
-  public: access-refresh-token-keys/access-token-public.key
-
-refresh-token:
-  private: access-refresh-token-keys/refresh-token-private.key
-  public: access-refresh-token-keys/refresh-token-public.key
 
 openvidu:
   url: ${OPENVIDU_URL}
