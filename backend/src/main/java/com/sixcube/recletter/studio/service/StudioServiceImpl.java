@@ -2,6 +2,7 @@ package com.sixcube.recletter.studio.service;
 
 import com.sixcube.recletter.clip.dto.ClipInfo;
 import com.sixcube.recletter.clip.service.ClipService;
+import com.sixcube.recletter.studio.StudioUtil;
 import com.sixcube.recletter.studio.dto.Studio;
 import com.sixcube.recletter.studio.dto.StudioParticipant;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
@@ -37,13 +38,16 @@ public class StudioServiceImpl implements StudioService {
 
   private final ClipService clipService;
 
+  private final StudioUtil studioUtil;
+
   private final int MAX_STUDIO_OWN_COUNT = 3;
 
   @Override
   public Studio searchStudioByStudioId(String studioId, User user) throws StudioNotFoundException {
     Studio result = studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
 
-    if (result.getStudioOwner().getUserId().equals(user.getUserId())) {
+//    if (result.getStudioOwner().getUserId().equals(user.getUserId())) { //예전 코드
+    if (studioUtil.isStudioParticipant(studioId, user.getUserId())){ //스튜디오 참가자 여부 확인
       return result;
     } else {
       throw new UnauthorizedToSearchStudioException();
