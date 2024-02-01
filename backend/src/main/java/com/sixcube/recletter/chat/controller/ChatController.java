@@ -71,12 +71,4 @@ public class ChatController {
         return chatService.leaveChat(studioId, chatMessage, user);
     }
 
-    /**
-     * 채팅방에 참여중인 사용자 조회
-     */
-    @GetMapping("/chat/{studioId}/userList")
-    public ResponseEntity<List<String>> searchChatUserList(@PathVariable String studioId) {
-        List<String> userList = chatService.searchChatUserList(studioId);
-        return new ResponseEntity<>(userList, HttpStatus.OK);
-    }
 }
