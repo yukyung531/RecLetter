@@ -1,6 +1,7 @@
 package com.sixcube.recletter.auth.service;
 
 import com.sixcube.recletter.auth.dto.Code;
+import com.sixcube.recletter.auth.dto.res.LoginRes;
 import com.sixcube.recletter.redis.RedisPrefix;
 import com.sixcube.recletter.user.dto.User;
 
@@ -17,4 +18,6 @@ public interface AuthService {
 
 
     public String createCode() throws NoSuchAlgorithmException;
+
+    LoginRes socialLogin(String userEmail);
 }

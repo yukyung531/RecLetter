@@ -1,5 +1,6 @@
 package com.sixcube.recletter.auth.controller;
 
+import com.sixcube.recletter.auth.dto.res.LoginRes;
 import com.sixcube.recletter.auth.dto.res.VerifyCodeRes;
 import com.sixcube.recletter.auth.jwt.JWTUtil;
 import com.sixcube.recletter.auth.service.AuthService;
@@ -10,11 +11,11 @@ import com.sixcube.recletter.auth.dto.req.TokenReq;
 import com.sixcube.recletter.auth.dto.req.VerifyCodeReq;
 import com.sixcube.recletter.auth.dto.res.TokenRes;
 import com.sixcube.recletter.user.dto.User;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -106,5 +107,15 @@ public class AuthController {
                 .isValid(isValid)
                 .build()
         );
+    }
+
+    @RequestMapping("/social")
+    public ResponseEntity<LoginRes> socialLogin(HttpServletRequest request) {
+
+        String userEmail = (String) request.getAttribute("userEmail");
+        System.out.println("잘 왔니?" + userEmail);
+        LoginRes loginRes = authService.socialLogin(userEmail);
+
+        return ResponseEntity.ok().body(loginRes);
     }
 }

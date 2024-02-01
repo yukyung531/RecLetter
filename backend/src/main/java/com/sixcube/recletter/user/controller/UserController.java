@@ -60,6 +60,7 @@ public class UserController {
         return ResponseEntity.ok()
                 .body(
                         SearchUserInfoRes.builder()
+                                .userId(user.getUserId())
                                 .userNickname(user.getUserNickname())
                                 .userEmail(user.getUserEmail())
                                 .build()
@@ -75,4 +76,5 @@ public class UserController {
         return ResponseEntity.ok().build();
 
     }
+
 }

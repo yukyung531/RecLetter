@@ -14,6 +14,11 @@ const local = localAxios();
 export async function login(user: User) {
     return await local.post(`/api/auth/login`, user, {});
 }
+/** POST 로그인 */
+export async function googleLogin() {
+    return await local.get(`/api/oauth2/authorization/google`, {});
+}
+
 /** POST 이메일 인증코드 요청 */
 export async function requestEmail(userEmail: EmailSend) {
     return await local.post(`/api/auth/email`, userEmail, {});
