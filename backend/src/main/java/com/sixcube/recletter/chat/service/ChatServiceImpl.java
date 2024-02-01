@@ -44,6 +44,9 @@ public class ChatServiceImpl implements ChatService {
             // 메시지 sender에 userNickname 등록
             chatMessage.setSender(user.getUserNickname());
 
+            // 메시지 UUID에 UUID 등록
+            chatMessage.setUUID(user.getUserId());
+
             // 메시지를 보낸 시간 설정
             chatMessage.setTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
 
@@ -68,6 +71,9 @@ public class ChatServiceImpl implements ChatService {
             // 메시지 sender에 userNickname 등록
             chatMessage.setSender(user.getUserNickname());
 
+            // 메시지 UUID에 UUID 등록
+            chatMessage.setUUID(user.getUserId());
+
             // 메시지를 보낸 시간 설정
             chatMessage.setTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
 
@@ -87,8 +93,13 @@ public class ChatServiceImpl implements ChatService {
 
             // 메시지 sender에 userNickname 등록
             chatMessage.setSender(user.getUserNickname());
+
+            // 메시지 UUID에 UUID 등록
+            chatMessage.setUUID(user.getUserId());
+
             // 메시지를 보낸 시간 설정
             chatMessage.setTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+
             // 퇴장 메시지 설정
             chatMessage.setContent(chatMessage.getSender() + "님이 퇴장하였습니다.");
 

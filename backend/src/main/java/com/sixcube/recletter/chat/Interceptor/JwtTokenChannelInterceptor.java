@@ -44,16 +44,11 @@ public class JwtTokenChannelInterceptor implements ChannelInterceptor {
                 // "Bearer " 다음에 오는 부분을 토큰으로 저장한다.
                 String jwtToken = authToken.substring(7);
                 try {
-//                    // 토큰을 디코딩한다.
-//                    Jwt jwt = jwtDecoder.decode(jwtToken);
-//                    // 디코딩된 토큰을 사용자 정보로 변환한다.
-//                    Authentication authentication = jwtToUserConverter.convert(jwt);
-//------------------------------
                     //토큰 소멸 시간 검증
                     if (jwtUtil.isExpired(jwtToken)) {
                         throw new JwtException("토큰이 만료되었습니다.");
                     }
-                    //토큰에서 username과 role 획득
+                    //토큰에서 userId, role 획득
                     String userId = jwtUtil.getUserId(jwtToken);
                     String role = jwtUtil.getRole(jwtToken);
 
@@ -63,7 +58,6 @@ public class JwtTokenChannelInterceptor implements ChannelInterceptor {
 
                     //스프링 시큐리티 인증 토큰 생성
                     Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-//------------------------------------
 
                     // 사용자 정보를 메시지 헤더에 저장한다.
                     accessor.setUser(authentication);
