@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { loginState, studioState } from '../util/counter-slice';
 
 export default function LoginPage() {
-    const [inputId, setInputId] = useState<string>('');
+    const [inputEmail, setInputEmail] = useState<string>('');
     const [inputPw, setInputPw] = useState<string>('');
 
     /** 리덕스 설정 */
@@ -30,8 +30,8 @@ export default function LoginPage() {
     }, [isLogin]);
     /** 리덕스 설정 */
 
-    const changeId = (e: BaseSyntheticEvent) => {
-        setInputId(e.target.value);
+    const changeEmail = (e: BaseSyntheticEvent) => {
+        setInputEmail(e.target.value);
     };
     const changePw = (e: BaseSyntheticEvent) => {
         setInputPw(e.target.value);
@@ -39,11 +39,11 @@ export default function LoginPage() {
 
     const onClickLogin = async () => {
         //api로 로그인
-        if (inputId === '' || inputPw === '') {
+        if (inputEmail === '' || inputPw === '') {
             alert('정보를 정확히 입력해주세요.');
         } else {
             const user: User = {
-                userId: inputId,
+                userEmail: inputEmail,
                 userPassword: inputPw,
             };
             loadLoginAPI(user);
@@ -80,9 +80,9 @@ export default function LoginPage() {
                         className="w-105 py-2 px-6 my-2 border-2 color-border-gray rounded-md text-2xl color-text-darkgray"
                         type="text"
                         placeholder="이메일"
-                        value={inputId}
+                        value={inputEmail}
                         onChange={(e) => {
-                            changeId(e);
+                            changeEmail(e);
                         }}
                     />
                     <input

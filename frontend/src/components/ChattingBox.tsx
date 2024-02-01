@@ -1,6 +1,8 @@
 import { BaseSyntheticEvent, useEffect, useState } from 'react';
 import { connect, disconnect, firstChatJoin, sendMessage } from '../util/chat';
 import { useDispatch, useSelector } from 'react-redux';
+import { getUser } from '../api/user';
+import { httpStatusCode } from '../util/http-status';
 
 type chattingType = {
     userName: string;
@@ -10,9 +12,9 @@ type chattingType = {
 export default function ChattingBox() {
     const [chatToggle, setChatToggle] = useState<boolean>(false);
     const [chattingList, setChattingList] = useState<chattingType[]>([]);
-    const [comment, setComment] = useState<string>();
+    const [comment, setComment] = useState<string>('');
     //test용 유저 선택
-    const [userSelect, setUserSelect] = useState<string>('은수');
+    const [userNickname, setUserNickname] = useState<string>('');
 
     /** 리덕스 함수 */
     const studioCurrentId = useSelector(
@@ -22,16 +24,26 @@ export default function ChattingBox() {
 
     useEffect(() => {
         if (studioCurrentId !== '') {
-            console.log(studioCurrentId);
             connect(studioCurrentId, setChattingList);
             setChatToggle(false);
             setChattingList([]);
         }
-
         return () => {
             disconnect();
         };
     }, [studioCurrentId]);
+    useEffect(() => {
+        getUserAPI();
+    }, []);
+
+    /** 유저 API 설정 */
+    const getUserAPI = async () => {
+        await getUser().then((res) => {
+            if (res.status === httpStatusCode.OK) {
+                setUserNickname(res.data.userNickname);
+            }
+        });
+    };
 
     // 채팅 토글 바꾸기
     const changeChatToggle = () => {
@@ -45,36 +57,38 @@ export default function ChattingBox() {
 
     // 채팅 보내기
     const sendChatting = () => {
-        sendMessage(userSelect, comment);
+        sendMessage(userNickname, comment);
     };
 
     // 채팅 리스트 표시
     const chatting = () => {
         return (
             <>
-                {chattingList.map((item, index) => {
-                    if (item.userName === userSelect) {
-                        console.log('은수작동');
+                {chattingList.map((chat, index) => {
+                    if (chat.userName === userNickname) {
                         return (
-                            <div className="flex flex-col items-end py-2">
-                                <p
-                                    className="w-3/4 text-right h-14 bg-sky-500 text-white rounded-lg px-2 py-1"
-                                    key={'chat' + index}
-                                >
-                                    {item.content}
-                                </p>
+                            <div
+                                className="flex flex-col items-end py-2 justify-between"
+                                key={'chat' + index}
+                            >
+                                <p>나</p>
+                                <div className="w-3/4 text-right h-14 bg-sky-500 text-white rounded-lg px-2 py-1">
+                                    <p>{chat.content}</p>
+                                    <p>{chat.time}</p>
+                                </div>
                             </div>
                         );
                     } else {
-                        console.log('연수작동');
                         return (
-                            <div className="flex flex-col items-start py-2">
-                                <p
-                                    className="w-3/4 text-left h-14 bg-gray-400 text-black rounded-lg px-2 py-1"
-                                    key={'chat' + index}
-                                >
-                                    {item.content}
-                                </p>
+                            <div
+                                className="flex flex-col items-start py-2"
+                                key={'chat' + index}
+                            >
+                                <p>{chat.userName}</p>
+                                <div className="w-3/4 text-right h-14 bg-sky-500 text-white rounded-lg px-2 py-1">
+                                    <p>{chat.content}</p>
+                                    <p>{chat.time}</p>
+                                </div>
                             </div>
                         );
                     }

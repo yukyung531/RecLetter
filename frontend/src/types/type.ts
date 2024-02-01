@@ -5,13 +5,12 @@ export type ImgFile = {
 
 // user 타입
 export interface RegistUser {
-    userId: string;
     userEmail: string;
     userPassword: string;
     userNickname: string;
 }
 export interface User {
-    userId: string;
+    userEmail: string;
     userPassword: string;
 }
 export interface UserInfo {
@@ -20,7 +19,6 @@ export interface UserInfo {
 }
 
 export interface UserModify {
-    userEmail: string;
     userNickname: string;
 }
 

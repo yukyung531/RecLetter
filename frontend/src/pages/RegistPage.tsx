@@ -1,5 +1,5 @@
 import { BaseSyntheticEvent, useEffect, useState } from 'react';
-import { checkId, requestEmail, verifyEmail } from '../api/auth';
+import { requestEmail, verifyEmail } from '../api/auth';
 import { getUser, registUser } from '../api/user';
 import { httpStatusCode } from '../util/http-status';
 import { useNavigate } from 'react-router-dom';
@@ -53,21 +53,7 @@ export default function RegistPage() {
     const changeNickname = (e: BaseSyntheticEvent) => {
         setInputNickName(e.target.value);
     };
-    /** 아이디 체크 함수 */
-    const checkIdAPI = async () => {
-        await checkId(inputId)
-            .then((res) => {
-                console.log(res);
-                if (res.data) {
-                    setIdCheck(true);
-                } else {
-                    setIdCheck(false);
-                }
-            })
-            .catch((e: Error) => {
-                console.log('오류가 발생했습니다.' + e);
-            });
-    };
+
     /** 이메일 체크 함수 */
     const checkEmailAPI = async () => {
         setEmailFlag(1);
@@ -310,9 +296,7 @@ export default function RegistPage() {
         }
     };
     const registAccount = async () => {
-        if (!idCheck) {
-            alert('아이디 중복검사를 해주세요');
-        } else if (inputNickname.length < 2 || inputNickname.length > 16) {
+        if (inputNickname.length < 2 || inputNickname.length > 16) {
             alert('이름의 길이를 맞춰주세요');
         } else if (!emailCheck) {
             alert('이메일 인증을 진행해주세요');
@@ -324,7 +308,6 @@ export default function RegistPage() {
             alert('비밀번호가 다릅니다');
         } else {
             await registUser({
-                userId: inputId,
                 userNickname: inputNickname,
                 userPassword: inputPassword,
                 userEmail: inputEmail,
@@ -340,20 +323,7 @@ export default function RegistPage() {
         <section className="section-center">
             <ul className=" flex flex-col justify-center items-center">
                 <h5 className=" text-3xl mt-4 mb-12">회원가입</h5>
-                <li className="flex my-4">
-                    <p className="mx-4">아이디</p>
-                    <input
-                        type="text"
-                        className="border"
-                        onChange={(e) => {
-                            changeId(e);
-                        }}
-                    />
-                    <p className="border" onClick={checkIdAPI}>
-                        아이디 확인
-                    </p>
-                    {checkIdElement()}
-                </li>
+
                 <li className="flex mt-4">
                     <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4">
                         이메일
