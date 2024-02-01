@@ -109,11 +109,11 @@ public class StudioController {
     return ResponseEntity.ok().build();
   }
 
-  @DeleteMapping("/{studioId}")
-  public ResponseEntity<Void> deleteStudio(@PathVariable String studioId,
+  @DeleteMapping("/{concatenatedStudioId}")
+  public ResponseEntity<Void> deleteStudio(@PathVariable String concatenatedStudioId,
       @AuthenticationPrincipal User user) {
 
-    studioService.deleteStudioByStudioId(studioId, user);
+    studioService.deleteStudioByStudioId(concatenatedStudioId, user);
 
     return ResponseEntity.ok().build();
   }

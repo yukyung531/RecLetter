@@ -21,6 +21,7 @@ import com.sixcube.recletter.user.service.UserService;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.StringTokenizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -94,20 +95,26 @@ public class StudioServiceImpl implements StudioService {
   }
 
   @Override
-  public void deleteStudioByStudioId(String studioId, User user)
-      throws StudioNotFoundException, UnauthorizedToDeleteStudioException, UnauthorizedToDeleteStudioException {
+  public void deleteStudioByStudioId(String concatenatedStudioId, User user)
+      throws StudioNotFoundException, UnauthorizedToDeleteStudioException, StudioDeleteFailureException {
 
-    Studio result = studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
+    StringTokenizer st = new StringTokenizer(concatenatedStudioId, ",");
+    while (st.hasMoreTokens()) {
+      String studioId = st.nextToken();
 
-    if (result.getStudioOwner().equals(user.getUserId())) {
-      try {
-        studioRepository.deleteById(studioId);
-      } catch (Exception e) {
-        throw new StudioDeleteFailureException(e);
+      Studio result = studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
+
+      if (result.getStudioOwner().equals(user.getUserId())) {
+        try {
+          studioRepository.deleteById(studioId);
+        } catch (Exception e) {
+          throw new StudioDeleteFailureException(e);
+        }
+      } else {
+        throw new UnauthorizedToDeleteStudioException();
       }
-    } else {
-      throw new UnauthorizedToDeleteStudioException();
     }
+
 
   }
 
