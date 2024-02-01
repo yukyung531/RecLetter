@@ -1,8 +1,10 @@
 package com.sixcube.recletter.auth.service;
 
+import com.sixcube.recletter.auth.dto.res.LoginRes;
 import com.sixcube.recletter.auth.exception.CodeCreateException;
 import com.sixcube.recletter.auth.exception.EmailAlreadyExistsException;
 import com.sixcube.recletter.auth.exception.NoEmailException;
+import com.sixcube.recletter.auth.jwt.JWTUtil;
 import com.sixcube.recletter.redis.RedisPrefix;
 import com.sixcube.recletter.redis.RedisService;
 import com.sixcube.recletter.auth.dto.Code;
@@ -32,6 +34,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService mailService;
 
     private final RedisService redisService;
+    private final JWTUtil jwtUtil;
 
     @Value("${spring.mail.auth-code-expiration-millis}")
     private long authCodeExpirationMillis;
@@ -104,6 +107,26 @@ public class AuthServiceImpl implements AuthService {
         } catch (NoSuchAlgorithmException e) {
             throw new CodeCreateException();
         }
+
+    }
+
+    @Override
+    public LoginRes socialLogin(String userEmail) {
+        System.out.println("서비스까지 잘 왔니 ? "+userEmail);
+        User user = userRepository.findByUserEmailAndDeletedAtIsNull(userEmail).get();
+
+        //accessToken 생성
+        String accessToken = jwtUtil.createJwt(user.getUserId(), user.getUserRole(), 1000 * 60 * 60L);
+
+        //refreshToken 생성
+        String refreshToken = jwtUtil.createJwt(user.getUserId(), user.getUserRole(), 1000 * 60 * 60 * 24 * 14L);
+
+        //Redis에 refreshToken 저장
+        String key = RedisPrefix.REFRESH_TOKEN.prefix() + user.getUserId();
+        redisService.setValues(key, refreshToken);
+
+        return LoginRes.builder().accessToken(accessToken).refreshToken(refreshToken).build();
+
 
     }
 }

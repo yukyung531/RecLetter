@@ -31,7 +31,7 @@ public class User implements UserDetails {
   @Column(name = "user_email", nullable = false)
   private String userEmail;
 
-  @Column(name = "user_password", nullable = false)
+  @Column(name = "user_password")
   private String userPassword;
 
   @NotBlank
