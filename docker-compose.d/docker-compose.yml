@@ -27,6 +27,9 @@ services:
       TZ: Asia/Seoul
     networks:
       - recletter-network
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
 volumes:
   redis-data:
   mariadb-data:

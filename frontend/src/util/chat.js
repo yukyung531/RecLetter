@@ -9,6 +9,7 @@ let client = null;
 let studioId = 0;
 let chatList;
 let firstEnter = false;
+let username;
 
 /** create-react-app환경 */
 export function connect(id, setChattingList) {
@@ -74,8 +75,8 @@ function onMeesageReceived(payload) {
     console.log(message);
 
     if (
-        message.type === 'JOIN' ||
-        (message.type === 'LEAVE' && message.sender === username)
+        ((message.type === 'JOIN' ||
+        message.type === 'LEAVE') && message.sender === username)
     ) {
         console.log('유저가 같아서 표시되지 않습니다.');
     }
@@ -86,6 +87,7 @@ function onMeesageReceived(payload) {
 }
 
 export function sendMessage(userName, content) {
+    username=userName;
     client.publish({
         destination: app + `/${studioId}/sendMessage`,
         body: JSON.stringify({
