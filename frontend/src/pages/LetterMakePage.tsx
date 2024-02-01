@@ -6,13 +6,15 @@ import {
     fontTemplate,
     UserInfo,
 } from '../types/type';
-import { getTemplate, getFont, getBgm } from '../api/template';
+import { getTemplate, getFont } from '../api/template';
 import { httpStatusCode } from '../util/http-status';
 import { OpenVidu, Session } from 'openvidu-browser';
 // import { connectSession, createSession, endSession } from '../api/openvidu';
 import { getUser } from '../api/user';
-import { connect } from '../util/chat';
+// import { connect } from '../util/chat';
 import axios from 'axios';
+import AddMemberWindow from '../components/AddMemberWindow';
+import ParticipantAlertWindow from '../components/ParticipantAlertWindow';
 
 export default function LetterMakePage() {
     //mode - 0:영상리스트, 1:프레임, 2:텍스트, 3:오디오
@@ -20,37 +22,37 @@ export default function LetterMakePage() {
 
     ///////////////////////////////////////////////초기 설정////////////////////////////////////////////////////////
 
-    //영상리스트 with 스튜디오 정보
-    const [studioDetailInfo, setStudioDetailInfo] = useState<StudioDetail>({
-        studioId: '',
-        studioTitle: '',
-        studioOwner: '',
-        isCompleted: false,
-        clipInfoList: [],
-        studioFrameId: -1,
-        studioFontId: -1,
-        studioBGMId: -1,
-    });
+    // //영상리스트 with 스튜디오 정보
+    // const [studioDetailInfo, setStudioDetailInfo] = useState<StudioDetail>({
+    //     studioId: '',
+    //     studioTitle: '',
+    //     studioOwner: '',
+    //     isCompleted: false,
+    //     clipInfoList: [],
+    //     studioFrameId: -1,
+    //     studioFontId: -1,
+    //     studioBGMId: -1,
+    // });
 
-    // 수정 정보
-    const [studioModify, setStudioModify] = useState<Letter>({
-        studioId: '',
-        usedClipList: [
-            {
-                clipId: '',
-                clipVolume: 0,
-            },
-        ],
-        unusedClipList: [''],
-        studioFrameId: '',
-        studioFont: {
-            fontId: '',
-            fontSize: 10,
-            isBold: false,
-        },
-        studioBGM: '',
-        studioVolume: 50,
-    });
+    // // 수정 정보
+    // const [studioModify, setStudioModify] = useState<Letter>({
+    //     studioId: '',
+    //     usedClipList: [
+    //         {
+    //             clipId: '',
+    //             clipVolume: 0,
+    //         },
+    //     ],
+    //     unusedClipList: [''],
+    //     studioFrameId: '',
+    //     studioFont: {
+    //         fontId: '',
+    //         fontSize: 10,
+    //         isBold: false,
+    //     },
+    //     studioBGM: '',
+    //     studioVolume: 50,
+    // });
 
     //프레임 리스트
     const [frameList, setFrameList] = useState<FrameType[]>([]);
@@ -59,7 +61,7 @@ export default function LetterMakePage() {
     const [fontList, setFontList] = useState<fontTemplate[]>([]);
 
     //BGM 리스트
-    const [bgmList, setBGMList] = useState([]); //추후 구현
+    // const [bgmList, setBGMList] = useState([]); //추후 구현
 
     // 선택한 프레임
     const [selectImgUrl, setSelectImgUrl] = useState<string>(
@@ -222,10 +224,13 @@ export default function LetterMakePage() {
     const splitUrl = document.location.href.split('/');
     const studioId = splitUrl[splitUrl.length - 1];
 
-    const videoContainerRef = useRef<HTMLDivElement>(null);
+    // const videoContainerRef = useRef<HTMLDivElement>(null);
     const subVideoRef = useRef<HTMLVideoElement>(null);
 
     const [users, setUsers] = useState<any[]>([]);
+    const [newParticipant, setNewParticipant] = useState<any>();
+    const [isParticipantAlertActive, setIsParticipantAlertActive] =
+        useState<boolean>(false);
 
     let OV: OpenVidu;
     let session: Session;
@@ -242,7 +247,7 @@ export default function LetterMakePage() {
 
         //session action 정의 only screen share만 존재
         session.on('streamCreated', (event) => {
-            console.log(event);
+            console.log('Admin -', event);
             if (event.stream.typeOfVideo == 'SCREEN') {
                 const subscriber = session.subscribe(
                     event.stream,
@@ -312,8 +317,10 @@ export default function LetterMakePage() {
                     session.unpublish(publisherScreen);
                 });
             session.publish(publisherScreen);
-            publisherScreen.addVideoElement(mainVideoRef.current);
-            // console.log('Admin: session- ', session);
+            if (mainVideoRef.current) {
+                publisherScreen.addVideoElement(mainVideoRef.current);
+            }
+            console.log('Admin: session- ', session);
         });
 
         // console.log(publisherScreen);
@@ -342,6 +349,10 @@ export default function LetterMakePage() {
                 nodeId,
                 userData,
             };
+            //새 유저 알림창 활성화
+            setNewParticipant(userObj);
+            setIsParticipantAlertActive(true);
+            //변경필요
             return [...prev, userObj];
         });
     };
@@ -413,9 +424,28 @@ export default function LetterMakePage() {
         if (session) endScreenShare();
     };
 
+    //////////////////////////////////////////유저 신규 참가 알림창//////////////////////////////////////////////////
+    const allowAccess = () => {
+        console.log('참가를 수락했습니다.');
+        setIsParticipantAlertActive(false);
+    };
+
+    const denyAccess = () => {
+        console.log('참가를 거절했습니다.');
+        setIsParticipantAlertActive(false);
+    };
+
     ///////////////////////////////////////////////렌더링///////////////////////////////////////////////////////////
     return (
         <section className="relative section-top pt-16">
+            {isParticipantAlertActive ? (
+                <ParticipantAlertWindow
+                    onClickOK={allowAccess}
+                    onClickCancel={denyAccess}
+                />
+            ) : (
+                <></>
+            )}
             <div className="h-20 w-full px-12 color-text-black flex justify-between items-center">
                 <div className="flex items-center">
                     <span className="material-symbols-outlined">

@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import { BaseSyntheticEvent, useEffect, useRef, useState } from 'react';
-import { ClipInfo, ClipUpload } from '../types/type';
+import { ClipInfo } from '../types/type';
 
 //axios
 import { uploadClip } from '../api/clip';
@@ -113,6 +113,11 @@ export default function ClipEditPage() {
     }, []);
 
     ///////////////////////////////////////영상 자르기///////////////////////////////////////////////
+
+    /** changeStartTime(event)
+     *  자르는 시간의 시작 시간을 변경한다.
+     * @param event
+     */
     const changeStartTime = (event: BaseSyntheticEvent) => {
         const nextVal = event.target.value;
         if (nextVal >= 0 && nextVal < endTime) {
@@ -120,6 +125,10 @@ export default function ClipEditPage() {
         }
     };
 
+    /** changeEndTime(event)
+     *  자르는 시간의 끝 시간을 변경한다.
+     * @param event
+     */
     const changeEndTime = (event: BaseSyntheticEvent) => {
         const nextVal = event.target.value;
         if (nextVal > startTime && nextVal <= endMaxtime) {
@@ -127,6 +136,9 @@ export default function ClipEditPage() {
         }
     };
 
+    /** makeFinalVideo()
+     *  설정된 시간대로 잘라서 서버로 전송한다.
+     */
     const makeFinalVideo = async () => {
         const ffmpeg = ffmpegRef.current;
         if (videoRef.current) {
@@ -165,9 +177,14 @@ export default function ClipEditPage() {
                 clipForm.append('clipContent', inputText);
                 clipForm.append('clip', newBlob);
 
+                type ObjectType = {
+                    [key: string]: FormDataEntryValue;
+                };
                 //formdata to json
-                const object = {};
-                clipForm.forEach((value, key) => (object[key] = value));
+                const object: ObjectType = {};
+                clipForm.forEach((value, key) => {
+                    object[key.toString()] = value;
+                });
                 console.log(object);
 
                 await uploadClip(object)
@@ -190,6 +207,11 @@ export default function ClipEditPage() {
     };
 
     //////////////////////////////////////////////재생시간 제한///////////////////////////////////
+
+    /** timeChange(event)
+     *  재생 시 시작, 끝 시간을 자르는 시간으로 제한한다.
+     * @param event
+     */
     const timeChange = (event: BaseSyntheticEvent) => {
         const nowTime = event.target.currentTime;
         if (nowTime < startTime) {
