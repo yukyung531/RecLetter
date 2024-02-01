@@ -69,7 +69,6 @@ public class StudioController {
   @GetMapping("/{studioId}")
   public ResponseEntity<SearchStudioDetailRes> searchStudioDetail(@PathVariable String studioId,
       @AuthenticationPrincipal User user) {
-    log.debug("StudioController.searchStudioDetail : start");
     // 찾을 수 없을 경우 StudioNotFoundException 발생
     // 자신이 참여하지 않은 Studio를 검색할 경우 UnauthorizedToSearchStudioException 발생
     Studio studio = studioService.searchStudioByStudioId(studioId, user);
@@ -85,16 +84,13 @@ public class StudioController {
         .studioBgmId(studio.getStudioBgm().getBgmId())
         .build();
 
-    log.debug("StudioController.searchStudioDetail : end");
     return ResponseEntity.ok().body(result);
   }
 
   @GetMapping("/{studioId}/thumbnail")
   public ResponseEntity<SearchStudioThumbnailRes> searchStudioThumbnail(
       @PathVariable String studioId) {
-    log.debug("StudioController.searchStudioThumbnail : start");
 
-    log.debug("StudioController.searchStudioThumbnail : end");
     return ResponseEntity.ok()
         .body(SearchStudioThumbnailRes
             .builder()
@@ -105,43 +101,35 @@ public class StudioController {
   @PostMapping
   public ResponseEntity<Void> createStudio(@RequestBody CreateStudioReq createStudioReq,
       @AuthenticationPrincipal User user) {
-    log.debug("StudioController.createStudio : start");
 
     // 생성할 수 없는 경우 StudioCreateFailureException 발생
     studioService.createStudio(createStudioReq, user);
 
-    log.debug("StudioController.createStudio : end");
     return ResponseEntity.ok().build();
   }
 
   @DeleteMapping("/{studioId}")
   public ResponseEntity<Void> deleteStudio(@PathVariable String studioId,
       @AuthenticationPrincipal User user) {
-    log.debug("StudioController.deleteStudio : start");
 
     studioService.deleteStudioByStudioId(studioId, user);
 
-    log.debug("StudioController.deleteStudio : end");
     return ResponseEntity.ok().build();
   }
 
   @PostMapping("/{studioId}")
   public ResponseEntity<Void> joinStudio(@PathVariable String studioId,
       @AuthenticationPrincipal User user) {
-    log.debug("StudioController.joinStudio : start");
 
     studioParticipantService.createStudioParticipant(studioId, user);
 
-    log.debug("StudioController.joinStudio : end");
     return ResponseEntity.ok().build();
   }
 
   // TODO - redis 예외처리
   @GetMapping("/{studioId}/active")
   public ResponseEntity<SearchActiveUserRes> searchActiveUser(@PathVariable String studioId) {
-    log.debug("StudioController.searchActiveUser : start");
     // TODO - 해당 studioId로 활성화된 챗팅방이 있는를 체크해서 반환
-    log.debug("StudioController.searchActiveUser : end");
     return ResponseEntity.ok().body(SearchActiveUserRes.builder().isActive(false).build());
   }
 
@@ -149,13 +137,11 @@ public class StudioController {
   @PutMapping("/studio/{studioId}/title")
   public ResponseEntity<Void> updateStudioTitle(@PathVariable String studioId,
       @RequestParam String studioTitle, @AuthenticationPrincipal User user) {
-    log.debug("StudioController.updateStudioTitle : start");
 
     // 해당 스튜디오에 참여하지 않은 사용자의 경우 UnauthorizedToUpdateStudioException 발생
     // 스튜디오를 찾지 못한 경우 StudioNotFoundException 발생
     studioService.updateStudioTitle(studioId, studioTitle, user);
 
-    log.debug("StudioController.updateStudioTitle : end");
     return ResponseEntity.ok().build();
   }
 
