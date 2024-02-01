@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import {
     FrameType,
     Letter,
@@ -8,15 +8,19 @@ import {
 } from '../types/type';
 import { getTemplate, getFont } from '../api/template';
 import { httpStatusCode } from '../util/http-status';
-import { OpenVidu, Session } from 'openvidu-browser';
+import { OpenVidu, Publisher, Session, Subscriber } from 'openvidu-browser';
 // import { connectSession, createSession, endSession } from '../api/openvidu';
 import { getUser } from '../api/user';
 // import { connect } from '../util/chat';
 import axios from 'axios';
 import AddMemberWindow from '../components/AddMemberWindow';
 import ParticipantAlertWindow from '../components/ParticipantAlertWindow';
+import OpenViduVideoCard from '../components/OpenViduVideoCard';
+// import { useNavigate } from 'react-router-dom';
 
 export default function LetterMakePage() {
+    // const navigate = useNavigate();
+
     //mode - 0:영상리스트, 1:프레임, 2:텍스트, 3:오디오
     const [mode, setMode] = useState<number>(0);
 
@@ -78,9 +82,6 @@ export default function LetterMakePage() {
     const selectImg = (source: string) => {
         setSelectImgUrl(source);
     };
-
-    //메인비디오 Ref
-    const mainVideoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
         /**initSetting()
@@ -224,151 +225,110 @@ export default function LetterMakePage() {
     const splitUrl = document.location.href.split('/');
     const studioId = splitUrl[splitUrl.length - 1];
 
-    // const videoContainerRef = useRef<HTMLDivElement>(null);
-    const subVideoRef = useRef<HTMLVideoElement>(null);
+    const [session, setSession] = useState<Session>();
+    const [mainStreamManager, setMainStreamManager] = useState<Publisher>();
+    const [publisher, setPublisher] = useState<Publisher>(); //이게 스크린
+    const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
 
-    const [users, setUsers] = useState<any[]>([]);
-    const [newParticipant, setNewParticipant] = useState<any>();
-    const [isParticipantAlertActive, setIsParticipantAlertActive] =
-        useState<boolean>(false);
-
-    let OV: OpenVidu;
-    let session: Session;
+    const OV = useRef(new OpenVidu());
 
     const APPLICATION_SERVER_URL = 'https://demos.openvidu.io/';
 
-    /**startScreenShare
-     * 화면공유를 눌렀을 때 실행되는 함수다.
+    /** deleteSubscriber(deletedsub)
+     * 연결이 끊긴 구독자를 삭제한다.
      */
-    const startScreenShare = async () => {
-        //openvidu object 가져오고 session 추가
-        OV = new OpenVidu();
-        session = OV.initSession();
+    const deleteSubscriber = useCallback((deletedsub: Subscriber) => {
+        setSubscribers((prev) => {
+            return prev.filter((subscriber) => subscriber !== deletedsub);
+        });
+    }, []);
 
-        //session action 정의 only screen share만 존재
-        session.on('streamCreated', (event) => {
-            console.log('Admin -', event);
-            if (event.stream.typeOfVideo == 'SCREEN') {
-                const subscriber = session.subscribe(
-                    event.stream,
-                    'video-container'
-                );
+    /** startScreenShare
+     *  화면 공유 버튼을 누르면 나오는 함수(원래는 시작과 동시에 진행)
+     *  현재 세션을 초기화하고, stream을 생성한 후, 비디오를 보낸다.
+     */
+    const startScreenShare = useCallback(async () => {
+        const newSession = OV.current.initSession();
 
-                subscriber.on('videoElementCreated', (event) => {
-                    appendUserData(event.element, subscriber.stream.connection);
-                });
-            }
+        //동영상이 들어오고 있다.
+        newSession.on('streamCreated', (event) => {
+            //DOM 추가 없으니 두번째 인자는 undefined
+            const subscriber = newSession.subscribe(event.stream, undefined);
+            console.log('subcriber - ', subscriber);
+            //subscribers 리스트에 추가
+            setSubscribers((prevSubscribers) => [
+                ...prevSubscribers,
+                subscriber,
+            ]);
         });
 
-        //stream파괴시
-        session.on('streamDestroyed', (event) => {
-            //delete html element
-            removeUserData(event.stream.connection);
+        //화면 공유 종료 시
+        newSession.on('streamDestroyed', (event) => {
+            console.log(event);
+            // deleteSubscriber(event.streamManager);
         });
 
-        //오류시
-        session.on('exception', (exception) => {
+        //에러 발생 시
+        newSession.on('exception', (exception) => {
             console.warn(exception);
         });
 
-        //이제 세션에 연결해 봅시다.
-        getToken(studioId).then((token) => {
-            session
-                .connect(token, { clientData: userInfo.userEmail })
-                .then(() => {
-                    console.log('Session opened');
-                    console.log(session);
-                })
-                .catch((error) => {
-                    console.warn(
-                        'There was an error connecting to the session for screen share:',
-                        error.code,
-                        error.message
-                    );
-                });
-        });
-    };
+        // 세션 연결
+        const token = await getToken(studioId); //토큰 받아오기
 
-    /** publishScreenShare()
-     *  웹캠 공유를 활성화합니다.
-     */
-    const publishScreenShare = () => {
-        const publisherScreen = OV.initPublisher('container-screens', {
-            audioSource: undefined,
-            videoSource: 'screen',
-            publishAudio: false,
-            publishVideo: true,
-            resolution: '1920x1080',
-            frameRate: 30,
-            insertMode: 'APPEND',
-            mirror: false,
-        });
+        console.log(userInfo.userNickname);
+        // 세션 연결 시작
+        newSession
+            .connect(token, { clientData: userInfo.userNickname })
+            .then(async () => {
+                console.log('Connected');
+                //publisher 초기화(videoSource = screen)
+                const publisher = await OV.current.initPublisherAsync(
+                    undefined,
+                    {
+                        audioSource: undefined,
+                        videoSource: 'screen',
+                        publishAudio: true,
+                        publishVideo: true,
+                        resolution: '640x480',
+                        frameRate: 30,
+                        insertMode: 'APPEND',
+                        mirror: false,
+                    }
+                );
+                //퍼블리시
+                newSession.publish(publisher);
+                console.log(publisher);
+                //메인 화면, publisher에 현재 publisher 선정
+                setMainStreamManager(publisher);
+                setPublisher(publisher);
+            })
+            .catch((error) => {
+                //connect에 에러
+                console.log(
+                    'There was an error connecting to the session:',
+                    error.code,
+                    error.message
+                );
+            });
 
-        // session.publish(publisherScreen);
+        //세션 설정
+        setSession(newSession);
+    }, []);
 
-        // publisherScreen.addVideoElement(mainVideoRef.current);
-
-        // 유저가 공유 중지하면 중지
-        publisherScreen.once('accessAllowed', () => {
-            publisherScreen.stream
-                .getMediaStream()
-                .getVideoTracks()[0]
-                .addEventListener('ended', () => {
-                    console.log('User Pressed stop sharing');
-                    session.unpublish(publisherScreen);
-                });
-            session.publish(publisherScreen);
-            if (mainVideoRef.current) {
-                publisherScreen.addVideoElement(mainVideoRef.current);
-            }
-            console.log('Admin: session- ', session);
-        });
-
-        // console.log(publisherScreen);
-    };
-
-    /** appendUserData
-     *  userData가 추가되면 실행되는 함수입니다.
-     * @param videoElement
-     * @param connection
-     */
-    const appendUserData = (videoElement, connection) => {
-        let userData;
-        let nodeId;
-        //유저데이터, 노드 아이디 받아오기
-        if (typeof connection === 'string') {
-            userData = connection;
-            nodeId = connection;
-        } else {
-            userData = JSON.parse(connection.data).clientData;
-            nodeId = connection.connectionId;
+    const endScreenShare = useCallback(() => {
+        //세션이 있으면 연결을 멈춘다.
+        if (session) {
+            session.disconnect();
         }
 
-        //유저 목록 추가
-        setUsers((prev) => {
-            const userObj = {
-                nodeId,
-                userData,
-            };
-            //새 유저 알림창 활성화
-            setNewParticipant(userObj);
-            setIsParticipantAlertActive(true);
-            //변경필요
-            return [...prev, userObj];
-        });
-    };
-
-    /** removeUserData
-     *  유저를 지우는 함수입니다.
-     * @param connection
-     */
-    const removeUserData = (connection) => {
-        setUsers((prev) => {
-            return prev.filter((user) => {
-                user.nodeId !== connection.connectionId;
-            });
-        });
-    };
+        //OV 초기화
+        OV.current = new OpenVidu();
+        setSession(undefined);
+        setSubscribers([]);
+        setMainStreamManager(undefined);
+        setPublisher(undefined);
+    }, [session]);
 
     /** getToken()
      * 세션을 생성하고 접속을 위한 토큰을 가져옵니다.
@@ -411,43 +371,38 @@ export default function LetterMakePage() {
         return response.data; // The token
     };
 
-    /**세션을 종료합니다. */
-    const endScreenShare = async () => {
-        //세션 종료
-        // endSession(studioId);
+    //윈도우창 강제 종료 시 처리
+    useEffect(() => {
+        const handleBeforeUnload = () => endScreenShare();
+        window.addEventListener('beforeunload', handleBeforeUnload);
 
-        //세션 연결 종료, 유저 정보 초기화
-        session.disconnect();
-        setUsers([]);
-    };
-
-    /**윈도우 창을 닫으면 자동 종료 */
-    window.onbeforeunload = () => {
-        if (session) endScreenShare();
-    };
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [endScreenShare]);
 
     //////////////////////////////////////////유저 신규 참가 알림창//////////////////////////////////////////////////
-    const allowAccess = () => {
-        console.log('참가를 수락했습니다.');
-        setIsParticipantAlertActive(false);
-    };
+    // const allowAccess = () => {
+    //     console.log('참가를 수락했습니다.');
+    //     setIsParticipantAlertActive(false);
+    // };
 
-    const denyAccess = () => {
-        console.log('참가를 거절했습니다.');
-        setIsParticipantAlertActive(false);
-    };
+    // const denyAccess = () => {
+    //     console.log('참가를 거절했습니다.');
+    //     setIsParticipantAlertActive(false);
+    // };
 
     ///////////////////////////////////////////////렌더링///////////////////////////////////////////////////////////
     return (
         <section className="relative section-top pt-16">
-            {isParticipantAlertActive ? (
+            {/* {isParticipantAlertActive ? (
                 <ParticipantAlertWindow
                     onClickOK={allowAccess}
                     onClickCancel={denyAccess}
                 />
             ) : (
                 <></>
-            )}
+            )} */}
             <div className="h-20 w-full px-12 color-text-black flex justify-between items-center">
                 <div className="flex items-center">
                     <span className="material-symbols-outlined">
@@ -462,13 +417,7 @@ export default function LetterMakePage() {
                     className="btn-cover color-bg-blue3 text-white"
                     onClick={startScreenShare}
                 >
-                    세션 연결 하기
-                </button>
-                <button
-                    className="btn-cover color-bg-blue3 text-white"
-                    onClick={publishScreenShare}
-                >
-                    화상 공유하기
+                    화상 공유 하기
                 </button>
                 <button
                     className="btn-cover color-bg-blue3 text-white"
@@ -714,29 +663,26 @@ export default function LetterMakePage() {
                     </div>
                 </div>
             </div>
-            <div id="main-video" className="col-md-6">
-                <p>{userInfo.userEmail}</p>
-                <video
-                    autoPlay
-                    playsInline={true}
-                    ref={mainVideoRef}
-                    width={'680px'}
-                    height={'480px'}
-                ></video>
-            </div>
+            {publisher ? (
+                <div id="main-video" className="col-md-6">
+                    <OpenViduVideoCard streamManager={publisher} />
+                </div>
+            ) : (
+                <></>
+            )}
             <div id="video-container">
-                {users.map((user) => {
-                    console.log(users);
-                    return (
-                        <div
-                            className="data-node"
-                            id={`data-${user.nodeId}`}
-                            key={user.nodeId}
-                        >
-                            <p>{user}</p>
-                        </div>
-                    );
-                })}
+                {subscribers.length >= 1 ? (
+                    subscribers.map((subscriber) => {
+                        return (
+                            <OpenViduVideoCard
+                                key={subscriber.id}
+                                streamManager={subscriber}
+                            />
+                        );
+                    })
+                ) : (
+                    <></>
+                )}
             </div>
         </section>
     );
