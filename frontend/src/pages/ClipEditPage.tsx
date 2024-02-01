@@ -40,9 +40,10 @@ export default function ClipEditPage() {
         const baseURL = 'https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/esm';
         const ffmpeg = ffmpegRef.current;
 
-        // ffmpeg.on('log', ({ message }) => {
-        //     console.log(message);
-        // });
+        ffmpeg.on('log', ({ message }) => {
+            console.log(message);
+        });
+
         // toBlobURL is used to bypass CORS issue, urls with the same
         // domain can be used directly.
         await ffmpeg.load({
@@ -154,12 +155,14 @@ export default function ClipEditPage() {
                 endTime < 10 ? '0' + endTime : endTime
             }`;
             await ffmpeg.exec([
-                '-i',
-                'input.mp4',
                 '-ss',
                 startTimeString,
                 '-to',
                 endTimeString,
+                '-i',
+                'input.mp4',
+                '-map',
+                '0',
                 '-c',
                 'copy',
                 'final.mp4',
@@ -411,6 +414,7 @@ export default function ClipEditPage() {
                         <video
                             className="bg-white border my-2"
                             style={{
+                                transform: `rotateY(180deg)`,
                                 width: '640px',
                                 height: '480px',
                                 display: 'block',
@@ -420,7 +424,6 @@ export default function ClipEditPage() {
                                 timeChange(event);
                                 handleProgress(event);
                             }}
-                            controls
                         />
                         <div className="w-full flex flex-col justify-center items-center my-4">
                             {/* 재생버튼 */}

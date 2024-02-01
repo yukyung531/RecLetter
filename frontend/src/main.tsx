@@ -15,6 +15,7 @@ import StudioMainPage from './pages/StudioMainPage.tsx';
 import ClipRecodePage from './pages/ClipRecodePage.tsx';
 import ClipEditPage from './pages/ClipEditPage.tsx';
 import LetterMakePage from './pages/LetterMakePage.tsx';
+import LetterViewPage from './pages/LetterViewPage.tsx';
 import LetterFinishPage from './pages/LetterFinishPage.tsx';
 import FindResultPage from './pages/FindResultPage.tsx';
 import MyPage from './pages/MyPage.tsx';
@@ -26,52 +27,56 @@ import ChattingBox from './components/ChattingBox.tsx';
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-    <Provider store={store}>
-        <QueryClientProvider client={queryClient}>
-            <BrowserRouter>
-                <Header />
-                <Routes>
-                    <Route path="/" element={<Mainpage />}></Route>
-                    <Route path="/login" element={<LoginPage />}></Route>
-                    <Route path="/mypage" element={<MyPage />}></Route>
-                    <Route path="/regist" element={<RegistPage />}></Route>
-                    <Route path="/findid" element={<FindIdPage />}></Route>
-                    <Route path="/findpw" element={<FindPwPage />}></Route>
-                    <Route
-                        path="/findresult"
-                        element={<FindResultPage />}
-                    ></Route>
-                    <Route
-                        path="/studiolist"
-                        element={<StudioListPage />}
-                    ></Route>
-                    <Route
-                        path="/studiomain/:studioId"
-                        element={<StudioMainPage />}
-                    ></Route>
-                    <Route
-                        path="/create"
-                        element={<StudioCreatePage />}
-                    ></Route>
-                    <Route
-                        path="/cliprecode/:studioId"
-                        element={<ClipRecodePage />}
-                    ></Route>
-                    <Route
-                        path="/clipedit/:studioId"
-                        element={<ClipEditPage />}
-                    ></Route>
-                    <Route
-                        path="/lettermake/:studioId"
-                        element={<LetterMakePage />}
-                    ></Route>
-                    <Route
-                        path="/letterfinish"
-                        element={<LetterFinishPage />}
-                    ></Route>
-                </Routes>
-                <ChattingBox />
-            </BrowserRouter>
-        </QueryClientProvider>
-    </Provider>
+        <Provider store={store}>
+            <QueryClientProvider client={queryClient}>
+                <BrowserRouter>
+                    <Header />
+                    <Routes>
+                        <Route path="/" element={<Mainpage />}></Route>
+                        <Route path="/login" element={<LoginPage />}></Route>
+                        <Route path="/mypage" element={<MyPage />}></Route>
+                        <Route path="/regist" element={<RegistPage />}></Route>
+                        <Route path="/findid" element={<FindIdPage />}></Route>
+                        <Route path="/findpw" element={<FindPwPage />}></Route>
+                        <Route
+                            path="/findresult"
+                            element={<FindResultPage />}
+                        ></Route>
+                        <Route
+                            path="/studiolist"
+                            element={<StudioListPage />}
+                        ></Route>
+                        <Route
+                            path="/studiomain/:studioId"
+                            element={<StudioMainPage />}
+                        ></Route>
+                        <Route
+                            path="/create"
+                            element={<StudioCreatePage />}
+                        ></Route>
+                        <Route
+                            path="/cliprecode/:studioId"
+                            element={<ClipRecodePage />}
+                        ></Route>
+                        <Route
+                            path="/clipedit/:studioId"
+                            element={<ClipEditPage />}
+                        ></Route>
+                        <Route
+                            path="/lettermake/:studioId"
+                            element={<LetterMakePage />}
+                        ></Route>
+                        <Route
+                            path="/letterview/:studioId"
+                            element={<LetterViewPage />}
+                        ></Route>
+                        <Route
+                            path="/letterfinish/:studioId"
+                            element={<LetterFinishPage />}
+                        ></Route>
+                    </Routes>
+                    <ChattingBox />
+                </BrowserRouter>
+            </QueryClientProvider>
+        </Provider>
 );

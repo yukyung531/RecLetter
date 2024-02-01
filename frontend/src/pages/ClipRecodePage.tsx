@@ -48,8 +48,8 @@ export default function ClipRecodePage() {
 
     //유저 정보
     const [userInfo, setUserInfo] = useState<UserInfo>({
-        userId: '',
         userNickname: '',
+        userEmail: '',
     });
 
     //url로부터 스튜디오 제목 불러오기
@@ -149,10 +149,11 @@ export default function ClipRecodePage() {
         //+유저 정보 불러오기
         const getUserInfo = async () => {
             const resuser = await getUser();
+            console.log(resuser);
             const tempObj = { ...resuser.data };
             setUserInfo({
-                userId: tempObj.userId,
                 userNickname: tempObj.userNickname,
+                userEmail: tempObj.userEmail,
             });
         };
         getUserInfo();
@@ -201,11 +202,11 @@ export default function ClipRecodePage() {
                 }
 
                 //새 클립 정보 생성
-                if (userInfo.userId) {
+                if (userInfo.userEmail) {
                     const newClip: ClipInfo = {
                         clipId: clipNumber,
                         clipTitle: userInfo.userNickname + ' ' + clipNumber,
-                        clipOwner: userInfo.userId,
+                        clipOwner: userInfo.userEmail,
                         clipLength: Math.floor(duration),
                         clipThumbnail: '/src/assets/images/nothumb.png',
                         clipUrl: newURL,
@@ -215,6 +216,7 @@ export default function ClipRecodePage() {
                     };
 
                     const newArray = [...myClipList, newClip];
+                    console.log(newArray);
                     setMyClipList(newArray);
                 }
             }
@@ -448,10 +450,16 @@ export default function ClipRecodePage() {
         reader.readAsDataURL(blob);
         reader.onloadend = () => {
             const base64 = reader.result;
-            //url 초기화
+            //url 초기화(자원관리)
             myClipList.map((clip) => {
                 URL.revokeObjectURL(clip.clipUrl);
             });
+            //mediaStream 소멸
+            const trackList: MediaStreamTrack[] = mS.getTracks();
+            for (let i = 0; i < trackList.length; i++) {
+                mS.removeTrack(trackList[i]);
+            }
+
             //navigate
             const splitUrl = document.location.href.split('/');
             const studioId = splitUrl[splitUrl.length - 1];
@@ -597,6 +605,7 @@ export default function ClipRecodePage() {
                         <video
                             className="bg-white border my-2"
                             style={{
+                                transform: `rotateY(180deg)`,
                                 width: '640px',
                                 height: '480px',
                                 display: 'block',
@@ -608,12 +617,12 @@ export default function ClipRecodePage() {
                         <video
                             className="bg-white border my-2"
                             style={{
+                                transform: `rotateY(180deg)`,
                                 width: '640px',
                                 height: '480px',
                                 display: 'none',
                             }}
                             ref={videoPreviewRef}
-                            controls
                             onTimeUpdate={handleProgress}
                         />
                         <div className="w-full flex flex-col justify-center items-center my-4">
