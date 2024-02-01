@@ -26,12 +26,6 @@ public class Frame {
     @Column(name = "frame_title")
     private String frameTitle;
 
-    @Column(name = "frame_image_url")
-    private String frameImageUrl;
-
-    @Column(name = "frame_body")
-    private String frameBody;
-
     @JoinColumn(name = "font_id", referencedColumnName = "font_id")
     private Integer fontId;
 
