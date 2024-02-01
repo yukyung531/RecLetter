@@ -45,11 +45,9 @@ public class StudioServiceImpl implements StudioService {
 
   @Override
   public Studio searchStudioByStudioId(String studioId, User user) throws StudioNotFoundException {
-    Studio result = studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
 
-//    if (result.getStudioOwner().getUserId().equals(user.getUserId())) { //예전 코드
-    if (studioUtil.isStudioParticipant(studioId, user.getUserId())){ //스튜디오 참가자 여부 확인
-      return result;
+    if (studioUtil.isStudioParticipant(studioId, user.getUserId())) { //스튜디오 참가자 여부 확인
+      return studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
     } else {
       throw new UnauthorizedToSearchStudioException();
     }
@@ -80,7 +78,9 @@ public class StudioServiceImpl implements StudioService {
     Studio studio = Studio.builder()
         .studioOwner(user.getUserId())
         .studioTitle(createStudioReq.getStudioTitle())
-        .expireDate(createStudioReq.getExpireDate().isBefore(limitDate) ? createStudioReq.getExpireDate() : limitDate)
+        .expireDate(
+            createStudioReq.getExpireDate().isBefore(limitDate) ? createStudioReq.getExpireDate()
+                : limitDate)
         .studioFrameId(createStudioReq.getStudioFrameId())
         .build();
 
