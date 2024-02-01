@@ -11,12 +11,37 @@
 <button id="getVideo">get Video</button>
 <video-js id="video-player" width="500" height="500" controls></video-js>
 
-
+<button onclick="downloadVideo()">동영상 다운로드!</button>
+<video src="https://d3f9xm3snzk3an.cloudfront.net/64aae064-443d-4d9a-9847-d92b9a49b0e1/1/만약 이게 간다면 뚜.mp4"></video>
 <script src="https://vjs.zencdn.net/8.9.0/video.min.js"></script>
 <script>
+    function downloadVideo() {
+        // S3에 저장된 동영상의 URL을 여기에 입력
+        var videoUrl = 'https://d3f9xm3snzk3an.cloudfront.net/64aae064-443d-4d9a-9847-d92b9a49b0e1/1/만약 이게 간다면 뚜.mp4';
+
+        // XMLHttpRequest를 사용하여 동영상을 가져옴
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', videoUrl, true);
+        xhr.responseType = 'blob';
+
+        xhr.onload = function() {
+            // Blob을 생성하여 다운로드 링크로 설정
+            var blob = new Blob([xhr.response], { type: 'video/mp4' });
+            var link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+
+            // 다운로드될 파일명 설정 (선택사항)
+            link.download = '다운로드된_동영상.mp4';
+
+            // 링크를 클릭하여 다운로드 시작
+            link.click();
+        };
+
+        xhr.send();
+    }
 
     var myPlayer = videojs('video-player');
-    // myPlayer.src("https://sunjbucket.s3.ap-northeast-2.amazonaws.com/testVideo.mp4")
+    myPlayer.src("https://d3f9xm3snzk3an.cloudfront.net/64aae064-443d-4d9a-9847-d92b9a49b0e1/1/만약 이게 간다면 뚜.mp4")
     // myPlayer.src("https://d3f9xm3snzk3an.cloudfront.net/testVideo.mp4")
 
     const videoBtn=document.querySelector("#getVideo");

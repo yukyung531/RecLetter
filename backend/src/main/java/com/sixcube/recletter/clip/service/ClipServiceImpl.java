@@ -10,10 +10,8 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.sixcube.recletter.clip.Repository.ClipRepository;
 import com.sixcube.recletter.clip.dto.Clip;
 import com.sixcube.recletter.clip.dto.ClipInfo;
-import com.sixcube.recletter.clip.exception.InvalidClipFormatException;
-import com.sixcube.recletter.clip.exception.NoSuchClipException;
-import com.sixcube.recletter.clip.exception.SaveClipFailException;
-import com.sixcube.recletter.clip.exception.WeirdClipUserException;
+import com.sixcube.recletter.clip.exception.*;
+import com.sixcube.recletter.studio.StudioUtil;
 import com.sixcube.recletter.studio.dto.StudioParticipant;
 import com.sixcube.recletter.studio.dto.StudioParticipantId;
 import com.sixcube.recletter.studio.exception.StudioNotFoundException;
@@ -32,7 +30,7 @@ import java.util.*;
 public class ClipServiceImpl implements ClipService {
 
     private final ClipRepository clipRepository;
-    private final StudioParticipantRepository studioParticipantRepository;
+    private final StudioUtil studioUtil;
     private final AmazonS3Client amazonS3Client;
 //    private final String cloudFront = "https://d3f9xm3snzk3an.cloudfront.net/";
 
@@ -44,17 +42,16 @@ public class ClipServiceImpl implements ClipService {
     private String cloudFront;
     private final String extension = ".mp4";
 
-    private StudioParticipant checkValidUserClip(Clip clip) {
-        return studioParticipantRepository.findById(new StudioParticipantId(clip.getStudioId(), clip.getClipOwner())).orElseThrow(WeirdClipUserException::new);
-    }
 
     @Override
     public void createClip(Clip clip, MultipartFile file) {
-        if (!file.getContentType().equals("video/mp4")) {
+        if (file==null || !file.getContentType().equals("video/mp4")) {
             throw new InvalidClipFormatException();
         }
-        //아직 studioParticipant Table이 동작하지 않아 실행을 위해 주석 처리. 추후 구현 완료되면 예외처리를 위해 주석 해제 예정
-        checkValidUserClip(clip);
+        if (!studioUtil.isStudioParticipant(clip.getStudioId(),clip.getClipOwner())){
+            throw new WeirdClipUserException();
+        }
+
         try {
             clipRepository.save(clip);
             System.out.println(clip);
@@ -139,9 +136,13 @@ public class ClipServiceImpl implements ClipService {
     }
 
     @Override
-    public boolean isClipOwner(String userId, int clipId) {
-        //userId==clipId의 clipOwner랑 같은지 확인
-        return false;
+    public Clip searchMyClip(String userId, int clipId) throws NotClipOwnerException{
+        Clip clip=searchClip(clipId);
+        if(userId.equals(clip.getClipOwner())){
+            return clip;
+        } else{
+          throw new NotClipOwnerException();
+        }
     }
 
     @Override
@@ -164,17 +165,18 @@ public class ClipServiceImpl implements ClipService {
     }
 
     public String getPreSignedUrl(String fileName){
+        String url="";
         try {
             CloudFrontManager cm=new CloudFrontManager();
-            cm.printUrl();
+            url=cm.printUrl(fileName);
         } catch (Exception e) {
             System.out.println("TT...");
             e.printStackTrace();
         }
-
-        GeneratePresignedUrlRequest generatePresignedUrlRequest=getGeneratePreSignedUrlRequest(bucket,fileName);
-        URL url=amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest);
-        return url.toString();
+        return url;
+//        GeneratePresignedUrlRequest generatePresignedUrlRequest=getGeneratePreSignedUrlRequest(bucket,fileName);
+//        URL url=amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest);
+//        return url.toString();
     }
 
     /**
