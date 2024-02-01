@@ -41,6 +41,9 @@ public class ChatServiceImpl implements ChatService {
             // studioId에 해당하는 studio가 존재하는지 확인
             studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
 
+            // 해당 스튜디오에 현재 참여중인지 확인
+
+
             // 메시지 sender에 userNickname 등록
             chatMessage.setSender(user.getUserNickname());
 
@@ -68,6 +71,8 @@ public class ChatServiceImpl implements ChatService {
             // studioId에 해당하는 studio가 존재하는지 확인
             studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
 
+            // TODO - 해당 스튜디오에 참여중인지 확인
+
             // 메시지 sender에 userNickname 등록
             chatMessage.setSender(user.getUserNickname());
 
@@ -91,6 +96,8 @@ public class ChatServiceImpl implements ChatService {
             // studioId에 해당하는 studio가 존재하는지 확인
             studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
 
+            // TODO - 해당 스튜디오에 참여중인지 확인
+
             // 메시지 sender에 userNickname 등록
             chatMessage.setSender(user.getUserNickname());
 
@@ -110,21 +117,4 @@ public class ChatServiceImpl implements ChatService {
         }
     }
 
-    @Override
-    public List<String> searchChatUserList(String studioId)throws StudioNotFoundException, SearchChatUserListFailureException {
-        try {
-            log.debug("ChatServiceImpl.searchChatUserList : start");
-            // 스튜디오 아이디에 해당하는 스튜디오 정보 가져오기
-            Studio studio = studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
-            // 스튜디오에 참여하고 있는 참여자들 가져오기
-            List<StudioParticipant> participants = studioParticipantRepository.findAllByStudio(studio);
-            // userNickname 리스트 만들기
-            List<String> userList = participants.stream().map(participant -> participant.getUser().getUserNickname()).collect(Collectors.toList());
-            log.debug("ChatServiceImpl.searchChatUserList : end");
-            // userNickname 리스트 반환
-            return userList;
-        } catch (Exception e) {
-            throw new SearchChatUserListFailureException(e);
-        }
-    }
 }

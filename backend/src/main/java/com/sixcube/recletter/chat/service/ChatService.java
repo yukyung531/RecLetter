@@ -13,5 +13,4 @@ public interface ChatService {
 
     ChatMessage leaveChat(String studioId, ChatMessage chatMessage, User user);
 
-    List<String> searchChatUserList(String studioId);
 }
