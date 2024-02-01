@@ -38,15 +38,5 @@ public class StudioParticipantServiceImpl implements StudioParticipantService {
             throw new StudioParticipantCreateFailureException(e);
           }
         });
-
-    try {
-      studioParticipantRepository.save(
-          StudioParticipant.builder()
-              .studio(Studio.builder().studioId(studioId).build())
-              .user(user)
-              .build());
-    } catch (Exception e) {
-      throw new StudioParticipantCreateFailureException(e);
-    }
   }
 }
