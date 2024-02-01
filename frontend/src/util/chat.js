@@ -50,7 +50,7 @@ export function subscribe() {
         console.log(payload);
         onMeesageReceived(payload);
         console.log('구독이 되었습니다');
-        showMessage('은수', '1', JSON.parse(payload.body).content);
+        // showMessage('은수', '1', JSON.parse(payload.body).content);
     });
 }
 
@@ -73,23 +73,15 @@ function onMeesageReceived(payload) {
     let message = JSON.parse(payload.body); // 메시지 객체를 파싱
     console.log(message);
 
-    // 본인이 보낸 입장 메시지는 본인에게 렌더링하지 않음
-    // if (message.type === 'JOIN' && message.sender === username) {
-    //     console.log('작동해야지!!!정은수 핑크색 쓰지마라');
-
-    //     return;
-    // }
-    if (message.type === 'JOIN') {
-        showMessage(message.sender, message.time, message.content);
+    if (
+        message.type === 'JOIN' ||
+        (message.type === 'LEAVE' && message.sender === username)
+    ) {
+        console.log('유저가 같아서 표시되지 않습니다.');
     }
-    // 메시지를 출력할 요소를 생성
-    let messageElement = document.createElement('li');
-
-    // 참여하고 퇴장하였을 때, css 적용
-    if (message.type === 'JOIN' || message.type === 'LEAVE') {
-        messageElement.classList.add('event-message');
+    //이름이 같지 않을 때
+    else {
         showMessage(message.sender, message.time, message.content);
-        console.log(message.content + message.sender + message.time);
     }
 }
 

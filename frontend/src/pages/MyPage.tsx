@@ -46,7 +46,6 @@ export default function MyPage() {
     /** 수정사항 저장 API */
     const saveUserAPI = async () => {
         await modifyUser({
-            userEmail: userEmail,
             userNickname: userNickname,
         }).then((res) => {
             if (res.status === httpStatusCode.OK) {
@@ -150,11 +149,9 @@ export default function MyPage() {
                             <input
                                 className="w-105 py-2 px-3 border-2 rounded text-xl"
                                 type="text"
-                                onChange={(e) => {
-                                    changeNickname(e);
-                                }}
                                 value={userNickname}
-                                placeholder="2자~16자 사이로 입력해주세요"
+                                placeholder="이메일입니다."
+                                disabled
                             />
                         </div>
                     </div>

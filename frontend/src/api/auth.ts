@@ -23,10 +23,6 @@ export async function requestEmail(userEmail: EmailSend) {
 export async function verifyEmail(email: EmailRequest) {
     return await local.post(`/api/auth/email/code`, email, {});
 }
-/** GET 아이디 중복 검사 */
-export async function checkId(userid: string) {
-    return await local.get(`/api/auth/id/${userid}`);
-}
 
 /** POST 비밀번호 초기화 이메일 발송 요청 */
 export async function requestPasswordEmail(userEmail: PasswordReset) {
