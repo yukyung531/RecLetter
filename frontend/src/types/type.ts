@@ -10,7 +10,7 @@ export interface RegistUser {
     userNickname: string;
 }
 export interface User {
-    userId: string;
+    userEmail: string;
     userPassword: string;
 }
 export interface UserInfo {
