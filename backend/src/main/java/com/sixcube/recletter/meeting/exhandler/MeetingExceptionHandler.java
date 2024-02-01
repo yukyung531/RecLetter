@@ -1,9 +1,6 @@
 package com.sixcube.recletter.meeting.exhandler;
 
-import com.sixcube.recletter.meeting.exception.MaxMeetingParticipantException;
-import com.sixcube.recletter.meeting.exception.MeetingCreateConnectionFailureException;
-import com.sixcube.recletter.meeting.exception.MeetingDeleteSessionFailureException;
-import com.sixcube.recletter.meeting.exception.MeetingInitializeSessionFailureException;
+import com.sixcube.recletter.meeting.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -68,6 +65,17 @@ public class MeetingExceptionHandler {
         makeErrorMessage(errorMessage, e);
 
         errorMessage.append("세션 종료에 실패했습니다.");
+        return ResponseEntity.badRequest().body(errorMessage.toString());
+    }
+
+    @ExceptionHandler(MeetingCheckSessionFailureException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ResponseEntity<String> MeetingCheckSessionFailureExceptionHandler(MeetingCheckSessionFailureException e){
+        StringBuilder errorMessage = new StringBuilder();
+
+        makeErrorMessage(errorMessage, e);
+
+        errorMessage.append("해당 세션 정보 가져오기를 실패했습니다.");
         return ResponseEntity.badRequest().body(errorMessage.toString());
     }
 }
