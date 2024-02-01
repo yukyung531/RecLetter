@@ -2,10 +2,7 @@ package com.sixcube.recletter.meeting.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sixcube.recletter.meeting.exception.MaxMeetingParticipantException;
-import com.sixcube.recletter.meeting.exception.MeetingCreateConnectionFailureException;
-import com.sixcube.recletter.meeting.exception.MeetingDeleteSessionFailureException;
-import com.sixcube.recletter.meeting.exception.MeetingInitializeSessionFailureException;
+import com.sixcube.recletter.meeting.exception.*;
 import com.sixcube.recletter.studio.exception.StudioNotFoundException;
 import com.sixcube.recletter.studio.repository.StudioRepository;
 import com.sixcube.recletter.user.dto.User;
@@ -13,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
@@ -164,5 +162,40 @@ public class MeetingServiceImpl implements MeetingService {
         } catch (Exception e) {
             throw new MeetingDeleteSessionFailureException(e);
         }
+    }
+
+    public Boolean checkSession(String sessionId) throws StudioNotFoundException, MeetingCheckSessionFailureException {
+        // 스튜디오 존재 확인
+        studioRepository.findById(sessionId).orElseThrow(StudioNotFoundException::new);
+
+        // RestTemplate 생성
+        restTemplate = new RestTemplate();
+
+        // 헤더 생성
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setBasicAuth("OPENVIDUAPP", OPENVIDU_SECRET);
+
+        // HttpEntity 생성 (헤더 포함)
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        try {
+            // 해당 세션 정보를 가져오기 위한 GET 요청을 보냄
+            ResponseEntity<String> response = restTemplate.exchange(OPENVIDU_URL + "/" + sessionId, HttpMethod.GET, entity, String.class);
+
+            // HTTP 상태 코드가 200이면 세션 ID가 활성화되어 있음
+            if (response.getStatusCode() == HttpStatus.OK) {
+                return true;
+            }
+
+        } catch (HttpClientErrorException e) {
+            // HTTP 상태 코드가 404이면 세션 ID가 존재하지 않음
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                return false;
+            } else throw new MeetingCheckSessionFailureException(e);
+        }
+
+        return false;
     }
 }
