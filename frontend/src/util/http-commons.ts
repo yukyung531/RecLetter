@@ -24,6 +24,13 @@ export default function localAxios() {
 
     // Request 시 설정한 내용을 적용.
     instance.interceptors.request.use((config) => {
+        if (config.url === '/api/auth/token') {
+            config.headers.Authorization =
+                'Bearer ' + localStorage.getItem('refresh-token');
+        } else if (localStorage.getItem('access-token')) {
+            config.headers.Authorization =
+                'Bearer ' + localStorage.getItem('access-token');
+        }
         return config;
     }),
         (error: Error) => {
@@ -48,7 +55,10 @@ export default function localAxios() {
             } = error;
             // 페이지가 새로고침되어 저장된 accessToken이 없어진 경우.
             // 토큰 자체가 만료되어 더 이상 진행할 수 없는 경우.
-            if (status === httpStatusCode.UNAUTHORIZED) {
+            if (
+                status === httpStatusCode.UNAUTHORIZED ||
+                status == httpStatusCode.FORBIDDEN
+            ) {
                 // 요청 상태 저장
                 console.log('토큰이 없어 재생성합니다.');
                 const originalRequest = config;
@@ -62,25 +72,41 @@ export default function localAxios() {
                     const oldToken: tokenType = {
                         refreshToken: localStorage.getItem('refresh-token'),
                     };
-                    instance.defaults.headers.common['Authorization'] = '';
-                    return await token(oldToken).then((res) => {
-                        const newAccessToken = res.data.accessToken;
-                        instance.defaults.headers.common['Authorization'] =
-                            'Bearer ' + newAccessToken;
-                        originalRequest.headers.Authorization =
-                            'Bearer ' + newAccessToken;
-                        localStorage.setItem('access-token', newAccessToken);
-                        localStorage.setItem(
-                            'refresh-token',
-                            res.data.refreshToken
-                        );
-                        isTokenRefreshing = false;
-                        // 에러가 발생했던 원래의 요청을 다시 진행.
-                        return instance(originalRequest);
-                    });
+                    console.log(oldToken.refreshToken);
+                    instance.defaults.headers.common['Authorization'] =
+                        oldToken.refreshToken;
+                    return await token(oldToken)
+                        .then((res) => {
+                            console.log('토큰생성!');
+                            const newAccessToken = res.data.accessToken;
+                            instance.defaults.headers.common['Authorization'] =
+                                'Bearer ' + newAccessToken;
+                            originalRequest.headers.Authorization =
+                                'Bearer ' + newAccessToken;
+                            localStorage.setItem(
+                                'access-token',
+                                newAccessToken
+                            );
+                            localStorage.setItem(
+                                'refresh-token',
+                                res.data.refreshToken
+                            );
+                            isTokenRefreshing = false;
+                            // 에러가 발생했던 원래의 요청을 다시 진행.
+                            return instance(originalRequest);
+                        })
+                        .catch((e) => {
+                            console.log(e);
+                        });
                 }
             } else if (status == httpStatusCode.FORBIDDEN) {
-                alert(error.res.data.message);
+                console.log('포비든오류');
+                // const originalRequest = config;
+                // if (localStorage.getItem('access-token')) {
+                //     instance.defaults.headers.common['Authorization'] =
+                //         'Bearer ' + localStorage.getItem('access-token');
+                // }
+                // return instance(originalRequest);
             } else {
                 console.log('오류떠쎠');
             }

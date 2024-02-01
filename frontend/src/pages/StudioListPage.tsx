@@ -5,7 +5,11 @@ import { StudioInfo } from '../types/type';
 import { Link, useNavigate } from 'react-router-dom';
 import { getStudio, studioDetail } from '../api/studio';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginState, studioState } from '../util/counter-slice';
+import {
+    loginState,
+    studioNameState,
+    studioState,
+} from '../util/counter-slice';
 import { httpStatusCode } from '../util/http-status';
 import StudioFinishCard from '../components/StudioFinishCard';
 
@@ -63,6 +67,7 @@ export default function StudioListPage() {
                         );
                 };
                 dispatch(studioState(''));
+                dispatch(studioNameState(''));
                 makeStudioListAPI();
             }
             dispatch(loginState(true));

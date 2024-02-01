@@ -1,6 +1,10 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { loginState, studioState } from '../util/counter-slice';
+import {
+    loginState,
+    studioNameState,
+    studioState,
+} from '../util/counter-slice';
 import { useEffect } from 'react';
 
 export default function Mainpage() {
@@ -11,6 +15,7 @@ export default function Mainpage() {
 
     useEffect(() => {
         dispatch(studioState(''));
+        dispatch(studioNameState(''));
     }, []);
 
     useEffect(() => {

@@ -4,7 +4,11 @@ import { User } from '../types/type';
 import { Link, useNavigate } from 'react-router-dom';
 import { httpStatusCode } from '../util/http-status';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginState, studioState } from '../util/counter-slice';
+import {
+    loginState,
+    studioNameState,
+    studioState,
+} from '../util/counter-slice';
 
 export default function LoginPage() {
     const [inputEmail, setInputEmail] = useState<string>('');
@@ -17,6 +21,7 @@ export default function LoginPage() {
 
     useEffect(() => {
         dispatch(studioState(''));
+        dispatch(studioNameState(''));
     }, []);
 
     useEffect(() => {
