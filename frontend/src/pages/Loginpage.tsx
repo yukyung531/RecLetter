@@ -1,10 +1,14 @@
-import {BaseSyntheticEvent, useEffect, useState} from 'react';
-import {googleLogin, login} from '../api/auth';
-import {User} from '../types/type';
-import {Link, useNavigate} from 'react-router-dom';
-import {httpStatusCode} from '../util/http-status';
-import {useDispatch, useSelector} from 'react-redux';
-import {loginState, studioState} from '../util/counter-slice';
+import { BaseSyntheticEvent, useEffect, useState } from 'react';
+import { login } from '../api/auth';
+import { User } from '../types/type';
+import { Link, useNavigate } from 'react-router-dom';
+import { httpStatusCode } from '../util/http-status';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    loginState,
+    studioNameState,
+    studioState,
+} from '../util/counter-slice';
 
 export default function LoginPage() {
     const [inputEmail, setInputEmail] = useState<string>('');
@@ -17,6 +21,7 @@ export default function LoginPage() {
 
     useEffect(() => {
         dispatch(studioState(''));
+        dispatch(studioNameState(''));
     }, []);
 
     useEffect(() => {
@@ -49,18 +54,6 @@ export default function LoginPage() {
             loadLoginAPI(user);
         }
     };
-    const onClickGoogleLogin = async () => {
-        //api로 로그인
-
-        loadGoogleLoginAPI();
-
-    };
-
-    const loadGoogleLoginAPI = async () => {
-        await googleLogin().then((res)=>{
-            console.log(res);
-        })
-    }
     const loadLoginAPI = async (user: User) => {
         await login(user)
             .then((res) => {
@@ -118,12 +111,12 @@ export default function LoginPage() {
                     ---------------------------- 또는
                     ----------------------------
                 </p>
-                <a
-                    href="/api/oauth2/authorization/google"
+                <div
+                    onClick={onClickLogin}
                     className="block w-80 text-black border-black text-2xl border text-center py-2 rounded-md"
                 >
-                    Google로 로그인하기
-                </a>
+                    Google으로 로그인하기
+                </div>
                 <div className="flex justify-center items-center my-2">
                     <Link
                         to="/findpw"

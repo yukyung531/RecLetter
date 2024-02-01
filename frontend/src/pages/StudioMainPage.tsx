@@ -5,7 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import DeleteCheckWindow from '../components/DeleteCheckWindow';
 import { connect } from '../util/chat';
 import { useDispatch, useSelector } from 'react-redux';
-import { studioState } from '../util/counter-slice';
+import { studioNameState, studioState } from '../util/counter-slice';
 import { enterStudio, modifyStudioTitle, studioDetail } from '../api/studio';
 import { getUser } from '../api/user';
 import { deleteClip } from '../api/clip';
@@ -72,7 +72,7 @@ export default function StudioMainPage() {
             const getDetail = async (studioId: string) => {
                 await studioDetail(studioId).then((res) => {
                     if (res.status === httpStatusCode.OK) {
-                        console.log('겱국 바다와쪄');
+                        dispatch(studioNameState(res.data.studioTitle));
                         console.log(res.data);
                         setStudioDetailInfo(res.data);
                     }

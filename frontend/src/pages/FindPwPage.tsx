@@ -3,7 +3,11 @@ import { requestPasswordEmail, verifyPassword } from '../api/auth';
 import { httpStatusCode } from '../util/http-status';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginState, studioState } from '../util/counter-slice';
+import {
+    loginState,
+    studioNameState,
+    studioState,
+} from '../util/counter-slice';
 import { settingNewPassword } from '../api/user';
 import { deleteStorageData } from '../util/initialLocalStorage';
 
@@ -21,6 +25,7 @@ export default function FindPwPage() {
     const dispatch = useDispatch();
     useEffect(() => {
         dispatch(studioState(''));
+        dispatch(studioNameState(''));
     }, []);
 
     /** 이메일 변화 감지 */

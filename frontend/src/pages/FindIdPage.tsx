@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { studioState } from '../util/counter-slice';
+import { studioNameState, studioState } from '../util/counter-slice';
 
 export default function FindIdPage() {
     const dispatch = useDispatch();
     useEffect(() => {
         dispatch(studioState(''));
+        dispatch(studioNameState(''));
     }, []);
     return (
         <section className="section-center">

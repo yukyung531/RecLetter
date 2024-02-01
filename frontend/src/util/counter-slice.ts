@@ -3,10 +3,12 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 export interface LoginState {
     isLogin: boolean;
     studioId: string;
+    studioName: string;
 }
 const initialState: LoginState = {
     isLogin: false,
     studioId: '',
+    studioName: '',
 };
 
 export const loginSlice = createSlice({
@@ -19,7 +21,10 @@ export const loginSlice = createSlice({
         studioState: (state, action) => {
             state.studioId = action.payload;
         },
+        studioNameState: (state, action) => {
+            state.studioName = action.payload;
+        },
     },
 });
-export const { loginState, studioState } = loginSlice.actions;
+export const { loginState, studioState, studioNameState } = loginSlice.actions;
 export default loginSlice.reducer;

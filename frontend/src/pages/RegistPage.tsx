@@ -4,7 +4,7 @@ import { getUser, registUser } from '../api/user';
 import { httpStatusCode } from '../util/http-status';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { studioState } from '../util/counter-slice';
+import { studioNameState, studioState } from '../util/counter-slice';
 
 export default function RegistPage() {
     const [inputId, setInputId] = useState<string>('');
@@ -24,6 +24,7 @@ export default function RegistPage() {
     const dispatch = useDispatch();
     useEffect(() => {
         dispatch(studioState(''));
+        dispatch(studioNameState(''));
     }, []);
 
     /** ID 변화 감지 */
@@ -314,7 +315,7 @@ export default function RegistPage() {
             }).then((res) => {
                 if (res.status === httpStatusCode.OK) {
                     alert('회원가입이 완료되었습니다');
-                    navigate('/');
+                    navigate('/login');
                 }
             });
         }

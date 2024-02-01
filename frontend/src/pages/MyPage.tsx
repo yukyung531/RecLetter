@@ -1,7 +1,11 @@
 import { BaseSyntheticEvent, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { loginState, studioState } from '../util/counter-slice';
+import {
+    loginState,
+    studioNameState,
+    studioState,
+} from '../util/counter-slice';
 import { deleteUser, getUser, modifyPass, modifyUser } from '../api/user';
 import { httpStatusCode } from '../util/http-status';
 import { deleteStorageData } from '../util/initialLocalStorage';
@@ -20,6 +24,7 @@ export default function MyPage() {
 
     useEffect(() => {
         dispatch(studioState(''));
+        dispatch(studioNameState(''));
     }, []);
 
     useEffect(() => {
