@@ -15,6 +15,7 @@ import StudioMainPage from './pages/StudioMainPage.tsx';
 import ClipRecodePage from './pages/ClipRecodePage.tsx';
 import ClipEditPage from './pages/ClipEditPage.tsx';
 import LetterMakePage from './pages/LetterMakePage.tsx';
+import LetterViewPage from './pages/LetterViewPage.tsx';
 import LetterFinishPage from './pages/LetterFinishPage.tsx';
 import FindResultPage from './pages/FindResultPage.tsx';
 import MyPage from './pages/MyPage.tsx';
@@ -67,7 +68,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                             element={<LetterMakePage />}
                         ></Route>
                         <Route
-                            path="/letterfinish"
+                            path="/letterview/:studioId"
+                            element={<LetterViewPage />}
+                        ></Route>
+                        <Route
+                            path="/letterfinish/:studioId"
                             element={<LetterFinishPage />}
                         ></Route>
                     </Routes>

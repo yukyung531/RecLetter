@@ -70,7 +70,7 @@ export default function LetterMakePage() {
 
     //유저 정보
     const [userInfo, setUserInfo] = useState<UserInfo>({
-        userId: '',
+        userEmail: '',
         userNickname: '',
     });
 
@@ -119,7 +119,7 @@ export default function LetterMakePage() {
             const resuser = await getUser();
             const tempObj = { ...resuser.data };
             setUserInfo({
-                userId: tempObj.userId,
+                userEmail: tempObj.userEmail,
                 userNickname: tempObj.userNickname,
             });
         };
@@ -274,9 +274,10 @@ export default function LetterMakePage() {
         //이제 세션에 연결해 봅시다.
         getToken(studioId).then((token) => {
             session
-                .connect(token, { clientData: userInfo.userId })
+                .connect(token, { clientData: userInfo.userEmail })
                 .then(() => {
                     console.log('Session opened');
+                    console.log(session);
                 })
                 .catch((error) => {
                     console.warn(
@@ -375,6 +376,7 @@ export default function LetterMakePage() {
     const getToken = async (studioId: string) => {
         //studioId가 세션 id가 된다.
         const sessionId = await createSession(studioId);
+
         return await createToken(sessionId);
     };
 
@@ -713,7 +715,7 @@ export default function LetterMakePage() {
                 </div>
             </div>
             <div id="main-video" className="col-md-6">
-                <p>{userInfo.userId}</p>
+                <p>{userInfo.userEmail}</p>
                 <video
                     autoPlay
                     playsInline={true}
@@ -731,14 +733,7 @@ export default function LetterMakePage() {
                             id={`data-${user.nodeId}`}
                             key={user.nodeId}
                         >
-                            <p>{user.userData}</p>
-                            <video
-                                autoPlay
-                                playsInline={true}
-                                ref={subVideoRef}
-                                width={'680px'}
-                                height={'480px'}
-                            ></video>
+                            <p>{user}</p>
                         </div>
                     );
                 })}
