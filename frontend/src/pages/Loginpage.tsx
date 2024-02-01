@@ -24,7 +24,7 @@ export default function LoginPage() {
         if (loginValue === 'true') {
             dispatch(loginState(true));
         }
-        if (isLogin) {
+        if (isLogin && loginValue) {
             navigate(`/studiolist`);
         }
     }, [isLogin]);
@@ -74,21 +74,19 @@ export default function LoginPage() {
     return (
         <section className="section-center">
             <div className="w-1/3 flex flex-col justify-center items-center">
-                <h5 className="m-4 text-3xl text-center p-4 font-bold">
-                    Login
-                </h5>
+                <h5 className="mt-4 mb-8 text-4xl text-center p-4">Login</h5>
                 <div className="flex flex-col justify-center items-center">
                     <input
-                        className="w-88 py-2 px-3 bg-slate-100 my-2 border-2 rounded text-xl"
+                        className="w-105 py-2 px-6 my-2 border-2 color-border-gray rounded-md text-2xl color-text-darkgray"
                         type="text"
-                        placeholder="아이디"
+                        placeholder="이메일"
                         value={inputId}
                         onChange={(e) => {
                             changeId(e);
                         }}
                     />
                     <input
-                        className="w-88 py-2 px-3 bg-slate-100 my-2 border-2 rounded text-xl"
+                        className="w-105 py-2 px-6 my-2 border-2 color-border-gray rounded-md text-2xl color-text-darkgray"
                         type="password"
                         placeholder="비밀번호"
                         value={inputPw}
@@ -100,13 +98,13 @@ export default function LoginPage() {
 
                 <div
                     onClick={onClickLogin}
-                    className=" w-88 block text-2xl color-bg-blue1 text-white border text-center p-2 rounded-md"
+                    className=" w-105 block my-7 rounded-md py-2 text-2xl text-center color-bg-main text-white cursor-pointer hover:color-bg-subbold hover:text-white"
                 >
                     로그인
                 </div>
-                <p className="my-4">
-                    -------------------------------- 또는
-                    --------------------------------
+                <p className="mb-7 text-2xl color-text-darkgray">
+                    ---------------------------- 또는
+                    ----------------------------
                 </p>
                 <div
                     onClick={onClickLogin}
@@ -114,16 +112,18 @@ export default function LoginPage() {
                 >
                     Google으로 로그인하기
                 </div>
-                <div className="flex justify-center items-center my-2 color-text-blue1">
-                    <a className="mx-4 my-2 text-2xl" href="./findid">
-                        아이디 찾기
-                    </a>
-                    <p>/</p>
-                    <Link to="/findpw" className="mx-4 my-2 text-2xl">
+                <div className="flex justify-center items-center my-2">
+                    <Link
+                        to="/findpw"
+                        className="w-28 mx-4 my-2 text-2xl color-text-darkgray"
+                    >
                         비밀번호 찾기
                     </Link>
-                    <p>/</p>
-                    <a className="mx-4 my-2 text-2xl" href="./regist">
+                    <p className="mx-4 color-text-gray">|</p>
+                    <a
+                        className="w-28 mx-4 my-2 text-2xl color-text-main hover:color-text-subbold"
+                        href="./regist"
+                    >
                         회원가입
                     </a>
                 </div>

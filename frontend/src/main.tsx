@@ -55,15 +55,15 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                             element={<StudioCreatePage />}
                         ></Route>
                         <Route
-                            path="/cliprecode"
+                            path="/cliprecode/:studioId"
                             element={<ClipRecodePage />}
                         ></Route>
                         <Route
-                            path="/clipedit"
+                            path="/clipedit/:studioId"
                             element={<ClipEditPage />}
                         ></Route>
                         <Route
-                            path="/lettermake"
+                            path="/lettermake/:studioId"
                             element={<LetterMakePage />}
                         ></Route>
                         <Route

@@ -8,13 +8,13 @@ interface StudioCardProp {
 export default function StudioCard({ props, onClick }: StudioCardProp) {
     //참여 여부
     let isUploadUi = (
-        <p className="absolute px-3 top-4 right-4 bg-green-500 text-center text-lg border rounded-xl text-white">
+        <p className="absolute px-3 top-2 right-2 border-2 color-bg-blue3 text-center text-lg rounded-xl text-white">
             참여 완료
         </p>
     );
-    if (!props.isUpload) {
+    if (!props.hasMyClip) {
         isUploadUi = (
-            <p className="absolute px-3 top-4 right-4 bg-red-500 text-center text-lg border rounded-xl text-white">
+            <p className="absolute px-3 top-2 right-2 border-2 border-white color-bg-subbold text-center text-lg rounded-xl text-white">
                 미 참여
             </p>
         );
@@ -26,17 +26,23 @@ export default function StudioCard({ props, onClick }: StudioCardProp) {
 
     return (
         <div
-            className="relative flex flex-col justify-around items-center hover:bg-[#88D1F4]"
+            className="relative w-30per flex flex-col mx-2 my-2 justify-around items-center hover:bg-[#88D1F4]"
             id={studioId}
             onClick={onClick}
         >
             {isUploadUi}
-            <img className="image-select-size" src={props.thumbnailUrl} />
-            <div className="flex justify-around w-full px-4">
+            <video
+                className="w-full h-32 color-bg-sublight rounded-lg"
+                src={props.thumbnailUrl}
+                crossOrigin="anonymous"
+                controlsList="nodownload"
+            />{' '}
+            {/*"https://d3kbsbmyfcnq5r.cloudfront.net/favicon.png" */}
+            <div className="flex justify-center w-full px-4 text-xl">
                 <div className="flex items-center justify-center">
                     {props.studioTitle}
                 </div>
-                <p>|</p>
+                <p className="mx-5">|</p>
                 <p>
                     D-
                     {Math.floor(

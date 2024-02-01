@@ -4,7 +4,6 @@ services:
   RecLetterBackend:
     image: ssuyas/recletter_backend
     container_name: RecLetterBackend
-    network_mode: "RecLetterNetwork"
     restart: unless-stopped
     ports:
       - "8081:8080"
@@ -20,11 +19,12 @@ services:
       OPENVIDU_SECRET: ${OPENVIDU_SECRET}
     env_file:
       - .env
+    networks:
+      - RecLetterNetwork
 
   RecLetterFrontend:
     image: ssuyas/recletter_frontend
     container_name: RecLetterFrontend
-    network_mode: "RecLetterNetwork"
     ports:
       - "80:80"
       - "443:443"
@@ -33,24 +33,19 @@ services:
     volumes:
       - ../data/certbot/conf:/etc/letsencrypt
       - ../data/certbot/www:/var/www/certbot
-      - ${OPENVIDU_RECORDING_CUSTOM_LAYOUT}:/opt/openvidu/custom-layout
-      - DOMAIN_OR_PUBLIC_IP=${DOMAIN_OR_PUBLIC_IP}
-      - CERTIFICATE_TYPE=${CERTIFICATE_TYPE}
-      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
-      - ALLOWED_ACCESS_TO_DASHBOARD=${ALLOWED_ACCESS_TO_DASHBOARD:-}
-      - ALLOWED_ACCESS_TO_RESTAPI=${ALLOWED_ACCESS_TO_RESTAPI:-}
-      - PROXY_MODE=CE
-      - SUPPORT_DEPRECATED_API=${SUPPORT_DEPRECATED_API:-false}
-      - WORKER_CONNECTIONS=${WORKER_CONNECTIONS:-10240}
-      - PUBLIC_IP=${PROXY_PUBLIC_IP:-auto-ipv4}
+    networks:
+      - RecLetterNetwork
 
   certbot:
     image: certbot/certbot
     restart: unless-stopped
-    network_mode: "RecLetterNetwork"
     volumes:
       - ../data/certbot/conf:/etc/letsencrypt
       - ../data/certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - RecLetterNetwork
 
-
+networks:
+  RecLetterNetwork:
+    external: true
