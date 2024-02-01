@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS frame (
                                      FOREIGN KEY(font_id) REFERENCES font(font_id)
 ) ENGINE innoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-insert into S10P12A606.frame(frame_title) value ("프레임 없음");
 INSERT INTO S10P12A606.frame (frame_id, frame_title, font_id, font_size, font_bold) VALUES (1, '프레임 없음', 1, 20, 0);
 INSERT INTO S10P12A606.frame (frame_id, frame_title, font_id, font_size, font_bold) VALUES (2, '싸피 10기', 1, 20, 0);
 INSERT INTO S10P12A606.frame (frame_id, frame_title, font_id, font_size, font_bold) VALUES (3, '싸피 11기', 1, 20, 0);

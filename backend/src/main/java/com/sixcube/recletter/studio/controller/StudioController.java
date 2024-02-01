@@ -10,6 +10,7 @@ import com.sixcube.recletter.studio.dto.res.SearchStudioThumbnailRes;
 import com.sixcube.recletter.studio.service.StudioParticipantService;
 import com.sixcube.recletter.studio.service.StudioService;
 import com.sixcube.recletter.user.dto.User;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +54,7 @@ public class StudioController {
         studioList.stream().map(studio -> StudioInfo.builder()
             .studioId(studio.getStudioId())
             .studioTitle(studio.getStudioTitle())
-            .isStudioOwner(user.getUserId().equals(studio.getStudioOwner().getUserId()))
+            .isStudioOwner(user.getUserId().equals(studio.getStudioOwner()))
             .isCompleted(studio.getIsCompleted())
             .thumbnailUrl(studioService.searchMainClipInfo(studio.getStudioId()).getClipUrl())
             .expireDate(studio.getExpireDate())
@@ -77,11 +78,11 @@ public class StudioController {
         .studioId(studio.getStudioId())
         .studioTitle(studio.getStudioTitle())
         .isCompleted(studio.getIsCompleted())
-        .studioOwner(studio.getStudioOwner().getUserId())
+        .studioOwner(studio.getStudioOwner())
         .clipInfoList(studioService.searchStudioClipInfoList(studioId))
-        .studioFrameId(studio.getStudioFrame().getFrameId())
-        .studioFontId(studio.getStudioFont().getFontId())
-        .studioBgmId(studio.getStudioBgm().getBgmId())
+        .studioFrameId(studio.getStudioFrameId())
+        .studioFontId(studio.getStudioFontId())
+        .studioBgmId(studio.getStudioBgmId())
         .build();
 
     return ResponseEntity.ok().body(result);
@@ -99,7 +100,7 @@ public class StudioController {
   }
 
   @PostMapping
-  public ResponseEntity<Void> createStudio(@RequestBody CreateStudioReq createStudioReq,
+  public ResponseEntity<Void> createStudio(@Valid @RequestBody CreateStudioReq createStudioReq,
       @AuthenticationPrincipal User user) {
 
     // 생성할 수 없는 경우 StudioCreateFailureException 발생

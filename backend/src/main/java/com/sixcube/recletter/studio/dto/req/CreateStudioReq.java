@@ -1,6 +1,7 @@
 package com.sixcube.recletter.studio.dto.req;
 
 import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;

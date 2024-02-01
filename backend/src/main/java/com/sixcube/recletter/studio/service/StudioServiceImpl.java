@@ -19,6 +19,7 @@ import com.sixcube.recletter.template.service.TemplateService;
 import com.sixcube.recletter.user.dto.User;
 import com.sixcube.recletter.user.service.UserService;
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -67,12 +68,6 @@ public class StudioServiceImpl implements StudioService {
   @Override
   public void createStudio(CreateStudioReq createStudioReq, User user)
       throws StudioCreateFailureException, MaxStudioOwnCountExceedException {
-    Studio studio = Studio.builder()
-        .studioOwner(user)
-        .studioTitle(createStudioReq.getStudioTitle())
-        .expireDate(createStudioReq.getExpireDate())
-        .studioFrame(Frame.builder().frameId(createStudioReq.getStudioFrameId()).build())
-        .build();
 
     List<Studio> myStudioList = studioRepository.findAllByStudioOwner(user);
 
@@ -80,6 +75,14 @@ public class StudioServiceImpl implements StudioService {
     if (myStudioList.size() >= MAX_STUDIO_OWN_COUNT) {
       throw new MaxStudioOwnCountExceedException();
     }
+
+    LocalDateTime limitDate = LocalDateTime.now().plusDays(14);
+    Studio studio = Studio.builder()
+        .studioOwner(user.getUserId())
+        .studioTitle(createStudioReq.getStudioTitle())
+        .expireDate(createStudioReq.getExpireDate().isBefore(limitDate) ? createStudioReq.getExpireDate() : limitDate)
+        .studioFrameId(createStudioReq.getStudioFrameId())
+        .build();
 
     // 생성 시도
     try {
@@ -96,7 +99,7 @@ public class StudioServiceImpl implements StudioService {
 
     Studio result = studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
 
-    if (result.getStudioOwner().getUserId().equals(user.getUserId())) {
+    if (result.getStudioOwner().equals(user.getUserId())) {
       try {
         studioRepository.deleteById(studioId);
       } catch (Exception e) {
