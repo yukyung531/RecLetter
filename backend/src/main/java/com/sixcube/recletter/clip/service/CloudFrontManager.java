@@ -38,7 +38,7 @@ public class CloudFrontManager {
     private String distributionDomain="d3kbsbmyfcnq5r.cloudfront.net";
 
 //    @Value("${cloudfront.key}")
-    private String privateKeyFilePath="./private_cloudfront_key.pem";
+    private String privateKeyFilePath="./private_cloudfront_key.der";
     String s3ObjectKey = "favicon.png";
 
 // Convert your DER file into a byte array.
@@ -57,20 +57,24 @@ public class CloudFrontManager {
         System.out.println("hello "+privateKeyFilePath);
         System.out.println(keyPairId);
 
-//        derPrivateKey = readInputStreamToBytes(new FileInputStream(privateKeyFilePath));
-//        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        derPrivateKey = readInputStreamToBytes(new FileInputStream(privateKeyFilePath));
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        System.out.println(derPrivateKey[0]);
     }
 
-    public void printUrl() throws Exception {
+    public String printUrl(String fileName) throws Exception {
 //        byte[] derPrivateKey = readInputStreamToBytes(new FileInputStream(privateKeyFilePath));
 
 // Generate a "canned" signed URL to allow access to a
 // specific distribution and file
-        String fileName=s3ObjectKey;
+//        fileName=s3ObjectKey;
         CannedSignerRequest request=CreateCannedPolicyRequest.createRequestForCannedPolicy(distributionDomain,fileName,privateKeyFilePath,keyPairId);
 
-        SignedUrl signedUrlCanned = CloudFrontUtilities.create().getSignedUrlWithCannedPolicy(request);
+//        SignedUrl signedUrlCanned = SigningUtilities.getSignedUrlWithCannedPolicy(request,derPrivateKey);
+        SignedUrl signedUrlCanned=SigningUtilities.signUrlForCannedPolicy(request);
+//        SignedUrl signedUrlCanned=CloudFrontUtilities.create().getSignedUrlWithCannedPolicy(request);
         System.out.println(signedUrlCanned);
+        return signedUrlCanned.url().toString();
 
 // Build a policy document to define custom restrictions for a signed URL.
 

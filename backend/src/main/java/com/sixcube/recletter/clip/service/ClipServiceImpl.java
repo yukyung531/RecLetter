@@ -165,17 +165,18 @@ public class ClipServiceImpl implements ClipService {
     }
 
     public String getPreSignedUrl(String fileName){
+        String url="";
         try {
             CloudFrontManager cm=new CloudFrontManager();
-            cm.printUrl();
+            url=cm.printUrl(fileName);
         } catch (Exception e) {
             System.out.println("TT...");
             e.printStackTrace();
         }
-
-        GeneratePresignedUrlRequest generatePresignedUrlRequest=getGeneratePreSignedUrlRequest(bucket,fileName);
-        URL url=amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest);
-        return url.toString();
+        return url;
+//        GeneratePresignedUrlRequest generatePresignedUrlRequest=getGeneratePreSignedUrlRequest(bucket,fileName);
+//        URL url=amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest);
+//        return url.toString();
     }
 
     /**
