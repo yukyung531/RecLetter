@@ -13,6 +13,8 @@ import { OpenVidu, Session } from 'openvidu-browser';
 import { getUser } from '../api/user';
 // import { connect } from '../util/chat';
 import axios from 'axios';
+import AddMemberWindow from '../components/AddMemberWindow';
+import ParticipantAlertWindow from '../components/ParticipantAlertWindow';
 
 export default function LetterMakePage() {
     //mode - 0:영상리스트, 1:프레임, 2:텍스트, 3:오디오
@@ -226,6 +228,9 @@ export default function LetterMakePage() {
     const subVideoRef = useRef<HTMLVideoElement>(null);
 
     const [users, setUsers] = useState<any[]>([]);
+    const [newParticipant, setNewParticipant] = useState<any>();
+    const [isParticipantAlertActive, setIsParticipantAlertActive] =
+        useState<boolean>(false);
 
     let OV: OpenVidu;
     let session: Session;
@@ -242,7 +247,7 @@ export default function LetterMakePage() {
 
         //session action 정의 only screen share만 존재
         session.on('streamCreated', (event) => {
-            console.log(event);
+            console.log('Admin -', event);
             if (event.stream.typeOfVideo == 'SCREEN') {
                 const subscriber = session.subscribe(
                     event.stream,
@@ -315,7 +320,7 @@ export default function LetterMakePage() {
             if (mainVideoRef.current) {
                 publisherScreen.addVideoElement(mainVideoRef.current);
             }
-            // console.log('Admin: session- ', session);
+            console.log('Admin: session- ', session);
         });
 
         // console.log(publisherScreen);
@@ -344,6 +349,10 @@ export default function LetterMakePage() {
                 nodeId,
                 userData,
             };
+            //새 유저 알림창 활성화
+            setNewParticipant(userObj);
+            setIsParticipantAlertActive(true);
+            //변경필요
             return [...prev, userObj];
         });
     };
@@ -415,9 +424,28 @@ export default function LetterMakePage() {
         if (session) endScreenShare();
     };
 
+    //////////////////////////////////////////유저 신규 참가 알림창//////////////////////////////////////////////////
+    const allowAccess = () => {
+        console.log('참가를 수락했습니다.');
+        setIsParticipantAlertActive(false);
+    };
+
+    const denyAccess = () => {
+        console.log('참가를 거절했습니다.');
+        setIsParticipantAlertActive(false);
+    };
+
     ///////////////////////////////////////////////렌더링///////////////////////////////////////////////////////////
     return (
         <section className="relative section-top pt-16">
+            {isParticipantAlertActive ? (
+                <ParticipantAlertWindow
+                    onClickOK={allowAccess}
+                    onClickCancel={denyAccess}
+                />
+            ) : (
+                <></>
+            )}
             <div className="h-20 w-full px-12 color-text-black flex justify-between items-center">
                 <div className="flex items-center">
                     <span className="material-symbols-outlined">
