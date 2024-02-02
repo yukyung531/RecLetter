@@ -1,10 +1,15 @@
-import {BaseSyntheticEvent, useEffect, useState} from 'react';
-import {login} from '../api/auth';
-import {User} from '../types/type';
-import {Link, useNavigate} from 'react-router-dom';
-import {httpStatusCode} from '../util/http-status';
-import {useDispatch, useSelector} from 'react-redux';
-import {loginState, studioNameState, studioState} from '../util/counter-slice';
+import { BaseSyntheticEvent, useEffect, useState } from 'react';
+import { login } from '../api/auth';
+import { User } from '../types/type';
+import { Link, useNavigate } from 'react-router-dom';
+import { httpStatusCode } from '../util/http-status';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    loginState,
+    studioNameState,
+    studioState,
+} from '../util/counter-slice';
+import axios from 'axios';
 
 export default function LoginPage() {
     const [inputEmail, setInputEmail] = useState<string>('');
@@ -50,6 +55,11 @@ export default function LoginPage() {
             loadLoginAPI(user);
         }
     };
+    const loginEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            onClickLogin();
+        }
+    };
     const loadLoginAPI = async (user: User) => {
         await login(user)
             .then((res) => {
@@ -66,10 +76,18 @@ export default function LoginPage() {
                     navigate(`/studiolist`);
                 } else if (res.status === httpStatusCode.BADREQUEST) {
                     console.log('bad request');
+                } else if (res.status === httpStatusCode.UNAUTHORIZED) {
+                    alert('정보가 잘못되었습니다.');
                 }
             })
             .catch((error) => {
-                console.log('오류', error);
+                if (axios.isAxiosError(error)) {
+                    if (
+                        error.response?.status === httpStatusCode.UNAUTHORIZED
+                    ) {
+                        alert('아이디나 비밀번호가 잘못되었습니다.');
+                    }
+                }
             });
     };
 
@@ -86,6 +104,7 @@ export default function LoginPage() {
                         onChange={(e) => {
                             changeEmail(e);
                         }}
+                        onKeyDown={loginEnter}
                     />
                     <input
                         className="w-105 py-2 px-6 my-2 border-2 color-border-gray rounded-md text-2xl color-text-darkgray"
@@ -95,6 +114,7 @@ export default function LoginPage() {
                         onChange={(e) => {
                             changePw(e);
                         }}
+                        onKeyDown={loginEnter}
                     />
                 </div>
 

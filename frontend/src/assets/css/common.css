@@ -5,7 +5,7 @@
 #root {
     width: 100%;
 }
-* {
+.chat-text-setting {
     white-space: pre-wrap;
     word-wrap: break-word;
     word-break: break-all;

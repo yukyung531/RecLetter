@@ -10,12 +10,14 @@ type chattingType = {
     time: string;
     content: string;
     type: string;
+    uuid: string;
 };
 export default function ChattingBox() {
     const [chatToggle, setChatToggle] = useState<boolean>(false);
     const [chattingList, setChattingList] = useState<chattingType[]>([]);
     const [comment, setComment] = useState<string>('');
     const [userNickname, setUserNickname] = useState<string>('');
+    const [userId, setUserId] = useState<string>('');
     //스크롤 탐지용
     const messageEndRef = useRef<HTMLDivElement>(null);
 
@@ -50,10 +52,11 @@ export default function ChattingBox() {
         await getUser().then((res) => {
             if (res.status === httpStatusCode.OK) {
                 setUserNickname(res.data.userNickname);
+                setUserId(res.data.userId);
                 connect(
                     studioCurrentId,
-                    res.data.userNickname,
                     res.data.userId,
+                    res.data.userNickname,
                     setChattingList
                 );
                 setChatToggle(false);
@@ -76,6 +79,12 @@ export default function ChattingBox() {
         if (comment !== '') {
             sendMessage(userNickname, comment);
             setComment('');
+        }
+    };
+    /** 엔터키 누르면 보내는 이벤트 */
+    const sendEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            sendChatting();
         }
     };
 
@@ -106,6 +115,7 @@ export default function ChattingBox() {
         return (
             <>
                 {chattingList.map((chat, index) => {
+                    console.log(chat);
                     if (chat.type === 'alarm') {
                         return (
                             <div
@@ -117,10 +127,7 @@ export default function ChattingBox() {
                                 </div>
                             </div>
                         );
-                    } else if (
-                        chat.type === 'chat' &&
-                        chat.userName === userNickname
-                    ) {
+                    } else if (chat.type === 'chat' && chat.uuid === userId) {
                         return (
                             <div
                                 className="flex items-end py-2 justify-end"
@@ -130,7 +137,7 @@ export default function ChattingBox() {
                                     {chat.time}
                                 </p>
                                 <div
-                                    className="w-fit text-right h-fit color-text-darkgray color-bg-yellow2 px-2 py-1"
+                                    className="w-fit text-right h-fit color-text-darkgray color-bg-yellow2 px-2 py-1 chat-text-setting"
                                     style={{ borderRadius: '5px 0 5px 5px' }}
                                 >
                                     <p>{chat.content}</p>
@@ -146,7 +153,7 @@ export default function ChattingBox() {
                                 <p>{chat.userName}</p>
                                 <div className="flex items-end">
                                     <div
-                                        className="w-fit text-start h-fit color-text-darkgray bg-white rounded-lg px-2 py-1"
+                                        className="w-fit text-start h-fit color-text-darkgray bg-white rounded-lg px-2 py-1 chat-text-setting"
                                         style={{
                                             borderRadius: '0 5px 5px 5px',
                                         }}
@@ -171,7 +178,19 @@ export default function ChattingBox() {
             return (
                 <div className=" w-88 h-5/6 rounded-lg fixed flex bottom-16 flex-col justify-between items-center right-8 px-5 py-3 color-bg-sublight z-20 ">
                     <div className="w-full">
-                        <p className="text-left text-2xl font-bold">studio1</p>
+                        <div className="flex justify-between">
+                            <p className="text-center text-2xl font-bold">
+                                studio1
+                            </p>
+                            <p
+                                className="relative text-center left-3 bottom-3 text-xl cursor-pointer"
+                                onClick={() => {
+                                    changeChatToggle(!chatToggle);
+                                }}
+                            >
+                                x
+                            </p>
+                        </div>
                         <div className="flex justify-between">
                             <span className="material-symbols-outlined text-lg">
                                 group
@@ -201,6 +220,7 @@ export default function ChattingBox() {
                                     changeComment(e);
                                 }}
                                 placeholder="채팅을 입력해주세요"
+                                onKeyDown={sendEnter}
                             />
                             {sendIconElement()}
                         </div>
@@ -208,11 +228,7 @@ export default function ChattingBox() {
                 </div>
             );
         } else {
-            return (
-                <div className="w-0 h-0 fixed flex justify-center items-center bottom-8 right-8  hidden">
-                    닫힘
-                </div>
-            );
+            return <div className=" hidden"></div>;
         }
     };
 

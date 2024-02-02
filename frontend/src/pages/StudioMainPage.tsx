@@ -12,7 +12,6 @@ import { deleteClip } from '../api/clip';
 import { httpStatusCode } from '../util/http-status';
 
 export default function StudioMainPage() {
-    const navigator = useNavigate();
     //mode 0: 영상, 1: 관리
     const [mode, setMode] = useState<number>(0);
 
@@ -40,6 +39,7 @@ export default function StudioMainPage() {
     const [userInfo, setUserInfo] = useState<UserInfo>({
         userId: '',
         userNickname: '',
+        userEmail: '',
     });
 
     //현재 선택한 비디오(비디오 미리보기)
@@ -55,56 +55,63 @@ export default function StudioMainPage() {
         clipContent: '',
     });
 
-    /** 리덕스 함수 */
-    // const studioCurrentId = useSelector(
-    //     (state: any) => state.loginFlag.studioId
-    // );
+    /** 리덕스 설정 */
+    const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
     const dispatch = useDispatch();
+    const navigator = useNavigate();
 
     //영상 서버로부터 불러오기
     useEffect(() => {
-        //API 불러오는 함수로 clipInfo를 받아옴
-        //우선 url query String으로부터 스튜디오 상세 정보 받아오기
-        const splitUrl = document.location.href.split('/');
-        const studioId = splitUrl[splitUrl.length - 1];
-        if (studioId !== null) {
-            dispatch(studioState(studioId));
-            const getDetail = async (studioId: string) => {
-                await studioDetail(studioId).then((res) => {
-                    if (res.status === httpStatusCode.OK) {
-                        dispatch(studioNameState(res.data.studioTitle));
-                        console.log(res.data);
-                        setStudioDetailInfo(res.data);
-                    }
-                });
-                return;
-            };
-
-            const enterStudioAPI = async (studioId: string) => {
-                await enterStudio(studioId)
-                    .then((res) => {
-                        console.log(res);
-                        getDetail(studioId);
-                    })
-                    .catch(() => {
-                        console.log('오류떠서 재실행');
-                        getDetail(studioId);
+        const loginValue = localStorage.getItem('is-login');
+        const token = localStorage.getItem('access-token');
+        if (loginValue === 'true' && isLogin) {
+            //API 불러오는 함수로 clipInfo를 받아옴
+            //우선 url query String으로부터 스튜디오 상세 정보 받아오기
+            const splitUrl = document.location.href.split('/');
+            const studioId = splitUrl[splitUrl.length - 1];
+            if (studioId !== null) {
+                dispatch(studioState(studioId));
+                const getDetail = async (studioId: string) => {
+                    await studioDetail(studioId).then((res) => {
+                        if (res.status === httpStatusCode.OK) {
+                            dispatch(studioNameState(res.data.studioTitle));
+                            console.log(res.data);
+                            setStudioDetailInfo(res.data);
+                        }
                     });
-            };
-            enterStudioAPI(studioId);
-        }
+                    return;
+                };
 
-        //유저정보 불러오기
-        const getUserInfo = async () => {
-            const resuser = await getUser();
-            const tempObj = { ...resuser.data };
-            // console.log(tempObj);
-            setUserInfo({
-                userId: tempObj.userId,
-                userNickname: tempObj.userNickname,
-            });
-        };
-        getUserInfo();
+                const enterStudioAPI = async (studioId: string) => {
+                    await enterStudio(studioId)
+                        .then((res) => {
+                            console.log(res);
+                            getDetail(studioId);
+                        })
+                        .catch(() => {
+                            console.log('오류떠서 재실행');
+                            getDetail(studioId);
+                        });
+                };
+                enterStudioAPI(studioId);
+            }
+
+            //유저정보 불러오기
+            const getUserInfo = async () => {
+                const resuser = await getUser();
+                const tempObj = { ...resuser.data };
+                // console.log(tempObj);
+                setUserInfo({
+                    userId: tempObj.userId,
+                    userNickname: tempObj.userNickname,
+                    userEmail: tempObj.userEmail,
+                });
+            };
+            getUserInfo();
+        }
+        if (loginValue === 'false' || !loginValue || !token) {
+            navigator(`/`);
+        }
     }, []);
 
     //편집창으로 이동
@@ -290,6 +297,7 @@ export default function StudioMainPage() {
     const putStudiotitleAPI = async () => {
         const id = studioDetailInfo.studioId;
         const title = studioDetailInfo.studioTitle;
+        console.log(id);
         await modifyStudioTitle(id, title).then((res) => {
             if (res.status === httpStatusCode.OK) {
                 console.log('제목이 수정되었습니닷!!!!');
@@ -439,7 +447,7 @@ export default function StudioMainPage() {
                             </div>
                             <Link
                                 to={`/lettermake/${studioDetailInfo.studioId}`}
-                                className="w-full h-24 mx-4 my-2 color-border-blue3 color-text-blue3 text-xl flex flex-col justify-center items-center border rounded-md"
+                                className="w-full h-24 mx-4 my-2 color-border-main color-text-main text-xl flex flex-col justify-center items-center border rounded-md hover:color-bg-sublight hover:color-border-sublight hover:text-white"
                             >
                                 <span className="material-symbols-outlined text-3xl">
                                     theaters
