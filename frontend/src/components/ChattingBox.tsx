@@ -228,11 +228,7 @@ export default function ChattingBox() {
                 </div>
             );
         } else {
-            return (
-                <div className="w-0 h-0 fixed flex justify-center items-center bottom-8 right-8  hidden">
-                    닫힘
-                </div>
-            );
+            return <div className=" hidden"></div>;
         }
     };
 
