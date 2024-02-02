@@ -99,6 +99,10 @@ public class StudioServiceImpl implements StudioService {
       throws StudioNotFoundException, UnauthorizedToDeleteStudioException, StudioDeleteFailureException {
 
     StringTokenizer st = new StringTokenizer(concatenatedStudioId, ",");
+    if(st.countTokens() > 3) {
+      throw new UnauthorizedToDeleteStudioException();
+    }
+
     while (st.hasMoreTokens()) {
       String studioId = st.nextToken();
 
