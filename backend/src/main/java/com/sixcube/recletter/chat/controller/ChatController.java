@@ -2,7 +2,10 @@ package com.sixcube.recletter.chat.controller;
 
 import com.sixcube.recletter.chat.dto.ChatMessage;
 import com.sixcube.recletter.chat.service.ChatService;
+import com.sixcube.recletter.redis.RedisListService;
+import com.sixcube.recletter.redis.RedisPrefix;
 import com.sixcube.recletter.user.dto.User;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,16 +24,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.security.Principal;
 import java.util.List;
 
-
+@RequiredArgsConstructor
 @Controller
 public class ChatController {
 
-    private ChatService chatService;
+    private final ChatService chatService;
 
-    @Autowired
-    public ChatController(ChatService chatService) {
-        this.chatService = chatService;
-    }
+    private final RedisListService redisListService;
 
     /**
      * 채팅방에 참여하는 엔드포인트
@@ -69,6 +69,18 @@ public class ChatController {
     public ChatMessage leaveChat(@DestinationVariable String studioId, @Payload ChatMessage chatMessage, Principal principal) {
         User user = (User) ((Authentication) principal).getPrincipal();
         return chatService.leaveChat(studioId, chatMessage, user);
+    }
+
+    /**
+     * 채팅방(스튜디오)에 현재 접속해있는 유저리스트 조회
+     * @param studioId 확인할 채팅방(스튜디오)
+     * @return 채팅방(스튜디오)에 현재 접속해있는 유저리스트 반환
+     */
+    @GetMapping("/chat/{studioId}/userList")
+    public ResponseEntity<List<String>> searchChatUserList(@PathVariable String studioId) {
+        String key = RedisPrefix.STUDIO.prefix() + studioId;
+        List<String> userList = redisListService.getList(key);
+        return new ResponseEntity<>(userList, HttpStatus.OK);
     }
 
 }

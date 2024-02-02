@@ -2,6 +2,8 @@ package com.sixcube.recletter.chat.service;
 
 import com.sixcube.recletter.RecLetterApplication;
 import com.sixcube.recletter.chat.dto.ChatMessage;
+import com.sixcube.recletter.redis.RedisListService;
+import com.sixcube.recletter.redis.RedisPrefix;
 import com.sixcube.recletter.user.dto.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,9 @@ class ChatServiceImplTest {
 
     @Autowired
     private ChatServiceImpl chatService;
+
+    @Autowired
+    private RedisListService redisListService;
 
     private User testUser;
 
@@ -42,8 +47,9 @@ class ChatServiceImplTest {
         ChatMessage result = chatService.joinChat("testStudio", chatMessage, testUser);
         assertEquals(chatMessage.getSender()+"님이 참여하였습니다.", result.getContent());
         // 채팅방에 사용자가 추가되었는지 검증
-        List<String> users = chatService.searchChatUserList("testStudio");
-        assertTrue(users.contains(testUser.getUserNickname()));
+        String key = RedisPrefix.STUDIO.prefix() + "testStudio";
+        List<String> userList = redisListService.getList(key);
+        assertTrue(userList.contains(testUser.getUserNickname()));
     }
 
     @Test
@@ -67,8 +73,10 @@ class ChatServiceImplTest {
         ChatMessage result = chatService.leaveChat("testStudio", leaveMessage, testUser);
         assertEquals(leaveMessage.getSender()+"님이 퇴장하였습니다.", result.getContent());
         // 채팅방에서 사용자가 제거되었는지 검증
-        List<String> users = chatService.searchChatUserList("testStudio");
-        assertFalse(users.contains(leaveMessage.getSender()));
+        String key = RedisPrefix.STUDIO.prefix() + "testStudio";
+        List<String> userList = redisListService.getList(key);
+        assertFalse(userList.contains(leaveMessage.getSender()));
+
     }
 
     @Test
@@ -89,10 +97,11 @@ class ChatServiceImplTest {
         chatService.joinChat("testStudio", joinMessage2, testUser2);
 
         // 채팅방의 사용자 목록을 검색
-        List<String> users = chatService.searchChatUserList("testStudio");
+        String key = RedisPrefix.STUDIO.prefix() + "testStudio";
+        List<String> userList = redisListService.getList(key);
 
         // 사용자 목록에 추가한 사용자들이 모두 포함되어 있는지 확인
-        assertTrue(users.contains(testUser.getUserNickname()));
-        assertTrue(users.contains(testUser2.getUserNickname()));
+        assertTrue(userList.contains(testUser.getUserNickname()));
+        assertTrue(userList.contains(testUser2.getUserNickname()));
     }
 }
