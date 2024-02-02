@@ -1,14 +1,10 @@
-import { BaseSyntheticEvent, useEffect, useState } from 'react';
-import { login } from '../api/auth';
-import { User } from '../types/type';
-import { Link, useNavigate } from 'react-router-dom';
-import { httpStatusCode } from '../util/http-status';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-    loginState,
-    studioNameState,
-    studioState,
-} from '../util/counter-slice';
+import {BaseSyntheticEvent, useEffect, useState} from 'react';
+import {login} from '../api/auth';
+import {User} from '../types/type';
+import {Link, useNavigate} from 'react-router-dom';
+import {httpStatusCode} from '../util/http-status';
+import {useDispatch, useSelector} from 'react-redux';
+import {loginState, studioNameState, studioState} from '../util/counter-slice';
 
 export default function LoginPage() {
     const [inputEmail, setInputEmail] = useState<string>('');
@@ -57,6 +53,7 @@ export default function LoginPage() {
     const loadLoginAPI = async (user: User) => {
         await login(user)
             .then((res) => {
+                console.log("결과",res)
                 if (res.status === httpStatusCode.OK) {
                     console.log('로그인이 성공했습니다.');
                     localStorage.setItem('access-token', res.data.accessToken);
@@ -111,12 +108,12 @@ export default function LoginPage() {
                     ---------------------------- 또는
                     ----------------------------
                 </p>
-                <div
-                    onClick={onClickLogin}
+                <a
+                    href="http://localhost:5173/api/oauth2/authorization/google"
                     className="block w-80 text-black border-black text-2xl border text-center py-2 rounded-md"
                 >
-                    Google으로 로그인하기
-                </div>
+                    Google로 로그인하기
+                </a>
                 <div className="flex justify-center items-center my-2">
                     <Link
                         to="/findpw"

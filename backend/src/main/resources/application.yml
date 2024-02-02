@@ -80,8 +80,13 @@ logging:
     com:
       sixcube:
         recletter: debug
-    "[org.springframework.security]": DEBUG
+    org.springframework.security: DEBUG
 
 openvidu:
   url: ${OPENVIDU_URL}
   secret: ${OPENVIDU_SECRET}
+
+social:
+  google:
+    id: ${GOOGLE_CLIENT_ID}
+    secret: ${GOOGLE_CLIENT_SECRET}

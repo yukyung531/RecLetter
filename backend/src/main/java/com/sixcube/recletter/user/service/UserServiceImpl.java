@@ -92,6 +92,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     public void deleteUser(User user) {
+        //TODO : 소셜인 경우에는 구글 서버로 탈퇴 요청도 같이 해야 함
 
         //관련 토큰 모두 레디스에서 제거
         String key = RedisPrefix.REFRESH_TOKEN.prefix() + user.getUserId();

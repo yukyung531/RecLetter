@@ -3,7 +3,9 @@ package com.sixcube.recletter.config;
 import com.sixcube.recletter.auth.jwt.JWTFilter;
 import com.sixcube.recletter.auth.jwt.JWTUtil;
 import com.sixcube.recletter.auth.jwt.LoginFilter;
+import com.sixcube.recletter.oauth2.CustomAuthenticationEntryPoint;
 import com.sixcube.recletter.oauth2.CustomClientRegistrationRepo;
+import com.sixcube.recletter.oauth2.OAuth2MemberFailureHandler;
 import com.sixcube.recletter.oauth2.OAuth2MemberSuccessHandler;
 import com.sixcube.recletter.oauth2.service.CustomOAuth2UserService;
 import com.sixcube.recletter.redis.RedisService;
@@ -19,13 +21,12 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Collections;
 
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true)
@@ -39,6 +40,7 @@ public class SecurityConfig {
     private final RedisService redisService;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomClientRegistrationRepo customClientRegistrationRepo;
+    private final AuthenticationEntryPoint authenticationEntryPoint;
 
     //AuthenticationManager Bean 등록
     @Bean
@@ -59,34 +61,18 @@ public class SecurityConfig {
                 .csrf((auth) -> auth.disable())
                 .formLogin((auth) -> auth.disable())
                 .httpBasic((auth) -> auth.disable());
-//        http
-//                .cors((corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
-//
-//                    @Override
-//                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-//
-//                        CorsConfiguration configuration = new CorsConfiguration();
-//
-//                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:5173"));
-//                        configuration.setAllowedMethods(Collections.singletonList("*"));
-//                        configuration.setAllowCredentials(true);
-//                        configuration.setAllowedHeaders(Collections.singletonList("*"));
-//                        configuration.setMaxAge(3600L);
-//
-//                        configuration.setExposedHeaders(Collections.singletonList("Authorization"));
-//
-//                        return configuration;
-//                    }
-//                })));
-
         //소셜 로그인
         http
                 .oauth2Login((oauth2) -> oauth2
                         //.loginPage("/login")
-                        .successHandler(new OAuth2MemberSuccessHandler())
+                        .successHandler(new OAuth2MemberSuccessHandler(userRepository,jwtUtil,redisService))
+                        .failureHandler(new OAuth2MemberFailureHandler())
                         .clientRegistrationRepository(customClientRegistrationRepo.clientRegistrationRepository())
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig //data를 받을 수 있는 UserDetailsService를 등록해주는 endpoint
-                                .userService(customOAuth2UserService)));
+                                .userService(customOAuth2UserService)))
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                );
         //자체 로그인
         http
                 .authorizeHttpRequests((auth) -> auth
@@ -124,6 +110,4 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
-
 }
