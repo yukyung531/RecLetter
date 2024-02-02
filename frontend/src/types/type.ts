@@ -147,3 +147,9 @@ export interface fontTemplate {
     fontFamily: string;
     fontUrl: string;
 }
+
+export interface BGMTemplate {
+    bgmId: number;
+    bgmTitle: string;
+    bgmUrl: string;
+}

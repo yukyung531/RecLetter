@@ -63,18 +63,26 @@ export default function VideoCard({
             </div>
             {userId === props.clipOwner ? (
                 <div className="w-full flex flex-col items-end me-2">
-                    <p
-                        className="w-14 my-0.5 px-3 text-center color-bg-red2 text-white"
-                        onClick={onClick}
-                    >
-                        편집
-                    </p>
-                    <p
-                        className="w-14 my-0.5 px-3 text-center color-bg-black text-white"
-                        onClick={onDelete}
-                    >
-                        삭제
-                    </p>
+                    {onClick ? (
+                        <p
+                            className="w-14 my-0.5 px-3 text-center color-bg-red2 text-white"
+                            onClick={onClick}
+                        >
+                            편집
+                        </p>
+                    ) : (
+                        <></>
+                    )}
+                    {onDelete ? (
+                        <p
+                            className="w-14 my-0.5 px-3 text-center color-bg-black text-white"
+                            onClick={onDelete}
+                        >
+                            삭제
+                        </p>
+                    ) : (
+                        <></>
+                    )}
                 </div>
             ) : (
                 <></>
