@@ -5,18 +5,14 @@ import com.sixcube.recletter.studio.exception.MaxStudioOwnCountExceedException;
 import com.sixcube.recletter.studio.exception.StudioCreateFailureException;
 import com.sixcube.recletter.studio.exception.StudioDeleteFailureException;
 import com.sixcube.recletter.studio.exception.StudioNotFoundException;
+import com.sixcube.recletter.studio.exception.StudioParticipantNotFound;
 import com.sixcube.recletter.studio.exception.UnauthorizedToDeleteStudioException;
 import com.sixcube.recletter.studio.exception.UnauthorizedToSearchStudioException;
 import com.sixcube.recletter.studio.exception.UnauthorizedToUpdateStudioException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -136,6 +132,19 @@ public class StudioExceptionHandler {
     makeErrorMessage(errorMessage, e);
 
     errorMessage.append("이미 참여중인 스튜디오입니다.");
+    return ResponseEntity.badRequest().body(errorMessage.toString());
+  }
+
+  @ExceptionHandler(StudioParticipantNotFound.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  protected ResponseEntity<String> studioParticipantNotFoundExceptionHandler(
+      StudioParticipantNotFound e) {
+
+    StringBuilder errorMessage = new StringBuilder();
+
+    makeErrorMessage(errorMessage, e);
+
+    errorMessage.append("이미 참여중인 스튜디오 정보를 찾을 수 없습니다.");
     return ResponseEntity.badRequest().body(errorMessage.toString());
   }
 }

@@ -8,9 +8,11 @@ import java.util.List;
 
 public interface StudioParticipantService {
 
-  List<StudioParticipant> searchParticipantStudioByUser(User user);
+  List<StudioParticipant> searchStudioParticipantByUser(User user);
 
   void createStudioParticipant(String studioId, User user)
       throws StudioParticipantCreateFailureException, AlreadyJoinedStudioException;
+
+  StudioParticipant searchStudioParticipantByUserIdAndStudioId(String studioId, String userId);
 
 }

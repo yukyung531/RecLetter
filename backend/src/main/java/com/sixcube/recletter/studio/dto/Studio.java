@@ -39,38 +39,24 @@ public class Studio implements Serializable {
   @Builder.Default
   private String studioId = UUID.randomUUID().toString();
 
-  @ManyToOne
-  @JoinColumn(name = "studio_owner", referencedColumnName = "user_id")
-  private User studioOwner;
+  private String studioOwner;
 
-  @Column(nullable = false)
   private String studioTitle;
 
-  @Column(nullable = false)
   private LocalDateTime expireDate;
 
-  @ManyToOne
-  @JoinColumn(name = "studio_frame_id", referencedColumnName = "frame_id")
-  private Frame studioFrame;
+  private Integer studioFrameId;
 
-  @ManyToOne
-  @JoinColumn(name = "studio_font_id", referencedColumnName = "font_id")
-  private Font studioFont;
+  private Integer studioFontId;
 
-  @Column(name = "studio_font_size")
   private Integer studioFontSize;
 
-  @Column(name = "studio_font_bold")
   private Boolean studioFontBold;
 
-  @ManyToOne
-  @JoinColumn(name = "studio_bgm_id", referencedColumnName = "bgm_id")
-  private BGM studioBgm;
+  private Integer studioBgmId;
 
-  @Column(name = "studio_volume")
   private Integer studioVolume;
 
-  @Column(name = "is_completed")
   private Boolean isCompleted;
 
 }

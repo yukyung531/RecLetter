@@ -2,7 +2,9 @@ package com.sixcube.recletter.studio.controller;
 
 import com.sixcube.recletter.studio.dto.Studio;
 import com.sixcube.recletter.studio.dto.StudioInfo;
+import com.sixcube.recletter.studio.dto.StudioParticipant;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
+import com.sixcube.recletter.studio.dto.req.UpdateStudioReq;
 import com.sixcube.recletter.studio.dto.res.SearchActiveUserRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioDetailRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioListRes;
@@ -10,6 +12,7 @@ import com.sixcube.recletter.studio.dto.res.SearchStudioThumbnailRes;
 import com.sixcube.recletter.studio.service.StudioParticipantService;
 import com.sixcube.recletter.studio.service.StudioService;
 import com.sixcube.recletter.user.dto.User;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,9 +41,9 @@ public class StudioController {
   public ResponseEntity<SearchStudioListRes> searchStudioList(@AuthenticationPrincipal User user) {
     log.debug("StudioController.searchStudioList : start");
     // 참가중인 studio의 studioId 불러오기
-    List<String> participantStudioIdList = studioParticipantService.searchParticipantStudioByUser(user)
+    List<String> participantStudioIdList = studioParticipantService.searchStudioParticipantByUser(user)
         .stream()
-        .map(studioParticipant -> studioParticipant.getStudio().getStudioId())
+        .map(StudioParticipant::getStudioId)
         .toList();
 
     // 참가중인 Studio 정보 불러오기
@@ -53,7 +56,7 @@ public class StudioController {
         studioList.stream().map(studio -> StudioInfo.builder()
             .studioId(studio.getStudioId())
             .studioTitle(studio.getStudioTitle())
-            .isStudioOwner(user.getUserId().equals(studio.getStudioOwner().getUserId()))
+            .isStudioOwner(user.getUserId().equals(studio.getStudioOwner()))
             .isCompleted(studio.getIsCompleted())
             .thumbnailUrl(studioService.searchMainClipInfo(studio.getStudioId()).getClipUrl())
             .expireDate(studio.getExpireDate())
@@ -69,7 +72,6 @@ public class StudioController {
   @GetMapping("/{studioId}")
   public ResponseEntity<SearchStudioDetailRes> searchStudioDetail(@PathVariable String studioId,
       @AuthenticationPrincipal User user) {
-    log.debug("StudioController.searchStudioDetail : start");
     // 찾을 수 없을 경우 StudioNotFoundException 발생
     // 자신이 참여하지 않은 Studio를 검색할 경우 UnauthorizedToSearchStudioException 발생
     Studio studio = studioService.searchStudioByStudioId(studioId, user);
@@ -78,23 +80,20 @@ public class StudioController {
         .studioId(studio.getStudioId())
         .studioTitle(studio.getStudioTitle())
         .isCompleted(studio.getIsCompleted())
-        .studioOwner(studio.getStudioOwner().getUserId())
+        .studioOwner(studio.getStudioOwner())
         .clipInfoList(studioService.searchStudioClipInfoList(studioId))
-        .studioFrameId(studio.getStudioFrame().getFrameId())
-        .studioFontId(studio.getStudioFont().getFontId())
-        .studioBgmId(studio.getStudioBgm().getBgmId())
+        .studioFrameId(studio.getStudioFrameId())
+        .studioFontId(studio.getStudioFontId())
+        .studioBgmId(studio.getStudioBgmId())
         .build();
 
-    log.debug("StudioController.searchStudioDetail : end");
     return ResponseEntity.ok().body(result);
   }
 
   @GetMapping("/{studioId}/thumbnail")
   public ResponseEntity<SearchStudioThumbnailRes> searchStudioThumbnail(
       @PathVariable String studioId) {
-    log.debug("StudioController.searchStudioThumbnail : start");
 
-    log.debug("StudioController.searchStudioThumbnail : end");
     return ResponseEntity.ok()
         .body(SearchStudioThumbnailRes
             .builder()
@@ -103,59 +102,54 @@ public class StudioController {
   }
 
   @PostMapping
-  public ResponseEntity<Void> createStudio(@RequestBody CreateStudioReq createStudioReq,
+  public ResponseEntity<Void> createStudio(@Valid @RequestBody CreateStudioReq createStudioReq,
       @AuthenticationPrincipal User user) {
-    log.debug("StudioController.createStudio : start");
 
     // 생성할 수 없는 경우 StudioCreateFailureException 발생
     studioService.createStudio(createStudioReq, user);
 
-    log.debug("StudioController.createStudio : end");
     return ResponseEntity.ok().build();
   }
 
-  @DeleteMapping("/{studioId}")
-  public ResponseEntity<Void> deleteStudio(@PathVariable String studioId,
+  @DeleteMapping("/{concatenatedStudioId}")
+  public ResponseEntity<Void> deleteStudio(@PathVariable String concatenatedStudioId,
       @AuthenticationPrincipal User user) {
-    log.debug("StudioController.deleteStudio : start");
 
-    studioService.deleteStudioByStudioId(studioId, user);
+    studioService.deleteStudioByStudioId(concatenatedStudioId, user);
 
-    log.debug("StudioController.deleteStudio : end");
     return ResponseEntity.ok().build();
   }
 
   @PostMapping("/{studioId}")
   public ResponseEntity<Void> joinStudio(@PathVariable String studioId,
       @AuthenticationPrincipal User user) {
-    log.debug("StudioController.joinStudio : start");
 
     studioParticipantService.createStudioParticipant(studioId, user);
 
-    log.debug("StudioController.joinStudio : end");
     return ResponseEntity.ok().build();
   }
 
   // TODO - redis 예외처리
   @GetMapping("/{studioId}/active")
   public ResponseEntity<SearchActiveUserRes> searchActiveUser(@PathVariable String studioId) {
-    log.debug("StudioController.searchActiveUser : start");
     // TODO - 해당 studioId로 활성화된 챗팅방이 있는를 체크해서 반환
-    log.debug("StudioController.searchActiveUser : end");
     return ResponseEntity.ok().body(SearchActiveUserRes.builder().isActive(false).build());
   }
 
   // TODO - JPA 예외처리
-  @PutMapping("/studio/{studioId}/title")
+  @PutMapping("/{studioId}/title")
   public ResponseEntity<Void> updateStudioTitle(@PathVariable String studioId,
       @RequestParam String studioTitle, @AuthenticationPrincipal User user) {
-    log.debug("StudioController.updateStudioTitle : start");
 
     // 해당 스튜디오에 참여하지 않은 사용자의 경우 UnauthorizedToUpdateStudioException 발생
     // 스튜디오를 찾지 못한 경우 StudioNotFoundException 발생
     studioService.updateStudioTitle(studioId, studioTitle, user);
 
-    log.debug("StudioController.updateStudioTitle : end");
+    return ResponseEntity.ok().build();
+  }
+
+  @PutMapping
+  public ResponseEntity<Void> updateStudio(@RequestBody UpdateStudioReq updateStudioReq) {
     return ResponseEntity.ok().build();
   }
 
