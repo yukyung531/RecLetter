@@ -1,5 +1,11 @@
 import { BaseSyntheticEvent, useEffect, useRef, useState } from 'react';
-import { connect, disconnect, firstChatJoin, sendMessage } from '../util/chat';
+import {
+    connect,
+    disconnect,
+    firstChatJoin,
+    sendMessage,
+    unSubscribe,
+} from '../util/chat';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUser } from '../api/user';
 import { httpStatusCode } from '../util/http-status';
@@ -18,6 +24,8 @@ export default function ChattingBox() {
     const [comment, setComment] = useState<string>('');
     const [userNickname, setUserNickname] = useState<string>('');
     const [userId, setUserId] = useState<string>('');
+    const [currentPeople, setCurrentPeople] = useState<string[]>([]);
+    const [chatFlag, setChatFlag] = useState<boolean>(false);
     //스크롤 탐지용
     const messageEndRef = useRef<HTMLDivElement>(null);
 
@@ -37,7 +45,7 @@ export default function ChattingBox() {
             changeChatToggle(false);
         }
         return () => {
-            disconnect();
+            setChattingList([]);
         };
     }, [studioCurrentId]);
 
@@ -47,22 +55,34 @@ export default function ChattingBox() {
         }
     }, [chattingList]);
 
+    // useEffect(() => {
+    //     return () => {
+    //         console.log('작동');
+    //         disconnect();
+    //     };
+    // }, []);
+
     /** 유저 API 설정 */
     const chatInitialAPI = async () => {
-        await getUser().then((res) => {
-            if (res.status === httpStatusCode.OK) {
-                setUserNickname(res.data.userNickname);
-                setUserId(res.data.userId);
-                connect(
-                    studioCurrentId,
-                    res.data.userId,
-                    res.data.userNickname,
-                    setChattingList
-                );
-                setChatToggle(false);
-                setChattingList([]);
-            }
-        });
+        if (!chatFlag) {
+            await getUser().then((res) => {
+                if (res.status === httpStatusCode.OK) {
+                    setUserNickname(res.data.userNickname);
+                    setUserId(res.data.userId);
+                    setCurrentPeople([]);
+                    connect(
+                        studioCurrentId,
+                        res.data.userId,
+                        res.data.userNickname,
+                        setChattingList,
+                        setCurrentPeople
+                    );
+                    setChatToggle(false);
+                    setChatFlag(true);
+                    setChattingList([]);
+                }
+            });
+        }
     };
     // 채팅 토글 바꾸기
     const changeChatToggle = (toggle: boolean) => {
@@ -192,9 +212,13 @@ export default function ChattingBox() {
                             </p>
                         </div>
                         <div className="flex justify-between">
-                            <span className="material-symbols-outlined text-lg">
-                                group
-                            </span>
+                            <div>
+                                <span className="material-symbols-outlined text-lg">
+                                    group
+                                </span>
+                                <p>{currentPeople}</p>
+                            </div>
+
                             <span className="material-symbols-outlined text-lg">
                                 menu
                             </span>

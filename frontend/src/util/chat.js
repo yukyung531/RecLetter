@@ -1,6 +1,7 @@
 // import SockJS from 'sockjs-client';
 import * as StompJs from '@stomp/stompjs';
 import axios from 'axios';
+import { enterChatting } from '../api/chat';
 
 const websocketUrl = 'ws://localhost:8080/ws';
 const topic = '/topic';
@@ -12,12 +13,11 @@ let firstEnter = false;
 let username;
 let uuid;
 let setConnect = true;
+let people;
 
 /** create-react-app환경 */
-export function connect(id, uuid, nickname, setChattingList) {
+export function connect(id, uuid, nickname, setChattingList, setCurrentPeople) {
     const token = localStorage.getItem('access-token');
-    console.log(token);
-
     client = new StompJs.Client({
         brokerURL: websocketUrl,
         connectHeaders: {
@@ -31,6 +31,15 @@ export function connect(id, uuid, nickname, setChattingList) {
             setConnect = true;
             console.log(setConnect);
             chatList = setChattingList;
+            const findPeopleAPI = async () => {
+                await enterChatting(studioId)
+                    .then((res) => {
+                        console.log('현재인원 : ' + res);
+                        setCurrentPeople(res.data);
+                    })
+                    .catch((error) => {});
+            };
+            findPeopleAPI();
             subscribe();
             if (!firstEnter) {
                 firstChatJoin(studioId);
@@ -42,7 +51,6 @@ export function connect(id, uuid, nickname, setChattingList) {
 }
 
 export function firstChatJoin(studioId) {
-    console.log('조인 실행대쪄');
     client.publish({
         destination: app + `/${studioId}/join`,
         body: JSON.stringify({
@@ -53,15 +61,17 @@ export function firstChatJoin(studioId) {
 }
 
 export function subscribe() {
-    client.subscribe(topic + `/${studioId}`, (payload) => {
-        console.log(payload);
-        onMeesageReceived(payload);
-        console.log('구독이 되었습니다');
-        // showMessage('은수', '1', JSON.parse(payload.body).content);
-    });
-    if (!setConnect) {
+    if (setConnect) {
+        client.subscribe(topic + `/${studioId}`, (payload) => {
+            onMeesageReceived(payload);
+            console.log('채팅을 보냈습니다');
+        });
+    } else if (!setConnect) {
         client.deactivate();
     }
+}
+export function unSubscribe() {
+    client.subscribe(topic + `/${studioId}`, (payload) => {}).unsubscribe();
 }
 
 export function disconnect() {
@@ -75,7 +85,6 @@ export function disconnect() {
             studioId: studioId,
         }),
     });
-    // client.deactivate();
     console.log('채팅이 종료되었습니다.');
     firstEnter = false;
 }
@@ -98,10 +107,6 @@ function onMeesageReceived(payload) {
     console.log('합합 메시지리븟 입니다!');
     console.log(message);
 
-    if (message.type === 'LEAVE') {
-        console.log('작동 ' + setConnect);
-        setConnect = false;
-    }
     if (message.type === 'JOIN' && message.uuid === uuid) {
         console.log('유저가 같아서 표시되지 않습니다.');
     }
@@ -122,6 +127,10 @@ function onMeesageReceived(payload) {
             message.content,
             'chat'
         );
+    }
+    if (message.type === 'LEAVE') {
+        console.log('작동 ' + setConnect);
+        setConnect = false;
     }
 }
 

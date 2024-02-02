@@ -3,7 +3,7 @@ import { useState, useEffect, BaseSyntheticEvent } from 'react';
 import { StudioDetail, ClipInfo, UserInfo } from '../types/type';
 import { useNavigate, Link } from 'react-router-dom';
 import DeleteCheckWindow from '../components/DeleteCheckWindow';
-import { connect } from '../util/chat';
+import { connect, disconnect, unSubscribe } from '../util/chat';
 import { useDispatch, useSelector } from 'react-redux';
 import { studioNameState, studioState } from '../util/counter-slice';
 import { enterStudio, modifyStudioTitle, studioDetail } from '../api/studio';
@@ -112,6 +112,10 @@ export default function StudioMainPage() {
         if (loginValue === 'false' || !loginValue || !token) {
             navigator(`/`);
         }
+        return () => {
+            console.log('작동');
+            disconnect();
+        };
     }, []);
 
     //편집창으로 이동
