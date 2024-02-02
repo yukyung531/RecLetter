@@ -4,7 +4,8 @@ public enum RedisPrefix {
     REFRESH_TOKEN("loginRefresh:"),
     REGIST("regist:"),
     CHANGE_EMAIL("changeEmail:"),
-    RESET_PASSOWRD("resetPassword:");
+    RESET_PASSOWRD("resetPassword:"),
+    STUDIO("studio:");
 
     private String prefix;
 
