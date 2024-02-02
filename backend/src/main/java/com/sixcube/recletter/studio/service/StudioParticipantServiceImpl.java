@@ -20,7 +20,7 @@ public class StudioParticipantServiceImpl implements StudioParticipantService {
 
   @Override
   public List<StudioParticipant> searchStudioParticipantByUser(User user) {
-    return studioParticipantRepository.findAllByUser(user);
+    return studioParticipantRepository.findAllByUserId(user.getUserId());
   }
 
   @Override

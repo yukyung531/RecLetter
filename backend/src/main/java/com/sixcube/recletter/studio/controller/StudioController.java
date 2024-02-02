@@ -2,6 +2,7 @@ package com.sixcube.recletter.studio.controller;
 
 import com.sixcube.recletter.studio.dto.Studio;
 import com.sixcube.recletter.studio.dto.StudioInfo;
+import com.sixcube.recletter.studio.dto.StudioParticipant;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.dto.res.SearchActiveUserRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioDetailRes;
@@ -41,7 +42,7 @@ public class StudioController {
     // 참가중인 studio의 studioId 불러오기
     List<String> participantStudioIdList = studioParticipantService.searchStudioParticipantByUser(user)
         .stream()
-        .map(studioParticipant -> studioParticipant.getStudio().getStudioId())
+        .map(StudioParticipant::getStudioId)
         .toList();
 
     // 참가중인 Studio 정보 불러오기
