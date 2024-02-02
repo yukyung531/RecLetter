@@ -39,7 +39,7 @@ public class StudioController {
   public ResponseEntity<SearchStudioListRes> searchStudioList(@AuthenticationPrincipal User user) {
     log.debug("StudioController.searchStudioList : start");
     // 참가중인 studio의 studioId 불러오기
-    List<String> participantStudioIdList = studioParticipantService.searchParticipantStudioByUser(user)
+    List<String> participantStudioIdList = studioParticipantService.searchStudioParticipantByUser(user)
         .stream()
         .map(studioParticipant -> studioParticipant.getStudio().getStudioId())
         .toList();

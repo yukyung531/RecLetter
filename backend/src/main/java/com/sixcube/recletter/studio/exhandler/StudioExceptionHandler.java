@@ -138,4 +138,17 @@ public class StudioExceptionHandler {
     errorMessage.append("이미 참여중인 스튜디오입니다.");
     return ResponseEntity.badRequest().body(errorMessage.toString());
   }
+
+  @ExceptionHandler(StudioNotFoundException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  protected ResponseEntity<String> StudioParticipantNotFoundExceptionHandler(
+      StudioNotFoundException e) {
+
+    StringBuilder errorMessage = new StringBuilder();
+
+    makeErrorMessage(errorMessage, e);
+
+    errorMessage.append("이미 참여중인 스튜디오 정보를 찾을 수 없습니다.");
+    return ResponseEntity.badRequest().body(errorMessage.toString());
+  }
 }

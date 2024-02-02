@@ -1,10 +1,10 @@
 package com.sixcube.recletter.studio.service;
 
-import com.sixcube.recletter.studio.dto.Studio;
 import com.sixcube.recletter.studio.dto.StudioParticipant;
 import com.sixcube.recletter.studio.dto.StudioParticipantId;
 import com.sixcube.recletter.studio.exception.AlreadyJoinedStudioException;
 import com.sixcube.recletter.studio.exception.StudioParticipantCreateFailureException;
+import com.sixcube.recletter.studio.exception.StudioParticipantNotFound;
 import com.sixcube.recletter.studio.repository.StudioParticipantRepository;
 import com.sixcube.recletter.user.dto.User;
 import java.util.List;
@@ -19,7 +19,7 @@ public class StudioParticipantServiceImpl implements StudioParticipantService {
   private final StudioParticipantRepository studioParticipantRepository;
 
   @Override
-  public List<StudioParticipant> searchParticipantStudioByUser(User user) {
+  public List<StudioParticipant> searchStudioParticipantByUser(User user) {
     return studioParticipantRepository.findAllByUser(user);
   }
 
@@ -27,16 +27,25 @@ public class StudioParticipantServiceImpl implements StudioParticipantService {
   public void createStudioParticipant(String studioId, User user)
       throws StudioParticipantCreateFailureException, AlreadyJoinedStudioException {
     studioParticipantRepository.findById(new StudioParticipantId(studioId, user.getUserId()))
-        .orElseGet(() -> {
+        .ifPresentOrElse(studioParticipant -> {
+        }, () -> {
           try {
-            return studioParticipantRepository.save(
+            studioParticipantRepository.save(
                 StudioParticipant.builder()
-                    .studio(Studio.builder().studioId(studioId).build())
-                    .user(user)
+                    .studioId(studioId)
+                    .userId(user.getUserId())
                     .build());
           } catch (Exception e) {
             throw new StudioParticipantCreateFailureException(e);
           }
         });
+  }
+
+  @Override
+  public StudioParticipant searchStudioParticipantByUserIdAndStudioId(String studioId,
+      String userId) {
+    return studioParticipantRepository.findById(new StudioParticipantId(studioId, userId))
+        .orElseThrow(
+            StudioParticipantNotFound::new);
   }
 }

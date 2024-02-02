@@ -24,12 +24,8 @@ import lombok.NoArgsConstructor;
 public class StudioParticipant implements Serializable {
 
   @Id
-  @ManyToOne
-  @JoinColumn(name = "studio_id", referencedColumnName = "studio_id")
-  Studio studio;
+  String studioId;
 
   @Id
-  @ManyToOne
-  @JoinColumn(name = "user_id", referencedColumnName = "user_id")
-  User user;
+  String userId;
 }

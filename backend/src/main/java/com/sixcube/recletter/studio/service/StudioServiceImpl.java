@@ -4,7 +4,6 @@ import com.sixcube.recletter.clip.dto.ClipInfo;
 import com.sixcube.recletter.clip.service.ClipService;
 import com.sixcube.recletter.studio.StudioUtil;
 import com.sixcube.recletter.studio.dto.Studio;
-import com.sixcube.recletter.studio.dto.StudioParticipant;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.exception.MaxStudioOwnCountExceedException;
 import com.sixcube.recletter.studio.exception.StudioCreateFailureException;
@@ -14,7 +13,6 @@ import com.sixcube.recletter.studio.exception.UnauthorizedToDeleteStudioExceptio
 import com.sixcube.recletter.studio.exception.UnauthorizedToSearchStudioException;
 import com.sixcube.recletter.studio.exception.UnauthorizedToUpdateStudioException;
 import com.sixcube.recletter.studio.repository.StudioRepository;
-import com.sixcube.recletter.template.dto.Frame;
 import com.sixcube.recletter.template.service.TemplateService;
 import com.sixcube.recletter.user.dto.User;
 import com.sixcube.recletter.user.service.UserService;
@@ -99,7 +97,7 @@ public class StudioServiceImpl implements StudioService {
       throws StudioNotFoundException, UnauthorizedToDeleteStudioException, StudioDeleteFailureException {
 
     StringTokenizer st = new StringTokenizer(concatenatedStudioId, ",");
-    if(st.countTokens() > 3) {
+    if (st.countTokens() > 3) {
       throw new UnauthorizedToDeleteStudioException();
     }
 
@@ -108,7 +106,7 @@ public class StudioServiceImpl implements StudioService {
 
       Studio result = studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
 
-      if (result.getStudioOwner().equals(user.getUserId())) {
+      if (user.getUserId().equals(result.getStudioOwner())) {
         try {
           studioRepository.deleteById(studioId);
         } catch (Exception e) {
@@ -118,20 +116,13 @@ public class StudioServiceImpl implements StudioService {
         throw new UnauthorizedToDeleteStudioException();
       }
     }
-
-
   }
 
   @Override
   public void updateStudioTitle(String studioId, String studioTitle, User user)
       throws StudioNotFoundException {
     Studio studio = studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
-
-    List<StudioParticipant> studioParticipantList = studioParticipantService.searchParticipantStudioByUser(
-        user);
-
-    if (studioParticipantList.stream().anyMatch(
-        studioParticipant -> studioParticipant.getStudio().getStudioId().equals(studioId))) {
+    if (studio.getStudioOwner().equals(user.getUserId())) {
       studio.setStudioTitle(studioTitle);
     } else {
       throw new UnauthorizedToUpdateStudioException();
