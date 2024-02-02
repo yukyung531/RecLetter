@@ -9,6 +9,7 @@ import com.sixcube.recletter.chat.exhandler.ChatExceptionHandler;
 import com.sixcube.recletter.redis.RedisListService;
 import com.sixcube.recletter.redis.RedisPrefix;
 import com.sixcube.recletter.redis.RedisService;
+import com.sixcube.recletter.studio.StudioUtil;
 import com.sixcube.recletter.studio.dto.Studio;
 import com.sixcube.recletter.studio.dto.StudioParticipant;
 import com.sixcube.recletter.studio.dto.StudioParticipantId;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -35,8 +37,9 @@ public class ChatServiceImpl implements ChatService {
 
     private final StudioRepository studioRepository;
 
-    private final StudioParticipantRepository studioParticipantRepository;
     private final RedisListService redisListService;
+
+    private final StudioUtil studioUtil;
 
     @Override
     public ChatMessage joinChat(String studioId, ChatMessage chatMessage, User user) throws StudioNotFoundException, AlreadyJoinedStudioException, ChatJoinFailureException {
@@ -45,18 +48,12 @@ public class ChatServiceImpl implements ChatService {
             // studioId에 해당하는 studio가 존재하는지 확인
             studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
 
-            // TODO - 해당 스튜디오에 현재 참여중인지 확인(util에서 가져오기
+            // 해당 스튜디오에 현재 참여중인지 확인
+            studioUtil.isStudioParticipant(studioId, user.getUserId());
 
-
-            //레디스에 저장
-            // redis key값에 해당 studioId가 존재한다면, 그 key의 value에 userNickname 추가
-            // redis key값에 해당 studioId가 존재하지 않는다면, key = studioId, value에 userNickname 추가
+            // 접속 정보를 레디스에 저장
             String key = RedisPrefix.STUDIO.prefix() + studioId;
             redisListService.addValueToList(key, user.getUserNickname());
-
-            for(int i = 0; i<(redisListService.getList(key)).size(); i++){
-                System.out.println(redisListService.getList(key).get(i));
-            }
 
             // 메시지 sender에 userNickname 등록
             chatMessage.setSender(user.getUserNickname());
@@ -85,7 +82,8 @@ public class ChatServiceImpl implements ChatService {
             // studioId에 해당하는 studio가 존재하는지 확인
             studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
 
-            // TODO - 해당 스튜디오에 현재 참여중인지 확인(util에서 가져오기
+            // 해당 스튜디오에 현재 참여중인지 확인
+            studioUtil.isStudioParticipant(studioId, user.getUserId());
 
             // 메시지 sender에 userNickname 등록
             chatMessage.setSender(user.getUserNickname());
@@ -107,11 +105,12 @@ public class ChatServiceImpl implements ChatService {
     public ChatMessage leaveChat(String studioId, ChatMessage chatMessage, User user) throws StudioNotFoundException, ChatLeaveFailureException {
         try {
             log.debug("ChatServiceImpl.leaveChat : start");
+
             // studioId에 해당하는 studio가 존재하는지 확인
             studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
 
-            // TODO - 해당 스튜디오에 현재 참여중인지 확인(util에서 가져오기
-
+            // 해당 스튜디오에 현재 참여중인지 확인
+            studioUtil.isStudioParticipant(studioId, user.getUserId());
 
             // 메시지 sender에 userNickname 등록
             chatMessage.setSender(user.getUserNickname());
@@ -125,14 +124,24 @@ public class ChatServiceImpl implements ChatService {
             // 퇴장 메시지 설정
             chatMessage.setContent(chatMessage.getSender() + "님이 퇴장하였습니다.");
 
-            //레디스에 저장
-            // redis key값에 해당 studioId가 존재한다면, 그 key의 value에 userNickname 제거(하나만 제거, 중복될 수 있으니까)
-            // redis key값에 해당 studioId가 존재하지 않는다면, 예외처리
+            /* 퇴장 정보를 레디스에 저장
+               redis key값에 해당 studioId가 존재하고 해당 user가 접속중이라면, 그 key의 value에 userNickname 제거(하나만 제거, 중복될 수 있으니까)
+               redis key값에 해당 studioId가 존재하지 않는다면, 예외처리
+             */
             String key = RedisPrefix.STUDIO.prefix() + studioId;
-            redisListService.removeValueFromList(key,user.getUserNickname());
-            for(int i = 0; i<(redisListService.getList(key)).size(); i++){
-                System.out.println(redisListService.getList(key).get(i));
+            List<String> list = redisListService.getList(key);
+
+            if(list != null && list.contains(user.getUserNickname())) {
+                // 리스트에 userNickname이 존재하면, userNickname 제거
+                redisListService.removeValueFromList(key,user.getUserNickname());
+            } else {
+                // 리스트에 userNickname이 존재하지 않으면, 예외 발생
+                throw new NoSuchElementException("The userNickname does not exist in the list");
             }
+
+//            for(int i = 0; i<(redisListService.getList(key)).size(); i++){
+//                System.out.println(redisListService.getList(key).get(i));
+//            }
 
             log.debug("ChatServiceImpl.leaveChat : end");
             return chatMessage;
