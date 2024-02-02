@@ -4,6 +4,7 @@ import com.sixcube.recletter.studio.dto.Studio;
 import com.sixcube.recletter.studio.dto.StudioInfo;
 import com.sixcube.recletter.studio.dto.StudioParticipant;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
+import com.sixcube.recletter.studio.dto.req.UpdateStudioReq;
 import com.sixcube.recletter.studio.dto.res.SearchActiveUserRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioDetailRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioListRes;
@@ -136,7 +137,7 @@ public class StudioController {
   }
 
   // TODO - JPA 예외처리
-  @PutMapping("/studio/{studioId}/title")
+  @PutMapping("/{studioId}/title")
   public ResponseEntity<Void> updateStudioTitle(@PathVariable String studioId,
       @RequestParam String studioTitle, @AuthenticationPrincipal User user) {
 
@@ -144,6 +145,11 @@ public class StudioController {
     // 스튜디오를 찾지 못한 경우 StudioNotFoundException 발생
     studioService.updateStudioTitle(studioId, studioTitle, user);
 
+    return ResponseEntity.ok().build();
+  }
+
+  @PutMapping
+  public ResponseEntity<Void> updateStudio(@RequestBody UpdateStudioReq updateStudioReq) {
     return ResponseEntity.ok().build();
   }
 
