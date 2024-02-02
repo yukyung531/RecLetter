@@ -33,24 +33,27 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         OAuth2Response oAuth2Response = null;
-        if (registrationId.equals("naver")) {
-            oAuth2Response = new NaverResponse(oAuth2User.getAttributes());
-        } else if (registrationId.equals("google")) {
+
+        if (registrationId.equals("google")) {
             oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
-        } else {
+        }
+//        else if (registrationId.equals("naver")) {
+//            oAuth2Response = new NaverResponse(oAuth2User.getAttributes());
+//        }
+        else {
             return null;
         }
 
         String userEmail = oAuth2Response.getEmail();
         Optional<User> existData = userRepository.findByUserEmailAndDeletedAtIsNull(userEmail);
-        String role = "ROLE_USER";
+        String role = "ROLE_SOCIAL";
 
         //회원가입(첫 로그인)
         if (existData.isEmpty()) {
             User user = User.builder()
                     .userEmail(oAuth2Response.getEmail())
                     .userNickname(oAuth2Response.getName())
-                    .userRole("ROLE_USER")
+                    .userRole("ROLE_SOCIAL")
                     .build();
 
             userRepository.save(user);

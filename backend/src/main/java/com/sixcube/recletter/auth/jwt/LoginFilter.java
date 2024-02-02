@@ -7,6 +7,7 @@ import com.sixcube.recletter.redis.RedisPrefix;
 import com.sixcube.recletter.redis.RedisService;
 import com.sixcube.recletter.user.dto.User;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -60,7 +61,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     //로그인 성공시 실행하는 메소드 (여기서 JWT를 발급하면 됨)
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
         //user 객체를 알아내기 위해
         User user = (User) authentication.getPrincipal();
 
@@ -101,12 +102,18 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.getWriter().write(result);
 
         System.out.println("LoginFilter: login success");
+
+        // 슈퍼 클래스의 successfulAuthentication 메서드를 호출하지 않음
+
     }
 
     //로그인 실패시 실행하는 메소드
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws ServletException, IOException {
         response.setStatus(401);
         System.out.println("LoginFilter: login fail");
+
+        // 슈퍼 클래스의 unsuccessfulAuthentication 메서드를 호출하지 않음
+
     }
 }

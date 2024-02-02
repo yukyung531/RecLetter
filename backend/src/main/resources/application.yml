@@ -80,7 +80,7 @@ logging:
     com:
       sixcube:
         recletter: debug
-    "[org.springframework.security]": DEBUG
+    org.springframework.security: DEBUG
 
 openvidu:
   url: ${OPENVIDU_URL}

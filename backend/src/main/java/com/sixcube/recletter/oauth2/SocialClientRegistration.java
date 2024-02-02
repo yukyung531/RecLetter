@@ -8,23 +8,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class SocialClientRegistration {
 
-    public ClientRegistration naverClientRegistration() {
-
-        return ClientRegistration.withRegistrationId("naver")
-                .clientId("8TKXMeogRSgxx2FUzBjA")
-                .clientSecret("gLpfx9mwOA")
-                .redirectUri("http://localhost:5173/login/oauth2/code/naver")
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .scope("name", "email")
-                .authorizationUri("https://nid.naver.com/oauth2.0/authorize")
-                .tokenUri("https://nid.naver.com/oauth2.0/token")
-                .userInfoUri("https://openapi.naver.com/v1/nid/me")
-                .userNameAttributeName("response")
-                .build();
-    }
+//    public ClientRegistration naverClientRegistration() {
+//
+//        return ClientRegistration.withRegistrationId("naver")
+//                .clientId("8TKXMeogRSgxx2FUzBjA")
+//                .clientSecret("gLpfx9mwOA")
+//                .redirectUri("http://localhost:5173/login/oauth2/code/naver")
+//                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+//                .scope("name", "email")
+//                .authorizationUri("https://nid.naver.com/oauth2.0/authorize")
+//                .tokenUri("https://nid.naver.com/oauth2.0/token")
+//                .userInfoUri("https://openapi.naver.com/v1/nid/me")
+//                .userNameAttributeName("response")
+//                .build();
+//    }
 
     public ClientRegistration googleClientRegistration() {
-
         return ClientRegistration.withRegistrationId("google")
                 .clientId("609466944952-13j1nj6j5cp7q0fctu6jpnu68hlt5gqe.apps.googleusercontent.com")
                 .clientSecret("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")
