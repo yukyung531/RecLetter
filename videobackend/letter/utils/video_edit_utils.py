@@ -1,7 +1,6 @@
 from moviepy.audio.fx.volumex import volumex
 from moviepy.editor import *
 from typing import List
-from letter.dto.dto import ClipInfo
 
 
 # 동영상 로드

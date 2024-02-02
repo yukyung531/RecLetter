@@ -3,7 +3,7 @@ import os.path
 from botocore.client import BaseClient
 from moviepy.video.io.VideoFileClip import VideoFileClip
 
-from letter.dto.dto import ClipInfo
+from videobackend.letter.dto.dto import ClipInfo
 
 
 def clip_download_and_load(clip_info: ClipInfo, studio_id: str, bucket: str,
@@ -18,7 +18,12 @@ def clip_download_and_load(clip_info: ClipInfo, studio_id: str, bucket: str,
     except OSError:
         print("Error: Failed to create the directory.")
 
-    client.download_file(bucket, key, file_name)
+    print("다운로드 시작")
+    try:
+        client.download_file(bucket, key, file_name)
+    except Exception as e:
+        print(e)
+    print("다운로드 완료")
     return VideoFileClip(directory)
 
 

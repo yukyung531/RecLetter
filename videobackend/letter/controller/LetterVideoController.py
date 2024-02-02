@@ -21,6 +21,7 @@ s3_client = boto3.client('s3', region_name=REGION,
 letter_video_router = APIRouter()
 
 
-@letter_video_router.post
+@letter_video_router.post("/letter")
 def make_letter(make_letter_dto: MakeLetterDto) -> None:
-    BackgroundTasks.add_task(create_letter, make_letter_dto, BUCKET, s3_client)
+    # BackgroundTasks.add_task(create_letter, make_letter_dto, BUCKET, s3_client)
+    create_letter(make_letter_dto, BUCKET, s3_client)
