@@ -7,7 +7,7 @@ const local = localAxios();
  * @param studioId
  * @returns
  */
-export async function createSession(studioId: string) {
+export async function createSessionAPI(studioId: string) {
     return await local.post(
         `/api/meeting/${studioId}`,
         { customSessionId: studioId },
@@ -22,7 +22,7 @@ export async function createSession(studioId: string) {
  * @param sessionId
  * @returns
  */
-export async function connectSession(sessionId: string) {
+export async function connectSessionAPI(sessionId: string) {
     return await local.post(`/api/meeting/${sessionId}/connections`, {
         headers: { 'Content-Type': 'application/json' },
     });
@@ -33,6 +33,14 @@ export async function connectSession(sessionId: string) {
  * @param studioId
  * @returns
  */
-export async function endSession(studioId: string) {
-    return await local.delete(`/api/meeting/${studioId}`);
+export async function endSessionAPI(studioId: string) {
+    return await local.delete(`/api/meeting/${studioId}`, {
+        headers: { 'Content-Type': 'application/json' },
+    });
+}
+
+export async function isSessionExistAPI(studioId: string) {
+    return await local.get(`/api/meeting/${studioId}/exists`, {
+        headers: { 'Content-Type': 'application/json' },
+    });
 }

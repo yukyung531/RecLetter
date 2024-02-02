@@ -1,6 +1,11 @@
+import { Subscriber, Publisher } from 'openvidu-browser';
 import { useEffect, useRef } from 'react';
 
-export default function OpenViduVideoCard({ streamManager }) {
+interface props {
+    streamManager: Publisher | Subscriber;
+}
+
+export default function OpenViduVideoCard({ streamManager }: props) {
     const userNickname = JSON.parse(
         streamManager.stream.connection.data
     ).clientData;
@@ -8,8 +13,9 @@ export default function OpenViduVideoCard({ streamManager }) {
     const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
-        console.log('Now videoRef - ', videoRef.current);
-        streamManager.addVideoElement(videoRef.current);
+        if (videoRef.current) {
+            streamManager.addVideoElement(videoRef.current);
+        }
     }, [streamManager]);
 
     return (

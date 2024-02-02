@@ -14,6 +14,7 @@ export interface User {
     userPassword: string;
 }
 export interface UserInfo {
+    userId: string;
     userNickname: string;
     userEmail: string;
 }
