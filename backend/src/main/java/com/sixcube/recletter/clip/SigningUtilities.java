@@ -1,21 +1,17 @@
-package com.sixcube.recletter.clip.service;
+package com.sixcube.recletter.clip;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.cloudfront.CloudFrontUtilities;
 import software.amazon.awssdk.services.cloudfront.cookie.CookiesForCannedPolicy;
 import software.amazon.awssdk.services.cloudfront.cookie.CookiesForCustomPolicy;
 import software.amazon.awssdk.services.cloudfront.internal.url.DefaultSignedUrl;
 import software.amazon.awssdk.services.cloudfront.internal.utils.SigningUtils;
 import software.amazon.awssdk.services.cloudfront.model.CannedSignerRequest;
-import software.amazon.awssdk.services.cloudfront.model.CloudFrontOriginAccessIdentity;
 import software.amazon.awssdk.services.cloudfront.model.CustomSignerRequest;
 import software.amazon.awssdk.services.cloudfront.url.SignedUrl;
 
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
 
 public class SigningUtilities {
     private static final Logger logger = LoggerFactory.getLogger(SigningUtilities.class);

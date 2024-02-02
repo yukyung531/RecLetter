@@ -7,22 +7,18 @@ import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.sixcube.recletter.clip.CloudFrontManager;
 import com.sixcube.recletter.clip.Repository.ClipRepository;
 import com.sixcube.recletter.clip.dto.Clip;
 import com.sixcube.recletter.clip.dto.ClipInfo;
 import com.sixcube.recletter.clip.exception.*;
 import com.sixcube.recletter.studio.StudioUtil;
-import com.sixcube.recletter.studio.dto.StudioParticipant;
-import com.sixcube.recletter.studio.dto.StudioParticipantId;
-import com.sixcube.recletter.studio.exception.StudioNotFoundException;
-import com.sixcube.recletter.studio.repository.StudioParticipantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.*;
 
 @Service
@@ -32,7 +28,7 @@ public class ClipServiceImpl implements ClipService {
     private final ClipRepository clipRepository;
     private final StudioUtil studioUtil;
     private final AmazonS3Client amazonS3Client;
-//    private final String cloudFront = "https://d3f9xm3snzk3an.cloudfront.net/";
+    private final CloudFrontManager cloudFrontManager;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -45,7 +41,7 @@ public class ClipServiceImpl implements ClipService {
 
     @Override
     public void createClip(Clip clip, MultipartFile file) {
-        if (file==null || !file.getContentType().equals("video/mp4")) {
+        if (file==null || !"video/mp4".equals(file.getContentType())) {
             throw new InvalidClipFormatException();
         }
         if (!studioUtil.isStudioParticipant(clip.getStudioId(),clip.getClipOwner())){
@@ -91,7 +87,6 @@ public class ClipServiceImpl implements ClipService {
             e.printStackTrace();
         }
     }
-
     @Override
     public Clip searchClip(int clipId) {
         return clipRepository.findClipByClipId(clipId).orElseThrow(NoSuchClipException::new);
@@ -100,11 +95,16 @@ public class ClipServiceImpl implements ClipService {
     @Override
     public String searchClipUrl(int clipId){
         Clip clip=searchClip(clipId);
-        StringBuilder clipUrl=new StringBuilder();
-        clipUrl.append(cloudFront).append(getFileKey(clip));
-        return clipUrl.toString();
+//        StringBuilder clipUrl=new StringBuilder();
+//        clipUrl.append(cloudFront).append(getFileKey(clip));
+//        return clipUrl.toString();
+        return createSignedClipUrl(getFileKey(clip));
     }
 
+//    @Override
+    public String searchClipUrl(Clip clip){
+        return createSignedClipUrl(getFileKey(clip));
+    }
     @Override
     public String getFileKey(Clip clip) {
         StringBuilder stringBuilder = new StringBuilder();
@@ -125,7 +125,6 @@ public class ClipServiceImpl implements ClipService {
     }
 
     public void saveS3Object(Clip clip, MultipartFile file) throws IOException,AmazonS3Exception {
-//        String fileKey = "test/"+clip.getClipTitle()+".mp4";
         String fileKey= getFileKey(clip);
         System.out.println(fileKey);
 
@@ -157,26 +156,24 @@ public class ClipServiceImpl implements ClipService {
                     .clipOwner(clip.getClipOwner())
                     .clipContent(clip.getClipContent())
                     .clipOrder(clip.getClipOrder())
-                    .clipUrl(cloudFront + getFileKey(clip))
+                    .clipUrl(createSignedClipUrl(getFileKey(clip)))
+//                    .clipUrl(cloudFront + getFileKey(clip))
                     .build();
             clipInfoList.add(clipInfo);
         }
         return clipInfoList;
     }
 
-    public String getPreSignedUrl(String fileName){
+    public String createSignedClipUrl(String fileName){
         String url="";
         try {
-            CloudFrontManager cm=new CloudFrontManager();
-            url=cm.printUrl(fileName);
+            url=cloudFrontManager.getSignedUrl(fileName);
         } catch (Exception e) {
             System.out.println("TT...");
             e.printStackTrace();
+            throw new AwsAuthorizationException();
         }
         return url;
-//        GeneratePresignedUrlRequest generatePresignedUrlRequest=getGeneratePreSignedUrlRequest(bucket,fileName);
-//        URL url=amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest);
-//        return url.toString();
     }
 
     /**

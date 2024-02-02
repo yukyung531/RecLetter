@@ -44,7 +44,7 @@ public class ClipController {
     @PostMapping()
     public ResponseEntity<Void> createClip(@ModelAttribute CreateClipReq createClipReq, @AuthenticationPrincipal User user) {
 
-        log.debug(createClipReq.getClip().getContentType());
+        log.debug(createClipReq.toString());
 
         Clip clip=Clip.builder()
                 .clipOwner(user.getUserId())
@@ -65,14 +65,15 @@ public class ClipController {
         System.out.println(clipId);
         //편집 단계에 들어갈 때 기존 상세 정보 제공
         Clip clip=clipService.searchMyClip(user.getUserId(), clipId);
-
+        String fileKey=clipService.getFileKey(clip);
         String downloadUrl=cloudFront+clipService.getFileKey(clip);
 
         SearchClipRes searchClipRes=SearchClipRes.builder()
                 .clipId(clip.getClipId())
                 .clipTitle(clip.getClipTitle())
                 .clipContent(clip.getClipContent())
-                .clipDownloadUrl(downloadUrl) //download 링크에 접속하면 웹에서 저장된 파일을 볼 수 있다!
+                .clipDownloadUrl(clipService.createSignedClipUrl(fileKey))
+//                .clipDownloadUrl(downloadUrl) //download 링크에 접속하면 웹에서 저장된 파일을 볼 수 있다!
                 .build();
         return ResponseEntity.ok(searchClipRes);
     }
@@ -118,10 +119,9 @@ public class ClipController {
     public ResponseEntity<Map> getPresignedUrl(@RequestBody String fileName){
         Map<String,Object> res=new HashMap<>();
         res.put("title",fileName);
-        res.put("url",clipService.getPreSignedUrl(fileName));
+        res.put("url",clipService.createSignedClipUrl(fileName));
         return ResponseEntity.ok(res);
     }
-
 
 
     //studioId에 따른 clipInfoList 조회 테스트
