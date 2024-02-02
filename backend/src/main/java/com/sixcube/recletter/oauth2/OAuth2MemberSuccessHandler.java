@@ -14,7 +14,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+
 
 import java.io.IOException;
 import java.net.URI;
@@ -35,7 +38,7 @@ public class OAuth2MemberSuccessHandler extends SimpleUrlAuthenticationSuccessHa
         String userEmail = oAuth2User.getUserEmail();
         System.out.println("이메이이이일=" + userEmail);
 
-        System.out.println("서비스까지 잘 왔니 ? "+userEmail);
+        System.out.println("서비스까지 잘 왔니 ? " + userEmail);
         User user = userRepository.findByUserEmailAndDeletedAtIsNull(userEmail).get();
 
         //accessToken 생성
@@ -47,6 +50,7 @@ public class OAuth2MemberSuccessHandler extends SimpleUrlAuthenticationSuccessHa
         //Redis에 refreshToken 저장
         String key = RedisPrefix.REFRESH_TOKEN.prefix() + user.getUserId();
         redisService.setValues(key, refreshToken);
+
 
         //response에 토큰 담아서 반환
         ObjectMapper objectMapper = new ObjectMapper();
@@ -63,6 +67,9 @@ public class OAuth2MemberSuccessHandler extends SimpleUrlAuthenticationSuccessHa
         String result = objectMapper.writeValueAsString(loginRes);
 
         response.getWriter().write(result);
+
     }
+
+
 }
 

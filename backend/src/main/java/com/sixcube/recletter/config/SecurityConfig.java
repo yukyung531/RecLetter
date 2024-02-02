@@ -3,19 +3,19 @@ package com.sixcube.recletter.config;
 import com.sixcube.recletter.auth.jwt.JWTFilter;
 import com.sixcube.recletter.auth.jwt.JWTUtil;
 import com.sixcube.recletter.auth.jwt.LoginFilter;
-import com.sixcube.recletter.oauth2.CustomAuthenticationEntryPoint;
 import com.sixcube.recletter.oauth2.CustomClientRegistrationRepo;
+import com.sixcube.recletter.oauth2.service.CustomOAuth2AuthorizedClientService;
 import com.sixcube.recletter.oauth2.OAuth2MemberFailureHandler;
 import com.sixcube.recletter.oauth2.OAuth2MemberSuccessHandler;
 import com.sixcube.recletter.oauth2.service.CustomOAuth2UserService;
 import com.sixcube.recletter.redis.RedisService;
 import com.sixcube.recletter.user.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -41,6 +41,8 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomClientRegistrationRepo customClientRegistrationRepo;
     private final AuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomOAuth2AuthorizedClientService customOAuth2AuthorizedClientService;
+    private final JdbcTemplate jdbcTemplate;
 
     //AuthenticationManager Bean 등록
     @Bean
@@ -65,9 +67,10 @@ public class SecurityConfig {
         http
                 .oauth2Login((oauth2) -> oauth2
                         //.loginPage("/login")
-                        .successHandler(new OAuth2MemberSuccessHandler(userRepository,jwtUtil,redisService))
+                        .successHandler(new OAuth2MemberSuccessHandler(userRepository, jwtUtil, redisService))
                         .failureHandler(new OAuth2MemberFailureHandler())
                         .clientRegistrationRepository(customClientRegistrationRepo.clientRegistrationRepository())
+                        .authorizedClientService(customOAuth2AuthorizedClientService.oAuth2AuthorizedClientService(jdbcTemplate, customClientRegistrationRepo.clientRegistrationRepository()))
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig //data를 받을 수 있는 UserDetailsService를 등록해주는 endpoint
                                 .userService(customOAuth2UserService)))
                 .exceptionHandling(exceptionHandling -> exceptionHandling
@@ -92,7 +95,8 @@ public class SecurityConfig {
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        return http.build();
+        SecurityFilterChain chain = http.build();
+        return chain;
     }
 
 
@@ -110,4 +114,6 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
+
 }

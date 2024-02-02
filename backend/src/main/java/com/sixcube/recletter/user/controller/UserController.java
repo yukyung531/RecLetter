@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URISyntaxException;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -50,9 +52,8 @@ public class UserController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal User user) {
-        userService.deleteUser(user);
-        return ResponseEntity.ok().build();
+    public void deleteUser(@AuthenticationPrincipal User user) throws URISyntaxException {
+       userService.deleteUser(user);
     }
 
     @GetMapping
