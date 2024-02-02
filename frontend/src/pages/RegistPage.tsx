@@ -7,18 +7,18 @@ import { useDispatch } from 'react-redux';
 import { studioNameState, studioState } from '../util/counter-slice';
 
 export default function RegistPage() {
-    const [inputId, setInputId] = useState<string>('');
     const [inputEmail, setInputEmail] = useState<string>('');
     const [inputCode, setInputCode] = useState<string>('');
     const [inputPassword, setInputPassword] = useState<string>('');
     const [inputPasswordConfirm, setInputPasswordConfirm] =
         useState<string>('');
     const [inputNickname, setInputNickName] = useState<string>('');
-    const [idCheck, setIdCheck] = useState<boolean>(false);
     const [emailCheck, setEmailCheck] = useState<boolean>(false);
     const [codeCheck, setCodeCheck] = useState<boolean>(false);
     const [emailFlag, setEmailFlag] = useState<number>(0);
     const [codeFlag, setCodeFlag] = useState<boolean>(false);
+    const [count, setCount] = useState<number>(600);
+    const [isCounting, setIsCounting] = useState<boolean>(false);
     const navigate = useNavigate();
 
     const dispatch = useDispatch();
@@ -27,11 +27,20 @@ export default function RegistPage() {
         dispatch(studioNameState(''));
     }, []);
 
-    /** ID 변화 감지 */
-    const changeId = (e: BaseSyntheticEvent) => {
-        setInputId(e.target.value);
-        setIdCheck(false);
-    };
+    useEffect(() => {
+        let intervalId: any;
+
+        if (isCounting) {
+            intervalId = setInterval(() => {
+                setCount((prevCount) => prevCount - 1);
+            }, 1000);
+        }
+
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, [isCounting]);
+
     /** 이메일 변화 감지 */
     const changeEmail = (e: BaseSyntheticEvent) => {
         setInputEmail(e.target.value);
@@ -64,6 +73,7 @@ export default function RegistPage() {
                     console.log('이메일을 보냈습니다.');
                     setEmailFlag(2);
                     setEmailCheck(true);
+                    startCounting();
                 } else {
                     setEmailFlag(4);
                     setEmailCheck(false);
@@ -95,28 +105,34 @@ export default function RegistPage() {
                 console.log('오류가 발생했습니다.' + e);
             });
     };
-    /** ID 컴포넌트 */
-    const checkIdElement = () => {
-        if (idCheck) {
-            return (
-                <div className="flex">
-                    <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4"></p>
-                    <p className="w-128 h-3 color-text-main">
-                        사용 가능합니다.
-                    </p>
-                </div>
-            );
-        } else {
-            return (
-                <div className="flex">
-                    <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4"></p>
-                    <p className="w-128 h-3 color-text-main">
-                        아이디 검증이 필요합니다.
-                    </p>
-                </div>
-            );
+    /** 엔터키 누르면 보내는 이벤트 */
+    const sendRegistEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            registAccount();
         }
     };
+    const sendEmailCodeEnter = (
+        event: React.KeyboardEvent<HTMLInputElement>
+    ) => {
+        if (event.key === 'Enter') {
+            checkEmailAPI();
+        }
+    };
+    const sendCodeEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            checkCodeAPI();
+        }
+    };
+    /** 카운팅 시작 */
+    const startCounting = () => {
+        setCount(600);
+        setIsCounting(true);
+    };
+    /** 카운팅 종료 */
+    const endCounting = () => {
+        setIsCounting(false);
+    };
+
     /** Email 컴포넌트 */
     const checkEmailElement = () => {
         if (emailFlag === 0) {
@@ -146,7 +162,7 @@ export default function RegistPage() {
                     <p className="w-128 h-3 text-green-600">인증되었습니다.</p>
                 </div>
             );
-        } else if (emailFlag === 4) {
+        } else if (emailFlag === 4 || count === 0) {
             return (
                 <div className="flex">
                     <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4"></p>
@@ -185,6 +201,7 @@ export default function RegistPage() {
                                 changeCode(e);
                             }}
                             placeholder="인증코드 입력"
+                            onKeyDown={sendCodeEnter}
                         />
                         <p
                             className="w-32 border-2 rounded-md flex justify-center items-center text-2xl color-border-main color-text-main mx-2"
@@ -200,9 +217,14 @@ export default function RegistPage() {
                 <li className="flex mt-4">
                     <p className="w-32 me-4"></p>
                     <div className="flex w-128">
-                        <p className="w-32 rounded-md flex justify-start items-center color-text-darkgray text-2xl ">
-                            인증코드
-                        </p>
+                        <div>
+                            <p className="w-32 rounded-md flex justify-start items-center color-text-darkgray text-2xl ">
+                                인증코드
+                            </p>
+                            <p>
+                                {Math.floor(count / 60)}분 {count % 60}초
+                            </p>
+                        </div>
                         <input
                             type="text"
                             className="w-94 w-64 h-12 ps-3 text-2xl border rounded-md"
@@ -341,6 +363,7 @@ export default function RegistPage() {
                         <p
                             className="w-32 border-2 rounded-md flex justify-center items-center text-2xl color-border-main color-text-main mx-2 cursor-pointer hover:color-bg-main hover:text-white hover:transition-all"
                             onClick={checkEmailAPI}
+                            onKeyDown={sendEmailCodeEnter}
                         >
                             인증하기
                         </p>
@@ -373,6 +396,7 @@ export default function RegistPage() {
                         onChange={(e) => {
                             changePassword(e);
                         }}
+                        onKeyDown={sendRegistEnter}
                         placeholder="비밀번호 (8~16자 이내)"
                     />
                 </li>
@@ -388,6 +412,7 @@ export default function RegistPage() {
                         onChange={(e) => {
                             changePasswordConfig(e);
                         }}
+                        onKeyDown={sendRegistEnter}
                         placeholder="비밀번호 재확인"
                     />
                 </li>

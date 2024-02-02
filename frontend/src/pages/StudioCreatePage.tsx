@@ -13,6 +13,7 @@ export default function StudioCreatePage() {
     const [studioTitle, setStudioTitle] = useState<string>('');
     const [framelist, setFrameList] = useState<FrameType[]>([]);
     const [frame, setFrame] = useState<number>(1);
+    const [createDate, setCreateDate] = useState<number>(14);
     // const [startDate, setStartDate] = useState<Date | null>(new Date());
     const navigate = useNavigate();
 
@@ -31,16 +32,25 @@ export default function StudioCreatePage() {
     const changeTitle = (e: BaseSyntheticEvent) => {
         setStudioTitle(e.target.value);
     };
-
+    const changeDate = (e: BaseSyntheticEvent) => {
+        setCreateDate(e.target.value);
+    };
     const makeOnClick = () => {
-        moment().format('YYYY-MM-DDTHH:mm:ss');
-        let time = moment().add(13, 'days').format().substring(0, 19);
-        const studioParameter: StudioMake = {
-            studioTitle: studioTitle,
-            expireDate: time,
-            studioFrameId: frame,
-        };
-        loadMakeStudioAPI(studioParameter);
+        if (createDate > 14 || createDate <= 0) {
+            alert('기간을 확인해주세요');
+        } else {
+            moment().format('YYYY-MM-DDTHH:mm:ss');
+            let time = moment()
+                .add(createDate, 'days')
+                .format()
+                .substring(0, 19);
+            const studioParameter: StudioMake = {
+                studioTitle: studioTitle,
+                expireDate: time,
+                studioFrameId: frame,
+            };
+            loadMakeStudioAPI(studioParameter);
+        }
     };
 
     const loadMakeStudioAPI = async (studioParameter: StudioMake) => {
@@ -100,6 +110,8 @@ export default function StudioCreatePage() {
                             type="number"
                             max={14}
                             min={1}
+                            value={createDate}
+                            onChange={changeDate}
                             placeholder="Placeholder"
                         />
                         {/* <p

@@ -9,7 +9,6 @@ export async function getStudio(token: string) {
         headers: { Authorization: `Bearer ${token}` },
     });
 }
-
 /** GET 스튜디오 상세 정보 조회 */
 export async function studioDetail(studioId: string) {
     return await local.get(`/api/studio/${studioId}`);

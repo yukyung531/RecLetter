@@ -3,7 +3,7 @@ import StudioCard from '../components/StudioCard';
 import { useState, useEffect } from 'react';
 import { StudioInfo } from '../types/type';
 import { Link, useNavigate } from 'react-router-dom';
-import { getStudio, studioDetail } from '../api/studio';
+import { deleteStudio, getStudio, studioDetail } from '../api/studio';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     loginState,
@@ -18,7 +18,10 @@ export default function StudioListPage() {
     const [createStudioList, setCreateStudioList] = useState<StudioInfo[]>([]);
     const [attendStudioList, setAttendStudioList] = useState<StudioInfo[]>([]);
     const [finishStudioList, setFinishStudioList] = useState<StudioInfo[]>([]);
+    const [editMode, setEditMode] = useState<boolean>(false);
+    const [deleteList, setDeleteList] = useState<string[]>([]);
 
+    const token = localStorage.getItem('access-token');
     /** 리덕스 설정 */
     const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
     const dispatch = useDispatch();
@@ -26,46 +29,8 @@ export default function StudioListPage() {
 
     useEffect(() => {
         const loginValue = localStorage.getItem('is-login');
-        const token = localStorage.getItem('access-token');
         if (loginValue === 'true' && isLogin) {
             if (token) {
-                /** GET 스튜디오 리스트 가져오기 API */
-                const makeStudioListAPI = async () => {
-                    await getStudio(token)
-                        .then((res) => {
-                            console.log(res);
-                            if (res.status === httpStatusCode.OK) {
-                                setStudioList(res.data.studioInfoList);
-                                setFinishStudioList([]);
-                                setCreateStudioList([]);
-                                setAttendStudioList([]);
-                                const studioDivide = res.data.studioInfoList;
-                                studioDivide.map(
-                                    (studio: StudioInfo, studiokey: number) => {
-                                        if (studio.isCompleted) {
-                                            setFinishStudioList((prev) => [
-                                                ...prev,
-                                                studio,
-                                            ]);
-                                        } else if (studio.isStudioOwner) {
-                                            setCreateStudioList((prev) => [
-                                                ...prev,
-                                                studio,
-                                            ]);
-                                        } else if (!studio.isStudioOwner) {
-                                            setAttendStudioList((prev) => [
-                                                ...prev,
-                                                studio,
-                                            ]);
-                                        }
-                                    }
-                                );
-                            }
-                        })
-                        .catch((e: Error) =>
-                            console.log('방 조회에 오류가 생겼습니다.')
-                        );
-                };
                 dispatch(studioState(''));
                 dispatch(studioNameState(''));
                 makeStudioListAPI();
@@ -78,10 +43,76 @@ export default function StudioListPage() {
     }, [isLogin]);
     /** 리덕스 설정 */
 
+    /** GET 스튜디오 리스트 가져오기 API */
+    const makeStudioListAPI = async () => {
+        if (token)
+            await getStudio(token)
+                .then((res) => {
+                    console.log(res);
+                    if (res.status === httpStatusCode.OK) {
+                        setStudioList(res.data.studioInfoList);
+                        setFinishStudioList([]);
+                        setCreateStudioList([]);
+                        setAttendStudioList([]);
+                        const studioDivide = res.data.studioInfoList;
+                        studioDivide.map(
+                            (studio: StudioInfo, studiokey: number) => {
+                                if (studio.isCompleted) {
+                                    setFinishStudioList((prev) => [
+                                        ...prev,
+                                        studio,
+                                    ]);
+                                } else if (studio.isStudioOwner) {
+                                    setCreateStudioList((prev) => [
+                                        ...prev,
+                                        studio,
+                                    ]);
+                                } else if (!studio.isStudioOwner) {
+                                    setAttendStudioList((prev) => [
+                                        ...prev,
+                                        studio,
+                                    ]);
+                                }
+                            }
+                        );
+                    }
+                })
+                .catch((e: Error) =>
+                    console.log('방 조회에 오류가 생겼습니다.')
+                );
+    };
+
+    /** 스튜디오 삭제인데 스튜디오 다수 삭제가 필요할지도 */
+    const deleteStudioList = async () => {
+        let deleteString = '';
+        deleteList.map((item) => {
+            deleteString = deleteString + item + ',';
+        });
+        deleteString = deleteString.slice(0, -1);
+        await deleteStudio(deleteString).then((res) => {
+            if (res.status === httpStatusCode.OK) {
+                console.log('삭제되었습니다.');
+                makeStudioListAPI();
+            }
+        });
+    };
     /** 카드를 클릭 했을 때 */
-    const onClickSCard = (studioId: number) => {
-        // viewStudioDetailAPI(studioId);
-        navigate(`/studiomain/${studioId}`);
+    const onClickSCard = (studioId: string) => {
+        if (editMode) {
+            let flag = false;
+            deleteList.map((item) => {
+                if (item === studioId) {
+                    flag = true;
+                }
+            });
+            if (!flag) {
+                setDeleteList([...deleteList, studioId]);
+            } else {
+                setDeleteList(deleteList.filter((item) => item !== studioId));
+            }
+        } else {
+            navigate(`/studiomain/${studioId}`);
+        }
     };
 
     /** 방 생성 Element. 3개 이상이면 사라지는 구문 */
@@ -99,6 +130,47 @@ export default function StudioListPage() {
             );
         }
     };
+    /** 편집 Element */
+    const editElement = () => {
+        if (editMode) {
+            return (
+                <div className="flex items-center">
+                    {deleteList.length > 0 && (
+                        <p
+                            className="mx-2 color-text-main cursor-pointer"
+                            onClick={deleteStudioList}
+                        >
+                            삭제
+                        </p>
+                    )}
+                    {deleteList.length === 0 && (
+                        <p className="mx-2 color-text-darkgray cursor-default">
+                            삭제
+                        </p>
+                    )}
+                    <p
+                        className="mx-2 color-text-main cursor-pointer hover:color-text-subbold"
+                        onClick={() => setEditMode(false)}
+                    >
+                        취소
+                    </p>
+                </div>
+            );
+        } else {
+            return (
+                <div className="flex items-center">
+                    <p
+                        className="mx-2 color-text-main cursor-pointer hover:color-text-subbold"
+                        onClick={() => {
+                            setEditMode(true);
+                        }}
+                    >
+                        편집
+                    </p>
+                </div>
+            );
+        }
+    };
 
     //스튜디오 정보 불러오기
 
@@ -110,12 +182,14 @@ export default function StudioListPage() {
                         <p className="text-2xl font-bold">
                             내가 생성한 스튜디오
                         </p>
-                        <div className="flex items-center">
-                            <p className="mx-2 color-text-darkgray">편집</p>
-                            <p className="mx-2 color-text-main">취소</p>
-                        </div>
+                        {editElement()}
                     </div>
-                    <div className="w-full h-1 color-bg-main my-2" />
+                    {!editMode && (
+                        <div className="w-full h-1 color-bg-gray my-2" />
+                    )}
+                    {editMode && (
+                        <div className="w-full h-1 color-bg-main my-2 " />
+                    )}
                     <div className="flex my-4 flex-wrap">
                         {createElement()}
                         {createStudioList.map((studio) => {
@@ -123,6 +197,7 @@ export default function StudioListPage() {
                                 <StudioCard
                                     key={studio.studioId}
                                     props={studio}
+                                    editMode={editMode}
                                     onClick={() =>
                                         onClickSCard(studio.studioId)
                                     }
@@ -142,6 +217,7 @@ export default function StudioListPage() {
                                 <StudioCard
                                     key={studio.studioId}
                                     props={studio}
+                                    editMode={1 ? null : null}
                                     onClick={() =>
                                         onClickSCard(studio.studioId)
                                     }

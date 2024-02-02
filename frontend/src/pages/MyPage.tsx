@@ -73,10 +73,7 @@ export default function MyPage() {
     const changeNickname = (e: BaseSyntheticEvent) => {
         setUserNickname(e.target.value);
     };
-    /** 이메일 변환 감지 */
-    const changeEmail = (e: BaseSyntheticEvent) => {
-        setUserEmail(e.target.value);
-    };
+
     /** 전 비밀번호 변환 감지 */
     const changeOldPassword = (e: BaseSyntheticEvent) => {
         setOldPassword(e.target.value);
@@ -95,14 +92,14 @@ export default function MyPage() {
     const saveUser = () => {
         if (userNickname.length < 2 || userNickname.length > 16) {
             alert('닉네임은 2~16자 사이로 사용 가능합니다');
-        } else if (newPassword.length < 8 || newPassword.length > 16) {
-            alert('비밀번호는 8~16자 사이로 사용 가능합니다');
         } else saveUserAPI();
     };
     /** 비밀번호 변경 함수 */
     const modifyPassword = () => {
         if (newPassword !== newPasswordConfirm) {
             alert('새 비밀번호를 확인해주세요');
+        } else if (newPassword.length < 8 || newPassword.length > 16) {
+            alert('비밀번호는 8~16자 사이로 사용 가능합니다.');
         } else {
             modifyPass({
                 originalPassword: oldPassword,
@@ -140,12 +137,9 @@ export default function MyPage() {
                             <p className="w-16 text-xl color-text-darkgray me-4 text-end">
                                 이메일
                             </p>
-                            <input
-                                className="w-105 py-2 px-3 border-2 rounded text-xl"
-                                type="text"
-                                disabled
-                                value={userEmail}
-                            />
+                            <p className="w-105 py-2 px-3 border-2 rounded text-xl color-bg-gray">
+                                {userEmail}
+                            </p>
                         </div>
                         <div className="flex h-12 my-5 items-center justify-center">
                             <p className="w-16 text-xl color-text-darkgray me-4 text-end">
@@ -155,8 +149,8 @@ export default function MyPage() {
                                 className="w-105 py-2 px-3 border-2 rounded text-xl"
                                 type="text"
                                 value={userNickname}
-                                placeholder="이메일입니다."
-                                disabled
+                                onChange={changeNickname}
+                                placeholder="이름입니다."
                             />
                         </div>
                     </div>

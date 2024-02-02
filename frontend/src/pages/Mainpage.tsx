@@ -30,7 +30,7 @@ export default function Mainpage() {
     /** 리덕스 설정 */
 
     return (
-        <div className="relative color-bg-yellow1 z-10">
+        <div className="relative base-height color-bg-subbold z-10">
             <div className="color-bg-black h-20 absolute top-0 w-full z-30 flex justify-around items-center text-white">
                 <p>monofilm</p>
                 <p>monofilm</p>
@@ -47,7 +47,7 @@ export default function Mainpage() {
                         영상으로 전하는 우리의 마음, 레크레터
                     </p>
                     <img
-                        className=" object-cover"
+                        className="w-96 object-cover"
                         src="/src/assets/images/logo.png"
                         alt=""
                     />

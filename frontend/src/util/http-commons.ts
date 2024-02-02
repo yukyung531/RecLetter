@@ -2,12 +2,18 @@ import axios, { AxiosInstance } from 'axios';
 import { httpStatusCode } from './http-status';
 import { tokenType } from '../types/type';
 import { token } from '../api/auth';
+import { deleteStorageData } from './initialLocalStorage';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginState } from './counter-slice';
+import { redirect, useNavigate } from 'react-router-dom';
 
 // VITE_REACT_API_URL 의 위치 : .env
 
 const VITE_REACT_API_URL = import.meta.env.VITE_REACT_API_URL;
 // api axios 환경
 export default function localAxios() {
+    let refreshCount = 0;
+
     const instance = axios.create({
         baseURL: VITE_REACT_API_URL,
         headers: {
@@ -44,37 +50,95 @@ export default function localAxios() {
 
     let isTokenRefreshing = false;
     // Reponse 시 설정한 내용을 적용.
+
     instance.interceptors.response.use(
         (response) => {
             return response;
         },
         async (error) => {
-            const {
-                config,
-                response: { status },
-            } = error;
-            // 페이지가 새로고침되어 저장된 accessToken이 없어진 경우.
-            // 토큰 자체가 만료되어 더 이상 진행할 수 없는 경우.
-            if (
-                status === httpStatusCode.UNAUTHORIZED ||
-                status == httpStatusCode.FORBIDDEN
-            ) {
-                // 요청 상태 저장
-                console.log('토큰이 없어 재생성합니다.');
-                const originalRequest = config;
+            if (error.response) {
+                const {
+                    config,
+                    response: { status },
+                } = error;
+                // 페이지가 새로고침되어 저장된 accessToken이 없어진 경우.
+                // 토큰 자체가 만료되어 더 이상 진행할 수 없는 경우.
+                if (
+                    localStorage.getItem('is-login') === 'true' &&
+                    (status === httpStatusCode.UNAUTHORIZED ||
+                        status == httpStatusCode.FORBIDDEN)
+                ) {
+                    // 요청 상태 저장
+                    console.log('토큰이 없어 재생성합니다.');
+                    const originalRequest = config;
 
-                // Token을 재발급하는 동안 다른 요청이 발생하는 경우 대기.
-                // 다른 요청을 진행하면, 새로 발급 받은 Token이 유효하지 않게 됨.
-                if (!isTokenRefreshing) {
-                    isTokenRefreshing = true;
-                    // 에러가 발생했던 컴포넌트의 axios로 이동하고자하는 경우
-                    // 반드시 return을 붙여주어야한다.
+                    // Token을 재발급하는 동안 다른 요청이 발생하는 경우 대기.
+                    // 다른 요청을 진행하면, 새로 발급 받은 Token이 유효하지 않게 됨.
+                    if (!isTokenRefreshing) {
+                        isTokenRefreshing = true;
+                        // 에러가 발생했던 컴포넌트의 axios로 이동하고자하는 경우
+                        // 반드시 return을 붙여주어야한다.
+                        const oldToken: tokenType = {
+                            refreshToken: localStorage.getItem('refresh-token'),
+                        };
+                        if (oldToken.refreshToken === null) {
+                            console.log(
+                                'refreshToken이 없어 localhost 지우기 작동'
+                            );
+                            deleteStorageData();
+                            const dispatch = useDispatch();
+                            dispatch(loginState(false));
+                            const navigator = useNavigate();
+                            navigator('/');
+                            return;
+                        }
+                        instance.defaults.headers.common['Authorization'] =
+                            oldToken.refreshToken;
+                        return await token(oldToken)
+                            .then((res) => {
+                                // refresh token이 비어있으면 localhost 다 비우기
+
+                                console.log('토큰생성!');
+                                const newAccessToken = res.data.accessToken;
+                                instance.defaults.headers.common[
+                                    'Authorization'
+                                ] = 'Bearer ' + newAccessToken;
+                                originalRequest.headers.Authorization =
+                                    'Bearer ' + newAccessToken;
+                                localStorage.setItem(
+                                    'access-token',
+                                    newAccessToken
+                                );
+                                localStorage.setItem(
+                                    'refresh-token',
+                                    res.data.refreshToken
+                                );
+                                isTokenRefreshing = false;
+                                // 에러가 발생했던 원래의 요청을 다시 진행.
+                                return instance(originalRequest);
+                            })
+                            .catch((e) => {
+                                console.log(e);
+                            });
+                    }
+                } else if (status == httpStatusCode.FORBIDDEN) {
+                    console.log('포비든오류');
+                } else {
+                    console.log('오류떠쎠');
+                }
+            } else {
+                console.log('아마도 토큰 오류...');
+                refreshCount += 1;
+                if (refreshCount == 4) {
+                    alert('연결이 끊겼습니다. 다시 로그인해주세요.');
+                    refreshCount = 0;
+                    return;
+                } else {
+                    const { config } = error;
+                    const originalRequest = config;
                     const oldToken: tokenType = {
                         refreshToken: localStorage.getItem('refresh-token'),
                     };
-                    console.log(oldToken.refreshToken);
-                    instance.defaults.headers.common['Authorization'] =
-                        oldToken.refreshToken;
                     return await token(oldToken)
                         .then((res) => {
                             console.log('토큰생성!');
@@ -99,19 +163,8 @@ export default function localAxios() {
                             console.log(e);
                         });
                 }
-            } else if (status == httpStatusCode.FORBIDDEN) {
-                console.log('포비든오류');
-                // const originalRequest = config;
-                // if (localStorage.getItem('access-token')) {
-                //     instance.defaults.headers.common['Authorization'] =
-                //         'Bearer ' + localStorage.getItem('access-token');
-                // }
-                // return instance(originalRequest);
-            } else {
-                console.log('오류떠쎠');
+                return Promise.reject(error);
             }
-
-            return Promise.reject(error);
         }
     );
     return instance;

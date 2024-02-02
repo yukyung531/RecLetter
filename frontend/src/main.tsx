@@ -21,13 +21,15 @@ import FindResultPage from './pages/FindResultPage.tsx';
 import MyPage from './pages/MyPage.tsx';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
-import store from './util/store.ts';
+import { store, persistor } from './util/store.ts';
 import ChattingBox from './components/ChattingBox.tsx';
+import { PersistGate } from 'redux-persist/integration/react';
 
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-        <Provider store={store}>
+    <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
             <QueryClientProvider client={queryClient}>
                 <BrowserRouter>
                     <Header />
@@ -78,5 +80,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                     <ChattingBox />
                 </BrowserRouter>
             </QueryClientProvider>
-        </Provider>
+        </PersistGate>
+    </Provider>
 );
