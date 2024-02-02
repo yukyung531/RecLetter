@@ -16,10 +16,17 @@ import axios from 'axios';
 import AddMemberWindow from '../components/AddMemberWindow';
 import ParticipantAlertWindow from '../components/ParticipantAlertWindow';
 import OpenViduVideoCard from '../components/OpenViduVideoCard';
-// import { useNavigate } from 'react-router-dom';
+import {
+    connectSessionAPI,
+    createSessionAPI,
+    endSessionAPI,
+    isSessionExist,
+    isSessionExistAPI,
+} from '../api/openvidu';
+import { useNavigate } from 'react-router-dom';
 
 export default function LetterMakePage() {
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
 
     //mode - 0:영상리스트, 1:프레임, 2:텍스트, 3:오디오
     const [mode, setMode] = useState<number>(0);
@@ -74,6 +81,7 @@ export default function LetterMakePage() {
 
     //유저 정보
     const [userInfo, setUserInfo] = useState<UserInfo>({
+        userId: '',
         userEmail: '',
         userNickname: '',
     });
@@ -112,6 +120,7 @@ export default function LetterMakePage() {
                 .catch((err) => {
                     console.log(err);
                 });
+            startScreenShare();
         };
         initSetting();
 
@@ -120,6 +129,7 @@ export default function LetterMakePage() {
             const resuser = await getUser();
             const tempObj = { ...resuser.data };
             setUserInfo({
+                userId: tempObj.userId,
                 userEmail: tempObj.userEmail,
                 userNickname: tempObj.userNickname,
             });
@@ -232,7 +242,7 @@ export default function LetterMakePage() {
 
     const OV = useRef(new OpenVidu());
 
-    const APPLICATION_SERVER_URL = 'https://demos.openvidu.io/';
+    // const APPLICATION_SERVER_URL = 'https://demos.openvidu.io/';
 
     /** deleteSubscriber(deletedsub)
      * 연결이 끊긴 구독자를 삭제한다.
@@ -265,7 +275,7 @@ export default function LetterMakePage() {
         //화면 공유 종료 시
         newSession.on('streamDestroyed', (event) => {
             console.log(event);
-            // deleteSubscriber(event.streamManager);
+            deleteSubscriber(event.streamManager);
         });
 
         //에러 발생 시
@@ -276,10 +286,9 @@ export default function LetterMakePage() {
         // 세션 연결
         const token = await getToken(studioId); //토큰 받아오기
 
-        console.log(userInfo.userNickname);
         // 세션 연결 시작
         newSession
-            .connect(token, { clientData: userInfo.userNickname })
+            .connect(token, { clientData: userInfo.userId })
             .then(async () => {
                 console.log('Connected');
                 //publisher 초기화(videoSource = screen)
@@ -317,39 +326,42 @@ export default function LetterMakePage() {
     }, []);
 
     const endScreenShare = useCallback(() => {
-        //세션이 있으면 연결을 멈춘다.
-        if (session) {
-            session.disconnect();
-        }
-
         //OV 초기화
         OV.current = new OpenVidu();
         setSession(undefined);
         setSubscribers([]);
         setMainStreamManager(undefined);
         setPublisher(undefined);
-    }, [session]);
+
+        //세션 삭제
+        endSessionAPI(studioId);
+
+        navigate(`/studiomain/${studioId}`);
+    }, [session, studioId]);
 
     /** getToken()
      * 세션을 생성하고 접속을 위한 토큰을 가져옵니다.
      */
     const getToken = async (studioId: string) => {
+        //우선은 세션 활성화 여부 조회
+        const isExistSession = await isSessionExistAPI(studioId);
+
+        //이미 있는 세션이면 navigate
+        if (isExistSession.data) {
+            navigate(`/letterview/${studioId}`);
+        }
+
         //studioId가 세션 id가 된다.
         const sessionId = await createSession(studioId);
-
+        //세션 아이디로 토큰을 만든다.
         return await createToken(sessionId);
     };
 
-    /**createSession(sessionId), 세션을 생성한다 */
-    const createSession = async (sessionId: string) => {
-        const response = await axios.post(
-            APPLICATION_SERVER_URL + 'api/sessions',
-            { customSessionId: sessionId },
-            {
-                headers: { 'Content-Type': 'application/json' },
-            }
-        );
-        return response.data; // The sessionId
+    /**createSession(sessionId), 세션 정보를 받아오거나 생성한다. */
+    const createSession = async (studioId: string) => {
+        const response = await createSessionAPI(studioId);
+        console.log('session -', response);
+        return response.data.sessionId; // The session
     };
 
     /** createToken(sessionId)
@@ -358,17 +370,8 @@ export default function LetterMakePage() {
      * @returns
      */
     const createToken = async (sessionId: string) => {
-        const response = await axios.post(
-            APPLICATION_SERVER_URL +
-                'api/sessions/' +
-                sessionId +
-                '/connections',
-            {},
-            {
-                headers: { 'Content-Type': 'application/json' },
-            }
-        );
-        return response.data; // The token
+        const response = await connectSessionAPI(sessionId);
+        return response.data.token; // The token
     };
 
     //윈도우창 강제 종료 시 처리
@@ -415,15 +418,9 @@ export default function LetterMakePage() {
                 {/* 테스트용 화상 공유 버튼 */}
                 <button
                     className="btn-cover color-bg-blue3 text-white"
-                    onClick={startScreenShare}
-                >
-                    화상 공유 하기
-                </button>
-                <button
-                    className="btn-cover color-bg-blue3 text-white"
                     onClick={endScreenShare}
                 >
-                    화상공유종료하기
+                    편집 종료, 홈페이지로
                 </button>
                 <a
                     href="/studiomain"
