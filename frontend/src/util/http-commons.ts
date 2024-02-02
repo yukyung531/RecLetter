@@ -5,15 +5,14 @@ import { token } from '../api/auth';
 import { deleteStorageData } from './initialLocalStorage';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginState } from './counter-slice';
-import { redirect, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 // VITE_REACT_API_URL 의 위치 : .env
 
 const VITE_REACT_API_URL = import.meta.env.VITE_REACT_API_URL;
 // api axios 환경
 export default function localAxios() {
-    let refreshCount = 0;
-
+    let count = 0;
     const instance = axios.create({
         baseURL: VITE_REACT_API_URL,
         headers: {
@@ -115,7 +114,12 @@ export default function localAxios() {
                                 );
                                 isTokenRefreshing = false;
                                 // 에러가 발생했던 원래의 요청을 다시 진행.
-                                return instance(originalRequest);
+                                count++;
+                                if (count < 3) {
+                                    return instance(originalRequest);
+                                } else {
+                                    alert('오류가 발생하였습니다.');
+                                }
                             })
                             .catch((e) => {
                                 console.log(e);
@@ -128,43 +132,33 @@ export default function localAxios() {
                 }
             } else {
                 console.log('아마도 토큰 오류...');
-                refreshCount += 1;
-                if (refreshCount == 4) {
-                    alert('연결이 끊겼습니다. 다시 로그인해주세요.');
-                    refreshCount = 0;
-                    return;
-                } else {
-                    const { config } = error;
-                    const originalRequest = config;
-                    const oldToken: tokenType = {
-                        refreshToken: localStorage.getItem('refresh-token'),
-                    };
-                    return await token(oldToken)
-                        .then((res) => {
-                            console.log('토큰생성!');
-                            const newAccessToken = res.data.accessToken;
-                            instance.defaults.headers.common['Authorization'] =
-                                'Bearer ' + newAccessToken;
-                            originalRequest.headers.Authorization =
-                                'Bearer ' + newAccessToken;
-                            localStorage.setItem(
-                                'access-token',
-                                newAccessToken
-                            );
-                            localStorage.setItem(
-                                'refresh-token',
-                                res.data.refreshToken
-                            );
-                            isTokenRefreshing = false;
-                            // 에러가 발생했던 원래의 요청을 다시 진행.
-                            return instance(originalRequest);
-                        })
-                        .catch((e) => {
-                            console.log(e);
-                        });
-                }
-                return Promise.reject(error);
+                const { config } = error;
+                const originalRequest = config;
+                const oldToken: tokenType = {
+                    refreshToken: localStorage.getItem('refresh-token'),
+                };
+                return await token(oldToken)
+                    .then((res) => {
+                        console.log('토큰생성!');
+                        const newAccessToken = res.data.accessToken;
+                        instance.defaults.headers.common['Authorization'] =
+                            'Bearer ' + newAccessToken;
+                        originalRequest.headers.Authorization =
+                            'Bearer ' + newAccessToken;
+                        localStorage.setItem('access-token', newAccessToken);
+                        localStorage.setItem(
+                            'refresh-token',
+                            res.data.refreshToken
+                        );
+                        isTokenRefreshing = false;
+                        // 에러가 발생했던 원래의 요청을 다시 진행.
+                        return instance(originalRequest);
+                    })
+                    .catch((e) => {
+                        console.log(e);
+                    });
             }
+            return Promise.reject(error);
         }
     );
     return instance;

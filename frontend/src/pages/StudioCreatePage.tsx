@@ -41,7 +41,7 @@ export default function StudioCreatePage() {
         } else {
             moment().format('YYYY-MM-DDTHH:mm:ss');
             let time = moment()
-                .add(createDate, 'days')
+                .add(createDate - 1, 'days')
                 .format()
                 .substring(0, 19);
             const studioParameter: StudioMake = {
