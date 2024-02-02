@@ -1,29 +1,38 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import {
+    useEffect,
+    useState,
+    useRef,
+    useCallback,
+    BaseSyntheticEvent,
+} from 'react';
 import {
     FrameType,
     Letter,
     StudioDetail,
     fontTemplate,
     UserInfo,
+    ClipInfo,
+    BGMTemplate,
 } from '../types/type';
-import { getTemplate, getFont } from '../api/template';
+import { getTemplate, getFont, getBgm } from '../api/template';
 import { httpStatusCode } from '../util/http-status';
 import { OpenVidu, Publisher, Session, Subscriber } from 'openvidu-browser';
 // import { connectSession, createSession, endSession } from '../api/openvidu';
 import { getUser } from '../api/user';
 // import { connect } from '../util/chat';
-import axios from 'axios';
-import AddMemberWindow from '../components/AddMemberWindow';
 import ParticipantAlertWindow from '../components/ParticipantAlertWindow';
 import OpenViduVideoCard from '../components/OpenViduVideoCard';
 import {
     connectSessionAPI,
     createSessionAPI,
     endSessionAPI,
-    isSessionExist,
     isSessionExistAPI,
 } from '../api/openvidu';
 import { useNavigate } from 'react-router-dom';
+import { getStudio, studioDetail } from '../api/studio';
+import VideoCard from '../components/VideoCard';
+import SelectedVideoCard from '../components/SelectedVideoCard';
+import BGMCard from '../components/BGMCard';
 
 export default function LetterMakePage() {
     const navigate = useNavigate();
@@ -34,16 +43,24 @@ export default function LetterMakePage() {
     ///////////////////////////////////////////////초기 설정////////////////////////////////////////////////////////
 
     // //영상리스트 with 스튜디오 정보
-    // const [studioDetailInfo, setStudioDetailInfo] = useState<StudioDetail>({
-    //     studioId: '',
-    //     studioTitle: '',
-    //     studioOwner: '',
-    //     isCompleted: false,
-    //     clipInfoList: [],
-    //     studioFrameId: -1,
-    //     studioFontId: -1,
-    //     studioBGMId: -1,
-    // });
+    const [studioDetailInfo, setStudioDetailInfo] = useState<StudioDetail>({
+        studioId: '',
+        studioTitle: '',
+        studioOwner: '',
+        isCompleted: false,
+        clipInfoList: [],
+        studioFrameId: -1,
+        studioFontId: -1,
+        studioBGMId: -1,
+    });
+
+    //나중 결과물 산출용 상태 관리
+
+    //사용 영상, 사용하지 않은 영상
+    const [usedClipList, setUsedClipList] = useState<ClipInfo[]>([]);
+    const [notUsedClipList, setNotUsedClipList] = useState<ClipInfo[]>([]);
+    //선택된 정보들
+    const [selectedBGM, setSelectedBGM] = useState<number>(1);
 
     // // 수정 정보
     // const [studioModify, setStudioModify] = useState<Letter>({
@@ -72,7 +89,7 @@ export default function LetterMakePage() {
     const [fontList, setFontList] = useState<fontTemplate[]>([]);
 
     //BGM 리스트
-    // const [bgmList, setBGMList] = useState([]); //추후 구현
+    const [bgmList, setBGMList] = useState<BGMTemplate[]>([]); //추후 구현
 
     // 선택한 프레임
     const [selectImgUrl, setSelectImgUrl] = useState<string>(
@@ -96,22 +113,36 @@ export default function LetterMakePage() {
          * 초기 설정
          */
         const initSetting = async () => {
-            getFont()
+            //스튜디오 상세 정보 받아오기
+            studioDetail(studioId)
                 .then((res) => {
                     if (res.status === httpStatusCode.OK) {
-                        console.log(res.data);
-                        setFontList([...res.data.fontTemplate]);
+                        //저장
+                        setStudioDetailInfo({ ...res.data });
+                        //사용 영상, 사용하지 않은 영상 리스트 출력
+                        const clipList = res.data.clipInfoList;
+                        const initialUsedVideo = [];
+                        const nonInitialUsedVideo = [];
+                        for (let i = 0; i < clipList.length; i++) {
+                            if (clipList[i].clipOrder === -1) {
+                                nonInitialUsedVideo.push(clipList[i]);
+                            } else {
+                                initialUsedVideo.push(clipList[i]);
+                            }
+                        }
+                        setUsedClipList(initialUsedVideo);
+                        setNotUsedClipList(nonInitialUsedVideo);
                     } else {
-                        console.log('Network Error!');
+                        console.log('Network Error');
                     }
                 })
                 .catch((err) => {
                     console.log(err);
                 });
+            //프레임 리스트 받아오기
             getTemplate()
                 .then((res) => {
                     if (res.status === httpStatusCode.OK) {
-                        console.log(res.data);
                         setFrameList([...res.data.frameTemplate]);
                     } else {
                         console.log('Network Error');
@@ -120,7 +151,35 @@ export default function LetterMakePage() {
                 .catch((err) => {
                     console.log(err);
                 });
-            startScreenShare();
+            //폰트 리스트 받아오기
+            getFont()
+                .then((res) => {
+                    if (res.status === httpStatusCode.OK) {
+                        setFontList([...res.data.fontTemplate]);
+                    } else {
+                        console.log('Network Error!');
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+
+            //bgm 리스트 받아오기
+            getBgm()
+                .then((res) => {
+                    if (res.status === httpStatusCode.OK) {
+                        setBGMList([...res.data.bgmTemplate]);
+                    } else {
+                        console.log('Network Error');
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+
+            // openvidu 화면 공유 시작
+            //현재 주석 처리. 주석 풀것!!! (주석해제위치)
+            // startScreenShare();
         };
         initSetting();
 
@@ -137,14 +196,81 @@ export default function LetterMakePage() {
         getUserInfo();
     }, []);
 
+    ////////////////////////////////////////영상 순서 결정////////////////////////////////////////////////////////////
+    const selectVideo = (clipId: number) => {
+        //클립 제거
+        const newNotSelected = notUsedClipList.filter(
+            (clip) => clip.clipId !== clipId
+        );
+        //clip 탐색 후 사용 클립에 추가
+        let selectedClip: ClipInfo = studioDetailInfo.clipInfoList[0];
+        for (let i = 0; i < notUsedClipList.length; i++) {
+            if (notUsedClipList[i].clipId === clipId) {
+                selectedClip = notUsedClipList[i];
+                break;
+            }
+        }
+        const newSelected = [...usedClipList, selectedClip];
+
+        //결과 반영
+        setNotUsedClipList(newNotSelected);
+        setUsedClipList(newSelected);
+    };
+
+    //클립 선택 취소
+    const unselectClip = (clipId: number) => {
+        //클립 제거
+        const newSelected = usedClipList.filter(
+            (clip) => clip.clipId !== clipId
+        );
+        //clip 탐색 후 미사용 클립에 추가
+        let notSelectedClip: ClipInfo = studioDetailInfo.clipInfoList[0];
+        for (let i = 0; i < usedClipList.length; i++) {
+            if (usedClipList[i].clipId === clipId) {
+                notSelectedClip = usedClipList[i];
+                break;
+            }
+        }
+        const newNotSelected = [...notUsedClipList, notSelectedClip];
+
+        //결과 반영
+        setNotUsedClipList(newNotSelected);
+        setUsedClipList(newSelected);
+    };
+
+    //클립 볼륨 조절
+    const changeVolume = (clipId: number, event: BaseSyntheticEvent) => {
+        for (let i = 0; i < usedClipList.length; i++) {
+            if (usedClipList[i].clipId === clipId) {
+                usedClipList[i].clipVolume = event.target.value;
+                break;
+            }
+        }
+    };
+
+    ////////////////////////////////////////BGM 결정////////////////////////////////////////////////////////////////
+    const selectBGM = (bgmId: number) => {
+        setSelectedBGM(bgmId);
+    };
+
     /////////////////////////////////////mode에 따른 사이드바 추가////////////////////////////////////////////////////
     let sideBar = <></>;
 
     switch (mode) {
         case 0:
             sideBar = (
-                <div className="w-full flex justify-start text-xl ">
+                <div className="w-full flex flex-col justify-start text-xl ">
                     <p>선택하지 않은 영상</p>
+                    {notUsedClipList.map((clip) => {
+                        return (
+                            <VideoCard
+                                key={clip.clipId}
+                                props={clip}
+                                presentUser={userInfo.userId}
+                                selectVideo={() => selectVideo(clip.clipId)}
+                            />
+                        );
+                    })}
                 </div>
             );
             break;
@@ -223,8 +349,17 @@ export default function LetterMakePage() {
             break;
         case 3:
             sideBar = (
-                <div className="w-full flex justify-start text-xl ">
+                <div className="w-full flex flex-col justify-start text-xl ">
                     <p>BGM</p>
+                    {bgmList.map((bgm) => {
+                        return (
+                            <BGMCard
+                                key={bgm.bgmId}
+                                bgm={bgm}
+                                selectBGM={() => selectBGM(bgm.bgmId)}
+                            />
+                        );
+                    })}
                 </div>
             );
             break;
@@ -520,141 +655,20 @@ export default function LetterMakePage() {
                                 </span>
                             </div>
                             <div className="w-11/12 flex items-center overflow-x-scroll">
-                                <div className="w-28 flex flex-col justify-center mx-2">
-                                    <img
-                                        className="w-28"
-                                        src="/src/assets/images/nothumb.png"
-                                        alt=""
-                                    />
-                                    <p>선재</p>
-                                    <input
-                                        className="w-28"
-                                        type="range"
-                                        min={1}
-                                        max={100}
-                                        defaultValue={50}
-                                    />
-                                </div>
-                                <div className="w-28 flex flex-col justify-center mx-2">
-                                    <img
-                                        className="w-28"
-                                        src="/src/assets/images/nothumb.png"
-                                        alt=""
-                                    />
-                                    <p>선재</p>
-                                    <input
-                                        className="w-28"
-                                        type="range"
-                                        min={1}
-                                        max={100}
-                                        defaultValue={50}
-                                    />
-                                </div>
-                                <div className="w-28 flex flex-col justify-center mx-2">
-                                    <img
-                                        className="w-28"
-                                        src="/src/assets/images/nothumb.png"
-                                        alt=""
-                                    />
-                                    <p>선재</p>
-                                    <input
-                                        className="w-28"
-                                        type="range"
-                                        min={1}
-                                        max={100}
-                                        defaultValue={50}
-                                    />
-                                </div>
-                                <div className="w-28 flex flex-col justify-center mx-2">
-                                    <img
-                                        className="w-28"
-                                        src="/src/assets/images/nothumb.png"
-                                        alt=""
-                                    />
-                                    <p>선재</p>
-                                    <input
-                                        className="w-28"
-                                        type="range"
-                                        min={1}
-                                        max={100}
-                                        defaultValue={50}
-                                    />
-                                </div>
-                                <div className="w-28 flex flex-col justify-center mx-2">
-                                    <img
-                                        className="w-28"
-                                        src="/src/assets/images/nothumb.png"
-                                        alt=""
-                                    />
-                                    <p>선재</p>
-                                    <input
-                                        className="w-28"
-                                        type="range"
-                                        min={1}
-                                        max={100}
-                                        defaultValue={50}
-                                    />
-                                </div>
-                                <div className="w-28 flex flex-col justify-center mx-2">
-                                    <img
-                                        className="w-28"
-                                        src="/src/assets/images/nothumb.png"
-                                        alt=""
-                                    />
-                                    <p>선재</p>
-                                    <input
-                                        className="w-28"
-                                        type="range"
-                                        min={1}
-                                        max={100}
-                                        defaultValue={50}
-                                    />
-                                </div>
-                                <div className="w-28 flex flex-col justify-center mx-2">
-                                    <img
-                                        className="w-28"
-                                        src="/src/assets/images/nothumb.png"
-                                        alt=""
-                                    />
-                                    <p>선재</p>
-                                    <input
-                                        className="w-28"
-                                        type="range"
-                                        min={1}
-                                        max={100}
-                                        defaultValue={50}
-                                    />
-                                </div>
-                                <div className="w-28 flex flex-col justify-center mx-2">
-                                    <img
-                                        className="w-28"
-                                        src="/src/assets/images/nothumb.png"
-                                        alt=""
-                                    />
-                                    <p>선재</p>
-                                    <input
-                                        className="w-28"
-                                        type="range"
-                                        min={1}
-                                        max={100}
-                                        defaultValue={50}
-                                    />
-                                </div>
-                                <div className="w-28 flex flex-col justify-center mx-2">
-                                    <img
-                                        className="w-28"
-                                        src="/src/assets/images/nothumb.png"
-                                        alt=""
-                                    />
-                                    <p>선재</p>
-                                    <input
-                                        className="w-28"
-                                        type="range"
-                                        min={1}
-                                        max={100}
-                                        defaultValue={50}
-                                    />
-                                </div>
+                                {usedClipList.map((clip) => {
+                                    return (
+                                        <SelectedVideoCard
+                                            key={clip.clipId}
+                                            clip={clip}
+                                            unselectClip={() =>
+                                                unselectClip(clip.clipId)
+                                            }
+                                            changeVolume={(event) =>
+                                                changeVolume(clip.clipId, event)
+                                            }
+                                        />
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
