@@ -4,21 +4,19 @@ services:
   RecLetterRedis:
     image: redis:7.2.3
     container_name: RecLetterRedis
-    network_mode: host
-    ports:
-      - "6379:6379"
     volumes:
       - redis-data:/data
+    networks:
+      - RecLetterNetwork
 
   RecLetterMariaDB:
     image: mariadb:10.4
     container_name: RecLetterMariaDB
-    network_mode: host
-    ports:
-      - "3306:3306"
     volumes:
       - mariadb-data:/lib/var/mysql
       - ./initdb.d:/docker-entrypoint-initdb.d
+    networks:
+      - RecLetterNetwork
     environment:
       MARIADB_DATABASE: ${DB_NAME}
       MARIADB_USER: ${USER_NAME}
@@ -30,3 +28,7 @@ services:
 volumes:
   redis-data:
   mariadb-data:
+
+networks:
+  RecLetterNetwork:
+    external: true

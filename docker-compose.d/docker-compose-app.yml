@@ -1,13 +1,25 @@
-version: '3'
+version: '3.1'
 
 services:
+  # --------------------------------------------------------------
+  #
+  #    Change this if your want use your own application.
+  #    It's very important expose your application in port 5442
+  #    and use the http protocol.
+  #
+  #    Default Application
+  #
+  #    Openvidu-Call Version: 2.29.0
+  #
+  # --------------------------------------------------------------
   RecLetterBackend:
     image: ssuyas/recletter_backend
     container_name: RecLetterBackend
     restart: unless-stopped
-    network_mode: host
-    ports:
-      - "8081:8080"
+    networks:
+      - RecLetterNetwork
+    volumes:
+      - ./private_cloudfront_key.pem:./private_cloudfront_key.pem
     environment:
       DB_URL: ${DB_URL}
       USER_NAME: ${USER_NAME}
@@ -16,14 +28,28 @@ services:
       MAIL_SECRET: ${MAIL_SECRET}
       AWS_ACCESS: ${AWS_ACCESS}
       AWS_SECRET: ${AWS_SECRET}
+      AWS_REGION: ${AWS_REGION}
+      AWS_BUCKET: ${AWS_BUCKET}
+      AWS_FRONT: ${AWS_FRONT}
+      AWS_CLOUDFRONT_DOMAIN: ${AWS_CLOUDFRONT_DOMAIN}
+      AWS_CLOUDFRONT_KEY: ${AWS_CLOUDFRONT_KEY}
+      AWS_CLOUDFRONT_KEY_ID: ${AWS_CLOUDFRONT_KEY_ID}
+      JWT_KEY: ${JWT_KEY}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       OPENVIDU_URL: ${OPENVIDU_URL}
       OPENVIDU_SECRET: ${OPENVIDU_SECRET}
     env_file:
       - .env
 
-  RecLetterFrontend:
+  app:
     image: ssuyas/recletter_frontend
     container_name: RecLetterFrontend
     network_mode: host
     depends_on:
       - RecLetterBackend
+networks:
+  RecLetterNetwork:
+    external: true
