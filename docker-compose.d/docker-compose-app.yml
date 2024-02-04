@@ -19,7 +19,7 @@ services:
     networks:
       - RecLetterNetwork
     volumes:
-      - ./private_cloudfront_key.pem:./private_cloudfront_key.pem
+      - ./private_cloudfront_key.pem:/private_cloudfront_key.pem
     environment:
       DB_URL: ${DB_URL}
       USER_NAME: ${USER_NAME}
