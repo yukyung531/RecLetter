@@ -5,6 +5,7 @@ import { UserInfo } from '../types/type';
 import { connectSessionAPI } from '../api/openvidu';
 import { useNavigate } from 'react-router-dom';
 import OpenViduVideoCard from '../components/OpenViduVideoCard';
+import { disconnect } from '../util/chat';
 
 export default function LetterViewPage() {
     //navigate
@@ -70,7 +71,7 @@ export default function LetterViewPage() {
         });
 
         //화면 공유 종료 시
-        newSession.on('streamDestroyed', (event) => {
+        newSession.on('streamDestroyed', (event: any) => {
             console.log('stream Destoryed - ', event);
             deleteSubscriber(event.streamManager);
         });
@@ -157,6 +158,15 @@ export default function LetterViewPage() {
             await startSession();
         };
         initSetting();
+        /** 페이지 새로고침 전에 실행 할 함수 */
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            disconnect();
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            disconnect();
+        };
     }, []);
 
     return (

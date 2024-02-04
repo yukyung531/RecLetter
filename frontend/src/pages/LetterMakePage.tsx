@@ -33,6 +33,7 @@ import { getStudio, studioDetail } from '../api/studio';
 import VideoCard from '../components/VideoCard';
 import SelectedVideoCard from '../components/SelectedVideoCard';
 import BGMCard from '../components/BGMCard';
+import { disconnect } from '../util/chat';
 
 export default function LetterMakePage() {
     const navigate = useNavigate();
@@ -194,6 +195,16 @@ export default function LetterMakePage() {
             });
         };
         getUserInfo();
+
+        /** 페이지 새로고침 전에 실행 할 함수 */
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            disconnect();
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            disconnect();
+        };
     }, []);
 
     ////////////////////////////////////////영상 순서 결정////////////////////////////////////////////////////////////
@@ -408,7 +419,7 @@ export default function LetterMakePage() {
         });
 
         //화면 공유 종료 시
-        newSession.on('streamDestroyed', (event) => {
+        newSession.on('streamDestroyed', (event: any) => {
             console.log(event);
             deleteSubscriber(event.streamManager);
         });

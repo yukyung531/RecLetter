@@ -10,6 +10,8 @@ import { getScript } from '../api/template';
 import { httpStatusCode } from '../util/http-status';
 import ScriptTemplateCard from '../components/ScriptTemplateCard';
 import { getUser } from '../api/user';
+import { disconnect } from '../util/chat';
+import { useSelector } from 'react-redux';
 
 interface Const {
     audio: boolean;
@@ -36,6 +38,8 @@ export default function ClipRecodePage() {
         videoBitsPerSecond: 7500000,
         mimeType: 'video/webm; codecs=vp9',
     };
+    /** 리덕스 설정 */
+    const studioName = useSelector((state: any) => state.loginFlag.studioName);
 
     /**handleScript()
      * 사이드바 textarea에 작성한 script를 중앙 상단의 출력창에 바인딩한다.
@@ -48,6 +52,7 @@ export default function ClipRecodePage() {
 
     //유저 정보
     const [userInfo, setUserInfo] = useState<UserInfo>({
+        userId: '',
         userNickname: '',
         userEmail: '',
     });
@@ -152,11 +157,21 @@ export default function ClipRecodePage() {
             console.log(resuser);
             const tempObj = { ...resuser.data };
             setUserInfo({
+                userId: tempObj.userId,
                 userNickname: tempObj.userNickname,
                 userEmail: tempObj.userEmail,
             });
         };
         getUserInfo();
+        /** 페이지 새로고침 전에 실행 할 함수 */
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            disconnect();
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            disconnect();
+        };
     }, []);
 
     /**startRecord()
@@ -473,24 +488,8 @@ export default function ClipRecodePage() {
 
     ///////////////////////////////렌더링 화면//////////////////////////////////////////
     return (
-        <section className="relative section-top">
+        <section className="relative section-top pt-14 ">
             {/* 상단바 */}
-            <div className="h-20 w-full px-12 color-text-black flex justify-between items-center">
-                <div className="flex items-center">
-                    <span className="material-symbols-outlined">
-                        arrow_back_ios
-                    </span>
-                    <p className="text-3xl">{studioTitle}</p>
-                    <div className="ml-20" />
-                    <p>2024-01-14-02:12AM</p>
-                </div>
-                <div
-                    onClick={goToClipEdit}
-                    className="btn-cover color-bg-blue3 text-white"
-                >
-                    편집하기
-                </div>
-            </div>
 
             {/* 중앙 섹션 */}
             <div className="flex w-full editor-height">
@@ -504,101 +503,122 @@ export default function ClipRecodePage() {
                     <></>
                 )}
                 {/* 좌측부분 */}
-                <div className="w-1/4 editor-height flex">
-                    {/* 카테고리 */}
-                    <div className="w-1/5 ">
-                        <div
-                            className={`h-28 bg-orange-100 flex flex-col justify-center items-center ${
-                                mode === 0 ? 'categori-selected' : ''
-                            }`}
-                            onClick={() => {
-                                changeMode(0);
-                            }}
-                        >
-                            <span className="material-symbols-outlined text-3xl">
-                                movie_edit
+                <div className="relative w-1/4 h-full flex flex-col">
+                    <div className="w-full h-10 flex justify-between items-center px-12 py-6 border-b-2 color-border-sublight color-text-black">
+                        <div className="flex items-center ">
+                            <span className="material-symbols-outlined">
+                                arrow_back_ios
                             </span>
-                            <p className="font-bold">영상</p>
-                        </div>
-                        <div
-                            className={`h-28 bg-orange-100 flex flex-col justify-center items-center ${
-                                mode === 1 ? 'categori-selected' : ''
-                            }`}
-                            onClick={() => {
-                                changeMode(1);
-                            }}
-                        >
-                            <span className="material-symbols-outlined text-3xl">
-                                kid_star
-                            </span>
-                            <p className="font-bold">스크립트</p>
+                            <p className="text-2xl ms-3">{studioName}</p>
                         </div>
                     </div>
-                    {/* 카테고리 선택에 따라 */}
-                    {mode === 0 ? (
-                        <div className="w-4/5 flex flex-col items-center p-6 overflow-y-scroll">
-                            <div className="w-full flex justify-start text-xl ">
-                                <p>촬영한 영상</p>
-                            </div>
-                            {myClipList.map((clip) => {
-                                return (
-                                    <MyClipCard
-                                        props={clip}
-                                        key={clip.clipId}
-                                        onClick={() => {
-                                            onPressDelete(clip.clipId);
-                                        }}
-                                        onLinkClick={() => {
-                                            onLinkClick(clip.clipId);
-                                        }}
-                                        onNameChange={() =>
-                                            onNameChange(clip.clipId)
-                                        }
-                                        setChangingName={setChangingName}
-                                    />
-                                );
-                            })}
-                            <button
-                                className="w-full text-xl bg-[#2C75E2] text-white rounded"
-                                onClick={handleRecordMode}
+                    {/* 카테고리 */}
+                    <div className="flex">
+                        <div className="relative w-1/6 color-text-main">
+                            <div
+                                className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
+                                onClick={() => {
+                                    changeMode(0);
+                                }}
                             >
-                                영상 촬영하기
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="w-4/5 flex flex-col items-center p-6 overflow-y-scroll">
-                            <div className="w-full flex justify-start text-xl ">
-                                <p>스크립트</p>
+                                <div
+                                    className={`${
+                                        mode === 0
+                                            ? 'h-16 categori-selected'
+                                            : ''
+                                    }`}
+                                ></div>
+                                <span className="material-symbols-outlined text-3xl">
+                                    movie_edit
+                                </span>
+                                <p className="font-bold">영상</p>
                             </div>
-                            <textarea
-                                ref={scriptRef}
-                                onChange={handleScript}
-                                rows={4}
-                                className="text-xl text-black w-full border-black border-solid border-2 rounded"
-                            ></textarea>
-                            {scriptList.map((script) => {
-                                return (
-                                    <ScriptTemplateCard
-                                        key={script.scriptId}
-                                        props={script}
-                                        onClick={() =>
-                                            setSelectedScript(
-                                                script.scriptContent
-                                            )
-                                        }
-                                    />
-                                );
-                            })}
+                            <div
+                                className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
+                                onClick={() => {
+                                    changeMode(1);
+                                }}
+                            >
+                                <div
+                                    className={`${
+                                        mode === 1
+                                            ? 'h-16 categori-selected'
+                                            : ''
+                                    }`}
+                                ></div>
+                                <span className="material-symbols-outlined text-3xl">
+                                    kid_star
+                                </span>
+                                <p className="font-bold">스크립트</p>
+                            </div>
                         </div>
-                    )}
+                        {/* 카테고리 선택에 따라 */}
+                        {mode === 0 ? (
+                            <div className="w-4/5 h-screen flex flex-col items-center p-4 overflow-y-scroll">
+                                <div className="w-full py-1 flex justify-start text-xl ">
+                                    <p>촬영한 영상</p>
+                                </div>
+                                {myClipList.map((clip) => {
+                                    return (
+                                        <MyClipCard
+                                            props={clip}
+                                            key={clip.clipId}
+                                            onClick={() => {
+                                                onPressDelete(clip.clipId);
+                                            }}
+                                            onLinkClick={() => {
+                                                onLinkClick(clip.clipId);
+                                            }}
+                                            onNameChange={() =>
+                                                onNameChange(clip.clipId)
+                                            }
+                                            setChangingName={setChangingName}
+                                        />
+                                    );
+                                })}
+                                {/* <button
+                                    className="w-full text-xl bg-[#2C75E2] text-white rounded"
+                                    onClick={handleRecordMode}
+                                >
+                                    영상 촬영하기
+                                </button> */}
+                            </div>
+                        ) : (
+                            <div className="w-4/5 flex flex-col items-center p-6 overflow-y-scroll">
+                                <div className="w-full my-2 flex justify-start text-xl ">
+                                    <p>스크립트</p>
+                                </div>
+                                <textarea
+                                    ref={scriptRef}
+                                    onChange={handleScript}
+                                    rows={4}
+                                    placeholder="스크립트를 작성하면, 녹화하면서 확인할 수 있어요. 하고 싶은 말을 자유롭게 메모하세요"
+                                    className="text-xl text-black w-full border-black border-solid border-2 rounded"
+                                ></textarea>
+                                <div className="my-2 w-full flex justify-start text-xl ">
+                                    <p>템플릿 불러오기</p>
+                                </div>
+                                {scriptList.map((script) => {
+                                    return (
+                                        <ScriptTemplateCard
+                                            key={script.scriptId}
+                                            props={script}
+                                            onClick={() =>
+                                                setSelectedScript(
+                                                    script.scriptContent
+                                                )
+                                            }
+                                        />
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
                 </div>
                 {/* 우측부분 */}
-                <div className="w-3/4 editor-height bg-gray-50 flex justify-between">
-                    <div className="w-full px-4 py-4 flex flex-col justify-center items-center">
-                        <div className="movie-width flex justify-start items-center mt-0">
-                            <p className="text-2xl">{userInfo.userNickname}</p>
-                        </div>
-                        <p className="my-3 py-3 rounded-full border-2 border-black movie-width text-center text-xl whitespace-pre-wrap">
+                <div className="w-3/4 flex editor-height bg-gray-50 justify-between">
+                    <div className="w-4/5 px-4 py-4 flex flex-col justify-center items-center">
+                        <p className="relative my-2 py-2 rounded-full border-2 border-black movie-width text-center text-xl whitespace-pre-wrap">
                             {selectedScript}
                         </p>
                         {/*영상 촬영 화면*/}
@@ -625,68 +645,117 @@ export default function ClipRecodePage() {
                             ref={videoPreviewRef}
                             onTimeUpdate={handleProgress}
                         />
-                        <div className="w-full flex flex-col justify-center items-center my-4">
+
+                        <div className="w-full flex justify-center items-center my-4 px-12">
+                            {/* 프로그레스 바 */}
+                            <span className="material-symbols-outlined me-1 text-4xl">
+                                play_circle
+                            </span>
+                            <progress
+                                id="progress"
+                                max={100}
+                                value={progress}
+                                className="w-full h-2 rounded -webkit-progress-bar:bg-black -webkit-progress-value:bg-red"
+                            >
+                                Progress
+                            </progress>
+                        </div>
+                    </div>
+                    <div className="w-1/5 flex flex-col justify-around items-center">
+                        <div
+                            onClick={goToClipEdit}
+                            className="btn-cover color-bg-main text-white"
+                        >
+                            다음단계로
+                        </div>
+                        <div>
                             <div>
+                                {/* 녹화중 아니면 녹화버튼, 녹화중이면 정지 버튼 */}
+                                {!isRecording ? (
+                                    <div className="w-32 p-1 flex items-center justify-center border border-gray-100 rounded-lg shadow-md">
+                                        <span
+                                            className="mx-1 material-symbols-outlined text-2xl color-text-main cursor-pointer"
+                                            onClick={startRecord}
+                                        >
+                                            radio_button_checked
+                                        </span>
+                                        <span
+                                            className={
+                                                isRecording
+                                                    ? 'text-red-500 mx-1'
+                                                    : 'text-red-500 mx-1'
+                                            }
+                                        >
+                                            ON-AIR
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <div className="w-32 p-1 flex flex-col items-center justify-center border color-border-main rounded-lg shadow-md">
+                                        <div className="flex items-center justify-center">
+                                            <span
+                                                className="material-symbols-outlined text-2xl color-text-main mx-2  cursor-pointer"
+                                                onClick={endRecord}
+                                            >
+                                                stop_circle
+                                            </span>
+                                            <span
+                                                className={
+                                                    isRecording
+                                                        ? 'text-red-500 mx-1'
+                                                        : 'text-red-500 mx-1'
+                                                }
+                                            >
+                                                ON-AIR
+                                            </span>
+                                        </div>
+                                        <span className="text-2xl">
+                                            {Math.floor(nowTime / 60)} :{' '}
+                                            {nowTime >= 10
+                                                ? nowTime % 60
+                                                : '0' + (nowTime % 60)}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="my-4"></div>
+                            <div className="w-32 px-2 p-1 flex justify-around items-center border border-gray-100 rounded-lg shadow-md">
                                 {/* 녹화중 아니면 재생 버튼, 녹화중에는 타이머 비활성화 */}
                                 {!isRecording ? (
                                     <>
                                         <span
-                                            className="material-symbols-outlined me-1 text-4xl cursor-pointer"
+                                            className="material-symbols-outlined me-1 text-2xl cursor-pointer"
                                             onClick={playVideo}
                                         >
                                             play_circle
                                         </span>
+                                        <p className=" h-6 border color-border-darkgray"></p>
                                         <span
-                                            className="material-symbols-outlined me-1 text-4xl cursor-pointer"
+                                            className="material-symbols-outlined me-1 text-2xl cursor-pointer"
                                             onClick={pauseVideo}
                                         >
                                             pause_circle
                                         </span>
                                     </>
                                 ) : (
-                                    <span className="me-1 text-4xl">
-                                        {Math.floor(nowTime / 60)} :{' '}
-                                        {nowTime >= 10
-                                            ? nowTime % 60
-                                            : '0' + (nowTime % 60)}
-                                    </span>
+                                    <>
+                                        <span
+                                            className="material-symbols-outlined me-1 text-2xl cursor-pointer"
+                                            onClick={playVideo}
+                                        >
+                                            play_circle
+                                        </span>
+                                        <p className=" h-6 border color-border-darkgray"></p>
+                                        <span
+                                            className="material-symbols-outlined me-1 text-2xl cursor-pointer"
+                                            onClick={pauseVideo}
+                                        >
+                                            pause_circle
+                                        </span>
+                                    </>
                                 )}
-                                {/* 녹화중 아니면 녹화버튼, 녹화중이면 정지 버튼 */}
-                                {!isRecording ? (
-                                    <span
-                                        className="material-symbols-outlined me-1 text-4xl color-text-red3 cursor-pointer"
-                                        onClick={startRecord}
-                                    >
-                                        radio_button_checked
-                                    </span>
-                                ) : (
-                                    <span
-                                        className="material-symbols-outlined me-1 text-4xl cursor-pointer"
-                                        onClick={endRecord}
-                                    >
-                                        stop_circle
-                                    </span>
-                                )}
-                                <span
-                                    className={
-                                        isRecording
-                                            ? 'text-red-500'
-                                            : 'text-black'
-                                    }
-                                >
-                                    ON-AIR
-                                </span>
                             </div>
-                            {/* 프로그레스 바 */}
-                            <progress
-                                id="progress"
-                                max={100}
-                                value={progress}
-                                className="w-full rounded -webkit-progress-bar:bg-black -webkit-progress-value:bg-red"
-                            >
-                                Progress
-                            </progress>
                         </div>
+                        <div></div>
                     </div>
                 </div>
             </div>
