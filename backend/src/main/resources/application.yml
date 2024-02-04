@@ -1,6 +1,4 @@
 spring:
-  server:
-    port: 8081
   messages:
     basename: errors, messages
     encoding: UTF-8
@@ -99,3 +97,6 @@ social:
   google:
     id: ${GOOGLE_CLIENT_ID}
     secret: ${GOOGLE_CLIENT_SECRET}
+
+server:
+  port: 8081
