@@ -5,6 +5,7 @@ services:
     image: ssuyas/recletter_backend
     container_name: RecLetterBackend
     restart: unless-stopped
+    network_mode: host
     ports:
       - "8081:8080"
     environment:
@@ -19,33 +20,10 @@ services:
       OPENVIDU_SECRET: ${OPENVIDU_SECRET}
     env_file:
       - .env
-    networks:
-      - RecLetterNetwork
 
   RecLetterFrontend:
     image: ssuyas/recletter_frontend
     container_name: RecLetterFrontend
-    ports:
-      - "80:80"
-      - "443:443"
+    network_mode: host
     depends_on:
       - RecLetterBackend
-    volumes:
-      - ../data/certbot/conf:/etc/letsencrypt
-      - ../data/certbot/www:/var/www/certbot
-    networks:
-      - RecLetterNetwork
-
-  certbot:
-    image: certbot/certbot
-    restart: unless-stopped
-    volumes:
-      - ../data/certbot/conf:/etc/letsencrypt
-      - ../data/certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-    networks:
-      - RecLetterNetwork
-
-networks:
-  RecLetterNetwork:
-    external: true

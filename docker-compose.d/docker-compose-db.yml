@@ -4,16 +4,16 @@ services:
   RecLetterRedis:
     image: redis:7.2.3
     container_name: RecLetterRedis
+    network_mode: host
     ports:
       - "6379:6379"
     volumes:
       - redis-data:/data
-    networks:
-      - RecLetterNetwork
 
   RecLetterMariaDB:
     image: mariadb:10.4
     container_name: RecLetterMariaDB
+    network_mode: host
     ports:
       - "3306:3306"
     volumes:
@@ -26,13 +26,7 @@ services:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     env_file:
       - .env
-    networks:
-      - RecLetterNetwork
 
 volumes:
   redis-data:
   mariadb-data:
-
-networks:
-  RecLetterNetwork:
-    external: true

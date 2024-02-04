@@ -1,4 +1,6 @@
 spring:
+  server:
+    port: 8081
   messages:
     basename: errors, messages
     encoding: UTF-8
