@@ -48,6 +48,7 @@ export default function ClipRecodePage() {
 
     //유저 정보
     const [userInfo, setUserInfo] = useState<UserInfo>({
+        userId: '',
         userNickname: '',
         userEmail: '',
     });
@@ -152,6 +153,7 @@ export default function ClipRecodePage() {
             console.log(resuser);
             const tempObj = { ...resuser.data };
             setUserInfo({
+                userId: tempObj.userId,
                 userNickname: tempObj.userNickname,
                 userEmail: tempObj.userEmail,
             });
@@ -573,7 +575,7 @@ export default function ClipRecodePage() {
                             <textarea
                                 ref={scriptRef}
                                 onChange={handleScript}
-                                rows={4}
+                                rows={2}
                                 className="text-xl text-black w-full border-black border-solid border-2 rounded"
                             ></textarea>
                             {scriptList.map((script) => {
@@ -598,9 +600,9 @@ export default function ClipRecodePage() {
                         <div className="movie-width flex justify-start items-center mt-0">
                             <p className="text-2xl">{userInfo.userNickname}</p>
                         </div>
-                        <p className="my-3 py-3 rounded-full border-2 border-black movie-width text-center text-xl whitespace-pre-wrap">
+                        <div className="box-border my-3 py-3 min-h-[80px] h-[80px] rounded-full border-2 border-black movie-width text-xl whitespace-pre-wrap flex align-middle justify-center text-center">
                             {selectedScript}
-                        </p>
+                        </div>
                         {/*영상 촬영 화면*/}
                         <video
                             className="bg-white border my-2"
