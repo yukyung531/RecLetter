@@ -7,6 +7,7 @@ import { ClipInfo } from '../types/type';
 //axios
 import { uploadClip } from '../api/clip';
 import { httpStatusCode } from '../util/http-status';
+import { disconnect } from '../util/chat';
 
 export default function ClipEditPage() {
     ///////////////////////////////영상 정보 불러오기///////////////////////////////////////////////////////////
@@ -111,6 +112,16 @@ export default function ClipEditPage() {
             await loadVideoMetadata();
         };
         loading();
+
+        /** 페이지 새로고침 전에 실행 할 함수 */
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            disconnect();
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            disconnect();
+        };
     }, []);
 
     ///////////////////////////////////////영상 자르기///////////////////////////////////////////////

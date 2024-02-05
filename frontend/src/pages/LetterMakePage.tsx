@@ -34,6 +34,12 @@ import VideoCard from '../components/VideoCard';
 import SelectedVideoCard from '../components/SelectedVideoCard';
 import BGMCard from '../components/BGMCard';
 import { disconnect } from '../util/chat';
+import CanvasItem from '../components/CanvasItem';
+
+interface mousePosition {
+    positionX: number | null;
+    positionY: number | null;
+}
 
 export default function LetterMakePage() {
     const navigate = useNavigate();
@@ -62,6 +68,8 @@ export default function LetterMakePage() {
     const [notUsedClipList, setNotUsedClipList] = useState<ClipInfo[]>([]);
     //선택된 정보들
     const [selectedBGM, setSelectedBGM] = useState<number>(1);
+    const [eraserFlag, setEraserFlag] = useState<boolean>(false);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
     // // 수정 정보
     // const [studioModify, setStudioModify] = useState<Letter>({
@@ -96,6 +104,36 @@ export default function LetterMakePage() {
     const [selectImgUrl, setSelectImgUrl] = useState<string>(
         '/src/assets/frames/frame1.png'
     );
+
+    // 스티커 리스트
+    const [stickerList, setStickerList] = useState<string[]>([
+        'sticker1',
+        'sticker2',
+        'sticker3',
+        'sticker4',
+        'sticker5',
+        'sticker6',
+    ]);
+    // 선택된 스티커
+    const [selectedObj, setSelectedObj] = useState<string>('');
+    // 마우스 위치
+    const [mousePosition, setMousePosition] = useState<mousePosition>({
+        positionX: null,
+        positionY: null,
+    });
+    // 스티커 붙이기
+    const [stickerFlag, setStickerFlag] = useState<boolean>(false);
+    /** 스티커 선택 */
+    const handleSelectedObj = (sticker: string) => {
+        setSelectedObj(sticker);
+    };
+    /** 마우스 포인터 정하기 */
+    const handleMousePositionInSideBar = ({
+        positionX,
+        positionY,
+    }: mousePosition) => {
+        setMousePosition({ ...mousePosition, positionX, positionY });
+    };
 
     //유저 정보
     const [userInfo, setUserInfo] = useState<UserInfo>({
@@ -374,6 +412,33 @@ export default function LetterMakePage() {
                 </div>
             );
             break;
+        case 4:
+            sideBar = (
+                <div className="w-full flex flex-col justify-start text-xl ">
+                    <p>스티커</p>
+                    <div className="flex flex-wrap m-2">
+                        {stickerList.map((item) => {
+                            const imgUrl = `/src/assets/sticker/${item}.png`;
+                            return (
+                                <div className="w-16 h-16 cursor-pointer rounded-lg hover:bg-gray-100">
+                                    <img
+                                        src={imgUrl}
+                                        alt=""
+                                        onClick={(e) => {
+                                            handleSelectedObj(item);
+                                            handleMousePositionInSideBar({
+                                                positionX: e.clientX,
+                                                positionY: e.clientY,
+                                            });
+                                        }}
+                                    />
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+            break;
     }
 
     /////////////////////////////////////////////openvidu이용 화상 공유/////////////////////////////////////////////
@@ -543,7 +608,37 @@ export default function LetterMakePage() {
 
     ///////////////////////////////////////////////렌더링///////////////////////////////////////////////////////////
     return (
-        <section className="relative section-top pt-16">
+        <section
+            className="relative section-top pt-16"
+            onMouseMove={(e) => {
+                if (selectedObj !== '') {
+                    setMousePosition({
+                        ...mousePosition,
+                        positionX: e.clientX,
+                        positionY: e.clientY,
+                    });
+                    console.log(mousePosition.positionX);
+                }
+            }}
+        >
+            {selectedObj !== '' &&
+            mousePosition.positionX &&
+            mousePosition.positionY ? (
+                <div
+                    className="sticker z-40 w-40 h-40"
+                    style={{
+                        position: 'absolute',
+                        left: mousePosition.positionX - 80,
+                        top: mousePosition.positionY - 80,
+                        backgroundImage: `url('/src/assets/sticker/${selectedObj}.png')`,
+                        backgroundSize: 'cover',
+                    }}
+                    onClick={(e) => {
+                        setStickerFlag(true);
+                        // setSelectedObj('');
+                    }}
+                ></div>
+            ) : null}
             {/* {isParticipantAlertActive ? (
                 <ParticipantAlertWindow
                     onClickOK={allowAccess}
@@ -552,7 +647,7 @@ export default function LetterMakePage() {
             ) : (
                 <></>
             )} */}
-            <div className="h-20 w-full px-12 color-text-black flex justify-between items-center">
+            <div className="relative h-20 w-full px-12 color-text-black flex justify-between items-center">
                 <div className="flex items-center">
                     <span className="material-symbols-outlined">
                         arrow_back_ios
@@ -581,54 +676,86 @@ export default function LetterMakePage() {
                 {/* 좌측부분 */}
                 <div className="w-1/4 editor-height flex">
                     {/* 카테고리 */}
-                    <div className="w-1/5 ">
+                    <div className="relative w-1/5 color-text-main">
                         <div
-                            className={`h-28 bg-orange-100 flex flex-col justify-center items-center cursor-pointer hover:bg-orange-200 ${
-                                mode === 0 ? 'categori-selected' : ''
-                            }`}
-                            onClick={() => setMode(0)}
+                            className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
+                            onClick={() => {
+                                setMode(0);
+                            }}
                         >
+                            <div
+                                className={`${
+                                    mode === 0 ? 'h-16 categori-selected ' : ''
+                                }`}
+                            ></div>
                             <span className="material-symbols-outlined text-3xl">
                                 movie_edit
                             </span>
                             <p className="font-bold">영상</p>
                         </div>
                         <div
-                            className={`h-28 bg-orange-100 flex flex-col justify-center items-center cursor-pointer hover:bg-orange-200 ${
-                                mode === 1 ? 'categori-selected' : ''
-                            }`}
-                            onClick={() => setMode(1)}
+                            className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
+                            onClick={() => {
+                                setMode(1);
+                            }}
                         >
+                            <div
+                                className={`${
+                                    mode === 1 ? 'h-16 categori-selected' : ''
+                                }`}
+                            ></div>
                             <span className="material-symbols-outlined text-3xl">
                                 kid_star
                             </span>
                             <p className="font-bold">프레임</p>
                         </div>
                         <div
-                            className={`h-28 bg-orange-100 flex flex-col justify-center items-center cursor-pointer hover:bg-orange-200 ${
-                                mode === 2 ? 'categori-selected' : ''
-                            }`}
-                            onClick={() => setMode(2)}
+                            className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
+                            onClick={() => {
+                                setMode(2);
+                            }}
                         >
+                            <div
+                                className={`${
+                                    mode === 2 ? 'h-16 categori-selected' : ''
+                                }`}
+                            ></div>
                             <span className="material-symbols-outlined text-3xl">
-                                <span className="material-symbols-outlined">
-                                    title
-                                </span>
+                                title
                             </span>
                             <p className="font-bold">텍스트</p>
                         </div>
                         <div
-                            className={`h-28 bg-orange-100 flex flex-col justify-center items-center cursor-pointer hover:bg-orange-200 ${
-                                mode === 3 ? 'categori-selected' : ''
-                            }`}
-                            onClick={() => setMode(3)}
+                            className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
+                            onClick={() => {
+                                setMode(3);
+                            }}
                         >
+                            <div
+                                className={`${
+                                    mode === 3 ? 'h-16 categori-selected' : ''
+                                }`}
+                            ></div>
                             <span className="material-symbols-outlined text-3xl">
-                                <span className="material-symbols-outlined">
-                                    volume_up
-                                </span>
+                                volume_up
                             </span>
                             <p className="font-bold">오디오</p>
+                        </div>
+                        <div
+                            className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
+                            onClick={() => {
+                                setMode(4);
+                            }}
+                        >
+                            <div
+                                className={`${
+                                    mode === 4 ? 'h-16 categori-selected' : ''
+                                }`}
+                            ></div>
+                            <span className="material-symbols-outlined text-3xl">
+                                image
+                            </span>
+                            <p className="font-bold">스티커</p>
                         </div>
                     </div>
                     {/* 카테고리 선택에 따라 */}
@@ -656,6 +783,18 @@ export default function LetterMakePage() {
                                 style={{ width: '640px', height: '400px' }}
                                 alt=""
                             />
+                            <main className="absolute" ref={canvasRef}>
+                                <CanvasItem
+                                    canvasWidth={640}
+                                    canvasHeight={400}
+                                    sticker={selectedObj}
+                                    setSticker={setSelectedObj}
+                                    eraser={eraserFlag}
+                                    stickerFlag={stickerFlag}
+                                    setStickerFlag={setStickerFlag}
+                                    mousePosition={mousePosition}
+                                ></CanvasItem>
+                            </main>
                         </div>
                     </div>
                     <div className="w-full h-1/4 bg-white border-2 flex justify-center items-center">

@@ -37,32 +37,37 @@ export default function VideoCard({
     //hover시 class에 color-border-blue2 추가
     return (
         <div
-            className="flex w-full my-2 p-2 border-2 hover:border-[#65a6f2]"
+            className="flex justify-between w-full my-2 p-2 border-2 hover:color-border-sublight"
             id={clipId}
             onClick={selectVideo}
         >
-            <video
-                src={props.clipUrl}
-                style={{ display: 'none' }}
-                ref={videoRef}
-                crossOrigin="anonymous"
-                preload="metadata"
-                onLoadedData={metadataLoad}
-            />
-            <img
+            <div className="flex justify-center items-center">
+                <video
+                    className="w-16 h-12 bg-gray-200"
+                    src={props.clipUrl}
+                    ref={videoRef}
+                    crossOrigin="anonymous"
+                    preload="metadata"
+                    onLoadedData={metadataLoad}
+                />
+                {/* <img
                 className="w-16 h-12"
                 src={props.clipThumbnail}
                 alt={props.clipTitle}
-            />
-            <div className="ms-2">
-                <p className="font-bold w-9">{props.clipTitle}</p>
-                <p>
-                    {duration >= 60 ? 1 : 0} :{' '}
-                    {duration % 60 < 10 ? '0' + (duration % 60) : duration % 60}
-                </p>
+            /> */}
+                <div className="mx-2">
+                    <p className="font-bold w-full">{props.clipTitle}</p>
+                    <p>
+                        {duration >= 60 ? 1 : 0} :{' '}
+                        {duration % 60 < 10
+                            ? '0' + (duration % 60)
+                            : duration % 60}
+                    </p>
+                </div>
             </div>
+
             {userId === props.clipOwner ? (
-                <div className="w-full flex flex-col items-end me-2">
+                <div className="me-2">
                     {onClick ? (
                         <p
                             className="w-14 my-0.5 px-3 text-center color-bg-red2 text-white"
