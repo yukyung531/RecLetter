@@ -90,3 +90,4 @@ social:
   google:
     id: ${GOOGLE_CLIENT_ID}
     secret: ${GOOGLE_CLIENT_SECRET}
+    redirect: ${GOOGLE_REDIRECT_URL}

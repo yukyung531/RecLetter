@@ -15,11 +15,14 @@ public class SocialClientRegistration {
     @Value("${social.google.secret}")
     private String CLIENT_SECRET;
 
+    @Value("${social.google.redirect}")
+    private String REDIRECT;
+
     public ClientRegistration googleClientRegistration() {
         return ClientRegistration.withRegistrationId("google")
                 .clientId(CLIENT_ID)
                 .clientSecret(CLIENT_SECRET)
-                .redirectUri("http://localhost:5173/login/oauth2/code/google")
+                .redirectUri(REDIRECT)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .scope("profile", "email")
                 .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")

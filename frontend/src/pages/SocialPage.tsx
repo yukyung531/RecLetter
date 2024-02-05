@@ -10,15 +10,25 @@ import axios from "axios";
     /** 리덕스 설정 */
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const VITE_REACT_GOOGLE_CHANGE_HOST = import.meta.env.VITE_REACT_GOOGLE_CHANGE_HOST;
+    const VITE_REACT_GOOGLE_PROTOCOL = import.meta.env.VITE_REACT_GOOGLE_PROTOCOL;
 
 
     useEffect(() => {
         const currentUri = window.location.href;
         console.log("변경 전 호스트", currentUri)
         // 변경할 새로운 호스트
-        const newHost = 'http://localhost:5173/api';
+        const newHost = VITE_REACT_GOOGLE_CHANGE_HOST;
+        console.log("뉴호스트",newHost)
+
         // Axios 요청을 보내기 전에 URI의 호스트를 변경
-        const modifiedUri = currentUri.replace(/^(http?:\/\/)([^\/]+)/, `${newHost}`);
+        let modifiedUri:string="";
+        if(VITE_REACT_GOOGLE_PROTOCOL==="http"){
+            modifiedUri = currentUri.replace(/^(http?:\/\/)([^\/]+)/, `${newHost}`);
+        }
+        if(VITE_REACT_GOOGLE_PROTOCOL==="https"){
+            modifiedUri = currentUri.replace(/^(https?:\/\/)([^\/]+)/, `${newHost}`);
+        }
 
         console.log("최종 경로",modifiedUri)
         fetchData(modifiedUri);

@@ -2,7 +2,6 @@ package com.sixcube.recletter.oauth2.service;
 
 import com.sixcube.recletter.oauth2.dto.CustomOAuth2User;
 import com.sixcube.recletter.oauth2.dto.GoogleResponse;
-import com.sixcube.recletter.oauth2.dto.NaverResponse;
 import com.sixcube.recletter.oauth2.dto.OAuth2Response;
 import com.sixcube.recletter.user.dto.User;
 import com.sixcube.recletter.user.repository.UserRepository;
@@ -37,9 +36,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         if (registrationId.equals("google")) {
             oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
         }
-//        else if (registrationId.equals("naver")) {
-//            oAuth2Response = new NaverResponse(oAuth2User.getAttributes());
-//        }
         else {
             return null;
         }
