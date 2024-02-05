@@ -118,7 +118,7 @@ export default function Mainpage() {
                         />
                         <Link
                             to="./login"
-                            className=" w-72 color-bg-main cursor-pointer my-10 p-4 flex justify-center items-center border-8 color-border-sublight rounded-full hover:scale-105 hover:transition-all transition-all"
+                            className=" w-72 color-bg-main cursor-pointer my-10 p-4 flex justify-center items-center border-8 color-border-sublight rounded-full btn-animation"
                         >
                             <img
                                 className="w-8"

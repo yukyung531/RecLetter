@@ -92,6 +92,8 @@ export default function StudioListPage() {
         await deleteStudio(deleteString).then((res) => {
             if (res.status === httpStatusCode.OK) {
                 console.log('삭제되었습니다.');
+                alert('삭제되었습니다');
+                setEditMode(false);
                 makeStudioListAPI();
             }
         });
@@ -159,14 +161,18 @@ export default function StudioListPage() {
         } else {
             return (
                 <div className="flex items-center">
-                    <p
-                        className="mx-2 color-text-main cursor-pointer hover:color-text-subbold"
-                        onClick={() => {
-                            setEditMode(true);
-                        }}
-                    >
-                        편집
-                    </p>
+                    {createStudioList.length > 0 ? (
+                        <p
+                            className="mx-2 color-text-main cursor-pointer hover:color-text-subbold"
+                            onClick={() => {
+                                setEditMode(true);
+                            }}
+                        >
+                            편집
+                        </p>
+                    ) : (
+                        <p></p>
+                    )}
                 </div>
             );
         }

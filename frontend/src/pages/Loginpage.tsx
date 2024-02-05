@@ -20,7 +20,8 @@ export default function LoginPage() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const VITE_REACT_GOOGLE_LOGIN_URL = import.meta.env.VITE_REACT_GOOGLE_LOGIN_URL;
+    const VITE_REACT_GOOGLE_LOGIN_URL = import.meta.env
+        .VITE_REACT_GOOGLE_LOGIN_URL;
 
     useEffect(() => {
         dispatch(studioState(''));
@@ -65,7 +66,7 @@ export default function LoginPage() {
     const loadLoginAPI = async (user: User) => {
         await login(user)
             .then((res) => {
-                console.log("결과",res)
+                console.log('결과', res);
                 if (res.status === httpStatusCode.OK) {
                     console.log('로그인이 성공했습니다.');
                     localStorage.setItem('access-token', res.data.accessToken);
@@ -122,7 +123,7 @@ export default function LoginPage() {
 
                 <div
                     onClick={onClickLogin}
-                    className=" w-105 block my-7 rounded-md py-2 text-2xl text-center color-bg-main text-white cursor-pointer hover:color-bg-subbold hover:text-white"
+                    className=" w-105 block my-7 rounded-md py-2 text-2xl text-center color-bg-main text-white cursor-pointer hover:color-bg-subbold hover:text-white btn-animation"
                 >
                     로그인
                 </div>
