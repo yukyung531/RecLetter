@@ -1,4 +1,4 @@
-package com.sixcube.recletter.clip;
+package com.sixcube.recletter.studio;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +13,9 @@ import software.amazon.awssdk.services.cloudfront.url.SignedUrl;
 
 import java.net.URI;
 
+/**
+ * copyright from `https://github.com/awsdocs/aws-doc-sdk-examples/blob/main/javav2/example_code/cloudfront/src/main/java/com/example/cloudfront/SigningUtilities.java`
+ */
 public class SigningUtilities {
     private static final Logger logger = LoggerFactory.getLogger(SigningUtilities.class);
     private static final CloudFrontUtilities cloudFrontUtilities = CloudFrontUtilities.create();

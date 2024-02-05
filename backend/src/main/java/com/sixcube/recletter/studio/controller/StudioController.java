@@ -69,11 +69,13 @@ public class StudioController {
     return ResponseEntity.ok().body(result);
   }
 
+  //TODO - studioStickerUrl 추가
   @GetMapping("/{studioId}")
   public ResponseEntity<SearchStudioDetailRes> searchStudioDetail(@PathVariable String studioId,
       @AuthenticationPrincipal User user) {
     // 찾을 수 없을 경우 StudioNotFoundException 발생
     // 자신이 참여하지 않은 Studio를 검색할 경우 UnauthorizedToSearchStudioException 발생
+    // TODO- studioSticker
     Studio studio = studioService.searchStudioByStudioId(studioId, user);
 
     SearchStudioDetailRes result = SearchStudioDetailRes.builder()
@@ -152,5 +154,11 @@ public class StudioController {
     return ResponseEntity.ok().build();
   }
 
+  @GetMapping("/{studioId}/letter")
+  public ResponseEntity<Void> createLetter(@PathVariable String studioId){
+
+
+    return ResponseEntity.ok().build();
+  }
 
 }
