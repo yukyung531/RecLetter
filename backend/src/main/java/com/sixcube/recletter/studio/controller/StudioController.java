@@ -69,11 +69,13 @@ public class StudioController {
     return ResponseEntity.ok().body(result);
   }
 
+  //TODO - studioStickerUrl 추가
   @GetMapping("/{studioId}")
   public ResponseEntity<SearchStudioDetailRes> searchStudioDetail(@PathVariable String studioId,
       @AuthenticationPrincipal User user) {
     // 찾을 수 없을 경우 StudioNotFoundException 발생
     // 자신이 참여하지 않은 Studio를 검색할 경우 UnauthorizedToSearchStudioException 발생
+    // TODO- studioSticker
     Studio studio = studioService.searchStudioByStudioId(studioId, user);
 
     SearchStudioDetailRes result = SearchStudioDetailRes.builder()
@@ -139,8 +141,7 @@ public class StudioController {
   // TODO - JPA 예외처리
   @PutMapping("/{studioId}/title")
   public ResponseEntity<Void> updateStudioTitle(@PathVariable String studioId,
-      @RequestParam String studioTitle, @AuthenticationPrincipal User user) {
-
+      @RequestBody String studioTitle, @AuthenticationPrincipal User user) {
     // 해당 스튜디오에 참여하지 않은 사용자의 경우 UnauthorizedToUpdateStudioException 발생
     // 스튜디오를 찾지 못한 경우 StudioNotFoundException 발생
     studioService.updateStudioTitle(studioId, studioTitle, user);
@@ -153,5 +154,11 @@ public class StudioController {
     return ResponseEntity.ok().build();
   }
 
+  @GetMapping("/{studioId}/letter")
+  public ResponseEntity<Void> createLetter(@PathVariable String studioId){
+
+
+    return ResponseEntity.ok().build();
+  }
 
 }
