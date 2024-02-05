@@ -20,8 +20,6 @@ import { OpenVidu, Publisher, Session, Subscriber } from 'openvidu-browser';
 // import { connectSession, createSession, endSession } from '../api/openvidu';
 import { getUser } from '../api/user';
 // import { connect } from '../util/chat';
-import ParticipantAlertWindow from '../components/ParticipantAlertWindow';
-import OpenViduVideoCard from '../components/OpenViduVideoCard';
 import {
     connectSessionAPI,
     createSessionAPI,
@@ -30,8 +28,8 @@ import {
 } from '../api/openvidu';
 import { useNavigate } from 'react-router-dom';
 import { getStudio, studioDetail } from '../api/studio';
-import VideoCard from '../components/VideoCard';
 import SelectedVideoCard from '../components/SelectedVideoCard';
+import UnSelectedVideoCard from '../components/UnSelectedVideoCard';
 import BGMCard from '../components/BGMCard';
 import { disconnect } from '../util/chat';
 import CanvasItem from '../components/CanvasItem';
@@ -70,6 +68,16 @@ export default function LetterMakePage() {
     const [selectedBGM, setSelectedBGM] = useState<number>(1);
     const [eraserFlag, setEraserFlag] = useState<boolean>(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    interface WholeVideo {
+        length: number;
+        clipList: ClipInfo[];
+    }
+    //비디오 정보
+    const [wholeVideoInfo, setWholeVideoInfo] = useState<WholeVideo>({
+        length: 0,
+        clipList: [],
+    });
 
     // // 수정 정보
     // const [studioModify, setStudioModify] = useState<Letter>({
@@ -147,6 +155,16 @@ export default function LetterMakePage() {
         setSelectImgUrl(source);
     };
 
+    /** duration 정보 끌어올리기 */
+    const getDuration = (clipId: number, length: number) => {
+        for (let i = 0; i < studioDetailInfo.clipInfoList.length; i++) {
+            if (studioDetailInfo.clipInfoList[i].clipId === clipId) {
+                studioDetailInfo.clipInfoList[i].clipLength = length;
+                break;
+            }
+        }
+    };
+
     useEffect(() => {
         /**initSetting()
          * 초기 설정
@@ -171,6 +189,10 @@ export default function LetterMakePage() {
                         }
                         setUsedClipList(initialUsedVideo);
                         setNotUsedClipList(nonInitialUsedVideo);
+                        //프레임 기본 정보 초기화
+                        setSelectImgUrl(
+                            `/src/assets/frames/frame${res.data.studioFrameId}.png`
+                        );
                     } else {
                         console.log('Network Error');
                     }
@@ -246,6 +268,8 @@ export default function LetterMakePage() {
     }, []);
 
     ////////////////////////////////////////영상 순서 결정////////////////////////////////////////////////////////////
+
+    //클립 선택
     const selectVideo = (clipId: number) => {
         //클립 제거
         const newNotSelected = notUsedClipList.filter(
@@ -264,6 +288,9 @@ export default function LetterMakePage() {
         //결과 반영
         setNotUsedClipList(newNotSelected);
         setUsedClipList(newSelected);
+
+        //전체영상정보 업데이트
+        updateWhole(newSelected);
     };
 
     //클립 선택 취소
@@ -285,6 +312,15 @@ export default function LetterMakePage() {
         //결과 반영
         setNotUsedClipList(newNotSelected);
         setUsedClipList(newSelected);
+
+        //전체영상정보 업데이트
+        updateWhole(newSelected);
+
+        //비디오 재생 중이었다면 중지 후 초기화
+        if (videoRef.current) {
+            videoRef.current.pause();
+            playingIdx.current = 0;
+        }
     };
 
     //클립 볼륨 조절
@@ -297,9 +333,57 @@ export default function LetterMakePage() {
         }
     };
 
+    /** updateWhole
+     * 전체 영상 정보 업데이트를 위한 함수다.
+     * @param newSelected
+     */
+    const updateWhole = (newSelected: ClipInfo[]) => {
+        console.log(newSelected);
+        //전체 영상 정보 업데이트
+        let len = 0;
+        newSelected.map((clip) => {
+            len += clip.clipLength;
+        });
+        setWholeVideoInfo({
+            length: len,
+            clipList: [...newSelected],
+        });
+    };
+
     ////////////////////////////////////////BGM 결정////////////////////////////////////////////////////////////////
     const selectBGM = (bgmId: number) => {
         setSelectedBGM(bgmId);
+    };
+
+    ///////////////////////////////////////비디오 플레이어////////////////////////////////////////////////////////////
+
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    const playingIdx = useRef<number>(0);
+
+    const playVideo = () => {
+        if (videoRef.current !== null) {
+            //idx 범위 내부면 비디오 재생 및 다음으로 넘기는 함수
+            if (
+                playingIdx.current >= 0 &&
+                playingIdx.current < usedClipList.length
+            ) {
+                //범위 안이면 실행, 목록, 볼륨 조절
+                videoRef.current.src = usedClipList[playingIdx.current].clipUrl;
+                videoRef.current.volume =
+                    usedClipList[playingIdx.current].clipVolume / 100;
+                videoRef.current.play();
+            } else {
+                //범위 밖이면 정지
+                playingIdx.current = 0;
+                videoRef.current.pause();
+            }
+        }
+    };
+
+    //////////////////////////////////////뒤로가기 버튼 누르면 뒤로가기///////////////////////////////////////////////
+    const goBack = () => {
+        navigate(-1);
     };
 
     /////////////////////////////////////mode에 따른 사이드바 추가////////////////////////////////////////////////////
@@ -312,11 +396,13 @@ export default function LetterMakePage() {
                     <p>선택하지 않은 영상</p>
                     {notUsedClipList.map((clip) => {
                         return (
-                            <VideoCard
+                            <UnSelectedVideoCard
                                 key={clip.clipId}
                                 props={clip}
-                                presentUser={userInfo.userId}
                                 selectVideo={() => selectVideo(clip.clipId)}
+                                getDuration={(clipId: number, length: number) =>
+                                    getDuration(clipId, length)
+                                }
                             />
                         );
                     })}
@@ -647,160 +733,215 @@ export default function LetterMakePage() {
             ) : (
                 <></>
             )} */}
-            <div className="relative h-20 w-full px-12 color-text-black flex justify-between items-center">
-                <div className="flex items-center">
-                    <span className="material-symbols-outlined">
-                        arrow_back_ios
-                    </span>
-                    <p className="text-3xl">studio1</p>
-                    <div className="ml-20" />
-                    <p>2024-01-14-02:12AM</p>
-                </div>
-                {/* 테스트용 화상 공유 버튼 */}
-                <button
-                    className="btn-cover color-bg-blue3 text-white"
-                    onClick={endScreenShare}
-                >
-                    편집 종료, 홈페이지로
-                </button>
-                <a
-                    href="/studiomain"
-                    className="btn-cover color-bg-blue3 text-white"
-                >
-                    편집하기
-                </a>
-            </div>
-
             {/* 중앙 섹션 */}
             <div className="flex w-full editor-height">
                 {/* 좌측부분 */}
-                <div className="w-1/4 editor-height flex">
-                    {/* 카테고리 */}
-                    <div className="relative w-1/5 color-text-main">
-                        <div
-                            className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
-                            onClick={() => {
-                                setMode(0);
-                            }}
+                <div className="w-1/4 editor-height flex flex-col">
+                    <div className="flex items-center pl-12">
+                        <span
+                            className="material-symbols-outlined cursor-pointer"
+                            onClick={goBack}
                         >
-                            <div
-                                className={`${
-                                    mode === 0 ? 'h-16 categori-selected ' : ''
-                                }`}
-                            ></div>
-                            <span className="material-symbols-outlined text-3xl">
-                                movie_edit
-                            </span>
-                            <p className="font-bold">영상</p>
-                        </div>
-                        <div
-                            className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
-                            onClick={() => {
-                                setMode(1);
-                            }}
-                        >
-                            <div
-                                className={`${
-                                    mode === 1 ? 'h-16 categori-selected' : ''
-                                }`}
-                            ></div>
-                            <span className="material-symbols-outlined text-3xl">
-                                kid_star
-                            </span>
-                            <p className="font-bold">프레임</p>
-                        </div>
-                        <div
-                            className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
-                            onClick={() => {
-                                setMode(2);
-                            }}
-                        >
-                            <div
-                                className={`${
-                                    mode === 2 ? 'h-16 categori-selected' : ''
-                                }`}
-                            ></div>
-                            <span className="material-symbols-outlined text-3xl">
-                                title
-                            </span>
-                            <p className="font-bold">텍스트</p>
-                        </div>
-                        <div
-                            className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
-                            onClick={() => {
-                                setMode(3);
-                            }}
-                        >
-                            <div
-                                className={`${
-                                    mode === 3 ? 'h-16 categori-selected' : ''
-                                }`}
-                            ></div>
-                            <span className="material-symbols-outlined text-3xl">
-                                volume_up
-                            </span>
-                            <p className="font-bold">오디오</p>
-                        </div>
-                        <div
-                            className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
-                            onClick={() => {
-                                setMode(4);
-                            }}
-                        >
-                            <div
-                                className={`${
-                                    mode === 4 ? 'h-16 categori-selected' : ''
-                                }`}
-                            ></div>
-                            <span className="material-symbols-outlined text-3xl">
-                                image
-                            </span>
-                            <p className="font-bold">스티커</p>
-                        </div>
+                            arrow_back_ios
+                        </span>
+                        <p className="text-3xl">
+                            {studioDetailInfo.studioTitle}
+                        </p>
                     </div>
-                    {/* 카테고리 선택에 따라 */}
-                    <div className="w-4/5 flex flex-col items-center p-6 overflow-y-scroll">
-                        {sideBar}
+                    {/* 카테고리 */}
+                    <div className="flex">
+                        <div className="relative w-1/5 color-text-main">
+                            <div
+                                className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
+                                onClick={() => {
+                                    setMode(0);
+                                }}
+                            >
+                                <div
+                                    className={`${
+                                        mode === 0
+                                            ? 'h-16 categori-selected '
+                                            : ''
+                                    }`}
+                                ></div>
+                                <span className="material-symbols-outlined text-3xl">
+                                    movie_edit
+                                </span>
+                                <p className="font-bold">영상</p>
+                            </div>
+                            <div
+                                className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
+                                onClick={() => {
+                                    setMode(1);
+                                }}
+                            >
+                                <div
+                                    className={`${
+                                        mode === 1
+                                            ? 'h-16 categori-selected'
+                                            : ''
+                                    }`}
+                                ></div>
+                                <span className="material-symbols-outlined text-3xl">
+                                    kid_star
+                                </span>
+                                <p className="font-bold">프레임</p>
+                            </div>
+                            <div
+                                className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
+                                onClick={() => {
+                                    setMode(2);
+                                }}
+                            >
+                                <div
+                                    className={`${
+                                        mode === 2
+                                            ? 'h-16 categori-selected'
+                                            : ''
+                                    }`}
+                                ></div>
+                                <span className="material-symbols-outlined text-3xl">
+                                    title
+                                </span>
+                                <p className="font-bold">텍스트</p>
+                            </div>
+                            <div
+                                className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
+                                onClick={() => {
+                                    setMode(3);
+                                }}
+                            >
+                                <div
+                                    className={`${
+                                        mode === 3
+                                            ? 'h-16 categori-selected'
+                                            : ''
+                                    }`}
+                                ></div>
+                                <span className="material-symbols-outlined text-3xl">
+                                    volume_up
+                                </span>
+                                <p className="font-bold">오디오</p>
+                            </div>
+                            <div
+                                className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
+                                onClick={() => {
+                                    setMode(4);
+                                }}
+                            >
+                                <div
+                                    className={`${
+                                        mode === 4
+                                            ? 'h-16 categori-selected'
+                                            : ''
+                                    }`}
+                                ></div>
+                                <span className="material-symbols-outlined text-3xl">
+                                    image
+                                </span>
+                                <p className="font-bold">스티커</p>
+                            </div>
+                        </div>
+                        {/* 카테고리 선택에 따라 */}
+                        <div className="w-4/5 flex flex-col items-center p-6 overflow-y-scroll">
+                            {sideBar}
+                        </div>
                     </div>
                 </div>
                 {/* 우측부분 */}
+                {/* 상단 */}
                 <div className="w-3/4 h-full editor-height bg-gray-50 flex flex-col justify-between">
                     <div className="w-full h-3/4 px-4 py-4 flex flex-col justify-center items-center">
                         <div className="movie-width flex justify-start items-center mt-0">
-                            <p className="text-2xl">은쮸</p>
+                            <p className="text-2xl">
+                                {'여기에 현재 재생 클립 제목 입력'}
+                            </p>
                         </div>
-                        {/* 폰트 테스트 */}
-                        <p>폰트 테스트</p>
-                        <div className="relative w-full h-full flex flex-col justify-center items-center">
-                            <img
-                                className="bg-white border"
-                                style={{ width: '640px', height: '400px' }}
-                                src="/src/assets/images/nothumb.png"
-                            />
-                            <img
-                                src={selectImgUrl}
-                                className="absolute top-0 lef-0"
-                                style={{ width: '640px', height: '400px' }}
-                                alt=""
-                            />
-                            <main className="absolute" ref={canvasRef}>
-                                <CanvasItem
-                                    canvasWidth={640}
-                                    canvasHeight={400}
-                                    sticker={selectedObj}
-                                    setSticker={setSelectedObj}
-                                    eraser={eraserFlag}
-                                    stickerFlag={stickerFlag}
-                                    setStickerFlag={setStickerFlag}
-                                    mousePosition={mousePosition}
-                                ></CanvasItem>
-                            </main>
+                        <div className="flex w-full">
+                            {/* 영상 표시 부분 */}
+                            <div className="relative w-4/5 h-full flex flex-col justify-center items-center">
+                                {/* 영상 */}
+                                <video
+                                    className="bg-white border"
+                                    style={{
+                                        width: '640px',
+                                        height: '400px',
+                                        transform: `rotateY(180deg)`,
+                                    }}
+                                    ref={videoRef}
+                                    onEnded={() => {
+                                        playingIdx.current =
+                                            playingIdx.current + 1;
+                                        playVideo();
+                                    }}
+                                    crossOrigin="anonymous"
+                                />
+                                {/* 프레임 */}
+                                <img
+                                    src={selectImgUrl}
+                                    className="absolute top-0 lef-0"
+                                    style={{ width: '640px', height: '400px' }}
+                                    alt=""
+                                />
+                                {/* 스티커 */}
+                                <main className="absolute" ref={canvasRef}>
+                                    <CanvasItem
+                                        canvasWidth={640}
+                                        canvasHeight={400}
+                                        sticker={selectedObj}
+                                        setSticker={setSelectedObj}
+                                        eraser={eraserFlag}
+                                        stickerFlag={stickerFlag}
+                                        setStickerFlag={setStickerFlag}
+                                        mousePosition={mousePosition}
+                                    ></CanvasItem>
+                                </main>
+                            </div>
+                            {/* 저장 및 현재 편지 정보 */}
+                            <div className="relative w-1/5 h-full flex flex-col justify-evenly">
+                                <button
+                                    className="box-border btn-cover w-full bg-[#FF777F] text-white"
+                                    onClick={endScreenShare}
+                                >
+                                    저장하기
+                                </button>
+                                <div className="w-full flex flex-col rounded">
+                                    <h5 className="bg-[#FF777F]">편지 정보</h5>
+                                    <div>
+                                        <p>
+                                            제목: {studioDetailInfo.studioTitle}
+                                        </p>
+                                        <p>
+                                            길이:{' '}
+                                            {Math.floor(
+                                                wholeVideoInfo.length / 60
+                                            )}
+                                            분{' '}
+                                            {Math.floor(
+                                                wholeVideoInfo.length % 60
+                                            )}
+                                            초
+                                        </p>
+                                        <p>
+                                            선택 영상:{' '}
+                                            {wholeVideoInfo.clipList.length}
+                                        </p>
+                                        {wholeVideoInfo.clipList.map((clip) => {
+                                            return <p>{clip.clipTitle}</p>;
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    {/* 하단바 */}
                     <div className="w-full h-1/4 bg-white border-2 flex justify-center items-center">
                         <div className="w-full flex items-center my-4">
                             <div className=" w-1/12 flex justify-center items-center">
-                                <span className="material-symbols-outlined me-1 text-4xl">
+                                <span
+                                    className="material-symbols-outlined me-1 text-4xl"
+                                    onClick={playVideo}
+                                >
                                     play_circle
                                 </span>
                             </div>
@@ -816,6 +957,10 @@ export default function LetterMakePage() {
                                             changeVolume={(event) =>
                                                 changeVolume(clip.clipId, event)
                                             }
+                                            getDuration={(
+                                                clipId: number,
+                                                length: number
+                                            ) => getDuration(clipId, length)}
                                         />
                                     );
                                 })}
@@ -824,27 +969,14 @@ export default function LetterMakePage() {
                     </div>
                 </div>
             </div>
-            {publisher ? (
+            {/* openvidu 동작 확인용 현재 publishing 창 */}
+            {/* {publisher ? (
                 <div id="main-video" className="col-md-6">
                     <OpenViduVideoCard streamManager={publisher} />
                 </div>
             ) : (
                 <></>
-            )}
-            <div id="video-container">
-                {subscribers.length >= 1 ? (
-                    subscribers.map((subscriber) => {
-                        return (
-                            <OpenViduVideoCard
-                                key={subscriber.id}
-                                streamManager={subscriber}
-                            />
-                        );
-                    })
-                ) : (
-                    <></>
-                )}
-            </div>
+            )} */}
         </section>
     );
 }
