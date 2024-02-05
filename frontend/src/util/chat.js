@@ -3,7 +3,7 @@ import * as StompJs from '@stomp/stompjs';
 import axios from 'axios';
 import { enterChatting } from '../api/chat';
 
-const websocketUrl = 'ws://localhost:8081/ws';
+const websocketUrl = 'ws://recletter.me/ws';
 const topic = '/topic';
 const app = '/app/chat';
 let client = null;
