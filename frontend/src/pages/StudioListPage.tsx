@@ -214,7 +214,7 @@ export default function StudioListPage() {
                 </li>
                 <li className=" w-5/6 pt-12">
                     <div className="flex justify-between items-center">
-                        <p className="text-2xl font-bold">참여중인 스튜디오</p>
+                        <p className="text-2xl font-bold">참여 중인 스튜디오</p>
                     </div>
                     <div className="w-full h-1 color-bg-main my-2 color-bg-lightgray1" />
                     <div className="flex my-4 flex-wrap">
