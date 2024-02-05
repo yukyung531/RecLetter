@@ -56,8 +56,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         }
         //로그인
-        else {
-            role = existData.get().getUserRole();
+        else if(existData.get().getUserRole().equals("ROLE_USER")){
+            role = "ROLE_BOTH";
+            existData.get().setUserRole(role);
+
+            userRepository.save(existData.get());
         }
 
         return new CustomOAuth2User(oAuth2Response, role);
