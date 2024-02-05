@@ -139,8 +139,7 @@ public class StudioController {
   // TODO - JPA 예외처리
   @PutMapping("/{studioId}/title")
   public ResponseEntity<Void> updateStudioTitle(@PathVariable String studioId,
-      @RequestParam String studioTitle, @AuthenticationPrincipal User user) {
-
+      @RequestBody String studioTitle, @AuthenticationPrincipal User user) {
     // 해당 스튜디오에 참여하지 않은 사용자의 경우 UnauthorizedToUpdateStudioException 발생
     // 스튜디오를 찾지 못한 경우 StudioNotFoundException 발생
     studioService.updateStudioTitle(studioId, studioTitle, user);
