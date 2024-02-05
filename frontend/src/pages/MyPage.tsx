@@ -109,7 +109,7 @@ export default function MyPage() {
                     if (res.status === httpStatusCode.OK) {
                         alert('비밀번호가 수정되었습니다.');
                         deleteStorageData();
-                        navigate('/');
+                        navigate('/login');
                     }
                 })
                 .catch(() => {

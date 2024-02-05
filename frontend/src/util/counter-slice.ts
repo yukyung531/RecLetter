@@ -10,7 +10,7 @@ const initialState: LoginState = {
     isLogin: false,
     studioId: '',
     studioName: '',
-    theme: 1,
+    theme: 0,
 };
 
 export const loginSlice = createSlice({

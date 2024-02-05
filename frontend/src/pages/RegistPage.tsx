@@ -123,6 +123,11 @@ export default function RegistPage() {
             checkCodeAPI();
         }
     };
+    const checkCodeEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            checkCodeAPI();
+        }
+    };
     /** 카운팅 시작 */
     const startCounting = () => {
         setCount(600);
@@ -231,6 +236,7 @@ export default function RegistPage() {
                             onChange={(e) => {
                                 changeCode(e);
                             }}
+                            onKeyDown={checkCodeEnter}
                             placeholder="인증코드 입력"
                         />
                         <p
@@ -358,12 +364,12 @@ export default function RegistPage() {
                             onChange={(e) => {
                                 changeEmail(e);
                             }}
+                            onKeyDown={sendEmailCodeEnter}
                             placeholder="sample@naver.com"
                         />
                         <p
-                            className="w-32 border-2 rounded-md flex justify-center items-center text-2xl color-border-main color-text-main mx-2 cursor-pointer hover:color-bg-main hover:text-white hover:transition-all"
+                            className="w-32 border-2 rounded-md flex justify-center items-center text-2xl color-border-main color-text-main mx-2 cursor-pointer hover:color-bg-main hover:text-white btn-animation"
                             onClick={checkEmailAPI}
-                            onKeyDown={sendEmailCodeEnter}
                         >
                             인증하기
                         </p>

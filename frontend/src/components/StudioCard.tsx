@@ -21,7 +21,7 @@ export default function StudioCard({
     if (!props.hasMyClip) {
         isUploadUi = (
             <p className="absolute px-3 top-2 right-2 border-2 border-white color-bg-subbold text-center text-lg rounded-xl text-white">
-                미 참여
+                미참여
             </p>
         );
     }

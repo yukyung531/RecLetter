@@ -110,7 +110,7 @@ export default function StudioMainPage() {
             getUserInfo();
         }
         if (loginValue === 'false' || !loginValue || !token) {
-            navigator(`/`);
+            navigator(`/login`);
         }
 
         /** 페이지 새로고침 전에 실행 할 함수 */
