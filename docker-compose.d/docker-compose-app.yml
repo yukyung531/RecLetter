@@ -16,6 +16,8 @@ services:
     image: ssuyas/recletter_backend
     container_name: RecLetterBackend
     restart: unless-stopped
+    ports:
+      - "8081:8081"
     networks:
       - RecLetterNetwork
     volumes:
