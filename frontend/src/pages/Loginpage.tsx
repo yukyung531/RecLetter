@@ -10,6 +10,7 @@ import {
     studioState,
 } from '../util/counter-slice';
 import axios from 'axios';
+import Image from '../assets/icons/google_icon.svg';
 
 export default function LoginPage() {
     const [inputEmail, setInputEmail] = useState<string>('');
@@ -19,6 +20,11 @@ export default function LoginPage() {
     const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
+
+    const logo = <img src={Image} alt="로고" width={250}></img>;
+
+
 
     const VITE_REACT_GOOGLE_LOGIN_URL = import.meta.env.VITE_REACT_GOOGLE_LOGIN_URL;
 
@@ -126,15 +132,15 @@ export default function LoginPage() {
                 >
                     로그인
                 </div>
-                <p className="mb-7 text-2xl color-text-darkgray">
-                    ---------------------------- 또는
-                    ----------------------------
+                <p className="mb-2 text-2xl color-text-darkgray">
+                    ------------------------- 또는
+                    -------------------------
                 </p>
                 <a
                     href={VITE_REACT_GOOGLE_LOGIN_URL}
-                    className="block w-80 text-black border-black text-2xl border text-center py-2 rounded-md"
+                    className="py-4"
                 >
-                    Google로 로그인하기
+                    {logo}
                 </a>
                 <div className="flex justify-center items-center my-2">
                     <Link
