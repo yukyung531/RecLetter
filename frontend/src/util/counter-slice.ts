@@ -4,11 +4,13 @@ export interface LoginState {
     isLogin: boolean;
     studioId: string;
     studioName: string;
+    theme: number;
 }
 const initialState: LoginState = {
     isLogin: false,
     studioId: '',
     studioName: '',
+    theme: 1,
 };
 
 export const loginSlice = createSlice({
@@ -24,7 +26,11 @@ export const loginSlice = createSlice({
         studioNameState: (state, action) => {
             state.studioName = action.payload;
         },
+        themeState: (state, action) => {
+            state.theme = action.payload;
+        },
     },
 });
-export const { loginState, studioState, studioNameState } = loginSlice.actions;
+export const { loginState, studioState, studioNameState, themeState } =
+    loginSlice.actions;
 export default loginSlice.reducer;

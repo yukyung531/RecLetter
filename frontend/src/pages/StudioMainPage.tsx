@@ -70,10 +70,10 @@ export default function StudioMainPage() {
             const splitUrl = document.location.href.split('/');
             const studioId = splitUrl[splitUrl.length - 1];
             if (studioId !== null) {
-                dispatch(studioState(studioId));
                 const getDetail = async (studioId: string) => {
                     await studioDetail(studioId).then((res) => {
                         if (res.status === httpStatusCode.OK) {
+                            dispatch(studioState(studioId));
                             dispatch(studioNameState(res.data.studioTitle));
                             console.log(res.data);
                             setStudioDetailInfo(res.data);
@@ -112,8 +112,14 @@ export default function StudioMainPage() {
         if (loginValue === 'false' || !loginValue || !token) {
             navigator(`/`);
         }
+
+        /** 페이지 새로고침 전에 실행 할 함수 */
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            disconnect();
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
         return () => {
-            console.log('작동');
+            window.removeEventListener('beforeunload', handleBeforeUnload);
             disconnect();
         };
     }, []);
@@ -196,16 +202,11 @@ export default function StudioMainPage() {
 
     //좌측 사이드바
     let leftSideBar = (
-        <div className="w-4/5 h-full flex flex-col items-center px-6 py-4 overflow-y-scroll color-bg-lightgray1">
+        <div className="w-4/5 h-full flex flex-col items-center px-4 py-4 overflow-y-scroll ">
             <div className="w-full flex justify-start text-xl ">
                 <p>선택된 영상</p>
             </div>
-            <div className="px-6 my-2 flex items-center justify-center bg-white border-2 rounded-md color-text-main color-border-main cursor-pointer hover:color-bg-sublight hover:text-white hover:color-border-sublight">
-                <span className="material-symbols-outlined text-4xl">
-                    arrow_right
-                </span>
-                <p className="text-xl font-bold">전체 편지 자동 재생</p>
-            </div>
+
             {studioDetailInfo.clipInfoList ? (
                 studioDetailInfo.clipInfoList.map((clip) => {
                     if (clip.clipOrder != -1) {
@@ -331,78 +332,36 @@ export default function StudioMainPage() {
             ) : (
                 <></>
             )}
-            <div className="h-16 w-full px-12 bg-black text-white flex justify-between items-center">
-                <div className="flex items-center">
-                    <span
-                        className="test-2xl material-symbols-outlined cursor-pointer"
-                        onClick={moveStudioList}
-                    >
-                        arrow_back_ios
-                    </span>
-                    {!isEditingName ? (
-                        <p className="text-2xl w-64 ms-6 cursor-default">
-                            {studioDetailInfo
-                                ? studioDetailInfo.studioTitle
-                                : 'new studio'}
-                        </p>
-                    ) : (
-                        <input
-                            type="text"
-                            value={studioDetailInfo?.studioTitle}
-                            className="text-2xl text-black w-64"
-                            onChange={updateStudioName}
-                        />
-                    )}
-                    <div className="ml-28" />
-
-                    {!isEditingName ? (
-                        <span
-                            className="material-symbols-outlined mx-2 text-2xl cursor-pointer"
-                            onClick={handleStudioEditing}
-                        >
-                            edit
-                        </span>
-                    ) : (
-                        <span
-                            className="material-symbols-outlined mx-2 text-2xl cursor-pointer"
-                            onClick={handleStudioName}
-                        >
-                            check_box
-                        </span>
-                    )}
-
-                    <span className="material-symbols-outlined mx-2 text-2xl cursor-pointer">
-                        group_add
-                    </span>
-                </div>
-                <a className=" w-52 text-center p-1 rounded-lg text-xl color-bg-yellow2 text-black">
-                    영상편지 완성하기
-                </a>
-            </div>
 
             {/* 중앙 섹션 */}
             <div className="flex w-full h-full">
                 {/* 좌측부분 */}
-                <div className="w-1/4 h-full flex">
+                <div className="w-1/4 h-full flex border border-r-2">
                     {/* 카테고리 */}
-                    <div className="w-1/6 color-text-main ">
+                    <div className="relative w-1/6 color-text-main color-bg-lightgray1">
                         <div
-                            className={`h-16  flex flex-col justify-center items-center cursor-pointer ${
-                                mode === 0 ? 'categori-selected' : ''
-                            }`}
+                            className={`w-full h-16  flex flex-col justify-center items-center cursor-pointer `}
                             onClick={onPressMovieEdit}
                         >
+                            <div
+                                className={`${
+                                    mode === 0 ? 'h-16 categori-selected' : ''
+                                }`}
+                            ></div>
                             <span className="material-symbols-outlined text-3xl">
                                 movie_edit
                             </span>
                             <p className="font-bold">영상</p>
                         </div>
                         <div
-                            className={`h-16 flex flex-col justify-center items-center cursor-pointer ${
-                                mode === 1 ? 'categori-selected' : ''
-                            }`}
+                            className={`h-16 flex flex-col justify-center items-center cursor-pointer `}
                             onClick={onPressChecklist}
                         >
+                            <div
+                                className={`${
+                                    mode === 1 ? 'h-16 categori-selected ' : ''
+                                }`}
+                            ></div>
                             <span className="material-symbols-outlined text-3xl">
                                 checklist
                             </span>
@@ -414,32 +373,68 @@ export default function StudioMainPage() {
                 </div>
                 {/* 우측부분 */}
                 <div className="w-3/4 h-full flex justify-between">
-                    <div className="w-3/4 px-4 py-4 flex flex-col justify-center items-center">
-                        <div className="movie-width flex justify-start items-center">
-                            <p className="text-2xl">
-                                {selectedVideo.clipTitle}
-                            </p>
+                    <div className="w-3/4">
+                        <div className="h-16 w-full px-6  color-bg-sublight text-black flex justify-between items-center">
+                            <div className="w-full flex justify-between items-center">
+                                <div className="flex w-fit">
+                                    {/* <span
+                                        className="flex items-center text-2xl material-symbols-outlined cursor-pointer"
+                                        onClick={moveStudioList}
+                                    >
+                                        arrow_back_ios
+                                    </span> */}
+                                    <input
+                                        type="text"
+                                        value={studioDetailInfo?.studioTitle}
+                                        className="w-36 border-b-2 color-bg-sublight flex items-center text-2xl text-white ms-2"
+                                        onChange={updateStudioName}
+                                    />
+                                    <span
+                                        className="material-symbols-outlined mx-2 text-2xl text-white cursor-pointer"
+                                        onClick={handleStudioName}
+                                    >
+                                        edit
+                                    </span>
+                                </div>
+
+                                <div className="relative right-24 px-6 my-2 flex items-center justify-center bg-white border-2 rounded-md color-text-main color-border-main cursor-pointer hover:color-bg-sublight hover:text-white hover:border-white">
+                                    <span className="material-symbols-outlined text-4xl">
+                                        arrow_right
+                                    </span>
+                                    <p className="text-xl font-bold">
+                                        전체 편지 자동 재생
+                                    </p>
+                                </div>
+                                <div></div>
+                            </div>
                         </div>
-                        <video
-                            src={selectedVideo.clipUrl}
-                            crossOrigin="anonymous"
-                            controls
-                            style={{ width: '640px', height: '480px' }}
-                        />
-                        <div className="w-full flex justify-center items-center my-4">
-                            <span className="material-symbols-outlined me-1 text-4xl">
-                                play_circle
-                            </span>
-                            <span className="material-symbols-outlined me-1 text-4xl">
-                                stop_circle
-                            </span>
-                            <div className="w-full h-2 bg-black"></div>
+                        <div className=" flex flex-col justify-center items-center">
+                            <div className="w-full  flex justify-start items-center">
+                                <p className="mt-8 ms-12 mb-4 text-2xl">
+                                    {selectedVideo.clipTitle}
+                                </p>
+                            </div>
+                            <video
+                                src={selectedVideo.clipUrl}
+                                crossOrigin="anonymous"
+                                controls
+                                style={{ width: '800px', height: '480px' }}
+                            />
+                            <div className="w-full flex justify-center items-center my-4 px-12">
+                                <span className="material-symbols-outlined me-1 text-4xl">
+                                    play_circle
+                                </span>
+                                <div className="w-full h-2 bg-black"></div>
+                            </div>
                         </div>
                     </div>
 
                     {/* (영상 리스트, 참가자 관리) */}
-                    <div className="w-1/4 color-bg-lightgray1 p-2">
+                    <div className="w-1/4 p-2 border border-l-2">
                         <div className="w-full px-2 flex flex-col justify-center items-center">
+                            <a className=" w-52 text-center my-2 p-1 rounded-lg text-xl color-bg-yellow2 text-black border border-black">
+                                영상편지 완성하기
+                            </a>
                             <div
                                 className="w-full h-24 mx-4 my-2 color-bg-main text-white text-xl flex flex-col justify-center items-center border rounded-md cursor-pointer hover:color-bg-subbold"
                                 onClick={onClickRecodePage}

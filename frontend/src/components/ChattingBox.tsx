@@ -3,6 +3,7 @@ import {
     connect,
     disconnect,
     firstChatJoin,
+    reSubscribe,
     sendMessage,
     unSubscribe,
 } from '../util/chat';
@@ -26,6 +27,7 @@ export default function ChattingBox() {
     const [userId, setUserId] = useState<string>('');
     const [currentPeople, setCurrentPeople] = useState<string[]>([]);
     const [chatFlag, setChatFlag] = useState<boolean>(false);
+    const [peopleFlag, setPeopleFlag] = useState<boolean>(false);
     //스크롤 탐지용
     const messageEndRef = useRef<HTMLDivElement>(null);
 
@@ -55,18 +57,12 @@ export default function ChattingBox() {
         }
     }, [chattingList]);
 
-    // useEffect(() => {
-    //     return () => {
-    //         console.log('작동');
-    //         disconnect();
-    //     };
-    // }, []);
-
     /** 유저 API 설정 */
     const chatInitialAPI = async () => {
         if (!chatFlag) {
             await getUser().then((res) => {
                 if (res.status === httpStatusCode.OK) {
+                    console.log('새로고침하여 유저 정보를 새로이 받아옵니다.');
                     setUserNickname(res.data.userNickname);
                     setUserId(res.data.userId);
                     setCurrentPeople([]);
@@ -82,6 +78,21 @@ export default function ChattingBox() {
                     setChattingList([]);
                 }
             });
+        }
+        // 처음 진입한게 아니라 connect가 이미 된 상태라 구독으로 바꾸기
+        else {
+            await getUser().then((res) => {
+                if (res.status === httpStatusCode.OK) {
+                    console.log('재진입 유저 정보를 새로이 받아옵니다.');
+                    setUserNickname(res.data.userNickname);
+                    setUserId(res.data.userId);
+                    setCurrentPeople([]);
+                    setChatToggle(false);
+                    setChatFlag(true);
+                    setChattingList([]);
+                }
+            });
+            reSubscribe(studioCurrentId);
         }
     };
     // 채팅 토글 바꾸기
@@ -127,6 +138,36 @@ export default function ChattingBox() {
                     send
                 </span>
             );
+        }
+    };
+
+    /** 채팅 리스트 열기 */
+    const openPeople = () => {
+        if (peopleFlag) {
+            return (
+                <div className="absolute top-8 w-72 max-h-52 overflow-y-scroll rounded-md p-2 bg-slate-200">
+                    <div className="relative w-full flex justify-between">
+                        <p>참여자 목록</p>
+                        <p
+                            className="cursor-pointer hover:font-bold"
+                            onClick={() => {
+                                setPeopleFlag(false);
+                            }}
+                        >
+                            x
+                        </p>
+                    </div>
+                    {currentPeople.map((item, index) => {
+                        return (
+                            <div className="m-1" key={'people ' + index}>
+                                {item}
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        } else {
+            return <></>;
         }
     };
 
@@ -197,7 +238,7 @@ export default function ChattingBox() {
         if (chatToggle) {
             return (
                 <div className=" w-88 h-5/6 rounded-lg fixed flex bottom-16 flex-col justify-between items-center right-8 px-5 py-3 color-bg-sublight z-20 ">
-                    <div className="w-full">
+                    <div className="relative w-full">
                         <div className="flex justify-between">
                             <p className="text-center text-2xl font-bold">
                                 studio1
@@ -211,19 +252,26 @@ export default function ChattingBox() {
                                 x
                             </p>
                         </div>
-                        <div className="flex justify-between">
-                            <div>
+                        <div className="relative flex justify-between">
+                            <div
+                                className="relative -left-2 flex items-center cursor-pointer rounded-full px-2 hover:font-bold hover:bg-gray-300"
+                                onClick={() => {
+                                    setPeopleFlag(true);
+                                }}
+                            >
                                 <span className="material-symbols-outlined text-lg">
                                     group
                                 </span>
-                                <p>{currentPeople}</p>
+                                <p className="mx-1">{currentPeople.length}</p>
                             </div>
-
-                            <span className="material-symbols-outlined text-lg">
-                                menu
-                            </span>
+                            <div className="flex justify-center items-center">
+                                <div className="w-4 h-4 rounded-full color-bg-darkgray mx-1"></div>
+                                <div className="w-4 h-4 rounded-full color-bg-lightgray1 mx-1"></div>
+                                <div className="w-4 h-4 rounded-full color-bg-main mx-1"></div>
+                            </div>
                         </div>
-                        <div className="w-full horizenbar bg-black"></div>
+                        {openPeople()}
+                        <div className="w-full horizenbar bg-black my-1"></div>
                     </div>
 
                     <div className="w-full rounded overflow-y-scroll h-full">

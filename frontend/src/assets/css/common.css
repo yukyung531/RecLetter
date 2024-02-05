@@ -75,6 +75,9 @@ body {
 .w-30per {
     width: 30%;
 }
+.w-70per {
+    width: 70%;
+}
 .w-88 {
     width: 22rem;
 }
@@ -112,7 +115,9 @@ body {
 }
 
 .categori-selected {
-    border-right: 8px solid #ff777f;
+    right: 0;
+    position: absolute;
+    border-right: 4px solid #ff777f;
 }
 .horizenbar {
     height: 1px;
