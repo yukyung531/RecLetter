@@ -26,5 +26,5 @@ export async function getClipThumb(clipId: string) {
 
 /** DELETE 클립 삭제 */
 export async function deleteClip(clipId: number) {
-    return await local.delete(`/clip/${clipId}`);
+    return await local.delete(`/api/clip/${clipId}`);
 }

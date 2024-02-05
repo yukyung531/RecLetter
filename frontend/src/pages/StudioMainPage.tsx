@@ -417,8 +417,13 @@ export default function StudioMainPage() {
                             <video
                                 src={selectedVideo.clipUrl}
                                 crossOrigin="anonymous"
-                                controls
-                                style={{ width: '800px', height: '480px' }}
+                                style={{
+                                    transform: `rotateY(180deg)`,
+                                    width: '640px',
+                                    height: '480px',
+                                    display: 'block',
+                                }}
+                                autoPlay
                             />
                             <div className="w-full flex justify-center items-center my-4 px-12">
                                 <span className="material-symbols-outlined me-1 text-4xl">
