@@ -20,6 +20,8 @@ export default function LoginPage() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
+    const VITE_REACT_GOOGLE_LOGIN_URL = import.meta.env.VITE_REACT_GOOGLE_LOGIN_URL;
+
     useEffect(() => {
         dispatch(studioState(''));
         dispatch(studioNameState(''));
@@ -129,7 +131,7 @@ export default function LoginPage() {
                     ----------------------------
                 </p>
                 <a
-                    href="http://localhost:5173/api/oauth2/authorization/google"
+                    href={VITE_REACT_GOOGLE_LOGIN_URL}
                     className="block w-80 text-black border-black text-2xl border text-center py-2 rounded-md"
                 >
                     Google로 로그인하기
