@@ -109,7 +109,11 @@ export default function ClipRecodePage() {
     const videoPreviewRef = useRef<HTMLVideoElement>(null);
 
     //영상 권한
-    const constraints: Const = { audio: true, video: true };
+    const constraints= { audio: true, video: {
+        width: {ideal: 1280},
+        height: {ideal: 720},
+        facingMode: "environment"
+    } };
     /**useEffect를 이용한 촬영 준비 설정
      * 오디오, 비디오 권한을 받아, 허가를 얻으면 mediaStream을 얻는다.
      * 해당 스트림을 비디오 녹화 화면(videoOutputRef)와 연결하여 현재 웹캠으로 촬영되는 화면의 미리보기를 실행한다.
@@ -624,7 +628,7 @@ export default function ClipRecodePage() {
                         <div className="box-border my-3 py-3 min-h-[80px] h-[80px] rounded-full border-2 border-black movie-width text-xl whitespace-pre-wrap flex align-middle justify-center text-center">
                             {selectedScript}
                         </div>
-                        <div className="w-full aspect-video flex justify-center align-middle bg-black">
+                        <div className="w-[60%] aspect-video flex justify-center align-middle bg-black">
                             {/*영상 촬영 화면*/}
                             <video
                                 className="bg-white border my-2"

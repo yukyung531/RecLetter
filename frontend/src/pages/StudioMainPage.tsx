@@ -432,8 +432,8 @@ export default function StudioMainPage() {
                                 crossOrigin="anonymous"
                                 style={{
                                     transform: `rotateY(180deg)`,
-                                    width: '640px',
-                                    height: '480px',
+                                    width: '60%',
+                                    aspectRatio: 16/9,
                                     display: 'block',
                                 }}
                                 autoPlay

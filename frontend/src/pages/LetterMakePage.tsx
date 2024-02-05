@@ -150,6 +150,9 @@ export default function LetterMakePage() {
         userNickname: '',
     });
 
+    //현재 재생 중
+    const [playing, setPlaying] = useState<boolean>(false);
+
     /** 선택한 프레임 적용 */
     const selectImg = (source: string) => {
         setSelectImgUrl(source);
@@ -359,16 +362,35 @@ export default function LetterMakePage() {
 
     const videoRef = useRef<HTMLVideoElement>(null);
 
+    //현재 재생 중인 index
     const playingIdx = useRef<number>(0);
 
+    //현재 재생중인 클립 정보
+    const [nowPlayingVideo, setNowPlayingVideo] = useState<ClipInfo>({
+        clipId: -1,
+        clipTitle: '원하시는 영상을 입력하세요',
+        clipOwner: '',
+        clipLength: -1,
+        clipThumbnail: '',
+        clipUrl: '',
+        clipOrder: -1,
+        clipVolume: -1,
+        clipContent: '',
+    });
+
+    /** playVideo()
+     *  비디오를 플레이한다.
+     */
     const playVideo = () => {
-        if (videoRef.current !== null) {
+        setPlaying(true);
+        if (videoRef.current) {
             //idx 범위 내부면 비디오 재생 및 다음으로 넘기는 함수
             if (
                 playingIdx.current >= 0 &&
                 playingIdx.current < usedClipList.length
             ) {
                 //범위 안이면 실행, 목록, 볼륨 조절
+                setNowPlayingVideo(usedClipList[playingIdx.current]);
                 videoRef.current.src = usedClipList[playingIdx.current].clipUrl;
                 videoRef.current.volume =
                     usedClipList[playingIdx.current].clipVolume / 100;
@@ -376,10 +398,20 @@ export default function LetterMakePage() {
             } else {
                 //범위 밖이면 정지
                 playingIdx.current = 0;
-                videoRef.current.pause();
+                stopVideo();
             }
         }
     };
+
+    /** stopVideo()
+     *  비디오를 정지한다.
+     */
+    const stopVideo = () => {
+        setPlaying(false);
+        if(videoRef.current) {
+            videoRef.current.pause();
+        }
+    }
 
     //////////////////////////////////////뒤로가기 버튼 누르면 뒤로가기///////////////////////////////////////////////
     const goBack = () => {
@@ -854,7 +886,7 @@ export default function LetterMakePage() {
                     <div className="w-full h-3/4 px-4 py-4 flex flex-col justify-center items-center">
                         <div className="movie-width flex justify-start items-center mt-0">
                             <p className="text-2xl">
-                                {'여기에 현재 재생 클립 제목 입력'}
+                                {nowPlayingVideo.clipTitle}
                             </p>
                         </div>
                         <div className="flex w-full">
@@ -864,8 +896,8 @@ export default function LetterMakePage() {
                                 <video
                                     className="bg-white border"
                                     style={{
-                                        width: '640px',
-                                        height: '400px',
+                                        width: '60%',
+                                        aspectRatio: 16/9,
                                         transform: `rotateY(180deg)`,
                                     }}
                                     ref={videoRef}
@@ -880,7 +912,8 @@ export default function LetterMakePage() {
                                 <img
                                     src={selectImgUrl}
                                     className="absolute top-0 lef-0"
-                                    style={{ width: '640px', height: '400px' }}
+                                    style={{ width: '60%',
+                                    aspectRatio: 16/9, }}
                                     alt=""
                                 />
                                 {/* 스티커 */}
@@ -938,12 +971,22 @@ export default function LetterMakePage() {
                     <div className="w-full h-1/4 bg-white border-2 flex justify-center items-center">
                         <div className="w-full flex items-center my-4">
                             <div className=" w-1/12 flex justify-center items-center">
+                                {/* 재생버튼 */}
+                                {!playing ?
                                 <span
-                                    className="material-symbols-outlined me-1 text-4xl"
-                                    onClick={playVideo}
+                                className="material-symbols-outlined me-1 text-4xl"
+                                onClick={playVideo}
                                 >
                                     play_circle
                                 </span>
+                                :
+                                <span
+                                className="material-symbols-outlined me-1 text-4xl"
+                                onClick={stopVideo}
+                                >
+                                    stop_circle
+                                </span>
+                                }
                             </div>
                             <div className="w-11/12 flex items-center overflow-x-scroll">
                                 {usedClipList.map((clip) => {
