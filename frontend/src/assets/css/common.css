@@ -72,8 +72,29 @@ body {
     margin: 8px;
 }
 
+.w-2per {
+    width: 2%;
+}
+.w-3per {
+    width: 3%;
+}
+.w-5per {
+    width: 5%;
+}
+.w-7per {
+    width: 7%;
+}
+.w-10per {
+    width: 10%;
+}
+.w-20per {
+    width: 20%;
+}
 .w-30per {
     width: 30%;
+}
+.w-40per {
+    width: 40%;
 }
 .w-70per {
     width: 70%;
@@ -95,6 +116,9 @@ body {
 }
 .w-147 {
     width: 36.75rem;
+}
+.top-30per {
+    top: 30%;
 }
 .btn-cover {
     width: fit-content;
@@ -138,6 +162,77 @@ body {
     font-weight: normal;
     font-style: normal;
 }
+
+/* 애니메이션 */
+.animation-shining {
+    animation: shining 3s ease infinite;
+}
+.animation-shining-reverse {
+    animation: shining-reverse 3s ease infinite;
+}
+.animation-updown {
+    animation: updown 3s ease-in-out infinite;
+}
+.animation-clockRotate {
+    animation: clockRotate 3.5s ease infinite;
+}
+.animation-bold {
+    animation: bold 3s ease infinite;
+}
+
+@keyframes updown {
+    0%,
+    100% {
+        transform: translateY(0); /* 초기 위치 */
+    }
+
+    50% {
+        transform: translateY(20px); /* 이동할 거리 및 방향 설정 */
+    }
+}
+
+@keyframes shining {
+    0%,
+    100% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+@keyframes shining-reverse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+@keyframes clockRotate {
+    0%,
+    100% {
+        transform-origin: bottom left;
+        transform: rotate(0);
+    }
+
+    50% {
+        transform-origin: bottom left;
+        transform: rotate(20deg);
+    }
+}
+@keyframes bold {
+    0%,
+    100% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
 .react-datepicker {
     width: 122px;
     height: 48px;
