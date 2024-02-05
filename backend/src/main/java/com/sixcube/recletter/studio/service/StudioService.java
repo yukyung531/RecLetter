@@ -3,6 +3,7 @@ package com.sixcube.recletter.studio.service;
 import com.sixcube.recletter.clip.dto.ClipInfo;
 import com.sixcube.recletter.studio.dto.Studio;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
+import com.sixcube.recletter.studio.dto.req.LetterVideoReq;
 import com.sixcube.recletter.studio.dto.req.UpdateStudioReq;
 import com.sixcube.recletter.studio.exception.MaxStudioOwnCountExceedException;
 import com.sixcube.recletter.studio.exception.StudioCreateFailureException;
@@ -39,5 +40,7 @@ public interface StudioService {
   void updateStudio(UpdateStudioReq updateStudioReq,User user);
 
   String searchStudioStickerUrl(String studioId);
+
+  public LetterVideoReq createLetterVideoReq(String studioId, User user);
 
 }

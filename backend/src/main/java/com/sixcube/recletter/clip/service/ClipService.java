@@ -30,4 +30,6 @@ public interface ClipService
     public void updateUsedClip(String studioId, int clipId, int clipOrder, int clipVolume);
 
     public void updateUnusedClip(String studioId, int clipId);
+
+    public List<ClipInfo> searchUsedClipInfoByOrder(String studioId);
 }

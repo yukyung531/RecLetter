@@ -4,6 +4,7 @@ import com.sixcube.recletter.studio.dto.Studio;
 import com.sixcube.recletter.studio.dto.StudioInfo;
 import com.sixcube.recletter.studio.dto.StudioParticipant;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
+import com.sixcube.recletter.studio.dto.req.LetterVideoReq;
 import com.sixcube.recletter.studio.dto.req.UpdateStudioReq;
 import com.sixcube.recletter.studio.dto.res.SearchActiveUserRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioDetailRes;
@@ -13,12 +14,17 @@ import com.sixcube.recletter.studio.service.StudioParticipantService;
 import com.sixcube.recletter.studio.service.StudioService;
 import com.sixcube.recletter.user.dto.User;
 import jakarta.validation.Valid;
+
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import static java.time.LocalDate.now;
 
 @RestController
 @RequestMapping("/studio")
@@ -142,6 +148,8 @@ public class StudioController {
     return ResponseEntity.ok().build();
   }
 
+  //TODO- 스티커 적용 안 받았을 때 인풋 결정 : 일단 null로 진행
+  //TODO- clipOrder 변경 transactional 고려
   @PutMapping
   public ResponseEntity<Void> updateStudio(@ModelAttribute UpdateStudioReq updateStudioReq, @AuthenticationPrincipal User user) {
 
@@ -150,9 +158,15 @@ public class StudioController {
     return ResponseEntity.ok().build();
   }
 
+  //TODO- clipInfo 포함 정보 확정
   @GetMapping("/{studioId}/letter")
-  public ResponseEntity<Void> createLetter(@PathVariable String studioId){
-
+  public ResponseEntity<Void> createLetter(@PathVariable String studioId, @AuthenticationPrincipal User user){
+    //사용한 클립 리스트, 프레임, 등등을 전달 해줘야 함!
+  //- 메인 화면의 진행 정도를 표시해주는 곳에 완료 버튼이 있고, 방장만 사용할 수 있다.
+    //- 기한 이틀 전에는 모든 사용자들에게 완료(인코딩) 권한이 주어진다.
+    LetterVideoReq letterVideoReq=studioService.createLetterVideoReq(studioId,user);
+    log.debug(letterVideoReq.toString());
+    //TODO- python server로 인코딩 요청전송
 
     return ResponseEntity.ok().build();
   }

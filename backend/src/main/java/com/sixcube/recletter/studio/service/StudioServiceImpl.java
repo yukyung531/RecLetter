@@ -5,8 +5,8 @@ import com.sixcube.recletter.clip.service.ClipService;
 import com.sixcube.recletter.studio.S3Util;
 import com.sixcube.recletter.studio.StudioUtil;
 import com.sixcube.recletter.studio.dto.Studio;
-import com.sixcube.recletter.studio.dto.StudioParticipant;
 import com.sixcube.recletter.studio.dto.UsedClipInfo;
+import com.sixcube.recletter.studio.dto.req.LetterVideoReq;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.dto.req.UpdateStudioReq;
 import com.sixcube.recletter.studio.exception.*;
@@ -17,12 +17,16 @@ import com.sixcube.recletter.user.service.UserService;
 import jakarta.transaction.Transactional;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.List;
 import java.util.StringTokenizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import static java.time.LocalDate.now;
 
 @Service
 @RequiredArgsConstructor
@@ -205,4 +209,27 @@ public class StudioServiceImpl implements StudioService {
     }
     return "";
   }
+
+  @Override
+  public LetterVideoReq createLetterVideoReq(String studioId, User user){
+    Studio studio=searchStudioByStudioId(studioId, user);
+    int leftDays= Period.between(now(), LocalDate.from(studio.getExpireDate())).getDays();
+
+    if(leftDays<0){
+      throw new ExpiredStudioException(); //기한 만료 스튜디오
+    } else if (leftDays<2 || studio.getStudioOwner().equals(user.getUserId())){ //기한이 2일 이내 남았거나, 방장인 경우
+      //진행
+        return LetterVideoReq.builder()
+              .studio_id(studio.getStudioId())
+              .studio_frame_id(studio.getStudioFrameId())
+              .studio_font(studio.getStudioFontId())
+              .studio_bgm(studio.getStudioBgmId())
+              .studio_volume(studio.getStudioVolume())
+              .clip_info_list(clipService.searchUsedClipInfoByOrder(studioId))
+              .build();
+    } else{
+      throw new UnauthorizedToCreateLetterException(); //완성요청 접근 권한 없음
+    }
+  }
+
 }

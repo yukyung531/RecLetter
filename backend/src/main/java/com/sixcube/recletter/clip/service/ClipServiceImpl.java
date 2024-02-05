@@ -174,5 +174,27 @@ public class ClipServiceImpl implements ClipService {
         clipRepository.save(clip);
     }
 
+    @Override
+    public List<ClipInfo> searchUsedClipInfoByOrder(String studioId) {
+        List<Clip> clipList = clipRepository.findClipsByStudioIdOrderByClipOrder(studioId);
+        List<ClipInfo> clipInfoList = new ArrayList<>();
+        for (Clip clip : clipList) {
+            if(clip.getClipOrder()<0){
+                continue;
+            }
+            ClipInfo clipInfo = ClipInfo.builder()
+                    .clipId(clip.getClipId())
+                    .clipTitle(clip.getClipTitle())
+                    .clipVolume(clip.getClipVolume())
+                    .clipOwner(clip.getClipOwner())
+                    .clipContent(clip.getClipContent())
+                    .clipOrder(clip.getClipOrder())
+                    .clipUrl(createSignedClipUrl(getFileKey(clip)))
+                    .build();
+            clipInfoList.add(clipInfo);
+        }
+        return clipInfoList;
+    }
+
 
 }
