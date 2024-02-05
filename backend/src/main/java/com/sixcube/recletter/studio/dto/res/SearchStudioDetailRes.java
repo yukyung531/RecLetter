@@ -23,4 +23,5 @@ public class SearchStudioDetailRes {
   private Integer studioFrameId;
   private Integer studioFontId;
   private Integer studioBgmId;
+  private String studioStickerUrl;
 }

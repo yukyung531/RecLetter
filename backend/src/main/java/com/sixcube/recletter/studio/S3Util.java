@@ -3,6 +3,7 @@ package com.sixcube.recletter.studio;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.sixcube.recletter.clip.exception.AwsAuthorizationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,11 +67,17 @@ public class S3Util {
     public boolean isObject(String fileName){
         return amazonS3Client.doesObjectExist(bucket, fileName);
     }
-    public String getSignedUrl(String fileName) throws Exception {
-        CannedSignerRequest request=createRequestForCannedPolicy(distributionDomain,fileName,privateKeyFilePath,keyPairId);
-        SignedUrl signedUrlCanned= SigningUtilities.signUrlForCannedPolicy(request);
-        log.debug(signedUrlCanned.toString());
-        return signedUrlCanned.url().toString();
+    public String getSignedUrl(String fileName) {
+        CannedSignerRequest request;
+        try {
+            request = createRequestForCannedPolicy(distributionDomain,fileName,privateKeyFilePath,keyPairId);
+            SignedUrl signedUrlCanned= SigningUtilities.signUrlForCannedPolicy(request);
+            log.debug(signedUrlCanned.toString());
+            return signedUrlCanned.url().toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new AwsAuthorizationException();
+        }
     }
 
     private CannedSignerRequest createRequestForCannedPolicy(String distributionDomainName, String fileNameToUpload,

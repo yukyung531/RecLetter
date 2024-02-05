@@ -26,4 +26,8 @@ public interface ClipService
     public List<ClipInfo> searchClipInfoList(String studioId);
 
     public String createSignedClipUrl(String fileName);
+
+    public void updateUsedClip(String studioId, int clipId, int clipOrder, int clipVolume);
+
+    public void updateUnusedClip(String studioId, int clipId);
 }

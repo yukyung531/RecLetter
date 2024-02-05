@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -17,11 +18,12 @@ public class UpdateStudioReq {
 
   private String studioId;
   private List<UsedClipInfo> usedClipList;
-  private List<String> unsuedClipList;
+  private List<Integer> unsuedClipList;
   private Integer studioFrameId;
   private Integer studioFontId;
   private Integer studioFontSize;
-  private Integer studioFontBold;
+  private Boolean studioFontBold;
   private Integer studioBgmId;
   private Integer studioVolume;
+  private MultipartFile studioSticker;
 }

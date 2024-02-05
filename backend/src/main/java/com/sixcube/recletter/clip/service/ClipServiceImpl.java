@@ -153,5 +153,26 @@ public class ClipServiceImpl implements ClipService {
         return url;
     }
 
+    @Override
+    public void updateUsedClip(String studioId, int clipId, int clipOrder, int clipVolume) {
+        Clip clip=searchClip(clipId);
+        if(!clip.getStudioId().equals(studioId)){
+            throw new ClipNotCorrespondingStudioException();
+        }
+        clip.setClipOrder(clipOrder);
+        clip.setClipVolume(clipVolume);
+        clipRepository.save(clip);
+    }
+
+    @Override
+    public void updateUnusedClip(String studioId, int clipId) {
+        Clip clip=searchClip(clipId);
+        if(!clip.getStudioId().equals(studioId)){
+            throw new ClipNotCorrespondingStudioException();
+        }
+        clip.setClipOrder(-1);
+        clipRepository.save(clip);
+    }
+
 
 }
