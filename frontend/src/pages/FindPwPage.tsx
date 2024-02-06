@@ -10,6 +10,7 @@ import {
 } from '../util/counter-slice';
 import { settingNewPassword } from '../api/user';
 import { deleteStorageData } from '../util/initialLocalStorage';
+import axios, {AxiosError} from "axios";
 
 export default function FindPwPage() {
     const [inputEmail, setInputEmail] = useState<string>('');
@@ -21,6 +22,7 @@ export default function FindPwPage() {
     const [emailFlag, setEmailFlag] = useState<number>(0);
     const [codeFlag, setCodeFlag] = useState<boolean>(false);
     const navigate = useNavigate();
+    const [errorMessage, setErrorMessage] = useState<string>('');
 
     const dispatch = useDispatch();
     useEffect(() => {
@@ -61,8 +63,16 @@ export default function FindPwPage() {
                 }
             })
             .catch((e: Error) => {
+                if (axios.isAxiosError(e)) {
+                    const axiosError: AxiosError = e;
+                    const originalString = axiosError.response.data;
+                    const parts = originalString.split(':');
+                    const firstPart = parts[1];
+                    setErrorMessage(firstPart);
+                }
                 setEmailFlag(4);
-                console.log('오류가 발생했습니다.' + e);
+
+                console.log('오류가 발생했습니다.' + e.message);
             });
     };
     /** POST 비밀번호 초기화 인증코드 검증 */
@@ -171,9 +181,9 @@ export default function FindPwPage() {
         } else if (emailFlag === 4) {
             return (
                 <div className="flex">
-                    <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4"></p>
+                    <p className="w-32 pb-4 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4"></p>
                     <p className="w-128 h-3 color-text-main">
-                        다시 시도해주시기바랍니다.
+                        {errorMessage}
                     </p>
                 </div>
             );
@@ -251,8 +261,7 @@ export default function FindPwPage() {
     return (
         <section className="section-center">
             <p className="text-3xl mx-4 my-6">비밀번호 찾기</p>
-
-            <div className="flex flex-col my-4 items-center justify-center">
+            <div className="flex flex-col items-center justify-center">
                 <li className="flex mt-4">
                     <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4">
                         이메일

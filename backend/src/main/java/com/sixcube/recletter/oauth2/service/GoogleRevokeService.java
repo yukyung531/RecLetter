@@ -1,5 +1,6 @@
 package com.sixcube.recletter.oauth2.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
@@ -11,10 +12,12 @@ import java.net.URISyntaxException;
 
 @Service
 public class GoogleRevokeService {
+    @Value("${social.google.id}")
+    private String CLIENT_ID;
 
     public void revokeGoogleAccessToken(String accessToken) throws URISyntaxException {
         String revokeUrl = "https://oauth2.googleapis.com/revoke";
-        String clientId = "609466944952-13j1nj6j5cp7q0fctu6jpnu68hlt5gqe.apps.googleusercontent.com";  // Google Developer Console에서 발급받은 클라이언트 아이디
+        String clientId = CLIENT_ID;  // Google Developer Console에서 발급받은 클라이언트 아이디
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);

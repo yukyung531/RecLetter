@@ -12,5 +12,6 @@ public class SearchUserInfoRes {
     private String userId;
     private String userNickname;
     private String userEmail;
+    private String userRole;
 
 }
