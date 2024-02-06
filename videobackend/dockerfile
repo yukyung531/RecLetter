@@ -1,7 +1,9 @@
 FROM python:3.11.7
 
-COPY . .
+COPY . /videobackend
 
+WORKDIR /videobackend
 RUN pip install --no-cache-dir -r /requirements.txt
+
 
 CMD ["uvicorn", "main:app",  "--port", "8000"]
