@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from letter.controller.LetterVideoController import letter_video_router
+from videobackend.LetterVideoController import letter_video_router
 
 app = FastAPI()
 

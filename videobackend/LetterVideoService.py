@@ -1,12 +1,10 @@
+import os
 from botocore.client import BaseClient
 
-from videobackend.letter.dto.dto import MakeLetterDto
-from videobackend.letter.utils.s3_utils import clip_download_and_load, \
-    letter_upload
-import os
-
-from videobackend.letter.utils.video_edit_utils import mirror_clip, tune_volume, \
-    concat_clip, encode_frame, resize_clip
+from videobackend.dto import MakeLetterDto
+from videobackend.s3_utils import clip_download_and_load
+from videobackend.video_edit_utils import resize_clip, mirror_clip, tune_volume, \
+    concat_clip, encode_frame
 
 
 def create_letter(make_letter_dto: MakeLetterDto, bucket: str,

@@ -3,9 +3,8 @@ import boto3
 from dotenv import load_dotenv
 from fastapi import APIRouter, BackgroundTasks
 
-from videobackend.letter.dto.dto import MakeLetterDto
-from videobackend.letter.service.LetterVideoService import create_letter
-
+from videobackend.LetterVideoService import create_letter
+from videobackend.dto import MakeLetterDto
 
 # 환경변수
 load_dotenv(dotenv_path="./.env")
