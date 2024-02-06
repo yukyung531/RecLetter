@@ -618,9 +618,6 @@ export default function ClipRecodePage() {
                 {/* 우측부분 */}
                 <div className="w-3/4  editor-height bg-gray-50 flex justify-between">
                     <div className="w-4/5 px-4 py-4 flex flex-col justify-center items-center">
-                        <div className="movie-width flex justify-start items-center mt-0">
-                            <p className="text-2xl">{userInfo.userNickname}</p>
-                        </div>
                         <div className="box-border my-3 py-3 min-h-[80px] h-[80px] rounded-full border-2 border-black movie-width text-xl whitespace-pre-wrap flex align-middle justify-center text-center">
                             {selectedScript}
                         </div>
