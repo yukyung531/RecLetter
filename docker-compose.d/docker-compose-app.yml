@@ -41,8 +41,6 @@ services:
     network_mode: host
     depends_on:
       - RecLetterBackend
-    networks:
-      - RecLetterNetwork
     command:
       - /bin/bash
       - -c
