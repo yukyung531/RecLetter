@@ -33,8 +33,10 @@ def concat_clip(clip_list: List[VideoClip]) -> VideoClip:
 
 
 def mirror_clip(clip: VideoClip) -> VideoClip:
-    return clip.fx(vfx.mirror_y)
+    return clip.fx(vfx.mirror_x)
 
+def resize_clip(clip: VideoClip) -> VideoClip:
+    return clip.fx(vfx.resize, (1280, 720))
 def encode_frame(clip: VideoClip, frame_id: int) -> VideoClip:
     file_route = "./assets/frames/frame" + str(frame_id) + ".png"
 

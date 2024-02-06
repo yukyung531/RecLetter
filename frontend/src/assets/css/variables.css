@@ -15,6 +15,7 @@
     --color-yellow3: #ffc165;
     --color-yellowbg: #fffacf;
     --color-ivory: #fafaf0;
+    --color-strawberry: #fff5f5;
 }
 .color-bg-black {
     background-color: var(--color-black);
@@ -156,4 +157,13 @@
 }
 .color-border-gray {
     border-color: var(--color-gray);
+}
+.color-bg-strawberry {
+    background-color: var(--color-strawberry);
+}
+.color-text-strawberry {
+    color: var(--color-strawberry);
+}
+.color-border-strawberry {
+    border-color: var(--color-strawberry);
 }

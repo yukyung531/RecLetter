@@ -24,7 +24,7 @@ def clip_download_and_load(clip_info: ClipInfo, studio_id: str, bucket: str,
     except Exception as e:
         print(e)
     print("다운로드 완료")
-    return VideoFileClip(directory)
+    return VideoFileClip(file_name)
 
 
 def letter_upload(file_name: str, key: str, bucket: str,

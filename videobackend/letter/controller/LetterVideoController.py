@@ -1,16 +1,19 @@
 import os
 import boto3
+from dotenv import load_dotenv
 from fastapi import APIRouter, BackgroundTasks
 
-from letter.dto.dto import MakeLetterDto
-from letter.service.LetterVideoService import create_letter
+from videobackend.letter.dto.dto import MakeLetterDto
+from videobackend.letter.service.LetterVideoService import create_letter
+
 
 # 환경변수
+load_dotenv(dotenv_path="./.env")
 AWS_ACCESS_KEY = os.environ.get('AWS_ACCESS')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET')
 REGION = os.environ.get('AWS_REGION')
 BUCKET = os.environ.get('AWS_BUCKET')
-SPRING_SERVER_URL = os.environ.get('SPRING_SERVER_URL')
+SPRING_SERVER_URL = os.environ.get('SPRING_SERVER_URL')\
 
 # S3 클라이언트 설정
 s3_client = boto3.client('s3', region_name=REGION,

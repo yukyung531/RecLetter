@@ -4,6 +4,7 @@ import com.sixcube.recletter.clip.dto.ClipInfo;
 import com.sixcube.recletter.clip.service.ClipService;
 import com.sixcube.recletter.studio.StudioUtil;
 import com.sixcube.recletter.studio.dto.Studio;
+import com.sixcube.recletter.studio.dto.StudioParticipant;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.exception.MaxStudioOwnCountExceedException;
 import com.sixcube.recletter.studio.exception.StudioCreateFailureException;
@@ -108,6 +109,7 @@ public class StudioServiceImpl implements StudioService {
 
       if (user.getUserId().equals(result.getStudioOwner())) {
         try {
+          studioParticipantService.deleteStudioParticipant(studioId);
           studioRepository.deleteById(studioId);
         } catch (Exception e) {
           throw new StudioDeleteFailureException(e);

@@ -624,31 +624,32 @@ export default function ClipRecodePage() {
                         <div className="box-border my-3 py-3 min-h-[80px] h-[80px] rounded-full border-2 border-black movie-width text-xl whitespace-pre-wrap flex align-middle justify-center text-center">
                             {selectedScript}
                         </div>
-                        {/*영상 촬영 화면*/}
-                        <video
-                            className="bg-white border my-2"
-                            style={{
-                                transform: `rotateY(180deg)`,
-                                width: '640px',
-                                height: '480px',
-                                display: 'block',
-                            }}
-                            ref={videoOutputRef}
-                            muted
-                        />
-                        {/*영상 감상 화면*/}
-                        <video
-                            className="bg-white border my-2"
-                            style={{
-                                transform: `rotateY(180deg)`,
-                                width: '640px',
-                                height: '480px',
-                                display: 'none',
-                            }}
-                            ref={videoPreviewRef}
-                            onTimeUpdate={handleProgress}
-                        />
-
+                        <div className="w-full aspect-video flex justify-center align-middle bg-black">
+                            {/*영상 촬영 화면*/}
+                            <video
+                                className="bg-white border my-2"
+                                style={{
+                                    transform: `rotateY(180deg)`,
+                                    maxWidth: '100%',
+                                    maxHeight: '100%',
+                                    display: 'block',
+                                }}
+                                ref={videoOutputRef}
+                                muted
+                            />
+                            {/*영상 감상 화면*/}
+                            <video
+                                className="bg-white border my-2"
+                                style={{
+                                    transform: `rotateY(180deg)`,
+                                    maxWidth: '100%',
+                                    maxHeight: '100%',
+                                    display: 'none',
+                                }}
+                                ref={videoPreviewRef}
+                                onTimeUpdate={handleProgress}
+                            />
+                        </div>
                         <div className="w-full flex justify-center items-center my-4 px-12">
                             {/* 프로그레스 바 */}
                             <span className="material-symbols-outlined me-1 text-4xl">

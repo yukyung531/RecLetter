@@ -36,9 +36,6 @@ public class OAuth2MemberSuccessHandler extends SimpleUrlAuthenticationSuccessHa
         // 사용자 정보 가져오기
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         String userEmail = oAuth2User.getUserEmail();
-        System.out.println("이메이이이일=" + userEmail);
-
-        System.out.println("서비스까지 잘 왔니 ? " + userEmail);
         User user = userRepository.findByUserEmailAndDeletedAtIsNull(userEmail).get();
 
         //accessToken 생성
