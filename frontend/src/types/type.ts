@@ -130,8 +130,9 @@ export interface FontType {
 export interface FrameType {
     frameId: number;
     frameTitle: string;
-    thumbnail: string;
-    frameBody: string;
+    fontId: number;
+    fontSize: string;
+    fontBold: string;
 }
 
 //template 타입

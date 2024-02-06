@@ -65,6 +65,19 @@ export default function ClipRecodePage() {
     //영상 번호
     let clipNumber: number = myClipList.length;
 
+    //선택한 영상 정보
+    const [selectedClip, setSelectedClip] = useState<ClipInfo>({
+        clipId: -1,
+        clipTitle: '',
+        clipOwner: '',
+        clipLength: -1,
+        clipThumbnail: '',
+        clipUrl: '',
+        clipOrder: -1,
+        clipVolume: -1,
+        clipContent: '',
+    });
+
     ////////////////////////타이머 기능///////////////////////////////////////////////////////
     const timer = useRef<number | null | NodeJS.Timeout>(null);
     const [nowTime, setNowTime] = useState<number>(0);
@@ -109,11 +122,14 @@ export default function ClipRecodePage() {
     const videoPreviewRef = useRef<HTMLVideoElement>(null);
 
     //영상 권한
-    const constraints= { audio: true, video: {
-        width: {ideal: 1280},
-        height: {ideal: 720},
-        facingMode: "environment"
-    } };
+    const constraints = {
+        audio: true,
+        video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            facingMode: 'environment',
+        },
+    };
     /**useEffect를 이용한 촬영 준비 설정
      * 오디오, 비디오 권한을 받아, 허가를 얻으면 mediaStream을 얻는다.
      * 해당 스트림을 비디오 녹화 화면(videoOutputRef)와 연결하여 현재 웹캠으로 촬영되는 화면의 미리보기를 실행한다.
@@ -158,7 +174,6 @@ export default function ClipRecodePage() {
         //+유저 정보 불러오기
         const getUserInfo = async () => {
             const resuser = await getUser();
-            console.log(resuser);
             const tempObj = { ...resuser.data };
             setUserInfo({
                 userId: tempObj.userId,
@@ -234,9 +249,9 @@ export default function ClipRecodePage() {
                         clipContent: 'S',
                     };
 
-                    const newArray = [...myClipList, newClip];
-                    console.log(newArray);
+                    const newArray = [newClip, ...myClipList];
                     setMyClipList(newArray);
+                    setSelectedClip(newClip);
                 }
             }
             getBlobInfo();
@@ -284,15 +299,14 @@ export default function ClipRecodePage() {
      * clipId는 현재 선택한 클립의 번호다.
      */
     const onLinkClick = (clipId: number) => {
-        const clip = myClipList.filter((prev) => clipId === prev.clipId);
+        //클립 선택
+        const clip: ClipInfo[] = myClipList.filter(
+            (prev) => clipId === prev.clipId
+        );
+        setSelectedClip(clip[0]);
 
-        const recording = videoOutputRef.current;
-        const preview = videoPreviewRef.current;
-        if (recording && preview) {
-            preview.src = clip[0].clipUrl;
-            preview.style.display = 'block';
-            recording.style.display = 'none';
-        }
+        //비디오 재생
+        playVideo();
     };
 
     /**changeMode()
@@ -325,6 +339,21 @@ export default function ClipRecodePage() {
      * 호출 시, 해당 요소를 myClipList에서 삭제한다. 그리고 삭제 확인 창을 닫늗다.
      */
     const chooseDelete = () => {
+        //선택된 비디오였다면 초기화
+        if (selectedClip.clipId === deleteStateId) {
+            setSelectedClip({
+                clipId: -1,
+                clipTitle: '',
+                clipOwner: '',
+                clipLength: -1,
+                clipThumbnail: '',
+                clipUrl: '',
+                clipOrder: -1,
+                clipVolume: -1,
+                clipContent: '',
+            });
+        }
+
         setMyClipList((prevList) => {
             for (let i = 0; i < prevList.length; i++) {
                 if (prevList[i].clipId === deleteStateId) {
@@ -422,15 +451,15 @@ export default function ClipRecodePage() {
      * @returns
      * 영상이 만들어진 직후에는 이 값이 없다. 그래서 그냥 생략한다.
      */
-    const handleProgress = (event: BaseSyntheticEvent) => {
-        if (isNaN(event.target.duration)) {
-            return;
-        } else {
-            setProgress(
-                (event.target.currentTime / event.target.duration) * 100
-            );
-        }
-    };
+    // const handleProgress = (event: BaseSyntheticEvent) => {
+    //     if (isNaN(event.target.duration)) {
+    //         return;
+    //     } else {
+    //         setProgress(
+    //             (event.target.currentTime / event.target.duration) * 100
+    //         );
+    //     }
+    // };
 
     /////////////////////////////클립 편집 페이지로 이동//////////////////////////////
 
@@ -440,15 +469,15 @@ export default function ClipRecodePage() {
      * 영상 편집 페이지로 이동한다.
      */
     const goToClipEdit = () => {
-        const preview = videoPreviewRef.current;
+        const preview = selectedClip;
         if (preview) {
-            if (preview.src) {
+            if (preview.clipUrl) {
                 //url기반 영상 정보 검색
                 //이렇게 해주는 이유는 State로 관리하기에는 복잡하고, 영상 편집하기 버튼 눌렀을 때만 필요해, 굳이 평소에 일일이 관리할 필요 없어서
                 for (let i = 0; i < myClipList.length; i++) {
-                    if (myClipList[i].clipUrl === preview.src) {
+                    if (myClipList[i].clipUrl === preview.clipUrl) {
                         const videoInfo: ClipInfo = myClipList[i];
-                        blobToBase64(preview.src, videoInfo);
+                        blobToBase64(preview.clipUrl, videoInfo);
                     }
                 }
                 //navigate 직전에 blob url 정리할 것
@@ -510,7 +539,10 @@ export default function ClipRecodePage() {
                 <div className="relative w-1/4 h-full flex flex-col">
                     <div className="w-full h-10 flex justify-between items-center px-12 py-6 border-b-2 color-border-sublight color-text-black">
                         <div className="flex items-center ">
-                            <span className="material-symbols-outlined">
+                            <span
+                                className="material-symbols-outlined cursor-pointer"
+                                onClick={() => navigate(-1)}
+                            >
                                 arrow_back_ios
                             </span>
                             <p className="text-2xl ms-3">{studioName}</p>
@@ -577,6 +609,7 @@ export default function ClipRecodePage() {
                                                 onNameChange(clip.clipId)
                                             }
                                             setChangingName={setChangingName}
+                                            selectedClip={selectedClip}
                                         />
                                     );
                                 })}
@@ -628,10 +661,10 @@ export default function ClipRecodePage() {
                         <div className="box-border my-3 py-3 min-h-[80px] h-[80px] rounded-full border-2 border-black movie-width text-xl whitespace-pre-wrap flex align-middle justify-center text-center">
                             {selectedScript}
                         </div>
-                        <div className="w-[60%] aspect-video flex justify-center align-middle bg-black">
+                        <div className="w-[800px] aspect-video flex justify-center align-middle bg-black">
                             {/*영상 촬영 화면*/}
                             <video
-                                className="bg-white border my-2"
+                                className="bg-black border my-2"
                                 style={{
                                     transform: `rotateY(180deg)`,
                                     maxWidth: '100%',
@@ -643,7 +676,7 @@ export default function ClipRecodePage() {
                             />
                             {/*영상 감상 화면*/}
                             <video
-                                className="bg-white border my-2"
+                                className="bg-black border my-2"
                                 style={{
                                     transform: `rotateY(180deg)`,
                                     maxWidth: '100%',
@@ -651,22 +684,9 @@ export default function ClipRecodePage() {
                                     display: 'none',
                                 }}
                                 ref={videoPreviewRef}
-                                onTimeUpdate={handleProgress}
+                                src={selectedClip.clipUrl}
+                                // onTimeUpdate={handleProgress}
                             />
-                        </div>
-                        <div className="w-full flex justify-center items-center my-4 px-12">
-                            {/* 프로그레스 바 */}
-                            <span className="material-symbols-outlined me-1 text-4xl">
-                                play_circle
-                            </span>
-                            <progress
-                                id="progress"
-                                max={100}
-                                value={progress}
-                                className="w-full h-2 rounded -webkit-progress-bar:bg-black -webkit-progress-value:bg-red"
-                            >
-                                Progress
-                            </progress>
                         </div>
                     </div>
                     <div className="w-1/5 flex flex-col justify-around items-center">

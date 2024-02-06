@@ -27,7 +27,7 @@ import {
     isSessionExistAPI,
 } from '../api/openvidu';
 import { useNavigate } from 'react-router-dom';
-import { getStudio, studioDetail } from '../api/studio';
+import { getStudio, modifyStudioInfo, studioDetail } from '../api/studio';
 import SelectedVideoCard from '../components/SelectedVideoCard';
 import UnSelectedVideoCard from '../components/UnSelectedVideoCard';
 import BGMCard from '../components/BGMCard';
@@ -109,9 +109,13 @@ export default function LetterMakePage() {
     const [bgmList, setBGMList] = useState<BGMTemplate[]>([]); //추후 구현
 
     // 선택한 프레임
-    const [selectImgUrl, setSelectImgUrl] = useState<string>(
-        '/src/assets/frames/frame1.png'
-    );
+    const [selectedFrame, setSelectedFrame] = useState<number>(-1);
+    const [selectImgUrl, setSelectImgUrl] = useState<string>('');
+
+    const selectImg = (frameId: number, source: string) => {
+        setSelectedFrame(frameId);
+        setSelectImgUrl(source);
+    };
 
     // 스티커 리스트
     const [stickerList, setStickerList] = useState<string[]>([
@@ -152,11 +156,6 @@ export default function LetterMakePage() {
 
     //현재 재생 중
     const [playing, setPlaying] = useState<boolean>(false);
-
-    /** 선택한 프레임 적용 */
-    const selectImg = (source: string) => {
-        setSelectImgUrl(source);
-    };
 
     /** duration 정보 끌어올리기 */
     const getDuration = (clipId: number, length: number) => {
@@ -243,7 +242,7 @@ export default function LetterMakePage() {
 
             // openvidu 화면 공유 시작
             //현재 주석 처리. 주석 풀것!!! (주석해제위치)
-            // startScreenShare();
+            startScreenShare();
         };
         initSetting();
 
@@ -336,21 +335,28 @@ export default function LetterMakePage() {
         }
     };
 
+    //누적 시간합
+    //현재 시간 계산용
+    const [cumulTime, setCumulTime] = useState<number[]>([]);
+    const [nowPlayingTime, setNowPlayingTime] = useState<number>(0);
+
     /** updateWhole
      * 전체 영상 정보 업데이트를 위한 함수다.
      * @param newSelected
      */
     const updateWhole = (newSelected: ClipInfo[]) => {
-        console.log(newSelected);
+        const cumul: number[] = [];
         //전체 영상 정보 업데이트
         let len = 0;
         newSelected.map((clip) => {
+            cumul.push(len);
             len += clip.clipLength;
         });
         setWholeVideoInfo({
             length: len,
             clipList: [...newSelected],
         });
+        setCumulTime([...cumul]);
     };
 
     ////////////////////////////////////////BGM 결정////////////////////////////////////////////////////////////////
@@ -382,6 +388,7 @@ export default function LetterMakePage() {
      *  비디오를 플레이한다.
      */
     const playVideo = () => {
+        setPercent(0);
         setPlaying(true);
         if (videoRef.current) {
             //idx 범위 내부면 비디오 재생 및 다음으로 넘기는 함수
@@ -396,8 +403,12 @@ export default function LetterMakePage() {
                     usedClipList[playingIdx.current].clipVolume / 100;
                 videoRef.current.play();
             } else {
-                //범위 밖이면 정지
+                //범위 밖이면 맨 처음 영상으로 돌아간 후 정지
                 playingIdx.current = 0;
+                setNowPlayingVideo(usedClipList[playingIdx.current]);
+                videoRef.current.src = usedClipList[playingIdx.current].clipUrl;
+                videoRef.current.volume =
+                    usedClipList[playingIdx.current].clipVolume / 100;
                 stopVideo();
             }
         }
@@ -408,14 +419,29 @@ export default function LetterMakePage() {
      */
     const stopVideo = () => {
         setPlaying(false);
-        if(videoRef.current) {
+        if (videoRef.current) {
             videoRef.current.pause();
         }
-    }
+    };
+
+    /** selectIdx(index: number)
+     *  카드를 누르면 거기부터 재생된다.
+     * @param index
+     */
+    const selectIdx = (index: number) => {
+        console.log(index);
+        stopVideo();
+        playingIdx.current = index;
+        playVideo();
+    };
+
+    //비디오 플레이어 위치를 위한 state
+    const [percent, setPercent] = useState<number>(0);
 
     //////////////////////////////////////뒤로가기 버튼 누르면 뒤로가기///////////////////////////////////////////////
-    const goBack = () => {
-        navigate(-1);
+    const goBack = async () => {
+        await endScreenShare();
+        navigate(`/studiomain/${studioId}`);
     };
 
     /////////////////////////////////////mode에 따른 사이드바 추가////////////////////////////////////////////////////
@@ -453,7 +479,7 @@ export default function LetterMakePage() {
                                     className="px-1 py-2 hover:bg-gray-100"
                                     key={frame.frameId}
                                     onClick={() => {
-                                        selectImg(source);
+                                        selectImg(frame.frameId, source);
                                     }}
                                 >
                                     <img
@@ -713,6 +739,55 @@ export default function LetterMakePage() {
         };
     }, [endScreenShare]);
 
+    interface usedClip {
+        clipId: number;
+        clipVolume: number;
+    }
+
+    /** saveNowStatus()
+     *  현재 상태 저장 함수
+     */
+    const saveNowStatus = async () => {
+        //현재 정보 서버로 전송.
+        const used: usedClip[] = [];
+        usedClipList.map((clip) => {
+            used.push({
+                clipId: clip.clipId,
+                clipVolume: clip.clipVolume,
+            });
+        });
+        const unused: number[] = [];
+        notUsedClipList.map((clip) => {
+            unused.push(clip.clipId);
+        });
+
+        //font의 경우 현재 구현 안되었으니 기본으로 고정
+        const nowStatus = {
+            studioId: studioId,
+            usedClipList: used,
+            unusedClipList: unused,
+            studioFrameId: selectedFrame,
+            studioFontId: 1,
+            studioFontSize: 32,
+            studioFontBold: 0,
+            studioBgmId: selectedBGM,
+            studioVolume: 100,
+            studioSticker: '',
+        };
+
+        //전송
+        modifyStudioInfo(nowStatus)
+            .then((res) => {
+                console.log(res);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+
+        //세션 종료 후 뒤로 가기
+        await endScreenShare();
+    };
+
     //////////////////////////////////////////유저 신규 참가 알림창//////////////////////////////////////////////////
     // const allowAccess = () => {
     //     console.log('참가를 수락했습니다.');
@@ -894,10 +969,10 @@ export default function LetterMakePage() {
                             <div className="relative w-4/5 h-full flex flex-col justify-center items-center">
                                 {/* 영상 */}
                                 <video
-                                    className="bg-white border"
+                                    className="bg-black border"
                                     style={{
-                                        width: '60%',
-                                        aspectRatio: 16/9,
+                                        width: '800px',
+                                        aspectRatio: 16 / 9,
                                         transform: `rotateY(180deg)`,
                                     }}
                                     ref={videoRef}
@@ -906,21 +981,34 @@ export default function LetterMakePage() {
                                             playingIdx.current + 1;
                                         playVideo();
                                     }}
+                                    onTimeUpdate={(
+                                        event: BaseSyntheticEvent
+                                    ) => {
+                                        setPercent(
+                                            event.target.currentTime /
+                                                event.target.duration
+                                        );
+                                        setNowPlayingTime(
+                                            event.target.currentTime
+                                        );
+                                    }}
                                     crossOrigin="anonymous"
                                 />
                                 {/* 프레임 */}
                                 <img
                                     src={selectImgUrl}
                                     className="absolute top-0 lef-0"
-                                    style={{ width: '60%',
-                                    aspectRatio: 16/9, }}
+                                    style={{
+                                        width: '800px',
+                                        aspectRatio: 16 / 9,
+                                    }}
                                     alt=""
                                 />
                                 {/* 스티커 */}
                                 <main className="absolute" ref={canvasRef}>
                                     <CanvasItem
-                                        canvasWidth={640}
-                                        canvasHeight={400}
+                                        canvasWidth={800}
+                                        canvasHeight={450}
                                         sticker={selectedObj}
                                         setSticker={setSelectedObj}
                                         eraser={eraserFlag}
@@ -934,7 +1022,7 @@ export default function LetterMakePage() {
                             <div className="relative w-1/5 h-full flex flex-col justify-evenly">
                                 <button
                                     className="box-border btn-cover w-full bg-[#FF777F] text-white"
-                                    onClick={endScreenShare}
+                                    onClick={saveNowStatus}
                                 >
                                     저장하기
                                 </button>
@@ -972,24 +1060,38 @@ export default function LetterMakePage() {
                         <div className="w-full flex items-center my-4">
                             <div className=" w-1/12 flex justify-center items-center">
                                 {/* 재생버튼 */}
-                                {!playing ?
-                                <span
-                                className="material-symbols-outlined me-1 text-4xl"
-                                onClick={playVideo}
-                                >
-                                    play_circle
+                                {!playing ? (
+                                    <span
+                                        className="material-symbols-outlined me-1 text-4xl"
+                                        onClick={playVideo}
+                                    >
+                                        play_circle
+                                    </span>
+                                ) : (
+                                    <span
+                                        className="material-symbols-outlined me-1 text-4xl"
+                                        onClick={stopVideo}
+                                    >
+                                        stop_circle
+                                    </span>
+                                )}
+                                <span>
+                                    {Math.floor(
+                                        (nowPlayingTime +
+                                            cumulTime[playingIdx.current]) /
+                                            60
+                                    )}
+                                    분
+                                    {Math.floor(
+                                        (nowPlayingTime +
+                                            cumulTime[playingIdx.current]) %
+                                            60
+                                    )}
+                                    초
                                 </span>
-                                :
-                                <span
-                                className="material-symbols-outlined me-1 text-4xl"
-                                onClick={stopVideo}
-                                >
-                                    stop_circle
-                                </span>
-                                }
                             </div>
                             <div className="w-11/12 flex items-center overflow-x-scroll">
-                                {usedClipList.map((clip) => {
+                                {usedClipList.map((clip, index) => {
                                     return (
                                         <SelectedVideoCard
                                             key={clip.clipId}
@@ -1004,6 +1106,9 @@ export default function LetterMakePage() {
                                                 clipId: number,
                                                 length: number
                                             ) => getDuration(clipId, length)}
+                                            propVideoRef={videoRef}
+                                            percent={percent}
+                                            selectCard={() => selectIdx(index)}
                                         />
                                     );
                                 })}
