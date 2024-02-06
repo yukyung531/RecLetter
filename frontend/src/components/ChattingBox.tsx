@@ -5,19 +5,30 @@ import {
     firstChatJoin,
     reSubscribe,
     sendMessage,
+    subscribe,
     unSubscribe,
 } from '../util/chat';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUser } from '../api/user';
 import { httpStatusCode } from '../util/http-status';
-import { studioState, themeState } from '../util/counter-slice';
+import {
+    studioAddState,
+    studioDeleteState,
+    studioState,
+    themeState,
+} from '../util/counter-slice';
+import { getlastPath } from '../util/get-func';
 
-type chattingType = {
+type chattingMessageType = {
     userName: string;
     time: string;
     content: string;
     type: string;
     uuid: string;
+};
+type chattingType = {
+    studioId: string;
+    chatting: chattingMessageType[];
 };
 type themeInterface = {
     bgColor: string;
@@ -33,13 +44,9 @@ export default function ChattingBox() {
     const [currentPeople, setCurrentPeople] = useState<string[]>([]);
     const [chatFlag, setChatFlag] = useState<boolean>(false);
     const [peopleFlag, setPeopleFlag] = useState<boolean>(false);
+    const [studioCurrentId, setStudioCurrentId] = useState<string>('');
     //스크롤 탐지용
     const messageEndRef = useRef<HTMLDivElement>(null);
-
-    /** 리덕스 함수 */
-    const studioCurrentId = useSelector(
-        (state: any) => state.loginFlag.studioId
-    );
 
     const chatTheme = useSelector((state: any) => state.loginFlag.theme);
     const [themeObj, setThemeObj] = useState<themeInterface[]>([
@@ -47,21 +54,46 @@ export default function ChattingBox() {
         { bgColor: '#fff593', comment: '#ffa9a9', chatColor: '#626262' },
         { bgColor: '#626262', comment: '#fff593', chatColor: '#ffffff' },
     ]);
+    const chatStudioList: string[] = useSelector(
+        (state: any) => state.loginFlag.studioId
+    );
     const dispatch = useDispatch();
     window.addEventListener('beforeunload', () => {
-        dispatch(studioState(''));
+        const studioPath = getlastPath();
+        dispatch(studioDeleteState(studioPath));
     });
 
     useEffect(() => {
-        if (studioCurrentId !== '') {
-            chatInitialAPI();
-        } else {
+        //최초 연결이면
+        const studioPath = getlastPath();
+        if (chatStudioList.length === 0) {
             changeChatToggle(false);
+        } else if (studioPath !== '') {
+            if (
+                chatStudioList.length === 1 &&
+                chatStudioList[0] === studioPath
+            ) {
+                console.log('작동1');
+
+                chatInitialAPI();
+            } else if (
+                chatStudioList.length > 1 &&
+                (chatStudioList[chatStudioList.length - 1] === studioPath ||
+                    chatStudioList[chatStudioList.length - 1] === 'reload')
+            ) {
+                console.log('작동2');
+                subscribeFunc();
+            } else if (chatStudioList.length === 0) {
+                console.log('작동3');
+
+                changeChatToggle(false);
+            }
         }
+
         return () => {
-            setChattingList([]);
+            resetChattingList();
         };
-    }, [studioCurrentId]);
+    }, [chatStudioList]);
 
     useEffect(() => {
         if (messageEndRef.current) {
@@ -74,12 +106,13 @@ export default function ChattingBox() {
         if (!chatFlag) {
             await getUser().then((res) => {
                 if (res.status === httpStatusCode.OK) {
-                    console.log('새로고침하여 유저 정보를 새로이 받아옵니다.');
+                    console.log('유저 정보를 새로이 받아옵니다.');
                     setUserNickname(res.data.userNickname);
                     setUserId(res.data.userId);
                     setCurrentPeople([]);
+                    const studioPath = getlastPath();
                     connect(
-                        studioCurrentId,
+                        studioPath,
                         res.data.userId,
                         res.data.userNickname,
                         setChattingList,
@@ -87,7 +120,7 @@ export default function ChattingBox() {
                     );
                     setChatToggle(false);
                     setChatFlag(true);
-                    setChattingList([]);
+                    resetChattingList();
                 }
             });
         }
@@ -101,11 +134,33 @@ export default function ChattingBox() {
                     setCurrentPeople([]);
                     setChatToggle(false);
                     setChatFlag(true);
-                    setChattingList([]);
+                    resetChattingList();
                 }
             });
-            reSubscribe(studioCurrentId);
+            const studioPath = getlastPath();
+            reSubscribe(studioPath);
         }
+    };
+    const subscribeFunc = async () => {
+        await getUser().then((res) => {
+            if (res.status === httpStatusCode.OK) {
+                console.log('유저 정보를 새로이 받아옵니다.');
+                setUserNickname(res.data.userNickname);
+                setUserId(res.data.userId);
+                setCurrentPeople([]);
+                const studioPath = getlastPath();
+                subscribe(
+                    studioPath,
+                    res.data.userId,
+                    res.data.userNickname,
+                    setChattingList,
+                    setCurrentPeople
+                );
+                setChatToggle(false);
+                setChatFlag(true);
+                resetChattingList();
+            }
+        });
     };
     // 채팅 토글 바꾸기
     const changeChatToggle = (toggle: boolean) => {
@@ -120,8 +175,24 @@ export default function ChattingBox() {
     // 채팅 보내기
     const sendChatting = () => {
         if (comment !== '') {
-            sendMessage(userNickname, comment);
+            const studioPath = getlastPath();
+            sendMessage(userNickname, comment, studioPath);
             setComment('');
+        }
+    };
+    /** 해당 id의 채팅 삭제 */
+    const resetChattingList = () => {
+        const studioPath = getlastPath();
+        if (studioPath !== '') {
+            setChattingList((prev) => {
+                // Filtering out the items with the same studioId
+                const filterList = prev.filter(
+                    (item) => item.studioId !== studioPath
+                );
+
+                // Adding a new item with the updated studioId
+                return [...filterList, { studioId: studioPath, chatting: [] }];
+            });
         }
     };
     /** 엔터키 누르면 보내는 이벤트 */
@@ -188,68 +259,99 @@ export default function ChattingBox() {
 
     // 채팅 리스트 표시
     const chatting = () => {
-        return (
-            <>
-                {chattingList.map((chat, index) => {
-                    console.log(chat);
-                    if (chat.type === 'alarm') {
-                        return (
-                            <div
-                                className="w-full flex flex-col items-center  my-3"
-                                key={'chat' + index}
-                            >
-                                <div className="w-3/4 text-center bg-gray-300 rounded-lg px-2 py-1">
-                                    <p>{chat.content}</p>
-                                </div>
-                            </div>
-                        );
-                    } else if (chat.type === 'chat' && chat.uuid === userId) {
-                        return (
-                            <div
-                                className="flex items-end py-2 justify-end"
-                                key={'chat' + index}
-                            >
-                                <p className=" text-sm me-1 color-text-darkgray">
-                                    {chat.time}
-                                </p>
+        const studioPath = getlastPath();
+        console.log(chattingList);
+        let index = -1;
+        chattingList.map((item, itemIndex) => {
+            console.log('엥');
+
+            if (item.studioId == studioPath) {
+                index = itemIndex;
+            }
+        });
+        if (index !== -1) {
+            let viewChat = chattingList[index].chatting;
+            return (
+                <>
+                    {viewChat.map((chat, index) => {
+                        if (chat.type === 'alarm') {
+                            return (
                                 <div
-                                    className="w-fit text-right h-fit color-text-darkgray px-2 py-1 chat-text-setting"
-                                    style={{
-                                        borderRadius: '5px 0 5px 5px',
-                                        backgroundColor: `${themeObj[chatTheme].comment}`,
-                                    }}
+                                    className="w-full flex flex-col items-center  my-3"
+                                    key={'chat' + index}
                                 >
-                                    <p>{chat.content}</p>
+                                    <div className="w-3/4 text-center bg-gray-300 rounded-lg px-2 py-1">
+                                        <p>{chat.content}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        );
-                    } else {
-                        return (
-                            <div
-                                className="flex flex-col items-start py-1"
-                                key={'chat' + index}
-                            >
-                                <p>{chat.userName}</p>
-                                <div className="flex items-end">
-                                    <div
-                                        className="w-fit text-start h-fit color-text-darkgray bg-white rounded-lg px-2 py-1 chat-text-setting"
+                            );
+                        } else if (
+                            chat.type === 'chat' &&
+                            chat.uuid === userId
+                        ) {
+                            return (
+                                <div
+                                    className="flex items-end py-2 justify-end"
+                                    key={'chat' + index}
+                                >
+                                    <p
+                                        className=" text-sm me-1"
                                         style={{
-                                            borderRadius: '0 5px 5px 5px',
+                                            color: `${themeObj[chatTheme].chatColor}`,
+                                        }}
+                                    >
+                                        {chat.time}
+                                    </p>
+                                    <div
+                                        className="w-fit text-right h-fit color-text-darkgray px-2 py-1 chat-text-setting"
+                                        style={{
+                                            borderRadius: '5px 0 5px 5px',
+                                            backgroundColor: `${themeObj[chatTheme].comment}`,
                                         }}
                                     >
                                         <p>{chat.content}</p>
                                     </div>
-                                    <p className=" text-sm ms-1 color-text-darkgray">
-                                        {chat.time}
-                                    </p>
                                 </div>
-                            </div>
-                        );
-                    }
-                })}
-                <div ref={messageEndRef}></div>
-            </>
-        );
+                            );
+                        } else {
+                            return (
+                                <div
+                                    className="flex flex-col items-start py-1"
+                                    key={'chat' + index}
+                                >
+                                    <p
+                                        style={{
+                                            color: `${themeObj[chatTheme].chatColor}`,
+                                        }}
+                                    >
+                                        {chat.userName}
+                                    </p>
+                                    <div className="flex items-end">
+                                        <div
+                                            className="w-fit text-start h-fit color-text-darkgray bg-white rounded-lg px-2 py-1 chat-text-setting"
+                                            style={{
+                                                borderRadius: '0 5px 5px 5px',
+                                            }}
+                                        >
+                                            <p>{chat.content}</p>
+                                        </div>
+                                        <p
+                                            className=" text-sm ms-1 "
+                                            style={{
+                                                color: `${themeObj[chatTheme].chatColor}`,
+                                            }}
+                                        >
+                                            {chat.time}
+                                        </p>
+                                    </div>
+                                </div>
+                            );
+                        }
+                    })}
+                    <div ref={messageEndRef}></div>
+                </>
+            );
+        }
     };
 
     const showChattingRoom = () => {
@@ -320,7 +422,7 @@ export default function ChattingBox() {
                         <div className="w-full horizenbar bg-black my-1"></div>
                     </div>
 
-                    <div className="w-full rounded overflow-y-scroll h-full">
+                    <div className="w-full rounded overflow-y-scroll h-full px-2">
                         <div>{chatting()}</div>
                     </div>
                     <div className="w-full flex bg-white cursor-pointer border border-black rounded-lg px-2 py-1">
@@ -352,7 +454,7 @@ export default function ChattingBox() {
 
     /** 리덕스에따라 활성화되는 채팅방 */
     const activeChatting = () => {
-        if (studioCurrentId) {
+        if (chatStudioList.length !== 0) {
             return (
                 <img
                     src="/src/assets/icons/Chat_Circle.png"

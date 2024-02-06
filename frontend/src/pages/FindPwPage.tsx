@@ -24,7 +24,7 @@ export default function FindPwPage() {
 
     const dispatch = useDispatch();
     useEffect(() => {
-        dispatch(studioState(''));
+        dispatch(studioState([]));
         dispatch(studioNameState(''));
     }, []);
 

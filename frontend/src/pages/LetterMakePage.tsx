@@ -33,6 +33,7 @@ import UnSelectedVideoCard from '../components/UnSelectedVideoCard';
 import BGMCard from '../components/BGMCard';
 import { disconnect } from '../util/chat';
 import CanvasItem from '../components/CanvasItem';
+import html2canvas from 'html2canvas';
 
 interface mousePosition {
     positionX: number | null;
@@ -68,6 +69,8 @@ export default function LetterMakePage() {
     const [selectedBGM, setSelectedBGM] = useState<number>(1);
     const [eraserFlag, setEraserFlag] = useState<boolean>(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [stickerScale, setStickerScale] = useState<number>(160);
+    const [stickerRotate, setStickerRotate] = useState<number>(0);
 
     interface WholeVideo {
         length: number;
@@ -266,6 +269,63 @@ export default function LetterMakePage() {
             disconnect();
         };
     }, []);
+
+    useEffect(() => {
+        /** 페이지 새로고침 전에 실행 할 키보드 이벤트 함수 */
+        setStickerScale(160);
+        setStickerRotate(0);
+        let scale = stickerScale;
+        let rotate = stickerRotate;
+        const handleStickerKey = (event: KeyboardEvent) => {
+            if (selectedObj !== '') {
+                if (event.key === 'q') {
+                    rotate -= 4;
+                    setStickerRotate(rotate + 2);
+                } else if (event.key === 'e') {
+                    rotate += 4;
+                    setStickerRotate(rotate + 2);
+                } else if (event.key === 'w') {
+                    scale += 4;
+                    setStickerScale(scale + 2);
+                } else if (event.key === 's') {
+                    scale -= 4;
+                    setStickerScale(scale + 2);
+                }
+            }
+        };
+        window.addEventListener('keydown', handleStickerKey);
+        return () => {
+            window.removeEventListener('keydown', handleStickerKey);
+        };
+    }, [selectedObj]);
+
+    const onHtmlToPng = () => {
+        const target = canvasRef.current;
+        const onCapture = () => {
+            console.log('onCapture');
+            if (!target) {
+                return alert('결과 저장에 실패했습니다');
+            }
+            html2canvas(target, { scale: 2, backgroundColor: null }).then(
+                (canvas) => {
+                    onSaveAs(
+                        canvas.toDataURL('image/png'),
+                        'image-download.png'
+                    );
+                }
+            );
+        };
+
+        const onSaveAs = (uri: string, filename: string) => {
+            const link = document.createElement('a');
+            document.body.appendChild(link);
+            link.href = uri;
+            link.download = filename;
+            link.click();
+            document.body.removeChild(link);
+        };
+        onCapture();
+    };
 
     ////////////////////////////////////////영상 순서 결정////////////////////////////////////////////////////////////
 
@@ -501,6 +561,7 @@ export default function LetterMakePage() {
         case 4:
             sideBar = (
                 <div className="w-full flex flex-col justify-start text-xl ">
+                    <button onClick={onHtmlToPng}>다운로드</button>
                     <p>스티커</p>
                     <div className="flex flex-wrap m-2">
                         {stickerList.map((item) => {
@@ -711,13 +772,16 @@ export default function LetterMakePage() {
             mousePosition.positionX &&
             mousePosition.positionY ? (
                 <div
-                    className="sticker z-40 w-40 h-40"
+                    className="sticker z-40"
                     style={{
                         position: 'absolute',
-                        left: mousePosition.positionX - 80,
-                        top: mousePosition.positionY - 80,
+                        left: mousePosition.positionX - stickerScale / 2,
+                        top: mousePosition.positionY - stickerScale / 2,
                         backgroundImage: `url('/src/assets/sticker/${selectedObj}.png')`,
                         backgroundSize: 'cover',
+                        width: stickerScale,
+                        height: stickerScale,
+                        rotate: stickerRotate + 'deg',
                     }}
                     onClick={(e) => {
                         setStickerFlag(true);
@@ -894,6 +958,8 @@ export default function LetterMakePage() {
                                         stickerFlag={stickerFlag}
                                         setStickerFlag={setStickerFlag}
                                         mousePosition={mousePosition}
+                                        scale={stickerScale}
+                                        rotate={stickerRotate}
                                     ></CanvasItem>
                                 </main>
                             </div>

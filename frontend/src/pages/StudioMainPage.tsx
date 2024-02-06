@@ -5,11 +5,18 @@ import { useNavigate, Link } from 'react-router-dom';
 import DeleteCheckWindow from '../components/DeleteCheckWindow';
 import { connect, disconnect, unSubscribe } from '../util/chat';
 import { useDispatch, useSelector } from 'react-redux';
-import { studioNameState, studioState } from '../util/counter-slice';
+import {
+    studioAddState,
+    studioDeleteState,
+    studioNameState,
+    studioState,
+} from '../util/counter-slice';
 import { enterStudio, modifyStudioTitle, studioDetail } from '../api/studio';
 import { getUser } from '../api/user';
 import { deleteClip } from '../api/clip';
 import { httpStatusCode } from '../util/http-status';
+import { getlastPath } from '../util/get-func';
+import ChattingBox from '../components/ChattingBox';
 
 export default function StudioMainPage() {
     //mode 0: 영상, 1: 관리
@@ -57,6 +64,9 @@ export default function StudioMainPage() {
 
     /** 리덕스 설정 */
     const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
+    const chatStudioList: string[] = useSelector(
+        (state: any) => state.loginFlag.studioId
+    );
     const dispatch = useDispatch();
     const navigator = useNavigate();
 
@@ -67,13 +77,31 @@ export default function StudioMainPage() {
         if (loginValue === 'true' && isLogin) {
             //API 불러오는 함수로 clipInfo를 받아옴
             //우선 url query String으로부터 스튜디오 상세 정보 받아오기
-            const splitUrl = document.location.href.split('/');
-            const studioId = splitUrl[splitUrl.length - 1];
-            if (studioId !== null) {
+
+            const studioId = getlastPath();
+            if (studioId !== '') {
                 const getDetail = async (studioId: string) => {
                     await studioDetail(studioId).then((res) => {
                         if (res.status === httpStatusCode.OK) {
-                            dispatch(studioState(studioId));
+                            // 채팅방 불러오기 설정
+                            if (chatStudioList.length === 0) {
+                                dispatch(studioAddState(studioId));
+                            } else {
+                                let chatListFlag = false;
+                                chatStudioList.map(
+                                    (item: string, index: number) => {
+                                        if (!chatListFlag) {
+                                            if (item === studioId)
+                                                chatListFlag = true;
+                                        }
+                                    }
+                                );
+                                if (!chatListFlag) {
+                                    dispatch(studioAddState(studioId));
+                                }
+                            }
+                            // 채팅방 불러오기 설정
+
                             dispatch(studioNameState(res.data.studioTitle));
                             console.log(res.data);
                             setStudioDetailInfo(res.data);
@@ -114,13 +142,17 @@ export default function StudioMainPage() {
         }
 
         /** 페이지 새로고침 전에 실행 할 함수 */
+        const reloadingStudioId = getlastPath();
         const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-            disconnect();
+            const studioId = getlastPath();
+            disconnect(studioId);
         };
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => {
+            console.log('사라지기전 ' + reloadingStudioId + '입니다');
+            dispatch(studioDeleteState(reloadingStudioId));
+            disconnect(reloadingStudioId);
             window.removeEventListener('beforeunload', handleBeforeUnload);
-            disconnect();
         };
     }, []);
 
@@ -286,10 +318,10 @@ export default function StudioMainPage() {
 
     const handleStudioName = () => {
         //DB에 변경 요청
-        if(isEditingName){
+        if (isEditingName) {
             putStudiotitleAPI();
             setIsEditingName(false);
-        }else{
+        } else {
             setIsEditingName(true);
         }
     };
@@ -307,7 +339,7 @@ export default function StudioMainPage() {
     const putStudiotitleAPI = async () => {
         const id = studioDetailInfo.studioId;
         const title = studioDetailInfo.studioTitle;
-        console.log(id,title);
+        console.log(id, title);
         await modifyStudioTitle(id, title).then((res) => {
             if (res.status === httpStatusCode.OK) {
                 console.log('제목이 수정되었습니닷!!!!');
@@ -394,23 +426,24 @@ export default function StudioMainPage() {
                                         className="w-36 border-b-2 color-bg-sublight flex items-center text-2xl text-white ms-2"
                                         onChange={updateStudioName}
                                     />
-                                    {isEditingName?(<span
-                                        className="material-symbols-outlined mx-2 text-2xl text-white cursor-pointer"
-                                        onClick={handleStudioName}
-                                    >
-                                        check_circle
-                                    </span>): (<span
-                                        className="material-symbols-outlined mx-2 text-2xl text-white cursor-pointer"
-                                        onClick={handleStudioName}
-                                    >
-                                        edit
-                                    </span>)}
-
-
+                                    {isEditingName ? (
+                                        <span
+                                            className="material-symbols-outlined mx-2 text-2xl text-white cursor-pointer"
+                                            onClick={handleStudioName}
+                                        >
+                                            check_circle
+                                        </span>
+                                    ) : (
+                                        <span
+                                            className="material-symbols-outlined mx-2 text-2xl text-white cursor-pointer"
+                                            onClick={handleStudioName}
+                                        >
+                                            edit
+                                        </span>
+                                    )}
                                 </div>
 
-                                <div
-                                    className="relative right-24 px-6 my-2 flex items-center justify-center bg-white border-2 rounded-md color-text-main color-border-main cursor-pointer hover:color-bg-sublight hover:text-white hover:border-white">
+                                <div className="relative right-24 px-6 my-2 flex items-center justify-center bg-white border-2 rounded-md color-text-main color-border-main cursor-pointer hover:color-bg-sublight hover:text-white hover:border-white">
                                     <span className="material-symbols-outlined text-4xl">
                                         arrow_right
                                     </span>

@@ -12,6 +12,7 @@ import {
 } from '../util/counter-slice';
 import { httpStatusCode } from '../util/http-status';
 import StudioFinishCard from '../components/StudioFinishCard';
+import { getlastPath } from '../util/get-func';
 
 export default function StudioListPage() {
     const [studioList, setStudioList] = useState<StudioInfo[]>([]);
@@ -31,7 +32,7 @@ export default function StudioListPage() {
         const loginValue = localStorage.getItem('is-login');
         if (loginValue === 'true' && isLogin) {
             if (token) {
-                dispatch(studioState(''));
+                dispatch(studioState([]));
                 dispatch(studioNameState(''));
                 makeStudioListAPI();
             }

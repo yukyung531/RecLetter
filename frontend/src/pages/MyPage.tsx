@@ -23,7 +23,7 @@ export default function MyPage() {
     const [flagPassword, setFlagPassword] = useState<boolean>(false);
 
     useEffect(() => {
-        dispatch(studioState(''));
+        dispatch(studioState([]));
         dispatch(studioNameState(''));
     }, []);
 

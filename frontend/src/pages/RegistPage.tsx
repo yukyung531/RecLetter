@@ -23,7 +23,7 @@ export default function RegistPage() {
 
     const dispatch = useDispatch();
     useEffect(() => {
-        dispatch(studioState(''));
+        dispatch(studioState([]));
         dispatch(studioNameState(''));
     }, []);
 
