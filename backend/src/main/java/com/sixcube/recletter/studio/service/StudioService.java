@@ -43,4 +43,6 @@ public interface StudioService {
 
   public LetterVideoReq createLetterVideoReq(String studioId, User user);
 
+  public void updateStudioIsCompleted(String studioId, boolean isCompleted);
+
 }

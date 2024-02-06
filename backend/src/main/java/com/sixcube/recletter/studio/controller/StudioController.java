@@ -1,8 +1,13 @@
 package com.sixcube.recletter.studio.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sixcube.recletter.studio.dto.Studio;
 import com.sixcube.recletter.studio.dto.StudioInfo;
 import com.sixcube.recletter.studio.dto.StudioParticipant;
+import com.sixcube.recletter.studio.dto.UsedClipInfo;
+import com.sixcube.recletter.studio.dto.req.CompleteLetterReq;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.dto.req.LetterVideoReq;
 import com.sixcube.recletter.studio.dto.req.UpdateStudioReq;
@@ -17,14 +22,22 @@ import jakarta.validation.Valid;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.json.JSONParser;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClient;
 
 import static java.time.LocalDate.now;
+import static org.apache.logging.log4j.message.MapMessage.MapFormat.JSON;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @RestController
 @RequestMapping("/studio")
@@ -34,10 +47,13 @@ public class StudioController {
 
   private final StudioService studioService;
   private final StudioParticipantService studioParticipantService;
+  @Value("${VIDEO_SERVER_URI}")
+  private String videoServerUri;
+
 
   @GetMapping
   public ResponseEntity<SearchStudioListRes> searchStudioList(@AuthenticationPrincipal User user) {
-    log.debug("StudioController.searchStudioList : start");
+//    log.debug("StudioController.searchStudioList : start");
     // 참가중인 studio의 studioId 불러오기
     List<String> participantStudioIdList = studioParticipantService.searchStudioParticipantByUser(user)
         .stream()
@@ -102,6 +118,7 @@ public class StudioController {
             .build());
   }
 
+  //TODO-잘못된 유저의 요청이면 403이 맞다
   @PostMapping
   public ResponseEntity<Void> createStudio(@Valid @RequestBody CreateStudioReq createStudioReq,
       @AuthenticationPrincipal User user) {
@@ -150,24 +167,58 @@ public class StudioController {
 
   //TODO- 스티커 적용 안 받았을 때 인풋 결정 : 일단 null로 진행
   //TODO- clipOrder 변경 transactional 고려
-  @PutMapping
-  public ResponseEntity<Void> updateStudio(@ModelAttribute UpdateStudioReq updateStudioReq, @AuthenticationPrincipal User user) {
+  @PutMapping()
+  public ResponseEntity<Void> updateStudio(@ModelAttribute UpdateStudioReq updateStudioReq, @AuthenticationPrincipal User user) throws JsonProcessingException {
+    log.debug(updateStudioReq.toString());
+
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    UsedClipInfo[] usedClipInfoList = objectMapper.readValue(updateStudioReq.getUsedClipList2(), UsedClipInfo[].class);
+    List<UsedClipInfo> usedClips=new ArrayList<>();
+    for(UsedClipInfo usedClipInfo : usedClipInfoList){
+      usedClips.add(usedClipInfo);
+    }
+    updateStudioReq.setUsedClipList(usedClips);
+
+    Integer[] unusedClipInfoList = objectMapper.readValue(updateStudioReq.getUnusedClipList2(), Integer[].class);
+    List<Integer> unusedClips=new ArrayList<>();
+    for(Integer clipId : unusedClipInfoList){
+      System.out.println(clipId);
+      unusedClips.add(clipId);
+    }
+    updateStudioReq.setUnusedClipList(unusedClips);
+
+    log.debug(updateStudioReq.toString());
 
     studioService.updateStudio(updateStudioReq,user);
 
     return ResponseEntity.ok().build();
   }
 
-  //TODO- clipInfo 포함 정보 확정
   @GetMapping("/{studioId}/letter")
   public ResponseEntity<Void> createLetter(@PathVariable String studioId, @AuthenticationPrincipal User user){
-    //사용한 클립 리스트, 프레임, 등등을 전달 해줘야 함!
-  //- 메인 화면의 진행 정도를 표시해주는 곳에 완료 버튼이 있고, 방장만 사용할 수 있다.
-    //- 기한 이틀 전에는 모든 사용자들에게 완료(인코딩) 권한이 주어진다.
     LetterVideoReq letterVideoReq=studioService.createLetterVideoReq(studioId,user);
     log.debug(letterVideoReq.toString());
-    //TODO- python server로 인코딩 요청전송
 
+    //python server로 인코딩 요청전송
+    RestClient restClient=RestClient.create();
+    ResponseEntity<Void> response = restClient.post()
+            .uri(videoServerUri + "/video")
+            .contentType(APPLICATION_JSON)
+            .body(letterVideoReq)
+            .retrieve()
+            .toBodilessEntity();
+
+    studioService.updateStudioIsCompleted(studioId,true);
+    return ResponseEntity.ok().build();
+  }
+
+  //TODO- python 요청 시 security 생각!
+  @PostMapping("/{studioId}/letter")
+  public ResponseEntity<Void> completeLetter(@PathVariable String studioId, @RequestBody CompleteLetterReq completeLetterReq){
+    if(!completeLetterReq.getIsCompleted()){
+      studioService.updateStudioIsCompleted(studioId,completeLetterReq.getIsCompleted());
+    }
     return ResponseEntity.ok().build();
   }
 

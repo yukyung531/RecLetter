@@ -3,6 +3,7 @@ package com.sixcube.recletter.clip.service;
 
 import com.sixcube.recletter.clip.dto.Clip;
 import com.sixcube.recletter.clip.dto.ClipInfo;
+import com.sixcube.recletter.studio.dto.LetterClipInfo;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -31,5 +32,5 @@ public interface ClipService
 
     public void updateUnusedClip(String studioId, int clipId);
 
-    public List<ClipInfo> searchUsedClipInfoByOrder(String studioId);
+    public List<LetterClipInfo> searchLetterClipInfoByOrder(String studioId);
 }

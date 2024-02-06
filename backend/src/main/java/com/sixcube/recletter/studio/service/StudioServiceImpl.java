@@ -166,16 +166,15 @@ public class StudioServiceImpl implements StudioService {
     if(!studioUtil.isStudioParticipant(updateStudioReq.getStudioId(),user.getUserId())){
       throw new UnauthorizedToUpdateStudioException();
     }
-    //받아온 정보를 바탕으로 스튜디오 객체 생성
-    Studio studio=Studio.builder()
-            .studioId(updateStudioReq.getStudioId())
-            .studioBgmId(updateStudioReq.getStudioBgmId())
-            .studioFrameId(updateStudioReq.getStudioFrameId())
-            .studioFontId(updateStudioReq.getStudioFontId())
-            .studioFontBold(updateStudioReq.getStudioFontBold())
-            .studioFontSize(updateStudioReq.getStudioFontSize())
-            .studioVolume(updateStudioReq.getStudioVolume())
-            .build();
+
+    //받아온 정보를 바탕으로 스튜디오 객체 업데이트
+    Studio studio=studioRepository.findById(updateStudioReq.getStudioId()).orElseThrow(StudioNotFoundException::new);
+    studio.setStudioBgmId(updateStudioReq.getStudioBgmId());
+    studio.setStudioFontId(updateStudioReq.getStudioFontId());
+    studio.setStudioFrameId(updateStudioReq.getStudioFrameId());
+    studio.setStudioFontBold(updateStudioReq.getStudioFontBold());
+    studio.setStudioFontSize(updateStudioReq.getStudioFontSize());
+    studio.setStudioVolume(updateStudioReq.getStudioVolume());
 
     //스튜디오 스티커 이미지 저장
     MultipartFile studioSticker= updateStudioReq.getStudioSticker();
@@ -190,11 +189,12 @@ public class StudioServiceImpl implements StudioService {
       throw new InvalidStudioStickerFormatException();
     }
 
-    studioRepository.save(studio);
+//    studioRepository.save(studio);
+    int order=1;
     for(UsedClipInfo clipInfo:updateStudioReq.getUsedClipList()){
-      clipService.updateUsedClip(studio.getStudioId(), clipInfo.getClipId(), clipInfo.getClipVolume(), clipInfo.getClipVolume());
+      clipService.updateUsedClip(studio.getStudioId(), clipInfo.getClipId(), order++, clipInfo.getClipVolume());
     }
-    for(int clipId:updateStudioReq.getUnsuedClipList()){
+    for(int clipId:updateStudioReq.getUnusedClipList()){
       clipService.updateUnusedClip(studio.getStudioId(), clipId);
     }
   }
@@ -214,22 +214,32 @@ public class StudioServiceImpl implements StudioService {
   public LetterVideoReq createLetterVideoReq(String studioId, User user){
     Studio studio=searchStudioByStudioId(studioId, user);
     int leftDays= Period.between(now(), LocalDate.from(studio.getExpireDate())).getDays();
-
+    //- 기본적으로는 방장만 완료 가능.
+    //- 만료 기한 이틀 전에는 모든 사용자들에게 완료(인코딩) 권한이 주어짐
     if(leftDays<0){
       throw new ExpiredStudioException(); //기한 만료 스튜디오
     } else if (leftDays<2 || studio.getStudioOwner().equals(user.getUserId())){ //기한이 2일 이내 남았거나, 방장인 경우
       //진행
         return LetterVideoReq.builder()
-              .studio_id(studio.getStudioId())
-              .studio_frame_id(studio.getStudioFrameId())
-              .studio_font(studio.getStudioFontId())
-              .studio_bgm(studio.getStudioBgmId())
-              .studio_volume(studio.getStudioVolume())
-              .clip_info_list(clipService.searchUsedClipInfoByOrder(studioId))
+              .studioId(studio.getStudioId())
+              .studioFrameId(studio.getStudioFrameId())
+              .studioFontId(studio.getStudioFontId())
+                .studioFontSize(studio.getStudioFontSize())
+                .studioFontBold(studio.getStudioFontBold())
+              .studioBgmId(studio.getStudioBgmId())
+              .studioVolume(studio.getStudioVolume())
+              .clipInfoList(clipService.searchLetterClipInfoByOrder(studioId))
               .build();
     } else{
       throw new UnauthorizedToCreateLetterException(); //완성요청 접근 권한 없음
     }
+  }
+
+  @Override
+  public void updateStudioIsCompleted(String studioId, boolean isCompleted){
+    Studio studio=studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
+    studio.setIsCompleted(isCompleted);
+    studioRepository.save(studio);
   }
 
 }

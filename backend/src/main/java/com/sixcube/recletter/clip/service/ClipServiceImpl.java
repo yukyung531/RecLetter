@@ -7,6 +7,8 @@ import com.sixcube.recletter.clip.dto.ClipInfo;
 import com.sixcube.recletter.clip.exception.*;
 import com.sixcube.recletter.studio.S3Util;
 import com.sixcube.recletter.studio.StudioUtil;
+import com.sixcube.recletter.studio.dto.LetterClipInfo;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +18,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ClipServiceImpl implements ClipService {
 
     private final ClipRepository clipRepository;
@@ -41,7 +44,7 @@ public class ClipServiceImpl implements ClipService {
             saveS3Object(clip, file);
         } catch (AmazonS3Exception | IOException e) {
             e.printStackTrace();
-            clipRepository.delete(clip); //S3에 저장실패했으므로, DB에만 저장된 것 롤백처리
+//            clipRepository.delete(clip); //S3에 저장실패했으므로, DB에만 저장된 것 롤백처리-> @Transactional로 롤백처리
             throw new SaveClipFailException();
         }
     }
@@ -83,10 +86,6 @@ public class ClipServiceImpl implements ClipService {
         return createSignedClipUrl(getFileKey(clip));
     }
 
-//    @Override
-    public String searchClipUrl(Clip clip){
-        return createSignedClipUrl(getFileKey(clip));
-    }
     @Override
     public String getFileKey(Clip clip) {
         StringBuilder stringBuilder = new StringBuilder();
@@ -142,16 +141,17 @@ public class ClipServiceImpl implements ClipService {
     }
 
     public String createSignedClipUrl(String fileName){
-        String url="";
         try {
-            url= s3Util.getSignedUrl(fileName);
+            return s3Util.getSignedUrl(fileName);
         } catch (Exception e) {
             System.out.println("TT...");
             e.printStackTrace();
             throw new AwsAuthorizationException();
         }
-        return url;
     }
+
+    //TODO- 
+//    public void updateClipOrderInfo
 
     @Override
     public void updateUsedClip(String studioId, int clipId, int clipOrder, int clipVolume) {
@@ -175,21 +175,18 @@ public class ClipServiceImpl implements ClipService {
     }
 
     @Override
-    public List<ClipInfo> searchUsedClipInfoByOrder(String studioId) {
+    public List<LetterClipInfo> searchLetterClipInfoByOrder(String studioId) {
         List<Clip> clipList = clipRepository.findClipsByStudioIdOrderByClipOrder(studioId);
-        List<ClipInfo> clipInfoList = new ArrayList<>();
+        List<LetterClipInfo> clipInfoList = new ArrayList<>();
         for (Clip clip : clipList) {
             if(clip.getClipOrder()<0){
                 continue;
             }
-            ClipInfo clipInfo = ClipInfo.builder()
+            LetterClipInfo clipInfo = LetterClipInfo.builder()
                     .clipId(clip.getClipId())
                     .clipTitle(clip.getClipTitle())
                     .clipVolume(clip.getClipVolume())
-                    .clipOwner(clip.getClipOwner())
-                    .clipContent(clip.getClipContent())
-                    .clipOrder(clip.getClipOrder())
-                    .clipUrl(createSignedClipUrl(getFileKey(clip)))
+//                    .clipContent(clip.getClipContent())
                     .build();
             clipInfoList.add(clipInfo);
         }

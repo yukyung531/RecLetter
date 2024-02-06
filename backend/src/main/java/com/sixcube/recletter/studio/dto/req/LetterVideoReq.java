@@ -1,6 +1,7 @@
 package com.sixcube.recletter.studio.dto.req;
 
 import com.sixcube.recletter.clip.dto.ClipInfo;
+import com.sixcube.recletter.studio.dto.LetterClipInfo;
 import lombok.*;
 
 import java.util.List;
@@ -13,12 +14,13 @@ import java.util.List;
 @ToString
 public class LetterVideoReq {
 
-    String studio_id;
-    Integer studio_frame_id;
-    Integer studio_bgm;
-    Integer studio_volume;
-    Integer studio_font;
-    List<ClipInfo> clip_info_list;
-    String studio_sticker_key;
+    String studioId;
+    Integer studioFrameId;
+    Integer studioBgmId;
+    Integer studioVolume;
+    Integer studioFontId;
+    Integer studioFontSize;
+    Boolean studioFontBold;
+    List<LetterClipInfo> clipInfoList;
 
 }
