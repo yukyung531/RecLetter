@@ -2,23 +2,16 @@ import { ClipInfo } from '../types/type';
 import { useRef, useState } from 'react';
 
 interface VideoCardProp {
-    onClick?: React.MouseEventHandler<HTMLParagraphElement>;
-    onDelete?: React.MouseEventHandler<HTMLParagraphElement>;
     selectVideo: React.MouseEventHandler<HTMLDivElement>;
+    getDuration: (clipId: number, duration: number) => void;
     props: ClipInfo;
-    presentUser: string;
 }
 
-export default function VideoCard({
-    onClick,
-    onDelete,
+export default function UnSelectedVideoCard({
     selectVideo,
+    getDuration,
     props,
-    presentUser,
 }: VideoCardProp) {
-    //userId에 따라 편집, 삭제 기능 활성화
-    const userId = presentUser;
-
     //clipId 문자열 변형
     const clipId: string = props.clipId + '';
 
@@ -30,6 +23,7 @@ export default function VideoCard({
     const metadataLoad = () => {
         if (videoRef.current) {
             setDuration(Math.floor(videoRef.current.duration));
+            getDuration(props.clipId, videoRef.current.duration);
         }
     };
 
@@ -50,11 +44,6 @@ export default function VideoCard({
                     onLoadedData={metadataLoad}
                     style={{ transform: `rotateY(180deg)` }}
                 />
-                {/* <img
-                className="w-16 h-12"
-                src={props.clipThumbnail}
-                alt={props.clipTitle}
-            /> */}
                 <div className="mx-2">
                     <p className="font-bold w-full">{props.clipTitle}</p>
                     <p>
@@ -65,33 +54,6 @@ export default function VideoCard({
                     </p>
                 </div>
             </div>
-
-            {userId === props.clipOwner ? (
-                <div className="me-2">
-                    {onClick ? (
-                        <p
-                            className="w-14 my-0.5 px-3 text-center color-bg-red2 text-white"
-                            onClick={onClick}
-                        >
-                            편집
-                        </p>
-                    ) : (
-                        <></>
-                    )}
-                    {onDelete ? (
-                        <p
-                            className="w-14 my-0.5 px-3 text-center color-bg-black text-white"
-                            onClick={onDelete}
-                        >
-                            삭제
-                        </p>
-                    ) : (
-                        <></>
-                    )}
-                </div>
-            ) : (
-                <></>
-            )}
         </div>
     );
 }

@@ -10,7 +10,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { getUser } from '../api/user';
 import { httpStatusCode } from '../util/http-status';
-import { studioState } from '../util/counter-slice';
+import { studioState, themeState } from '../util/counter-slice';
 
 type chattingType = {
     userName: string;
@@ -18,6 +18,11 @@ type chattingType = {
     content: string;
     type: string;
     uuid: string;
+};
+type themeInterface = {
+    bgColor: string;
+    comment: string;
+    chatColor: string;
 };
 export default function ChattingBox() {
     const [chatToggle, setChatToggle] = useState<boolean>(false);
@@ -35,6 +40,13 @@ export default function ChattingBox() {
     const studioCurrentId = useSelector(
         (state: any) => state.loginFlag.studioId
     );
+
+    const chatTheme = useSelector((state: any) => state.loginFlag.theme);
+    const [themeObj, setThemeObj] = useState<themeInterface[]>([
+        { bgColor: '#ffa9a9', comment: '#fff593', chatColor: '#626262' },
+        { bgColor: '#fff593', comment: '#ffa9a9', chatColor: '#626262' },
+        { bgColor: '#626262', comment: '#fff593', chatColor: '#ffffff' },
+    ]);
     const dispatch = useDispatch();
     window.addEventListener('beforeunload', () => {
         dispatch(studioState(''));
@@ -145,9 +157,9 @@ export default function ChattingBox() {
     const openPeople = () => {
         if (peopleFlag) {
             return (
-                <div className="absolute top-8 w-72 max-h-52 overflow-y-scroll rounded-md p-2 bg-slate-200">
+                <div className="absolute top-12 w-48 max-h-52 overflow-y-scroll rounded-md p-2 bg-white ">
                     <div className="relative w-full flex justify-between">
-                        <p>참여자 목록</p>
+                        <p></p>
                         <p
                             className="cursor-pointer hover:font-bold"
                             onClick={() => {
@@ -159,7 +171,10 @@ export default function ChattingBox() {
                     </div>
                     {currentPeople.map((item, index) => {
                         return (
-                            <div className="m-1" key={'people ' + index}>
+                            <div
+                                className="m-1 border-b-2 color-border-lightgray1"
+                                key={'people ' + index}
+                            >
                                 {item}
                             </div>
                         );
@@ -198,8 +213,11 @@ export default function ChattingBox() {
                                     {chat.time}
                                 </p>
                                 <div
-                                    className="w-fit text-right h-fit color-text-darkgray color-bg-yellow2 px-2 py-1 chat-text-setting"
-                                    style={{ borderRadius: '5px 0 5px 5px' }}
+                                    className="w-fit text-right h-fit color-text-darkgray px-2 py-1 chat-text-setting"
+                                    style={{
+                                        borderRadius: '5px 0 5px 5px',
+                                        backgroundColor: `${themeObj[chatTheme].comment}`,
+                                    }}
                                 >
                                     <p>{chat.content}</p>
                                 </div>
@@ -237,10 +255,20 @@ export default function ChattingBox() {
     const showChattingRoom = () => {
         if (chatToggle) {
             return (
-                <div className=" w-88 h-5/6 rounded-lg fixed flex bottom-16 flex-col justify-between items-center right-8 px-5 py-3 color-bg-sublight z-20 ">
+                <div
+                    className=" w-88 h-5/6 rounded-lg fixed flex bottom-16 flex-col justify-between items-center right-8 px-5 py-3 z-20 border-2 border-white"
+                    style={{
+                        backgroundColor: `${themeObj[chatTheme].bgColor}`,
+                    }}
+                >
                     <div className="relative w-full">
                         <div className="flex justify-between">
-                            <p className="text-center text-2xl font-bold">
+                            <p
+                                className="text-center text-2xl font-bold"
+                                style={{
+                                    color: `${themeObj[chatTheme].chatColor}`,
+                                }}
+                            >
                                 studio1
                             </p>
                             <p
@@ -258,6 +286,9 @@ export default function ChattingBox() {
                                 onClick={() => {
                                     setPeopleFlag(true);
                                 }}
+                                style={{
+                                    color: `${themeObj[chatTheme].chatColor}`,
+                                }}
                             >
                                 <span className="material-symbols-outlined text-lg">
                                     group
@@ -265,9 +296,24 @@ export default function ChattingBox() {
                                 <p className="mx-1">{currentPeople.length}</p>
                             </div>
                             <div className="flex justify-center items-center">
-                                <div className="w-4 h-4 rounded-full color-bg-darkgray mx-1"></div>
-                                <div className="w-4 h-4 rounded-full color-bg-lightgray1 mx-1"></div>
-                                <div className="w-4 h-4 rounded-full color-bg-main mx-1"></div>
+                                <div
+                                    className="w-4 h-4 rounded-full color-bg-darkgray mx-1 border-2 border-white"
+                                    onClick={() => {
+                                        dispatch(themeState(2));
+                                    }}
+                                ></div>
+                                <div
+                                    className="w-4 h-4 rounded-full color-bg-yellow2 mx-1 border-2 border-white"
+                                    onClick={() => {
+                                        dispatch(themeState(1));
+                                    }}
+                                ></div>
+                                <div
+                                    className="w-4 h-4 rounded-full color-bg-main mx-1 border-2 border-white"
+                                    onClick={() => {
+                                        dispatch(themeState(0));
+                                    }}
+                                ></div>
                             </div>
                         </div>
                         {openPeople()}

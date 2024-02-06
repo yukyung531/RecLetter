@@ -107,11 +107,14 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     public void deleteUser(User user) throws URISyntaxException {
 
         //소셜인 경우에는 구글 서버로 탈퇴 요청도 같이 해야 함
-        if (user.getUserRole().equals("ROLE_SOCIAL")) {
-            Optional<OAuth2AuthorizedClientEntity> entity = googleRepository.findById(new GoogleRepoId("google",user.getUserNickname()));
-            String token = entity.get().getAccessTokenValue();
-            googleRepository.delete(entity.get()); //테이블에서 제거
-            googleRevokeService.revokeGoogleAccessToken(token);
+        if (user.getUserRole().equals("ROLE_SOCIAL") || user.getUserRole().equals("ROLE_BOTH")) {
+            Optional<OAuth2AuthorizedClientEntity> entity = googleRepository.findById(new GoogleRepoId("google", user.getUserNickname()));
+            if(entity.isPresent()){
+                String token = entity.get().getAccessTokenValue();
+                googleRepository.delete(entity.get()); //테이블에서 제거
+                googleRevokeService.revokeGoogleAccessToken(token);
+            }
+
         }
 
         //관련 토큰 모두 레디스에서 제거

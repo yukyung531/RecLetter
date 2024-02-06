@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StudioParticipantRepository extends JpaRepository<StudioParticipant, StudioParticipantId> {
-  List<StudioParticipant> findAllByStudioId(Studio studioId);
+  List<StudioParticipant> findAllByStudioId(String studioId);
   List<StudioParticipant> findAllByUserId(String userId);
 
 

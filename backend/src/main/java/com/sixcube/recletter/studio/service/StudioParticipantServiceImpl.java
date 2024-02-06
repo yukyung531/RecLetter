@@ -1,5 +1,6 @@
 package com.sixcube.recletter.studio.service;
 
+import com.sixcube.recletter.studio.dto.Studio;
 import com.sixcube.recletter.studio.dto.StudioParticipant;
 import com.sixcube.recletter.studio.dto.StudioParticipantId;
 import com.sixcube.recletter.studio.exception.AlreadyJoinedStudioException;
@@ -47,5 +48,11 @@ public class StudioParticipantServiceImpl implements StudioParticipantService {
     return studioParticipantRepository.findById(new StudioParticipantId(studioId, userId))
         .orElseThrow(
             StudioParticipantNotFound::new);
+  }
+
+  @Override
+  public void deleteStudioParticipant(String studioId) {
+    List<StudioParticipant> studioParticipants=studioParticipantRepository.findAllByStudioId(studioId);
+    studioParticipantRepository.deleteAll(studioParticipants);
   }
 }

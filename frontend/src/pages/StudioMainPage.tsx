@@ -110,7 +110,7 @@ export default function StudioMainPage() {
             getUserInfo();
         }
         if (loginValue === 'false' || !loginValue || !token) {
-            navigator(`/`);
+            navigator(`/login`);
         }
 
         /** 페이지 새로고침 전에 실행 할 함수 */
@@ -286,11 +286,16 @@ export default function StudioMainPage() {
 
     const handleStudioName = () => {
         //DB에 변경 요청
-        putStudiotitleAPI();
-        setIsEditingName(false);
+        if(isEditingName){
+            putStudiotitleAPI();
+            setIsEditingName(false);
+        }else{
+            setIsEditingName(true);
+        }
     };
 
     const updateStudioName = (event: BaseSyntheticEvent) => {
+        setIsEditingName(true);
         if (studioDetailInfo !== null) {
             const newValue = { ...studioDetailInfo };
             newValue.studioTitle = event.target.value;
@@ -302,7 +307,7 @@ export default function StudioMainPage() {
     const putStudiotitleAPI = async () => {
         const id = studioDetailInfo.studioId;
         const title = studioDetailInfo.studioTitle;
-        console.log(id);
+        console.log(id,title);
         await modifyStudioTitle(id, title).then((res) => {
             if (res.status === httpStatusCode.OK) {
                 console.log('제목이 수정되었습니닷!!!!');
@@ -389,15 +394,23 @@ export default function StudioMainPage() {
                                         className="w-36 border-b-2 color-bg-sublight flex items-center text-2xl text-white ms-2"
                                         onChange={updateStudioName}
                                     />
-                                    <span
+                                    {isEditingName?(<span
+                                        className="material-symbols-outlined mx-2 text-2xl text-white cursor-pointer"
+                                        onClick={handleStudioName}
+                                    >
+                                        check_circle
+                                    </span>): (<span
                                         className="material-symbols-outlined mx-2 text-2xl text-white cursor-pointer"
                                         onClick={handleStudioName}
                                     >
                                         edit
-                                    </span>
+                                    </span>)}
+
+
                                 </div>
 
-                                <div className="relative right-24 px-6 my-2 flex items-center justify-center bg-white border-2 rounded-md color-text-main color-border-main cursor-pointer hover:color-bg-sublight hover:text-white hover:border-white">
+                                <div
+                                    className="relative right-24 px-6 my-2 flex items-center justify-center bg-white border-2 rounded-md color-text-main color-border-main cursor-pointer hover:color-bg-sublight hover:text-white hover:border-white">
                                     <span className="material-symbols-outlined text-4xl">
                                         arrow_right
                                     </span>
@@ -417,8 +430,13 @@ export default function StudioMainPage() {
                             <video
                                 src={selectedVideo.clipUrl}
                                 crossOrigin="anonymous"
-                                controls
-                                style={{ width: '800px', height: '480px' }}
+                                style={{
+                                    transform: `rotateY(180deg)`,
+                                    width: '640px',
+                                    height: '480px',
+                                    display: 'block',
+                                }}
+                                autoPlay
                             />
                             <div className="w-full flex justify-center items-center my-4 px-12">
                                 <span className="material-symbols-outlined me-1 text-4xl">
