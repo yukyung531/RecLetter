@@ -5,7 +5,7 @@ import { studioNameState, studioState } from '../util/counter-slice';
 export default function FindResultPage() {
     const dispatch = useDispatch();
     useEffect(() => {
-        dispatch(studioState(''));
+        dispatch(studioState([]));
         dispatch(studioNameState(''));
     }, []);
     return (

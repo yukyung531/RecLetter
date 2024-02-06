@@ -21,15 +21,13 @@ export default function LoginPage() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-
     const logo = <img src={Image} alt="로고" width={250}></img>;
 
-
-
-    const VITE_REACT_GOOGLE_LOGIN_URL = import.meta.env.VITE_REACT_GOOGLE_LOGIN_URL;
+    const VITE_REACT_GOOGLE_LOGIN_URL = import.meta.env
+        .VITE_REACT_GOOGLE_LOGIN_URL;
 
     useEffect(() => {
-        dispatch(studioState(''));
+        dispatch(studioState([]));
         dispatch(studioNameState(''));
     }, []);
 
@@ -71,7 +69,7 @@ export default function LoginPage() {
     const loadLoginAPI = async (user: User) => {
         await login(user)
             .then((res) => {
-                console.log("결과",res);
+                console.log('결과', res);
                 if (res.status === httpStatusCode.OK) {
                     console.log('로그인이 성공했습니다.');
                     localStorage.setItem('access-token', res.data.accessToken);
@@ -133,13 +131,9 @@ export default function LoginPage() {
                     로그인
                 </div>
                 <p className="mb-2 text-2xl color-text-darkgray">
-                    ------------------------- 또는
-                    -------------------------
+                    ------------------------- 또는 -------------------------
                 </p>
-                <a
-                    href={VITE_REACT_GOOGLE_LOGIN_URL}
-                    className="py-4"
-                >
+                <a href={VITE_REACT_GOOGLE_LOGIN_URL} className="py-4">
                     {logo}
                 </a>
                 <div className="flex justify-center items-center my-2">

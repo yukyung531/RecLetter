@@ -9,6 +9,8 @@ type canvasType = {
     setSticker: React.Dispatch<React.SetStateAction<string>>;
     setStickerFlag: React.Dispatch<React.SetStateAction<boolean>>;
     mousePosition: mousePosition;
+    scale: number;
+    rotate: number;
 };
 interface mousePosition {
     positionX: number | null;
@@ -25,6 +27,8 @@ export default function CanvasItem(props: canvasType) {
     const [painting, setPainting] = useState(false);
     const positionX = props.mousePosition.positionX;
     const positionY = props.mousePosition.positionY;
+    const scale = props.scale;
+    const rotate = props.rotate;
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -70,27 +74,29 @@ export default function CanvasItem(props: canvasType) {
                 console.log(canvas.getBoundingClientRect().top);
                 console.log(props.mousePosition.positionY);
 
-                const mouseX =
-                    positionX - canvas.getBoundingClientRect().left - 80;
-                const mouseY =
-                    positionY - canvas.getBoundingClientRect().top - 80;
+                const mouseX = positionX - canvas.getBoundingClientRect().left;
+                const mouseY = positionY - canvas.getBoundingClientRect().top;
                 // setting
                 // 이미지 설정
                 const objImage = new Image();
                 // onload와 onerror 핸들러 설정 후 이미지 소스 지정
                 objImage.src = `/src/assets/sticker/${sticker}.png`;
                 // 이미지 크기 조절
-                const imageSize = 160; // 이미지의 새로운 크기
+                const imageSize = scale; // 이미지의 새로운 크기
                 objImage.onload = () => {
                     // 이미지가 로드된 후에 실행됩니다.
                     console.log('작동');
+                    ctx.save();
+                    ctx.translate(mouseX, mouseY);
+                    ctx.rotate((rotate % 360) * (Math.PI / 180));
                     ctx.drawImage(
                         objImage,
-                        mouseX,
-                        mouseY,
+                        -imageSize / 2,
+                        -imageSize / 2,
                         imageSize,
                         imageSize
                     );
+                    ctx.restore();
                     props.setStickerFlag(false);
                     props.setSticker('');
                 };

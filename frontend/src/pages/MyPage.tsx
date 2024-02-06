@@ -33,7 +33,7 @@ export default function MyPage() {
 
 
     useEffect(() => {
-        dispatch(studioState(''));
+        dispatch(studioState([]));
         dispatch(studioNameState(''));
     }, []);
 

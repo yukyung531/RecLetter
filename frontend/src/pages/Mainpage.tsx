@@ -14,7 +14,7 @@ export default function Mainpage() {
     const navigator = useNavigate();
 
     useEffect(() => {
-        dispatch(studioState(''));
+        dispatch(studioState([]));
         dispatch(studioNameState(''));
     }, []);
 

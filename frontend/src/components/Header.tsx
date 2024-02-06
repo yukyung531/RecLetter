@@ -58,8 +58,10 @@ export default function Header() {
                         className="flex mx-2 text-xl justify-center items-center cursor-pointer color-text-ivory"
                         onClick={onLogout}
                     >
-                        <div className="flex justify-center items-center bg-white rounded-full mx-2"
-                        style={{ width: '1.25rem', height: '1.25rem' }}>
+                        <div
+                            className="flex justify-center items-center bg-white rounded-full mx-2"
+                            style={{ width: '1.25rem', height: '1.25rem' }}
+                        >
                             <span
                                 className="material-symbols-outlined color-text-main text-base"
                                 style={{ padding: '1px 0 0 1px' }}
@@ -98,7 +100,7 @@ export default function Header() {
                 <Link to="/studiolist">
                     <img
                         className="h-6"
-                        src="/src/assets/images/Logo.png"
+                        src="/src/assets/images/logo.png"
                         alt=""
                     />
                 </Link>
@@ -108,7 +110,7 @@ export default function Header() {
                 <Link to="/">
                     <img
                         className="h-6"
-                        src="/src/assets/images/Logo.png"
+                        src="/src/assets/images/logo.png"
                         alt=""
                     />
                 </Link>
