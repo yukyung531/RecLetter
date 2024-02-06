@@ -148,7 +148,7 @@ export default function MyPage() {
             return (
                 <div className="flex flex-col items-center">
                     <p className="text-3xl mx-4 my-2">마이페이지</p>
-                    <p className="mx-4 mb-4">내 개인 정보를 수정 가능합니다</p>
+                    <p className="mx-4 mb-4">내 개인 정보를 수정할 수 있습니다.</p>
                     <div className="my-14">
                         <div className="flex h-12 my-5 items-center justify-center">
                             <p className="w-16 text-xl color-text-darkgray me-4 text-end">
@@ -158,7 +158,7 @@ export default function MyPage() {
                                 {userEmail}
                             </p>
                         </div>
-                        <div className="flex h-12 my-5 items-center justify-center">
+                        <div className="flex h-12 my-2 items-center justify-center">
                             <p className="w-16 text-xl color-text-darkgray me-4 text-end">
                                 이름
                             </p>
@@ -173,7 +173,7 @@ export default function MyPage() {
                     </div>
 
                     <div
-                        className="w-128 rounded-md py-2 text-2xl my-2 text-center color-bg-main text-white cursor-pointer hover:color-bg-subbold hover:text-white"
+                        className="w-128 rounded-md py-2 text-2xl my-2 text-center color-bg-main text-white cursor-pointer hover:color-bg-subbold hover:text-white border-2 border-transparent"
                         onClick={saveUser}
                     >
                         변경사항 저장
@@ -189,11 +189,12 @@ export default function MyPage() {
                         onClick={changeFlag}
                     >비밀번호 변경
                     </div>
+                    
                     <div
-                        className="w-128 rounded-md py-2 text-2xl my-2 text-center color-bg-main text-white cursor-pointer hover:color-bg-subbold hover:text-white"
+                        className="text-xl underline my-6 text-center cursor-pointer text-gray-400"
                         onClick={deleteUserState}
                     >
-                        회원 탈퇴
+                       회원 탈퇴
                     </div>
                 </div>
             );
@@ -230,7 +231,7 @@ export default function MyPage() {
                                 placeholder="8자~16자 사이로 입력해주세요"
                             />
                         </div>
-                        <div className="flex h-12 my-3 items-center justify-center">
+                        <div className="flex h-12 my-2 items-center justify-center">
                             <p className="w-32 text-xl color-text-darkgray me-4 text-end">
                                 새 비밀번호 확인
                             </p>
@@ -247,7 +248,7 @@ export default function MyPage() {
                     </div>
 
                     <div
-                        className="w-128 rounded-md py-2 text-2xl mt-12 mb-2 text-center color-bg-main text-white cursor-pointer hover:color-bg-subbold hover:text-white"
+                        className="w-128 rounded-md py-2 text-2xl mt-12 mb-2 text-center color-bg-main text-white cursor-pointer hover:color-bg-subbold hover:text-white border-2 border-transparent"
                         onClick={modifyPassword}
                     >
                         비밀번호 변경
