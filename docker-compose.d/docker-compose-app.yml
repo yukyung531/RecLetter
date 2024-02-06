@@ -36,7 +36,7 @@ services:
       - .env
 
   RecLetterVideo:
-    image: ssuya/recletter_video
+    image: ssuyas/recletter_video
     container_name: RecLetterVideo
     networks:
       - RecLetterNetwork
@@ -48,6 +48,7 @@ services:
       AWS_REGION: ${AWS_REGION}
       AWS_BUCKET: ${AWS_BUCKET}
       SPRING_SERVER_URL: ${SPRING_SERVER_URL}
+      PYTHONPATH: /
 
   app:
     image: ssuyas/recletter_frontend
