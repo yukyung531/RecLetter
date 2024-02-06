@@ -1,17 +1,6 @@
 version: '3.1'
 
 services:
-  # --------------------------------------------------------------
-  #
-  #    Change this if your want use your own application.
-  #    It's very important expose your application in port 5442
-  #    and use the http protocol.
-  #
-  #    Default Application
-  #
-  #    Openvidu-Call Version: 2.29.0
-  #
-  # --------------------------------------------------------------
   RecLetterBackend:
     image: ssuyas/recletter_backend
     container_name: RecLetterBackend
@@ -52,6 +41,16 @@ services:
     network_mode: host
     depends_on:
       - RecLetterBackend
+    networks:
+      - RecLetterNetwork
+    command:
+      - /bin/bash
+      - -c
+      - |
+        echo "VITE_REACT_GOOGLE_LOGIN_URL=${VITE_REACT_GOOGLE_LOGIN_URL}" > /usr/share/nginx/html/.env
+        echo "VITE_REACT_GOOGLE_CHANGE_HOST=${VITE_REACT_GOOGLE_CHANGE_HOST}" > /usr/share/nginx/html/.env
+        echo "VITE_REACT_GOOGLE_PROTOCOL=${VITE_REACT_GOOGLE_PROTOCOL}" > /usr/share/nginx/html/.env
+        echo "VITE_REACT_API_URL=${VITE_REACT_API_URL}" > /usr/share/nginx/html/.env
 networks:
   RecLetterNetwork:
     external: true

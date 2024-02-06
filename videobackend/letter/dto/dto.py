@@ -1,6 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel
 from typing import List
+from pydantic.alias_generators import to_camel
 
 
 class ClipInfo(BaseModel):
@@ -25,3 +26,7 @@ class MakeLetterDto(BaseModel):
     studio_volume: int
     studio_font: int
     clip_info_list: List[ClipInfo]
+
+    class Config:
+        alias_generator = to_camel
+        allow_population_by_field_name = True
