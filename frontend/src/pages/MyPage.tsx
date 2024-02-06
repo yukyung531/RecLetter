@@ -22,6 +22,16 @@ export default function MyPage() {
     const navigate = useNavigate();
     const [flagPassword, setFlagPassword] = useState<boolean>(false);
 
+    const [isDisabled, setIsDisabled] = useState(false);
+
+    // 비활성화 상태일 때의 inline 스타일
+    const disabledStyle: React.CSSProperties = {
+        borderColor: '#ccc', // 테두리 색상
+        backgroundColor: '#ccc',
+        color: "darkgray",        // 글씨 색상
+    };
+
+
     useEffect(() => {
         dispatch(studioState(''));
         dispatch(studioNameState(''));
@@ -32,6 +42,7 @@ export default function MyPage() {
         if (loginValue === 'true') {
             dispatch(loginState(true));
             console.log(isLogin);
+
             getUserInfo();
         }
         if (loginValue === 'false' || !loginValue) {
@@ -45,6 +56,10 @@ export default function MyPage() {
             if (res.status === httpStatusCode.OK) {
                 setUserNickname(res.data.userNickname);
                 setUserEmail(res.data.userEmail);
+                if(res.data.userRole==="ROLE_SOCIAL"){
+                    setIsDisabled(true);
+                    console.log("안댕")
+                }
             }
         });
     };
@@ -123,7 +138,9 @@ export default function MyPage() {
     };
     /** 비밀번호 변경 토클 */
     const changeFlag = () => {
-        setFlagPassword(!flagPassword);
+        if (!isDisabled) {
+            setFlagPassword(!flagPassword);
+        }
     };
 
     const myPageElement = () => {
@@ -161,11 +178,16 @@ export default function MyPage() {
                     >
                         변경사항 저장
                     </div>
+
                     <div
-                        className="w-128 rounded-md py-2 text-2xl my-2 border-2 color-border-main text-center color-border-main color-text-main mx-2 cursor-pointer hover:color-bg-main hover:text-white hover:transition-all"
+                        className={`w-128 rounded-md py-2 text-2xl my-2 border-2 text-center mx-2 cursor-pointer ${isDisabled ? '' : 'hover:color-bg-main hover:text-white hover:transition-all'}`}
+                        style={isDisabled ? disabledStyle : {}}
+                        // 버튼이 비활성화된 경우 disabled 속성을 추가
+                        // React에서는 일반적으로 비활성화된 상태일 때는 onClick 이벤트를 처리하지 않으므로 disabled 속성은 선택적으로 추가할 수 있습니다.
+                        // 하지만 표현력을 높이고 명시성을 유지하기 위해 포함하는 것이 좋습니다.
+                        disabled={isDisabled}
                         onClick={changeFlag}
-                    >
-                        비밀번호 변경
+                    >비밀번호 변경
                     </div>
                     <div
                         className="w-128 rounded-md py-2 text-2xl my-2 text-center color-bg-main text-white cursor-pointer hover:color-bg-subbold hover:text-white"
