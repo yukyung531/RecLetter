@@ -118,10 +118,10 @@ export default function ClipEditPage() {
             disconnect();
         };
         window.addEventListener('beforeunload', handleBeforeUnload);
-        return () => {
-            window.removeEventListener('beforeunload', handleBeforeUnload);
-            disconnect();
-        };
+        // return () => {
+        //     window.removeEventListener('beforeunload', handleBeforeUnload);
+        //     disconnect();
+        // };
     }, []);
 
     ///////////////////////////////////////영상 자르기///////////////////////////////////////////////
@@ -353,12 +353,6 @@ export default function ClipEditPage() {
                         group_add
                     </span>
                 </div>
-                <div
-                    onClick={makeFinalVideo}
-                    className="btn-cover color-bg-red3 text-white"
-                >
-                    저장하기
-                </div>
             </div>
 
             {/* 중앙 섹션 */}
@@ -423,11 +417,11 @@ export default function ClipEditPage() {
                         <p>{inputText}</p>
                         {/* 비디오 */}
                         <video
-                            className="bg-white border my-2"
+                            className="bg-black border my-2"
                             style={{
                                 transform: `rotateY(180deg)`,
-                                width: '640px',
-                                height: '480px',
+                                width: '800px',
+                                aspectRatio: 16 / 9,
                                 display: 'block',
                             }}
                             ref={videoRef}
@@ -467,6 +461,14 @@ export default function ClipEditPage() {
                             >
                                 Progress
                             </progress>
+                        </div>
+                    </div>
+                    <div className="w-1/5 flex flex-col justify-around items-center">
+                        <div
+                            onClick={makeFinalVideo}
+                            className="btn-cover color-bg-main text-white"
+                        >
+                            저장하기
                         </div>
                     </div>
                 </div>

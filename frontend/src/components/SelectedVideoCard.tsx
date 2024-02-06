@@ -6,6 +6,9 @@ interface Prop {
     unselectClip: React.MouseEventHandler<HTMLButtonElement>;
     changeVolume: React.ChangeEventHandler<HTMLInputElement>;
     getDuration: (clipId: number, duration: number) => void;
+    propVideoRef: React.RefObject<HTMLVideoElement>;
+    percent: number;
+    selectCard: React.MouseEventHandler<HTMLDivElement>;
 }
 
 export default function SelectedVideoCard({
@@ -13,18 +16,37 @@ export default function SelectedVideoCard({
     unselectClip,
     changeVolume,
     getDuration,
+    propVideoRef,
+    percent,
+    selectCard,
 }: Prop) {
     //video metadata
     const videoRef = useRef<HTMLVideoElement>(null);
+
+    const progressBar = useRef<HTMLDivElement>(null);
 
     const metadataLoad = () => {
         if (videoRef.current) {
             getDuration(clip.clipId, videoRef.current.duration);
         }
     };
+
     return (
         <>
-            <div className="w-28 flex flex-col justify-center mx-2">
+            <div
+                className={`w-28 flex flex-col justify-center mx-2 relative`}
+                onClick={selectCard}
+            >
+                {propVideoRef.current &&
+                propVideoRef.current.src === clip.clipUrl ? (
+                    <div
+                        className={`w-[2px] h-full absolute bg-red-500 z-10`}
+                        ref={progressBar}
+                        style={{ left: percent * 112 }}
+                    ></div>
+                ) : (
+                    <></>
+                )}
                 <button onClick={unselectClip}>선택 취소</button>
                 <video
                     src={clip.clipUrl}

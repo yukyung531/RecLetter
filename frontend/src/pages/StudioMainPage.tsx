@@ -1,5 +1,5 @@
 import VideoCard from '../components/VideoCard';
-import { useState, useEffect, BaseSyntheticEvent } from 'react';
+import { useState, useEffect, BaseSyntheticEvent, useRef } from 'react';
 import { StudioDetail, ClipInfo, UserInfo } from '../types/type';
 import { useNavigate, Link } from 'react-router-dom';
 import DeleteCheckWindow from '../components/DeleteCheckWindow';
@@ -62,6 +62,13 @@ export default function StudioMainPage() {
         clipContent: '',
     });
 
+    //프레임 설정
+    // 선택한 프레임
+    const [selectImgUrl, setSelectImgUrl] = useState<string>('');
+
+    //비디오 재생중인가
+    const [playingVideo, setPlayingVideo] = useState<boolean>(false);
+
     /** 리덕스 설정 */
     const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
     const chatStudioList: string[] = useSelector(
@@ -103,8 +110,10 @@ export default function StudioMainPage() {
                             // 채팅방 불러오기 설정
 
                             dispatch(studioNameState(res.data.studioTitle));
-                            console.log(res.data);
                             setStudioDetailInfo(res.data);
+                            setSelectImgUrl(
+                                `/src/assets/frames/frame${res.data.studioFrameId}.png`
+                            );
                         }
                     });
                     return;
@@ -176,6 +185,20 @@ export default function StudioMainPage() {
             studioDetailInfo !== null &&
             studioDetailInfo.clipInfoList !== undefined
         ) {
+            if (selectedVideo.clipId === deleteStateId) {
+                setSelectedVideo({
+                    clipId: -1,
+                    clipTitle: '',
+                    clipOwner: '',
+                    clipLength: -1,
+                    clipThumbnail: '',
+                    clipUrl: '',
+                    clipOrder: -1,
+                    clipVolume: -1,
+                    clipContent: '',
+                });
+            }
+
             setStudioDetailInfo((prevValue) => {
                 const prevList: ClipInfo[] = prevValue?.clipInfoList;
                 //탐색 시작
@@ -223,14 +246,54 @@ export default function StudioMainPage() {
      * @returns
      */
     const selectVideo = (clipId: number) => {
-        console.log(clipId);
         for (let i = 0; i < studioDetailInfo.clipInfoList.length; i++) {
             if (studioDetailInfo.clipInfoList[i].clipId === clipId) {
                 setSelectedVideo(studioDetailInfo.clipInfoList[i]);
+                setPlayingVideo(true);
                 return;
             }
         }
     };
+
+    /////////////////////////////////////////////////////////////비디오 플레이어/////////////////////////////////////////////////
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    /** playVideo()
+     *  비디오를 재생한다.
+     */
+    const playVideo = () => {
+        setPlayingVideo(true);
+        if (videoRef.current) {
+            videoRef.current.play();
+        }
+    };
+
+    /** stopVideo()
+     *  비디오를 멈춘다.
+     */
+    const stopVideo = () => {
+        setPlayingVideo(false);
+        if (videoRef.current) {
+            videoRef.current.pause();
+        }
+    };
+
+    /** formatTime(time: number)
+     * 초를 입력하면 0:00 형식으로 변환한다.
+     * @param time
+     * @returns
+     */
+    const formatTime = (time: number) => {
+        const min = Math.floor(time / 60);
+        const sec =
+            Math.floor(time % 60) < 10
+                ? '0' + Math.floor(time % 60)
+                : '' + Math.floor(time % 60);
+        return `${min}:${sec}`;
+    };
+
+    const [videoNowPosition, setVideoNowPosition] = useState<number>(0);
+    const [wholeDuration, setWholeDuration] = useState<number>(0);
 
     //좌측 사이드바
     let leftSideBar = (
@@ -256,6 +319,7 @@ export default function StudioMainPage() {
                                 }}
                                 props={clip}
                                 presentUser={userInfo.userId}
+                                selectedClip={selectedVideo}
                             />
                         );
                     }
@@ -283,6 +347,7 @@ export default function StudioMainPage() {
                                 }}
                                 props={clip}
                                 presentUser={userInfo.userId}
+                                selectedClip={selectedVideo}
                             />
                         );
                     }
@@ -460,22 +525,79 @@ export default function StudioMainPage() {
                                     {selectedVideo.clipTitle}
                                 </p>
                             </div>
-                            <video
-                                src={selectedVideo.clipUrl}
-                                crossOrigin="anonymous"
-                                style={{
-                                    transform: `rotateY(180deg)`,
-                                    width: '640px',
-                                    height: '480px',
-                                    display: 'block',
-                                }}
-                                autoPlay
-                            />
-                            <div className="w-full flex justify-center items-center my-4 px-12">
-                                <span className="material-symbols-outlined me-1 text-4xl">
-                                    play_circle
-                                </span>
-                                <div className="w-full h-2 bg-black"></div>
+                            <div className="relative">
+                                <video
+                                    src={selectedVideo.clipUrl}
+                                    crossOrigin="anonymous"
+                                    style={{
+                                        transform: `rotateY(180deg)`,
+                                        width: '800px',
+                                        aspectRatio: 16 / 9,
+                                        display: 'block',
+                                        backgroundColor: 'black',
+                                    }}
+                                    autoPlay
+                                    ref={videoRef}
+                                    onLoadedData={() => {
+                                        if (videoRef.current) {
+                                            setWholeDuration(
+                                                videoRef.current.duration
+                                            );
+                                        }
+                                    }}
+                                    onTimeUpdate={() => {
+                                        if (videoRef.current) {
+                                            setVideoNowPosition(
+                                                videoRef.current.currentTime
+                                            );
+                                        }
+                                    }}
+                                    onEnded={stopVideo}
+                                />
+                                {/* 프레임 */}
+                                <img
+                                    src={selectImgUrl}
+                                    className="absolute top-0 lef-0"
+                                    style={{
+                                        width: '800px',
+                                        aspectRatio: 16 / 9,
+                                    }}
+                                    alt=""
+                                />
+                            </div>
+                            <div className="w-full flex justify-center items-center mt-4 px-12">
+                                {/* 비디오 컨트롤러 */}
+                                {!playingVideo ? (
+                                    <img
+                                        className="me-3"
+                                        src="/src/assets/icons/play_icon.png"
+                                        alt="플레이"
+                                        onClick={playVideo}
+                                    />
+                                ) : (
+                                    <img
+                                        className="me-[9px] h-[29px]"
+                                        src="/src/assets/icons/pause_icon.png"
+                                        alt="정지"
+                                        onClick={stopVideo}
+                                    />
+                                )}
+                                <div className="w-full h-2 bg-black relative">
+                                    <div
+                                        className={`h-2 bg-[#FF777F] absolute top-0 left-0 z-10`}
+                                        style={{
+                                            width: `${Math.floor(
+                                                (videoNowPosition /
+                                                    wholeDuration) *
+                                                    100
+                                            )}%`,
+                                        }}
+                                    ></div>
+                                </div>
+                            </div>
+                            <div className="w-full pl-[86px]">
+                                {formatTime(videoNowPosition)}/
+                                {formatTime(wholeDuration)}
                             </div>
                         </div>
                     </div>
@@ -532,6 +654,7 @@ export default function StudioMainPage() {
                                                 }}
                                                 props={clip}
                                                 presentUser={userInfo.userId}
+                                                selectedClip={selectedVideo}
                                             />
                                         );
                                     }

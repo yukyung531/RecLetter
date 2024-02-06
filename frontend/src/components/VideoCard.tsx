@@ -7,6 +7,7 @@ interface VideoCardProp {
     selectVideo: React.MouseEventHandler<HTMLDivElement>;
     props: ClipInfo;
     presentUser: string;
+    selectedClip: ClipInfo;
 }
 
 export default function VideoCard({
@@ -15,6 +16,7 @@ export default function VideoCard({
     selectVideo,
     props,
     presentUser,
+    selectedClip,
 }: VideoCardProp) {
     //userId에 따라 편집, 삭제 기능 활성화
     const userId = presentUser;
@@ -36,7 +38,11 @@ export default function VideoCard({
     //hover시 class에 color-border-blue2 추가
     return (
         <div
-            className="flex justify-between w-full my-2 p-2 border-2 hover:color-border-sublight"
+            className={`flex justify-between w-full my-2 p-2 border-2 ${
+                selectedClip && selectedClip.clipId === props.clipId
+                    ? 'border-[#FF777F]'
+                    : ''
+            } hover:color-border-sublight`}
             id={clipId}
             onClick={selectVideo}
         >
@@ -68,7 +74,7 @@ export default function VideoCard({
 
             {userId === props.clipOwner ? (
                 <div className="me-2">
-                    {onClick ? (
+                    {/* {onClick ? (
                         <p
                             className="w-14 my-0.5 px-3 text-center color-bg-red2 text-white"
                             onClick={onClick}
@@ -77,7 +83,7 @@ export default function VideoCard({
                         </p>
                     ) : (
                         <></>
-                    )}
+                    )} */}
                     {onDelete ? (
                         <p
                             className="w-14 my-0.5 px-3 text-center color-bg-black text-white"

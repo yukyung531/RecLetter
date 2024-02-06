@@ -35,7 +35,14 @@ export async function getCurrentStudioUser(studioId: string) {
 }
 /** PUT 스튜디오 제목 수정 */
 export async function modifyStudioTitle(studioId: string, studioTitle: string) {
-    return await local.put(`/api/studio/${studioId}/title`, studioTitle, {headers: {
-            'Content-Type': 'text/plain'
-        }});
+    return await local.put(`/api/studio/${studioId}/title`, studioTitle, {
+        headers: {
+            'Content-Type': 'text/plain',
+        },
+    });
+}
+
+/** PUT 스튜디오 편집 정보 수정 */
+export async function modifyStudioInfo(studioInfo) {
+    return await local.put(`/api/studio`, studioInfo, {});
 }

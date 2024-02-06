@@ -7,6 +7,7 @@ interface PropClip {
     onLinkClick: React.MouseEventHandler<HTMLDivElement>;
     onNameChange: React.MouseEventHandler<HTMLSpanElement>;
     setChangingName: React.Dispatch<React.SetStateAction<string>>;
+    selectedClip: ClipInfo;
 }
 
 export default function MyClipCard({
@@ -15,6 +16,7 @@ export default function MyClipCard({
     onLinkClick,
     onNameChange,
     setChangingName,
+    selectedClip,
 }: PropClip) {
     const [isEditingName, setIsEditingName] = useState<boolean>(false);
 
@@ -26,13 +28,16 @@ export default function MyClipCard({
 
     return (
         <div
-            className="relative flex w-full my-2 p-2 border-2 hover:color-border-main cursor-pointer rounded-md"
+            className={`relative flex w-full my-2 p-2 border-2 hover:color-border-main cursor-pointer rounded-m ${
+                selectedClip.clipId === props.clipId ? 'border-red-500' : ''
+            }`}
             onClick={onLinkClick}
         >
-            <img
-                className="w-16 h-12"
-                src={props.clipThumbnail}
-                alt={props.clipTitle}
+            <video
+                className="w-16 h-12 bg-gray-200"
+                src={props.clipUrl}
+                preload="metadata"
+                style={{ transform: `rotateY(180deg)` }}
             />
             <div className="ms-2">
                 {!isEditingName ? (
@@ -40,7 +45,7 @@ export default function MyClipCard({
                 ) : (
                     <input
                         type="text"
-                        className="text-base w-9"
+                        className="text-base w-[80px]"
                         value={name}
                         onChange={(event) => changeName(event)}
                     />
