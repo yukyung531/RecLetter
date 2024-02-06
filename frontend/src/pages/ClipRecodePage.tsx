@@ -509,7 +509,7 @@ export default function ClipRecodePage() {
                             <span className="material-symbols-outlined">
                                 arrow_back_ios
                             </span>
-                            <p className="text-2xl ms-3">{studioName}</p>
+                            <p className="text-2xl ms-3 w-64 truncate">{studioName}</p>
                         </div>
                     </div>
                     {/* 카테고리 */}
@@ -592,8 +592,8 @@ export default function ClipRecodePage() {
                                     ref={scriptRef}
                                     onChange={handleScript}
                                     rows={4}
-                                    placeholder="스크립트를 작성하면, 녹화하면서 확인할 수 있어요. 하고 싶은 말을 자유롭게 메모하세요"
-                                    className="text-xl text-black w-full border-black border-solid border-2 rounded"
+                                    placeholder={`하고 싶은 말을 자유롭게 메모하세요.\n녹화하면서 확인할 수 있어요.`}
+                                    className="text-base pl-2 text-black w-full border-black border-solid border-2 rounded"
                                 ></textarea>
                                 <div className="my-2 w-full flex justify-start text-xl ">
                                     <p>템플릿 불러오기</p>
@@ -618,9 +618,6 @@ export default function ClipRecodePage() {
                 {/* 우측부분 */}
                 <div className="w-3/4  editor-height bg-gray-50 flex justify-between">
                     <div className="w-4/5 px-4 py-4 flex flex-col justify-center items-center">
-                        <div className="movie-width flex justify-start items-center mt-0">
-                            <p className="text-2xl">{userInfo.userNickname}</p>
-                        </div>
                         <div className="box-border my-3 py-3 min-h-[80px] h-[80px] rounded-full border-2 border-black movie-width text-xl whitespace-pre-wrap flex align-middle justify-center text-center">
                             {selectedScript}
                         </div>
