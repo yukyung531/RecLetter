@@ -509,7 +509,7 @@ export default function ClipRecodePage() {
                             <span className="material-symbols-outlined">
                                 arrow_back_ios
                             </span>
-                            <p className="text-2xl ms-3 w-2/6 truncate break-words">{studioName}</p>
+                            <p className="text-2xl ms-3 w-64 truncate">{studioName}</p>
                         </div>
                     </div>
                     {/* 카테고리 */}

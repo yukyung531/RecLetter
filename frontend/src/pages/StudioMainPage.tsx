@@ -391,7 +391,7 @@ export default function StudioMainPage() {
                                     <input
                                         type="text"
                                         value={studioDetailInfo?.studioTitle}
-                                        className="w-36 border-b-2 color-bg-sublight flex items-center text-2xl text-white ms-2"
+                                        className="w-3/4 border-b-2 color-bg-sublight flex items-center text-2xl text-white ms-2"
                                         onChange={updateStudioName}
                                     />
                                     {isEditingName?(<span
