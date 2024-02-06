@@ -592,8 +592,8 @@ export default function ClipRecodePage() {
                                     ref={scriptRef}
                                     onChange={handleScript}
                                     rows={4}
-                                    placeholder="스크립트를 작성하면, 녹화하면서 확인할 수 있어요. 하고 싶은 말을 자유롭게 메모하세요"
-                                    className="text-xl text-black w-full border-black border-solid border-2 rounded"
+                                    placeholder={`하고 싶은 말을 자유롭게 메모하세요.\n녹화하면서 확인할 수 있어요.`}
+                                    className="text-base pl-2 text-black w-full border-black border-solid border-2 rounded"
                                 ></textarea>
                                 <div className="my-2 w-full flex justify-start text-xl ">
                                     <p>템플릿 불러오기</p>
