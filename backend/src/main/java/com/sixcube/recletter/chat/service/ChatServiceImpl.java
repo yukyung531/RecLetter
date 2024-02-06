@@ -58,6 +58,9 @@ public class ChatServiceImpl implements ChatService {
             // 메시지 sender에 userNickname 등록
             chatMessage.setSender(user.getUserNickname());
 
+            // 메시지 studioId에 studioId 등록
+            chatMessage.setStudioId(studioId);
+
             // 메시지 UUID에 UUID 등록
             chatMessage.setUUID(user.getUserId());
 
@@ -114,6 +117,9 @@ public class ChatServiceImpl implements ChatService {
 
             // 메시지 sender에 userNickname 등록
             chatMessage.setSender(user.getUserNickname());
+
+            // 메시지 studioId에 studioId 등록
+            chatMessage.setStudioId(studioId);
 
             // 메시지 UUID에 UUID 등록
             chatMessage.setUUID(user.getUserId());
