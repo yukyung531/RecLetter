@@ -14,4 +14,6 @@ public interface ClipRepository extends JpaRepository<Clip, Integer> {
 
     List<Clip> findClipsByStudioId(String studioId);
 
+    List<Clip> findClipsByStudioIdOrderByClipOrder(String studioId);
+
 }
