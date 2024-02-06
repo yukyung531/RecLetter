@@ -41,14 +41,7 @@ services:
     network_mode: host
     depends_on:
       - RecLetterBackend
-    command:
-      - /bin/bash
-      - -c
-      - |
-        echo "VITE_REACT_GOOGLE_LOGIN_URL=${VITE_REACT_GOOGLE_LOGIN_URL}" > /usr/share/nginx/html/.env
-        echo "VITE_REACT_GOOGLE_CHANGE_HOST=${VITE_REACT_GOOGLE_CHANGE_HOST}" > /usr/share/nginx/html/.env
-        echo "VITE_REACT_GOOGLE_PROTOCOL=${VITE_REACT_GOOGLE_PROTOCOL}" > /usr/share/nginx/html/.env
-        echo "VITE_REACT_API_URL=${VITE_REACT_API_URL}" > /usr/share/nginx/html/.env
+    command: sh -c echo "VITE_REACT_GOOGLE_LOGIN_URL=${VITE_REACT_GOOGLE_LOGIN_URL}" > /usr/share/nginx/html/.env && echo "VITE_REACT_GOOGLE_LOGIN_URL=${VITE_REACT_GOOGLE_LOGIN_URL}" > /usr/share/nginx/html/.env && echo "VITE_REACT_GOOGLE_CHANGE_HOST=${VITE_REACT_GOOGLE_CHANGE_HOST}" > /usr/share/nginx/html/.env && echo "VITE_REACT_GOOGLE_PROTOCOL=${VITE_REACT_GOOGLE_PROTOCOL}" > /usr/share/nginx/html/.env && echo "VITE_REACT_API_URL=${VITE_REACT_API_URL}" > /usr/share/nginx/html/.env
 networks:
   RecLetterNetwork:
     external: true
