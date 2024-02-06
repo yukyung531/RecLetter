@@ -144,7 +144,7 @@ public class StudioServiceImpl implements StudioService {
   @Override
   public Boolean hasMyClip(String studioId, String userId) {
     List<ClipInfo> clipInfoList = clipService.searchClipInfoList(studioId);
-    return clipInfoList.stream().anyMatch(clipInfo -> studioId.equals(clipInfo.getClipOwner()));
+    return clipInfoList.stream().anyMatch(clipInfo -> userId.equals(clipInfo.getClipOwner()));
   }
 
   @Override
