@@ -541,7 +541,22 @@ export default function ClipRecodePage() {
                         <div className="flex items-center ">
                             <span
                                 className="material-symbols-outlined cursor-pointer"
-                                onClick={() => navigate(-1)}
+                                onClick={() => {
+                                    //url 초기화(자원관리)
+                                    myClipList.map((clip) => {
+                                        URL.revokeObjectURL(clip.clipUrl);
+                                    });
+                                    //mediaStream 소멸
+                                    const trackList: MediaStreamTrack[] = mS.getTracks();
+                                    for (let i = 0; i < trackList.length; i++) {
+                                        mS.removeTrack(trackList[i]);
+                                    }
+
+                                    //navigate
+                                    const splitUrl = document.location.href.split('/');
+                                    const studioId = splitUrl[splitUrl.length - 1];
+                                    navigate(`/studiomain/${studioId}`);
+                                }}
                             >
                                 arrow_back_ios
                             </span>

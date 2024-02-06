@@ -4,8 +4,8 @@ import localAxios from '../util/http-commons';
 const local = localAxios();
 
 /** PUT 영상 수정 */
-export async function modifyLetter(letter: { studioId: string }) {
-    return await local.put(`/api/studio`, letter, {});
+export async function modifyLetter(letter: any) {
+    return await local.put(`/api/studio`, letter);
 }
 /** GET 영상 수정 */
 export async function encodingLetter(studioId: string) {

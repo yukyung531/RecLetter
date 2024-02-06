@@ -34,6 +34,7 @@ import BGMCard from '../components/BGMCard';
 import { disconnect } from '../util/chat';
 import CanvasItem from '../components/CanvasItem';
 import html2canvas from 'html2canvas';
+import { modifyLetter } from '../api/letter';
 
 interface mousePosition {
     positionX: number | null;
@@ -245,7 +246,7 @@ export default function LetterMakePage() {
 
             // openvidu 화면 공유 시작
             //현재 주석 처리. 주석 풀것!!! (주석해제위치)
-            startScreenShare();
+            // startScreenShare();
         };
         initSetting();
 
@@ -837,7 +838,7 @@ export default function LetterMakePage() {
         };
 
         //전송
-        modifyStudioInfo(nowStatus)
+        modifyLetter(nowStatus)
             .then((res) => {
                 console.log(res);
             })
@@ -1142,17 +1143,19 @@ export default function LetterMakePage() {
                                     </span>
                                 )}
                                 <span>
-                                    {Math.floor(
+                                    {cumulTime.length > 0 ? Math.floor(
                                         (nowPlayingTime +
                                             cumulTime[playingIdx.current]) /
                                             60
-                                    )}
+                                    ):
+                                    0}
                                     분
-                                    {Math.floor(
-                                        (nowPlayingTime +
-                                            cumulTime[playingIdx.current]) %
-                                            60
-                                    )}
+                                    {cumulTime.length > 0 ? Math.floor(
+                                            (nowPlayingTime +
+                                                cumulTime[playingIdx.current]) %
+                                                60
+                                    ) :
+                                    0}
                                     초
                                 </span>
                             </div>
