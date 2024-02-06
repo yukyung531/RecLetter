@@ -75,9 +75,10 @@ export default function Header() {
             return (
                 <div className="flex justify-center items-center">
                     <div className="flex mx-2 text-xl justify-center items-center cursor-pointer color-text-ivory">
-                        <div className="flex justify-center items-center bg-white rounded-full w-6 h-6 mx-2">
+                        <div className="flex justify-center items-center bg-white rounded-full w-6 h-6 mx-2"
+                        style={{ width: '1.25rem', height: '1.25rem' }}>
                             <span
-                                className="material-symbols-outlined color-text-main text-lg"
+                                className="material-symbols-outlined color-text-main text-base"
                                 style={{ padding: '1px 2px 0 0' }}
                             >
                                 login
