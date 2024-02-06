@@ -35,6 +35,20 @@ services:
     env_file:
       - .env
 
+  RecLetterVideo:
+    image: ssuya/recletter_video
+    container_name: RecLetterVideo
+    networks:
+      - RecLetterNetwork
+    ports:
+      - "8000:8000"
+    environment:
+      AWS_ACCESS: ${AWS_ACCESS}
+      AWS_SECRET: ${AWS_SECRET}
+      AWS_REGION: ${AWS_REGION}
+      AWS_BUCKET: ${AWS_BUCKET}
+      SPRING_SERVER_URL: ${SPRING_SERVER_URL}
+
   app:
     image: ssuyas/recletter_frontend
     container_name: RecLetterFrontend

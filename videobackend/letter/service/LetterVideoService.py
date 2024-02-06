@@ -4,9 +4,6 @@ from videobackend.letter.dto.dto import MakeLetterDto
 from videobackend.letter.utils.s3_utils import clip_download_and_load, \
     letter_upload
 import os
-# from letter.dto.dto import MakeLetterDto
-# from letter.utils.s3_utils import clip_download_and_load, letter_upload
-# from letter.utils.video_edit_utils import *
 
 from videobackend.letter.utils.video_edit_utils import mirror_clip, tune_volume, \
     concat_clip, encode_frame, resize_clip
@@ -49,7 +46,6 @@ def create_letter(make_letter_dto: MakeLetterDto, bucket: str,
         print("프레임 인코딩")
         frame_added_letter = encode_frame(concatenated_letter,
                                           make_letter_dto.studio_frame_id)
-        frame_added_letter.write_videofile("./complete/frame.mp4", fps=30, codec="libx264")
         del concatenated_letter
 
         # 6. 전체 영상 볼륨 조절
