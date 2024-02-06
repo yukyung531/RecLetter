@@ -13,6 +13,7 @@
     --color-yellow1: #fffacf;
     --color-yellow2: #fff593;
     --color-yellow3: #ffc165;
+    --color-yellow4: #F0DF86;
     --color-yellowbg: #fffacf;
     --color-ivory: #fafaf0;
     --color-strawberry: #fff5f5;
@@ -73,6 +74,9 @@
     --tw-text-opacity: 1;
     background-color: var(--color-subbold);
 }
+.hover\:color-bg-yellow3:hover {
+    background-color: var(--color-yellow3);
+}
 .color-text-subbold {
     color: var(--color-subbold);
 }
@@ -99,6 +103,15 @@
 }
 .color-bg-yellowbg {
     background-color: var(--color-yellowbg);
+}
+.color-border-yellow2 {
+    border-color: var(--color-yellow2);
+}
+.color-border-yellow3 {
+    border-color: var(--color-yellow3);
+}
+.color-border-yellow4 {
+    border-color: var(--color-yellow4);
 }
 .color-bg-blue1 {
     background-color: var(--color-blue1);
