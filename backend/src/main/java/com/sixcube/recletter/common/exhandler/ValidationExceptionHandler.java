@@ -28,10 +28,11 @@ public class ValidationExceptionHandler {
     StringBuilder errorMessage = new StringBuilder(bindingResult.getObjectName() + " : ");
 
     for (FieldError fieldError : bindingResult.getFieldErrors()) {
-      errorMessage.append(fieldError.getField())
-          .append(" ")
+      errorMessage
+          //.append(fieldError.getField())
+          //.append(" ")
           .append(messageSource.getMessage(fieldError, LocaleContextHolder.getLocale()))
-          .append(fieldError.getCode())
+          //.append(fieldError.getCode())
           .append(", ");
     }
 

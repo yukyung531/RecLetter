@@ -5,6 +5,7 @@ import { httpStatusCode } from '../util/http-status';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { studioNameState, studioState } from '../util/counter-slice';
+import axios, {AxiosError} from "axios";
 
 export default function RegistPage() {
     const [inputEmail, setInputEmail] = useState<string>('');
@@ -19,6 +20,7 @@ export default function RegistPage() {
     const [codeFlag, setCodeFlag] = useState<boolean>(false);
     const [count, setCount] = useState<number>(600);
     const [isCounting, setIsCounting] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
     const navigate = useNavigate();
 
     const dispatch = useDispatch();
@@ -80,8 +82,16 @@ export default function RegistPage() {
                 }
             })
             .catch((e: Error) => {
+                if (axios.isAxiosError(e)) {
+                    const axiosError: AxiosError = e;
+                    const originalString = axiosError.response.data;
+                    const parts = originalString.split(':');
+                    const firstPart = parts[1];
+                    setErrorMessage(firstPart);
+                }
                 setEmailFlag(4);
-                console.log('오류가 발생했습니다.' + e);
+
+                console.log('오류가 발생했습니다.' + e.message);
             });
     };
     /** 코드 체크 함수 */
@@ -167,12 +177,22 @@ export default function RegistPage() {
                     <p className="w-128 h-3 text-green-600">인증되었습니다.</p>
                 </div>
             );
-        } else if (emailFlag === 4 || count === 0) {
+        }
+        else if (emailFlag === 4) {
             return (
                 <div className="flex">
                     <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4"></p>
                     <p className="w-128 h-3 color-text-main">
-                        다시 시도해주시기바랍니다.
+                        {errorMessage}
+                    </p>
+                </div>
+            );
+        }else if ( count === 0) {
+            return (
+                <div className="flex">
+                    <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4"></p>
+                    <p className="w-128 h-3 color-text-main">
+                        인증 시간이 만료되었습니다.
                     </p>
                 </div>
             );
