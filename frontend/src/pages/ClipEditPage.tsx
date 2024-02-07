@@ -33,9 +33,6 @@ export default function ClipEditPage() {
     const videoInfo: ClipInfo = location.state.videoInfo;
     const base64: string = location.state.base64;
 
-    const splitUrl = document.location.href.split('/');
-    const studioId = splitUrl[splitUrl.length - 1];
-
     //////////////////////////로딩 직후 초기 설정///////////////////////////////////////////////////////
     const [loaded, setLoaded] = useState<boolean>(false);
     const ffmpegRef = useRef(new FFmpeg());
@@ -50,6 +47,48 @@ export default function ClipEditPage() {
 
     //텍스트 연동 설정
     const [inputText, setInputText] = useState<string>('');
+
+    //스튜디오 정보
+    const [studioDetailInfo, setStudioDetailInfo] = useState<StudioDetail>({
+        studioId: '',
+        studioTitle: '',
+        isCompleted: false,
+        studioOwner: '',
+        clipInfoList: [],
+        studioFrameId: -1,
+        studioFontId: -1,
+        studioBGMId: -1,
+    });
+
+    //비디오 재생중인가
+    const [playingVideo, setPlayingVideo] = useState<boolean>(false);
+
+    /** formatTime(time: number)
+     * 초를 입력하면 0:00 형식으로 변환한다.
+     * @param time
+     * @returns
+     */
+    const formatTime = (time: number) => {
+        const min = Math.round(time / 60);
+        const sec =
+            Math.round(time % 60) < 10
+                ? '0' + Math.round(time % 60)
+                : '' + Math.round(time % 60);
+        return `${min}:${sec}`;
+    };
+
+    const [videoNowPosition, setVideoNowPosition] = useState<number>(0);
+    const [wholeDuration, setWholeDuration] = useState<number>(0);
+
+    /////////////////////////////////프레임 설정////////////////////////////////////////
+    const [selectImgUrl, setSelectImgUrl] = useState<string>('');
+
+    //비디오 이름
+    const [clipName, setClipName] = useState<string>(videoInfo.clipTitle);
+
+    //studioId
+    const splitUrl = document.location.href.split('/');
+    const studioId = splitUrl[splitUrl.length - 1];
 
     /**ffmpegload()
      * 영상을 인코딩하는데 사용하는 ffmpeg을 불러오는 곳이다.
@@ -183,6 +222,19 @@ export default function ClipEditPage() {
         if (loginValue === 'false' || !loginValue || !token) {
             alert('오류가 났습니다');
         }
+        const getDetail = async (studioId: string) => {
+            await studioDetail(studioId).then((res) => {
+                if (res.status === httpStatusCode.OK) {
+                    setStudioDetailInfo(res.data);
+                    setSelectImgUrl(
+                        `/src/assets/frames/frame${res.data.studioFrameId}.png`
+                    );
+                }
+            });
+            return;
+        };
+        getDetail(studioId);
+
         /** 페이지 새로고침 전에 실행 할 함수 */
         const reloadingStudioId = getlastPath();
         const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -261,7 +313,7 @@ export default function ClipEditPage() {
                 //make formdata
                 const clipForm = new FormData();
                 clipForm.append('studioId', studioId);
-                clipForm.append('clipTitle', name);
+                clipForm.append('clipTitle', clipName);
                 clipForm.append('clipContent', inputText);
                 clipForm.append('clip', newBlob);
 
@@ -306,6 +358,7 @@ export default function ClipEditPage() {
             if (videoRef.current) {
                 videoRef.current.pause();
                 videoRef.current.currentTime = startTime;
+                videoRef.current.play();
             }
         }
 
@@ -313,8 +366,19 @@ export default function ClipEditPage() {
             if (videoRef.current) {
                 videoRef.current.pause();
                 videoRef.current.currentTime = startTime;
+                videoRef.current.play();
             }
         }
+    };
+
+    /** resetSettings()
+     *  설정 초기화 버튼 누르면 작동
+     *  시작, 종료 시간 초기화
+     */
+    const resetSettings = () => {
+        setStartTime(0);
+        setEndTime(endMaxtime);
+        setInputText('');
     };
 
     ///영상 재생//////////////////////////////////////////////////////////////////////////////
@@ -324,69 +388,40 @@ export default function ClipEditPage() {
      * 영상이 재생된다.
      */
     const playVideo = () => {
+        setPlayingVideo(true);
         //영상재생
         if (videoRef.current) {
             videoRef.current.play();
         }
     };
 
-    /** pauseVideo()
-     * 일시정지 버튼을 누르면 호출되는 함수다.
-     * 영상 재생이 일시정지된다.
-     */
-    const pauseVideo = () => {
-        //영상정지
-        if (videoRef.current) {
-            videoRef.current.pause();
-        }
-    };
-
     /** stopVideo()
      *  영상 정지 버튼 누르면 호출되는 함수다.
-     *  영상 재생이 정지되고, 처음으로 돌아간다.
+     *  영상 재생이 일시정지된다.
      */
     const stopVideo = () => {
+        setPlayingVideo(false);
         //영상정지
         if (videoRef.current) {
             videoRef.current.pause();
-            videoRef.current.currentTime = startTime;
-        }
-    };
-
-    //프로그레스 바의 현재 상태를 위한 state다.
-    const [progress, setProgress] = useState(0);
-
-    /**handleProgress(event)
-     * 프로그레스 바와 영상을 동기화한다.
-     * @param event
-     * 영상이 재생되는 이벤트다.
-     * @returns
-     * 영상이 만들어진 직후에는 이 값이 없다. 그래서 그냥 생략한다.
-     */
-    const handleProgress = (event: BaseSyntheticEvent) => {
-        if (isNaN(event.target.duration)) {
-            return;
-        } else {
-            setProgress(
-                (event.target.currentTime / event.target.duration) * 100
-            );
         }
     };
 
     //////////////////////////////////서브 텍스트 입력/////////////////////////////////////////////////
+    /** changeText()
+     *  서브텍스트 입력
+     * @param event
+     */
     const changeText = (event: BaseSyntheticEvent) => {
         setInputText(event.target.value);
     };
 
-    ////////////////////////////////////영상 이름 편집///////////////////////////////////////////////////////////
-    const [isEditingName, setIsEditingName] = useState<boolean>(false);
-    const [name, setName] = useState<string>(videoInfo.clipTitle);
-
     ///////////////////////////////////////렌더링 부분////////////////////////////////////////////////////////////////
 
     return (
-        <section className="relative section-top">
-            <div className="h-20 w-full px-12 color-text-black flex justify-between items-center">
+        <section className="relative section-top pt-14">
+            {/* 원래 상단바/ 현재 안쓰임 */}
+            {/* <div className="h-20 w-full px-12 color-text-black flex justify-between items-center">
                 <div className="flex items-center">
                     <span className="material-symbols-outlined">
                         arrow_back_ios
@@ -427,26 +462,35 @@ export default function ClipEditPage() {
                         group_add
                     </span>
                 </div>
-            </div>
+            </div> */}
 
             {/* 중앙 섹션 */}
             <div className="flex w-full">
                 {/* 좌측부분 */}
-                <div className="w-1/4 editor-height flex">
-                    {/* 카테고리 */}
-                    <div className="w-1/5 ">
-                        <div className="h-28 bg-orange-100 flex flex-col justify-center items-center categori-selected">
-                            <span className="material-symbols-outlined text-3xl">
-                                settings
+                <div className="w-1/5 flex flex-col editor-height">
+                    <div className="w-full h-10 flex justify-between items-center px-12 py-6 border-b-2 color-border-sublight color-text-black">
+                        <div className="flex items-center ">
+                            <span
+                                className="material-symbols-outlined cursor-pointer"
+                                onClick={() => {
+                                    //navigate
+                                    navigate(`/cliprecode/${studioId}`);
+                                }}
+                            >
+                                arrow_back_ios
                             </span>
-                            <p className="font-bold">설정</p>
+                            <p className="text-2xl ms-3 w-64 truncate">
+                                {studioDetailInfo.studioTitle}
+                            </p>
                         </div>
                     </div>
-                    {/* 카테고리 선택에 따라 */}
                     {loaded ? (
                         // 로딩 후
-                        <div className="w-4/5 flex flex-col items-center p-6 overflow-y-scroll">
-                            <div className="w-full flex justify-start text-xl ">
+                        <div className="w-full flex flex-col items-center p-6 overflow-y-scroll">
+                            <div className="w-56 flex justify-start text-xl text-[#FF777F]">
+                                <p>선택 영상 편집</p>
+                            </div>
+                            <div className="w-56 flex justify-start text-xl ">
                                 <p>사용할 구간 선택</p>
                             </div>
                             <div className="my-2 flex justify-center items-center">
@@ -454,7 +498,8 @@ export default function ClipEditPage() {
                                     className="w-16 p-2 border border-black rounded text-center"
                                     type="number"
                                     value={startTime}
-                                    min={0}
+                                    min={0.0}
+                                    step={0.01}
                                     onChange={changeStartTime}
                                 ></input>
                                 <p className="mx-4">~</p>
@@ -463,11 +508,12 @@ export default function ClipEditPage() {
                                     type="number"
                                     value={endTime}
                                     max={endMaxtime}
+                                    step={0.01}
                                     onChange={changeEndTime}
                                 ></input>
                             </div>
 
-                            <div className="w-full flex justify-start text-xl ">
+                            <div className="w-56 flex justify-start text-xl ">
                                 <p>서브 텍스트 입력</p>
                             </div>
                             <input
@@ -476,6 +522,12 @@ export default function ClipEditPage() {
                                 onChange={changeText}
                                 value={inputText}
                             ></input>
+                            <button
+                                className="w-56 mt-6 p-2 border border-[#FF777F] rounded text-[#FF777F] text-xl"
+                                onClick={resetSettings}
+                            >
+                                편집 내용 전체 초기화
+                            </button>
                         </div>
                     ) : (
                         //로딩 중
@@ -485,56 +537,97 @@ export default function ClipEditPage() {
                     )}
                 </div>
                 {/* 우측부분 */}
-                <div className="w-3/4 editor-height bg-gray-50 flex justify-between">
+                <div className="w-4/5 editor-height bg-gray-50 flex justify-between">
                     <div className="w-full px-4 py-4 flex flex-col justify-center items-center">
                         {/* 입력 텍스트 */}
-                        <p>{inputText}</p>
-                        {/* 비디오 */}
-                        <video
-                            className="bg-black border my-2"
-                            style={{
-                                transform: `rotateY(180deg)`,
-                                width: '800px',
-                                aspectRatio: 16 / 9,
-                                display: 'block',
-                            }}
-                            ref={videoRef}
-                            onTimeUpdate={(event: BaseSyntheticEvent) => {
-                                timeChange(event);
-                                handleProgress(event);
+                        <input
+                            type="text"
+                            className="w-[800px] text-2xl bg-white rounded p-4 border-2 border-black"
+                            value={clipName}
+                            onChange={(event) => {
+                                setClipName(event.target.value);
                             }}
                         />
+                        {/* 비디오 */}
+                        <div className="relative my-2">
+                            <video
+                                className="bg-black border"
+                                style={{
+                                    transform: `rotateY(180deg)`,
+                                    width: '800px',
+                                    height: '450px',
+                                    display: 'block',
+                                }}
+                                ref={videoRef}
+                                onTimeUpdate={(event: BaseSyntheticEvent) => {
+                                    timeChange(event);
+                                    if (videoRef.current) {
+                                        setVideoNowPosition(
+                                            videoRef.current.currentTime
+                                        );
+                                    }
+                                }}
+                                onLoadedData={() => {
+                                    if (videoRef.current) {
+                                        setWholeDuration(
+                                            videoRef.current.duration
+                                        );
+                                        setEndMaxTime(
+                                            videoRef.current.duration
+                                        );
+                                        setEndTime(videoRef.current.duration);
+                                    }
+                                }}
+                                onEnded={stopVideo}
+                            ></video>
+                            {/* 프레임 */}
+                            <img
+                                src={selectImgUrl}
+                                className="absolute top-0 lef-0"
+                                style={{
+                                    width: '800px',
+                                    aspectRatio: 16 / 9,
+                                }}
+                                alt=""
+                            />
+                        </div>
                         <div className="w-full flex flex-col justify-center items-center my-4">
                             {/* 재생버튼 */}
-                            <div>
-                                <span
-                                    className="material-symbols-outlined me-1 text-4xl cursor-pointer"
-                                    onClick={playVideo}
-                                >
-                                    play_circle
-                                </span>
-                                <span
-                                    className="material-symbols-outlined me-1 text-4xl cursor-pointer"
-                                    onClick={pauseVideo}
-                                >
-                                    pause_circle
-                                </span>
-                                <span
-                                    className="material-symbols-outlined me-1 text-4xl cursor-pointer"
-                                    onClick={stopVideo}
-                                >
-                                    stop_circle
-                                </span>
+                            <div className="w-full flex justify-center items-center mt-4 px-12">
+                                {/* 비디오 컨트롤러 */}
+                                {!playingVideo ? (
+                                    <img
+                                        className="me-3"
+                                        src="/src/assets/icons/play_icon.png"
+                                        alt="플레이"
+                                        onClick={playVideo}
+                                    />
+                                ) : (
+                                    <img
+                                        className="me-[9px] h-[29px]"
+                                        src="/src/assets/icons/pause_icon.png"
+                                        alt="정지"
+                                        onClick={stopVideo}
+                                    />
+                                )}
+                                <div className="w-full h-2 bg-black relative">
+                                    <div
+                                        className={`h-2 bg-[#FF777F] absolute top-0 left-0 z-10`}
+                                        style={{
+                                            width: `${
+                                                (videoNowPosition /
+                                                    wholeDuration) *
+                                                100
+                                            }%`,
+                                            maxWidth: `100%`,
+                                        }}
+                                    ></div>
+                                </div>
                             </div>
-                            {/* 프로그레스 바 */}
-                            <progress
-                                id="progress"
-                                max={100}
-                                value={progress}
-                                className="w-full rounded -webkit-progress-bar:bg-black -webkit-progress-value:bg-red"
-                            >
-                                Progress
-                            </progress>
+                            <div className="w-full pl-[86px]">
+                                {formatTime(videoNowPosition)}/
+                                {formatTime(wholeDuration)}
+                            </div>
                         </div>
                     </div>
                     <div className="w-1/5 flex flex-col justify-around items-center">
@@ -543,6 +636,19 @@ export default function ClipEditPage() {
                             className="btn-cover color-bg-main text-white"
                         >
                             저장하기
+                        </div>
+                        <div className="w-full h-[200px] p-2">
+                            <div className="w-full rounded-t-lg text-lg pl-2 bg-[#FF777F]">
+                                영상 정보
+                            </div>
+                            <div className="w-full h-full rounded-b-lg text-lg p-2 border-2 border-[#FF777F] bg-white whitespace-normal">
+                                <p>제목: {clipName}</p>
+                                <p>길이: {formatTime(wholeDuration)}</p>
+                                <p>
+                                    서브 텍스트: <br />
+                                    {inputText}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>

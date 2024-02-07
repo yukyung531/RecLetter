@@ -262,9 +262,11 @@ export default function StudioMainPage() {
      *  비디오를 재생한다.
      */
     const playVideo = () => {
-        setPlayingVideo(true);
-        if (videoRef.current) {
-            videoRef.current.play();
+        if (selectedVideo.clipId !== -1) {
+            setPlayingVideo(true);
+            if (videoRef.current) {
+                videoRef.current.play();
+            }
         }
     };
 
@@ -284,11 +286,11 @@ export default function StudioMainPage() {
      * @returns
      */
     const formatTime = (time: number) => {
-        const min = Math.floor(time / 60);
+        const min = Math.round(time / 60);
         const sec =
-            Math.floor(time % 60) < 10
-                ? '0' + Math.floor(time % 60)
-                : '' + Math.floor(time % 60);
+            Math.round(time % 60) < 10
+                ? '0' + Math.round(time % 60)
+                : '' + Math.round(time % 60);
         return `${min}:${sec}`;
     };
 
@@ -568,7 +570,9 @@ export default function StudioMainPage() {
                                             );
                                         }
                                     }}
-                                    onEnded={stopVideo}
+                                    onEnded={() => {
+                                        stopVideo();
+                                    }}
                                 />
                                 {/* 프레임 */}
                                 <img
@@ -602,11 +606,12 @@ export default function StudioMainPage() {
                                     <div
                                         className={`h-2 bg-[#FF777F] absolute top-0 left-0 z-10`}
                                         style={{
-                                            width: `${Math.floor(
+                                            width: `${
                                                 (videoNowPosition /
                                                     wholeDuration) *
-                                                    100
-                                            )}%`,
+                                                100
+                                            }%`,
+                                            maxWidth: `100%`,
                                         }}
                                     ></div>
                                 </div>
