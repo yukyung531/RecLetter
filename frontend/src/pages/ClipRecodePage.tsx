@@ -12,6 +12,8 @@ import ScriptTemplateCard from '../components/ScriptTemplateCard';
 import { getUser } from '../api/user';
 import { disconnect } from '../util/chat';
 import { useSelector } from 'react-redux';
+import { studioDetail } from '../api/studio';
+import { max } from 'moment';
 
 interface Const {
     audio: boolean;
@@ -78,6 +80,9 @@ export default function ClipRecodePage() {
         clipContent: '',
     });
 
+    //플레이 상태
+    const [isPlaying, setIsPlaying] = useState<boolean>(false);
+
     ////////////////////////타이머 기능///////////////////////////////////////////////////////
     const timer = useRef<number | null | NodeJS.Timeout>(null);
     const [nowTime, setNowTime] = useState<number>(0);
@@ -125,11 +130,29 @@ export default function ClipRecodePage() {
     const constraints = {
         audio: true,
         video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
+            width: { max: 1280 },
+            height: { max: 720 },
             facingMode: 'environment',
+            frameRate: { max: 30 },
         },
     };
+
+    //스튜디오 정보
+    const [studioDetailInfo, setStudioDetailInfo] = useState<StudioDetail>({
+        studioId: '',
+        studioTitle: '',
+        isCompleted: false,
+        studioOwner: '',
+        clipInfoList: [],
+        studioFrameId: -1,
+        studioFontId: -1,
+        studioBGMId: -1,
+    });
+
+    //studioId
+    const splitUrl = document.location.href.split('/');
+    const studioId = splitUrl[splitUrl.length - 1];
+
     /**useEffect를 이용한 촬영 준비 설정
      * 오디오, 비디오 권한을 받아, 허가를 얻으면 mediaStream을 얻는다.
      * 해당 스트림을 비디오 녹화 화면(videoOutputRef)와 연결하여 현재 웹캠으로 촬영되는 화면의 미리보기를 실행한다.
@@ -171,6 +194,19 @@ export default function ClipRecodePage() {
         };
         loadScript();
 
+        const getDetail = async (studioId: string) => {
+            await studioDetail(studioId).then((res) => {
+                if (res.status === httpStatusCode.OK) {
+                    setStudioDetailInfo(res.data);
+                    setSelectImgUrl(
+                        `/src/assets/frames/frame${res.data.studioFrameId}.png`
+                    );
+                }
+            });
+            return;
+        };
+        getDetail(studioId);
+
         //+유저 정보 불러오기
         const getUserInfo = async () => {
             const resuser = await getUser();
@@ -182,6 +218,7 @@ export default function ClipRecodePage() {
             });
         };
         getUserInfo();
+
         /** 페이지 새로고침 전에 실행 할 함수 */
         const handleBeforeUnload = (event: BeforeUnloadEvent) => {
             disconnect();
@@ -202,6 +239,9 @@ export default function ClipRecodePage() {
      * 타이머를 중지한다.
      */
     const startRecord = () => {
+        //일단 재생하던 영상은 멈춰
+        stopVideo();
+
         const mediaData: Blob[] = [];
 
         //MediaRecorder 생성자 호출, webm형식 저장
@@ -241,7 +281,7 @@ export default function ClipRecodePage() {
                         clipId: clipNumber,
                         clipTitle: userInfo.userNickname + ' ' + clipNumber,
                         clipOwner: userInfo.userEmail,
-                        clipLength: Math.floor(duration),
+                        clipLength: duration,
                         clipThumbnail: '/src/assets/images/nothumb.png',
                         clipUrl: newURL,
                         clipOrder: 0,
@@ -274,6 +314,8 @@ export default function ClipRecodePage() {
         if (mediaRecorder) {
             mediaRecorder.stop();
         }
+        setMode(0);
+        setIsPlaying(true); //영상 녹화 종료 후 video는 autoplay로 인해 바로 실행
     };
 
     /**handleRecordMode()
@@ -304,9 +346,6 @@ export default function ClipRecodePage() {
             (prev) => clipId === prev.clipId
         );
         setSelectedClip(clip[0]);
-
-        //비디오 재생
-        playVideo();
     };
 
     /**changeMode()
@@ -417,6 +456,7 @@ export default function ClipRecodePage() {
      * 클립 리스트에 있는 영상 중, 선택한 영상, 또는 최근에 감상한 영상을 재생한다.
      */
     const playVideo = () => {
+        setIsPlaying(true);
         //영상 재생 화면 띄우기
         const recording = videoOutputRef.current;
         const preview = videoPreviewRef.current;
@@ -435,31 +475,25 @@ export default function ClipRecodePage() {
      * 영상 재생이 일시정지된다.
      */
     const pauseVideo = () => {
+        setIsPlaying(false);
         const preview = videoPreviewRef.current;
         if (preview) {
             preview.pause();
         }
     };
 
-    //프로그레스 바의 현재 상태를 위한 state다.
-    const [progress, setProgress] = useState(0);
-
-    /**handleProgress(event)
-     * 프로그레스 바와 영상을 동기화한다.
-     * @param event
-     * 영상이 재생되는 이벤트다.
-     * @returns
-     * 영상이 만들어진 직후에는 이 값이 없다. 그래서 그냥 생략한다.
+    /** stopVideo()
+     *  정지 버튼을 누르면 호출되는 함수다.
+     *  영상 재생이 정지되고, 처음 위치로 돌아간다.
      */
-    // const handleProgress = (event: BaseSyntheticEvent) => {
-    //     if (isNaN(event.target.duration)) {
-    //         return;
-    //     } else {
-    //         setProgress(
-    //             (event.target.currentTime / event.target.duration) * 100
-    //         );
-    //     }
-    // };
+    const stopVideo = () => {
+        setIsPlaying(false);
+        const preview = videoPreviewRef.current;
+        if (preview) {
+            preview.pause();
+            preview.currentTime = 0;
+        }
+    };
 
     /////////////////////////////클립 편집 페이지로 이동//////////////////////////////
 
@@ -508,9 +542,6 @@ export default function ClipRecodePage() {
                 mS.removeTrack(trackList[i]);
             }
 
-            //navigate
-            const splitUrl = document.location.href.split('/');
-            const studioId = splitUrl[splitUrl.length - 1];
             if (base64 && typeof base64 === 'string') {
                 navigate(`/clipEdit/${studioId}`, {
                     state: { videoInfo, base64 },
@@ -518,6 +549,9 @@ export default function ClipRecodePage() {
             }
         };
     }
+
+    /////////////////////////////////프레임 설정////////////////////////////////////////
+    const [selectImgUrl, setSelectImgUrl] = useState<string>('');
 
     ///////////////////////////////렌더링 화면//////////////////////////////////////////
     return (
@@ -528,10 +562,15 @@ export default function ClipRecodePage() {
             <div className="flex w-full editor-height">
                 {/* 삭제 확인 모달 */}
                 {isDeleting ? (
-                    <DeleteCheckWindow
-                        onClickOK={chooseDelete}
-                        onClickCancel={chooseNotDelete}
-                    />
+                    <>
+                        <div className="w-full h-full absolute top-0 left-0 bg-[#626262] opacity-30 z-20"></div>
+                        <div className="absolute top-1/4 left-1/3 opacity-100 z-20">
+                            <DeleteCheckWindow
+                                onClickOK={chooseDelete}
+                                onClickCancel={chooseNotDelete}
+                            />
+                        </div>
+                    </>
                 ) : (
                     <></>
                 )}
@@ -547,14 +586,13 @@ export default function ClipRecodePage() {
                                         URL.revokeObjectURL(clip.clipUrl);
                                     });
                                     //mediaStream 소멸
-                                    const trackList: MediaStreamTrack[] = mS.getTracks();
+                                    const trackList: MediaStreamTrack[] =
+                                        mS.getTracks();
                                     for (let i = 0; i < trackList.length; i++) {
                                         mS.removeTrack(trackList[i]);
                                     }
 
                                     //navigate
-                                    const splitUrl = document.location.href.split('/');
-                                    const studioId = splitUrl[splitUrl.length - 1];
                                     navigate(`/studiomain/${studioId}`);
                                 }}
                             >
@@ -621,6 +659,8 @@ export default function ClipRecodePage() {
                                             }}
                                             onLinkClick={() => {
                                                 onLinkClick(clip.clipId);
+                                                playVideo();
+                                                setIsPlaying(true); //누르면 autoplay로 자동재생
                                             }}
                                             onNameChange={() =>
                                                 onNameChange(clip.clipId)
@@ -672,10 +712,10 @@ export default function ClipRecodePage() {
                 {/* 우측부분 */}
                 <div className="w-3/4  editor-height bg-gray-50 flex justify-between">
                     <div className="w-4/5 px-4 py-4 flex flex-col justify-center items-center">
-                        <div className="box-border my-3 py-3 min-h-[80px] h-[80px] rounded-full border-2 border-black movie-width text-xl whitespace-pre-wrap flex align-middle justify-center text-center">
+                        <div className="box-border my-3 py-3 min-h-[80px] h-[80px] rounded-full border-2 border-black movie-width text-xl whitespace-pre-wrap flex align-middle justify-center text-center overflow-hidden">
                             {selectedScript}
                         </div>
-                        <div className="w-[800px] aspect-video flex justify-center align-middle bg-black">
+                        <div className="w-[800px] h-[450px] flex justify-center align-middle bg-black relative">
                             {/*영상 촬영 화면*/}
                             <video
                                 className="bg-black border my-2"
@@ -699,7 +739,17 @@ export default function ClipRecodePage() {
                                 }}
                                 ref={videoPreviewRef}
                                 src={selectedClip.clipUrl}
-                                // onTimeUpdate={handleProgress}
+                                autoPlay
+                            />
+                            {/* 프레임 */}
+                            <img
+                                src={selectImgUrl}
+                                className="absolute top-0 lef-0"
+                                style={{
+                                    width: '800px',
+                                    aspectRatio: 16 / 9,
+                                }}
+                                alt=""
                             />
                         </div>
                     </div>
@@ -716,7 +766,7 @@ export default function ClipRecodePage() {
                                 {!isRecording ? (
                                     <div className="w-32 p-1 flex items-center justify-center border border-gray-100 rounded-lg shadow-md">
                                         <span
-                                            className="mx-1 material-symbols-outlined text-2xl color-text-main cursor-pointer"
+                                            className="mx-1 material-symbols-outlined text-2xl text-[#626262] cursor-pointer"
                                             onClick={startRecord}
                                         >
                                             radio_button_checked
@@ -725,7 +775,7 @@ export default function ClipRecodePage() {
                                             className={
                                                 isRecording
                                                     ? 'text-red-500 mx-1'
-                                                    : 'text-red-500 mx-1'
+                                                    : 'text-[#626262] mx-1'
                                             }
                                         >
                                             ON-AIR
@@ -738,20 +788,20 @@ export default function ClipRecodePage() {
                                                 className="material-symbols-outlined text-2xl color-text-main mx-2  cursor-pointer"
                                                 onClick={endRecord}
                                             >
-                                                stop_circle
+                                                radio_button_checked
                                             </span>
                                             <span
                                                 className={
                                                     isRecording
                                                         ? 'text-red-500 mx-1'
-                                                        : 'text-red-500 mx-1'
+                                                        : 'text-[#626262] mx-1'
                                                 }
                                             >
                                                 ON-AIR
                                             </span>
                                         </div>
                                         <span className="text-2xl">
-                                            {Math.floor(nowTime / 60)} :{' '}
+                                            {Math.round(nowTime / 60)} :{' '}
                                             {nowTime >= 10
                                                 ? nowTime % 60
                                                 : '0' + (nowTime % 60)}
@@ -764,34 +814,37 @@ export default function ClipRecodePage() {
                                 {/* 녹화중 아니면 재생 버튼, 녹화중에는 타이머 비활성화 */}
                                 {!isRecording ? (
                                     <>
-                                        <span
-                                            className="material-symbols-outlined me-1 text-2xl cursor-pointer"
-                                            onClick={playVideo}
-                                        >
-                                            play_circle
-                                        </span>
+                                        {!isPlaying ? (
+                                            <span
+                                                className="material-symbols-outlined me-1 text-2xl cursor-pointer text-[#626262]"
+                                                onClick={playVideo}
+                                            >
+                                                play_circle
+                                            </span>
+                                        ) : (
+                                            <span
+                                                className="material-symbols-outlined me-1 text-2xl cursor-pointer text-[#626262]"
+                                                onClick={pauseVideo}
+                                            >
+                                                pause_circle
+                                            </span>
+                                        )}
                                         <p className=" h-6 border color-border-darkgray"></p>
                                         <span
-                                            className="material-symbols-outlined me-1 text-2xl cursor-pointer"
-                                            onClick={pauseVideo}
+                                            className="material-symbols-outlined me-1 text-2xl cursor-pointer text-[#626262]"
+                                            onClick={stopVideo}
                                         >
-                                            pause_circle
+                                            stop_circle
                                         </span>
                                     </>
                                 ) : (
                                     <>
-                                        <span
-                                            className="material-symbols-outlined me-1 text-2xl cursor-pointer"
-                                            onClick={playVideo}
-                                        >
+                                        <span className="material-symbols-outlined me-1 text-2xl cursor-pointer text-[#D9D9D9]">
                                             play_circle
                                         </span>
-                                        <p className=" h-6 border color-border-darkgray"></p>
-                                        <span
-                                            className="material-symbols-outlined me-1 text-2xl cursor-pointer"
-                                            onClick={pauseVideo}
-                                        >
-                                            pause_circle
+                                        <p className=" h-6 border border-[#D9D9D9]"></p>
+                                        <span className="material-symbols-outlined me-1 text-2xl cursor-pointer text-[#D9D9D9]">
+                                            stop_circle
                                         </span>
                                     </>
                                 )}

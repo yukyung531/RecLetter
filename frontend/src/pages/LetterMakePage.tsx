@@ -1204,19 +1204,25 @@ export default function LetterMakePage() {
                                     </span>
                                 )}
                                 <span>
-                                    {cumulTime.length > 0 ? Math.floor(
-                                        (nowPlayingTime +
-                                            cumulTime[playingIdx.current]) /
-                                            60
-                                    ):
-                                    0}
+                                    {cumulTime.length > 0
+                                        ? Math.floor(
+                                              (nowPlayingTime +
+                                                  cumulTime[
+                                                      playingIdx.current
+                                                  ]) /
+                                                  60
+                                          )
+                                        : 0}
                                     분
-                                    {cumulTime.length > 0 ? Math.floor(
-                                            (nowPlayingTime +
-                                                cumulTime[playingIdx.current]) %
-                                                60
-                                    ) :
-                                    0}
+                                    {cumulTime.length > 0
+                                        ? Math.floor(
+                                              (nowPlayingTime +
+                                                  cumulTime[
+                                                      playingIdx.current
+                                                  ]) %
+                                                  60
+                                          )
+                                        : 0}
                                     초
                                 </span>
                             </div>
