@@ -35,9 +35,7 @@ public class MeetingController {
      */
     @PostMapping("/{studioId}")
     public ResponseEntity<String> initializeSession(@PathVariable("studioId") String studioId, @AuthenticationPrincipal User user) {
-        log.debug("MeetingServiceImpl.initializeSession : start");
         String sessionInfo = meetingService.initializeSession(studioId, user);
-        log.debug("MeetingServiceImpl.initializeSession : end");
         return ResponseEntity.ok().body(sessionInfo);
     }
 
@@ -49,9 +47,7 @@ public class MeetingController {
      */
     @PostMapping("/{sessionId}/connections")
     public ResponseEntity<String> createConnection(@PathVariable("sessionId") String sessionId, @AuthenticationPrincipal User user) {
-        log.debug("MeetingServiceImpl.createConnection : start");
         String connectionInfo = meetingService.createConnection(sessionId, user);
-        log.debug("MeetingServiceImpl.createConnection : end");
         return ResponseEntity.ok().body(connectionInfo);
     }
 
@@ -64,9 +60,7 @@ public class MeetingController {
      */
     @DeleteMapping("/{sessionId}")
     public ResponseEntity<Void> deleteSession(@PathVariable("sessionId") String sessionId, @AuthenticationPrincipal User user) {
-        log.debug("MeetingServiceImpl.deleteSession : start");
         meetingService.deleteSession(sessionId, user);
-        log.debug("MeetingServiceImpl.deleteSession : end");
         return ResponseEntity.ok().build();
     }
 
@@ -77,9 +71,7 @@ public class MeetingController {
      */
     @GetMapping("/{sessionId}/exists")
     public ResponseEntity<Boolean> checkSession(@PathVariable("sessionId") String sessionId) {
-        log.debug("MeetingServiceImpl.checkSession : start");
         Boolean isExists = meetingService.checkSession(sessionId);
-        log.debug("MeetingServiceImpl.checkSession : end");
         return ResponseEntity.ok().body(isExists);
     }
 }
