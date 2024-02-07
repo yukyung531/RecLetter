@@ -8,8 +8,25 @@ import { ClipInfo } from '../types/type';
 import { uploadClip } from '../api/clip';
 import { httpStatusCode } from '../util/http-status';
 import { disconnect } from '../util/chat';
+import { useDispatch, useSelector } from 'react-redux';
+import { getlastPath } from '../util/get-func';
+import {
+    studioAddState,
+    studioDeleteState,
+    studioNameState,
+} from '../util/counter-slice';
+import { getUser } from '../api/user';
+import { enterStudio, studioDetail } from '../api/studio';
 
 export default function ClipEditPage() {
+    /** 리덕스 설정 */
+    const dispatch = useDispatch();
+    const studioName = useSelector((state: any) => state.loginFlag.studioName);
+    const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
+    const chatStudioList: string[] = useSelector(
+        (state: any) => state.loginFlag.studioId
+    );
+
     ///////////////////////////////영상 정보 불러오기///////////////////////////////////////////////////////////
     const location = useLocation();
 
@@ -113,15 +130,72 @@ export default function ClipEditPage() {
         };
         loading();
 
+        const loginValue = localStorage.getItem('is-login');
+        const token = localStorage.getItem('access-token');
+        if (loginValue === 'true' && isLogin) {
+            //API 불러오는 함수로 clipInfo를 받아옴
+            //우선 url query String으로부터 스튜디오 상세 정보 받아오기
+
+            const studioId = getlastPath();
+            if (studioId !== '') {
+                const getDetail = async (studioId: string) => {
+                    await studioDetail(studioId).then((res) => {
+                        if (res.status === httpStatusCode.OK) {
+                            // 채팅방 불러오기 설정
+                            if (chatStudioList.length === 0) {
+                                dispatch(studioAddState(studioId));
+                            } else {
+                                let chatListFlag = false;
+                                chatStudioList.map(
+                                    (item: string, index: number) => {
+                                        if (!chatListFlag) {
+                                            if (item === studioId)
+                                                chatListFlag = true;
+                                        }
+                                    }
+                                );
+                                if (!chatListFlag) {
+                                    dispatch(studioAddState(studioId));
+                                }
+                            }
+                            // 채팅방 불러오기 설정
+
+                            dispatch(studioNameState(res.data.studioTitle));
+                        }
+                    });
+                    return;
+                };
+
+                const enterStudioAPI = async (studioId: string) => {
+                    await enterStudio(studioId)
+                        .then((res) => {
+                            console.log(res);
+                            getDetail(studioId);
+                        })
+                        .catch(() => {
+                            console.log('오류떠서 재실행');
+                            getDetail(studioId);
+                        });
+                };
+                enterStudioAPI(studioId);
+            }
+        }
+        if (loginValue === 'false' || !loginValue || !token) {
+            alert('오류가 났습니다');
+        }
         /** 페이지 새로고침 전에 실행 할 함수 */
+        const reloadingStudioId = getlastPath();
         const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-            disconnect();
+            const studioId = getlastPath();
+            disconnect(studioId);
         };
         window.addEventListener('beforeunload', handleBeforeUnload);
-        // return () => {
-        //     window.removeEventListener('beforeunload', handleBeforeUnload);
-        //     disconnect();
-        // };
+        return () => {
+            console.log('사라지기전 ' + reloadingStudioId + '입니다');
+            dispatch(studioDeleteState(reloadingStudioId));
+            disconnect(reloadingStudioId);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
     }, []);
 
     ///////////////////////////////////////영상 자르기///////////////////////////////////////////////

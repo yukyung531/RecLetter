@@ -34,7 +34,7 @@ export default function SelectedVideoCard({
     return (
         <>
             <div
-                className={`w-28 flex flex-col justify-center mx-2 relative`}
+                className={`relative w-28 flex flex-col justify-center mx-2`}
                 onClick={selectCard}
             >
                 {propVideoRef.current &&
@@ -47,7 +47,12 @@ export default function SelectedVideoCard({
                 ) : (
                     <></>
                 )}
-                <button onClick={unselectClip}>선택 취소</button>
+                <button
+                    className="absolute w-6 h-6 -right-2 -top-2 color-bg-main rounded-full z-10 flex justify-center items-center text-white"
+                    onClick={unselectClip}
+                >
+                    -
+                </button>
                 <video
                     src={clip.clipUrl}
                     style={{ transform: `rotateY(180deg)` }}
@@ -55,6 +60,7 @@ export default function SelectedVideoCard({
                     preload="metadata"
                     ref={videoRef}
                     onLoadedData={metadataLoad}
+                    className=""
                 />
                 <p>{clip.clipTitle}</p>
                 <input

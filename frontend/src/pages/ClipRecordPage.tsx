@@ -11,7 +11,14 @@ import { httpStatusCode } from '../util/http-status';
 import ScriptTemplateCard from '../components/ScriptTemplateCard';
 import { getUser } from '../api/user';
 import { disconnect } from '../util/chat';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { getlastPath } from '../util/get-func';
+import {
+    studioAddState,
+    studioDeleteState,
+    studioNameState,
+} from '../util/counter-slice';
+import { enterStudio, studioDetail } from '../api/studio';
 
 interface Const {
     audio: boolean;
@@ -38,8 +45,14 @@ export default function ClipRecordPage() {
         videoBitsPerSecond: 7500000,
         mimeType: 'video/webm; codecs=vp9',
     };
+
     /** 리덕스 설정 */
+    const dispatch = useDispatch();
     const studioName = useSelector((state: any) => state.loginFlag.studioName);
+    const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
+    const chatStudioList: string[] = useSelector(
+        (state: any) => state.loginFlag.studioId
+    );
 
     /**handleScript()
      * 사이드바 textarea에 작성한 script를 중앙 상단의 출력창에 바인딩한다.
@@ -171,25 +184,84 @@ export default function ClipRecordPage() {
         };
         loadScript();
 
-        //+유저 정보 불러오기
-        const getUserInfo = async () => {
-            const resuser = await getUser();
-            const tempObj = { ...resuser.data };
-            setUserInfo({
-                userId: tempObj.userId,
-                userNickname: tempObj.userNickname,
-                userEmail: tempObj.userEmail,
-            });
-        };
-        getUserInfo();
+        const loginValue = localStorage.getItem('is-login');
+        const token = localStorage.getItem('access-token');
+        if (loginValue === 'true' && isLogin) {
+            //API 불러오는 함수로 clipInfo를 받아옴
+            //우선 url query String으로부터 스튜디오 상세 정보 받아오기
+
+            const studioId = getlastPath();
+            if (studioId !== '') {
+                const getDetail = async (studioId: string) => {
+                    await studioDetail(studioId).then((res) => {
+                        if (res.status === httpStatusCode.OK) {
+                            // 채팅방 불러오기 설정
+                            if (chatStudioList.length === 0) {
+                                dispatch(studioAddState(studioId));
+                            } else {
+                                let chatListFlag = false;
+                                chatStudioList.map(
+                                    (item: string, index: number) => {
+                                        if (!chatListFlag) {
+                                            if (item === studioId)
+                                                chatListFlag = true;
+                                        }
+                                    }
+                                );
+                                if (!chatListFlag) {
+                                    dispatch(studioAddState(studioId));
+                                }
+                            }
+                            // 채팅방 불러오기 설정
+
+                            dispatch(studioNameState(res.data.studioTitle));
+                        }
+                    });
+                    return;
+                };
+
+                const enterStudioAPI = async (studioId: string) => {
+                    await enterStudio(studioId)
+                        .then((res) => {
+                            console.log(res);
+                            getDetail(studioId);
+                        })
+                        .catch(() => {
+                            console.log('오류떠서 재실행');
+                            getDetail(studioId);
+                        });
+                };
+                enterStudioAPI(studioId);
+            }
+
+            //유저정보 불러오기
+            const getUserInfo = async () => {
+                const resuser = await getUser();
+                const tempObj = { ...resuser.data };
+                // console.log(tempObj);
+                setUserInfo({
+                    userId: tempObj.userId,
+                    userNickname: tempObj.userNickname,
+                    userEmail: tempObj.userEmail,
+                });
+            };
+            getUserInfo();
+        }
+        if (loginValue === 'false' || !loginValue || !token) {
+            alert('오류가 났습니다');
+        }
         /** 페이지 새로고침 전에 실행 할 함수 */
+        const reloadingStudioId = getlastPath();
         const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-            disconnect();
+            const studioId = getlastPath();
+            disconnect(studioId);
         };
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => {
+            console.log('사라지기전 ' + reloadingStudioId + '입니다');
+            dispatch(studioDeleteState(reloadingStudioId));
+            disconnect(reloadingStudioId);
             window.removeEventListener('beforeunload', handleBeforeUnload);
-            disconnect();
         };
     }, []);
 
@@ -547,14 +619,17 @@ export default function ClipRecordPage() {
                                         URL.revokeObjectURL(clip.clipUrl);
                                     });
                                     //mediaStream 소멸
-                                    const trackList: MediaStreamTrack[] = mS.getTracks();
+                                    const trackList: MediaStreamTrack[] =
+                                        mS.getTracks();
                                     for (let i = 0; i < trackList.length; i++) {
                                         mS.removeTrack(trackList[i]);
                                     }
 
                                     //navigate
-                                    const splitUrl = document.location.href.split('/');
-                                    const studioId = splitUrl[splitUrl.length - 1];
+                                    const splitUrl =
+                                        document.location.href.split('/');
+                                    const studioId =
+                                        splitUrl[splitUrl.length - 1];
                                     navigate(`/studiomain/${studioId}`);
                                 }}
                             >
@@ -566,13 +641,21 @@ export default function ClipRecordPage() {
                         </div>
                     </div>
                     {/* 카테고리 */}
-                    <div className="flex">
-                        <div className="relative w-1/6 color-text-main">
+                    <div className="flex w-full h-full">
+                        <div className="relative w-16 color-text-darkgray color-bg-lightgray1">
                             <div
                                 className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
                                 onClick={() => {
                                     changeMode(0);
                                 }}
+                                style={
+                                    mode === 0
+                                        ? {
+                                              backgroundColor: 'white',
+                                              color: '#ff777f',
+                                          }
+                                        : {}
+                                }
                             >
                                 <div
                                     className={`${
@@ -591,6 +674,14 @@ export default function ClipRecordPage() {
                                 onClick={() => {
                                     changeMode(1);
                                 }}
+                                style={
+                                    mode === 1
+                                        ? {
+                                              backgroundColor: 'white',
+                                              color: '#ff777f',
+                                          }
+                                        : {}
+                                }
                             >
                                 <div
                                     className={`${
@@ -791,7 +882,7 @@ export default function ClipRecordPage() {
                                             className="material-symbols-outlined me-1 text-2xl cursor-pointer"
                                             onClick={pauseVideo}
                                         >
-                                            pause_circle
+                                            play_circle
                                         </span>
                                     </>
                                 )}

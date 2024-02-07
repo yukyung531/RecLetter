@@ -38,7 +38,7 @@ export default function VideoCard({
     //hover시 class에 color-border-blue2 추가
     return (
         <div
-            className={`flex justify-between w-full my-2 p-2 border-2 ${
+            className={`flex justify-between w-full my-2 p-2 border-2 cursor-pointer ${
                 selectedClip && selectedClip.clipId === props.clipId
                     ? 'border-[#FF777F]'
                     : ''

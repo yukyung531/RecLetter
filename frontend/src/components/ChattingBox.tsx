@@ -34,6 +34,8 @@ type themeInterface = {
     bgColor: string;
     comment: string;
     chatColor: string;
+    openLogo: string;
+    closeLogo: string;
 };
 export default function ChattingBox() {
     const [chatToggle, setChatToggle] = useState<boolean>(false);
@@ -48,11 +50,30 @@ export default function ChattingBox() {
     //스크롤 탐지용
     const messageEndRef = useRef<HTMLDivElement>(null);
 
+    // 리덕스 테마 값
     const chatTheme = useSelector((state: any) => state.loginFlag.theme);
     const [themeObj, setThemeObj] = useState<themeInterface[]>([
-        { bgColor: '#ffa9a9', comment: '#fff593', chatColor: '#626262' },
-        { bgColor: '#fff593', comment: '#ffa9a9', chatColor: '#626262' },
-        { bgColor: '#626262', comment: '#fff593', chatColor: '#ffffff' },
+        {
+            bgColor: '#ffa9a9',
+            comment: '#fff593',
+            chatColor: '#626262',
+            openLogo: 'chatlogo12',
+            closeLogo: 'chatlogo1',
+        },
+        {
+            bgColor: '#fff593',
+            comment: '#ffa9a9',
+            chatColor: '#626262',
+            openLogo: 'chatlogo22',
+            closeLogo: 'chatlogo2',
+        },
+        {
+            bgColor: '#626262',
+            comment: '#fff593',
+            chatColor: '#ffffff',
+            openLogo: 'chatlogo32',
+            closeLogo: 'chatlogo3',
+        },
     ]);
     const chatStudioList: string[] = useSelector(
         (state: any) => state.loginFlag.studioId
@@ -355,10 +376,12 @@ export default function ChattingBox() {
     };
 
     const showChattingRoom = () => {
+        const openLogoSrc =
+            '/src/assets/icons/' + themeObj[chatTheme].openLogo + '.png';
         if (chatToggle) {
             return (
                 <div
-                    className=" w-88 h-5/6 rounded-lg fixed flex bottom-16 flex-col justify-between items-center right-8 px-5 py-3 z-20 border-2 border-white"
+                    className=" w-88 h-5/6 rounded-ss-lg rounded-se-lg rounded-es-lg fixed flex bottom-16 flex-col justify-between items-center right-8 px-5 py-3 z-20 border-2 border-white me-2 mb-1"
                     style={{
                         backgroundColor: `${themeObj[chatTheme].bgColor}`,
                     }}
@@ -428,7 +451,7 @@ export default function ChattingBox() {
                     <div className="w-full flex bg-white cursor-pointer border border-black rounded-lg px-2 py-1">
                         <div className="flex w-full">
                             <img
-                                src="/src/assets/icons/Chat_Circle.png"
+                                src="/src/assets/icons/Chat_Circle1.png"
                                 className="w-8 h-8 flex justify-center items-center rounded color-text-gray "
                                 alt=""
                             />
@@ -445,6 +468,14 @@ export default function ChattingBox() {
                             {sendIconElement()}
                         </div>
                     </div>
+                    <div
+                        className="absolute w-14 h-10 -bottom-8 right-0 cursor-pointer"
+                        onClick={() => {
+                            changeChatToggle(!chatToggle);
+                        }}
+                    >
+                        <img className="" src={openLogoSrc} alt="" />
+                    </div>
                 </div>
             );
         } else {
@@ -455,16 +486,32 @@ export default function ChattingBox() {
     /** 리덕스에따라 활성화되는 채팅방 */
     const activeChatting = () => {
         if (chatStudioList.length !== 0) {
-            return (
-                <img
-                    src="/src/assets/icons/Chat_Circle.png"
-                    className="w-16 h-16 fixed flex justify-center items-center bottom-8 right-8 rounded-full cursor-pointer z-30"
-                    alt=""
-                    onClick={() => {
-                        changeChatToggle(!chatToggle);
-                    }}
-                />
-            );
+            const closeLogoSrc =
+                '/src/assets/icons/' + themeObj[chatTheme].closeLogo + '.png';
+
+            if (chatTheme === 0 && !chatToggle)
+                return (
+                    <img
+                        src="/src/assets/icons/chatlogo1.png"
+                        className="w-16 h-16 fixed flex justify-center items-center bottom-8 right-8 rounded-full cursor-pointer z-30"
+                        alt=""
+                        onClick={() => {
+                            changeChatToggle(!chatToggle);
+                        }}
+                    />
+                );
+            else if (!chatToggle) {
+                return (
+                    <img
+                        src={closeLogoSrc}
+                        className="w-16 h-16 fixed flex justify-center items-center bottom-8 right-8  cursor-pointer z-30"
+                        alt=""
+                        onClick={() => {
+                            changeChatToggle(!chatToggle);
+                        }}
+                    />
+                );
+            }
         }
     };
 

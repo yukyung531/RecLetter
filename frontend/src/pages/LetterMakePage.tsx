@@ -27,13 +27,25 @@ import {
     isSessionExistAPI,
 } from '../api/openvidu';
 import { useNavigate } from 'react-router-dom';
-import { modifyStudioInfo, studioDetail } from '../api/studio';
+import {
+    enterStudio,
+    getStudio,
+    modifyStudioInfo,
+    studioDetail,
+} from '../api/studio';
 import SelectedVideoCard from '../components/SelectedVideoCard';
 import UnSelectedVideoCard from '../components/UnSelectedVideoCard';
 import BGMCard from '../components/BGMCard';
 import { disconnect } from '../util/chat';
 import CanvasItem from '../components/CanvasItem';
 import html2canvas from 'html2canvas';
+import { getlastPath } from '../util/get-func';
+import {
+    studioAddState,
+    studioDeleteState,
+    studioNameState,
+} from '../util/counter-slice';
+import { useDispatch, useSelector } from 'react-redux';
 
 interface mousePosition {
     positionX: number | null;
@@ -55,9 +67,9 @@ export default function LetterMakePage() {
         studioOwner: '',
         isCompleted: false,
         clipInfoList: [],
-        studioFrameId: -1,
-        studioFontId: -1,
-        studioBGMId: -1,
+        studioFrameId: 1,
+        studioFontId: 1,
+        studioBGMId: 1,
     });
 
     //나중 결과물 산출용 상태 관리
@@ -71,6 +83,15 @@ export default function LetterMakePage() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [stickerScale, setStickerScale] = useState<number>(160);
     const [stickerRotate, setStickerRotate] = useState<number>(0);
+    const [keyState, setKeyState] = useState<string>('');
+
+    /** 리덕스 설정 */
+    const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
+    const chatStudioList: string[] = useSelector(
+        (state: any) => state.loginFlag.studioId
+    );
+    const dispatch = useDispatch();
+    const navigator = useNavigate();
 
     interface WholeVideo {
         length: number;
@@ -249,26 +270,89 @@ export default function LetterMakePage() {
         };
         initSetting();
 
-        //+유저 정보 불러오기
-        const getUserInfo = async () => {
-            const resuser = await getUser();
-            const tempObj = { ...resuser.data };
-            setUserInfo({
-                userId: tempObj.userId,
-                userEmail: tempObj.userEmail,
-                userNickname: tempObj.userNickname,
-            });
-        };
-        getUserInfo();
+        const loginValue = localStorage.getItem('is-login');
+        const token = localStorage.getItem('access-token');
+        if (loginValue === 'true' && isLogin) {
+            //API 불러오는 함수로 clipInfo를 받아옴
+            //우선 url query String으로부터 스튜디오 상세 정보 받아오기
+
+            const studioId = getlastPath();
+            if (studioId !== '') {
+                const getDetail = async (studioId: string) => {
+                    await studioDetail(studioId).then((res) => {
+                        if (res.status === httpStatusCode.OK) {
+                            // 채팅방 불러오기 설정
+                            if (chatStudioList.length === 0) {
+                                dispatch(studioAddState(studioId));
+                            } else {
+                                let chatListFlag = false;
+                                chatStudioList.map(
+                                    (item: string, index: number) => {
+                                        if (!chatListFlag) {
+                                            if (item === studioId)
+                                                chatListFlag = true;
+                                        }
+                                    }
+                                );
+                                if (!chatListFlag) {
+                                    dispatch(studioAddState(studioId));
+                                }
+                            }
+                            // 채팅방 불러오기 설정
+
+                            dispatch(studioNameState(res.data.studioTitle));
+                            setStudioDetailInfo(res.data);
+                            setSelectImgUrl(
+                                `/src/assets/frames/frame${res.data.studioFrameId}.png`
+                            );
+                        }
+                    });
+                    return;
+                };
+
+                const enterStudioAPI = async (studioId: string) => {
+                    await enterStudio(studioId)
+                        .then((res) => {
+                            console.log(res);
+                            getDetail(studioId);
+                        })
+                        .catch(() => {
+                            console.log('오류떠서 재실행');
+                            getDetail(studioId);
+                        });
+                };
+                enterStudioAPI(studioId);
+            }
+
+            //유저정보 불러오기
+            const getUserInfo = async () => {
+                const resuser = await getUser();
+                const tempObj = { ...resuser.data };
+                // console.log(tempObj);
+                setUserInfo({
+                    userId: tempObj.userId,
+                    userNickname: tempObj.userNickname,
+                    userEmail: tempObj.userEmail,
+                });
+            };
+            getUserInfo();
+        }
+        if (loginValue === 'false' || !loginValue || !token) {
+            navigator(`/login`);
+        }
 
         /** 페이지 새로고침 전에 실행 할 함수 */
+        const reloadingStudioId = getlastPath();
         const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-            disconnect();
+            const studioId = getlastPath();
+            disconnect(studioId);
         };
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => {
+            console.log('사라지기전 ' + reloadingStudioId + '입니다');
+            dispatch(studioDeleteState(reloadingStudioId));
+            disconnect(reloadingStudioId);
             window.removeEventListener('beforeunload', handleBeforeUnload);
-            disconnect();
         };
     }, []);
 
@@ -280,24 +364,34 @@ export default function LetterMakePage() {
         let rotate = stickerRotate;
         const handleStickerKey = (event: KeyboardEvent) => {
             if (selectedObj !== '') {
+                setKeyState('');
                 if (event.key === 'q') {
                     rotate -= 4;
                     setStickerRotate(rotate + 2);
+                    setKeyState('q');
                 } else if (event.key === 'e') {
                     rotate += 4;
                     setStickerRotate(rotate + 2);
+                    setKeyState('e');
                 } else if (event.key === 'w') {
                     scale += 4;
                     setStickerScale(scale + 2);
+                    setKeyState('w');
                 } else if (event.key === 's') {
                     scale -= 4;
                     setStickerScale(scale + 2);
+                    setKeyState('s');
                 }
             }
         };
+        const handleStickerKeyUp = (event: KeyboardEvent) => {
+            setKeyState('');
+        };
         window.addEventListener('keydown', handleStickerKey);
+        window.addEventListener('keyup', handleStickerKeyUp);
         return () => {
             window.removeEventListener('keydown', handleStickerKey);
+            window.removeEventListener('keyup', handleStickerKeyUp);
         };
     }, [selectedObj]);
 
@@ -436,13 +530,13 @@ export default function LetterMakePage() {
     //현재 재생중인 클립 정보
     const [nowPlayingVideo, setNowPlayingVideo] = useState<ClipInfo>({
         clipId: -1,
-        clipTitle: '원하시는 영상을 입력하세요',
+        clipTitle: '',
         clipOwner: '',
         clipLength: -1,
         clipThumbnail: '',
         clipUrl: '',
         clipOrder: -1,
-        clipVolume: -1,
+        clipVolume: 100,
         clipContent: '',
     });
 
@@ -534,22 +628,29 @@ export default function LetterMakePage() {
                 <div className="w-full flex flex-col justify-start text-xl ">
                     <p>프레임</p>
                     <div className="flex flex-wrap text-center cursor-pointer">
-                        {frameList.map((frame) => {
+                        {frameList.map((frame, item) => {
                             const source = `/src/assets/frames/frame${frame.frameId}.png`;
                             return (
                                 <div
-                                    className="px-1 py-2 hover:bg-gray-100"
+                                    className="px-1 py-1 hover:bg-gray-100 rounded-lg"
                                     key={frame.frameId}
                                     onClick={() => {
                                         selectImg(frame.frameId, source);
                                     }}
+                                    style={
+                                        selectedFrame === frame.frameId
+                                            ? { border: '1px solid #ff777f' }
+                                            : {}
+                                    }
                                 >
                                     <img
                                         className="w-24 h-14 border rounded-md"
                                         src={source}
                                         alt=""
                                     />
-                                    {/* <p>{frame.frameTitle}</p> */}
+                                    <p className="my-1 text-sm">
+                                        {frame.frameTitle}
+                                    </p>
                                 </div>
                             );
                         })}
@@ -620,7 +721,88 @@ export default function LetterMakePage() {
             break;
         case 4:
             sideBar = (
-                <div className="w-full flex flex-col justify-start text-xl ">
+                <div className="w-full flex flex-col justify-start text-xl">
+                    <div className="w-full h-full px-4 py-2 text-xl border rounded-2xl flex flex-wrap items-center justify-center">
+                        <p className="w-full text-left mb-2">크기 회전 조작</p>
+                        <div className="relative">
+                            {keyState === 'q' ? (
+                                <img
+                                    className="absolute w-8 h-8 -top-6 -right-5 z-20"
+                                    src="/src/assets/images/keyActive11.png"
+                                    alt=""
+                                />
+                            ) : (
+                                <></>
+                            )}
+                            <img
+                                src="/src/assets/images/keyQ.png"
+                                style={keyState === 'q' ? { scale: '1.2' } : {}}
+                                alt=""
+                            />
+                        </div>
+                        <div className="relative">
+                            {keyState === 'w' ? (
+                                <img
+                                    className="absolute w-8 h-8 -top-6 -right-5 z-20"
+                                    src="/src/assets/images/keyActive12.png"
+                                    alt=""
+                                />
+                            ) : (
+                                <></>
+                            )}
+                            <img
+                                src="/src/assets/images/keyW.png"
+                                style={keyState === 'w' ? { scale: '1.2' } : {}}
+                                alt=""
+                            />
+                        </div>
+                        <div className="relative">
+                            {keyState === 'e' ? (
+                                <img
+                                    className="absolute w-8 h-8 -top-6 -right-5 z-20"
+                                    src="/src/assets/images/keyActive11.png"
+                                    alt=""
+                                />
+                            ) : (
+                                <></>
+                            )}
+                            <img
+                                src="/src/assets/images/keyE.png"
+                                style={keyState === 'e' ? { scale: '1.2' } : {}}
+                                alt=""
+                            />
+                        </div>
+                        <div className="relative">
+                            {keyState === 's' ? (
+                                <img
+                                    className="absolute w-8 h-8 -top-6 -right-5 z-20"
+                                    src="/src/assets/images/keyActive12.png"
+                                    alt=""
+                                />
+                            ) : (
+                                <></>
+                            )}
+                            <img
+                                src="/src/assets/images/keyS.png"
+                                style={keyState === 's' ? { scale: '1.2' } : {}}
+                                alt=""
+                            />
+                        </div>
+                        <div className="w-full flex justify-around mt-4 color-text-darkgray">
+                            <div className="flex flex-col items-center text-lg">
+                                <div className="flex flex-col justify-center items-center">
+                                    <p>회전 조작</p>
+                                    <p>Q, E</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-center text-lg">
+                                <div className="flex flex-col justify-center items-center">
+                                    <p>크기 조작</p>
+                                    <p>W, S</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <button onClick={onHtmlToPng}>다운로드</button>
                     <p>스티커</p>
                     <div className="flex flex-wrap m-2">
@@ -841,8 +1023,6 @@ export default function LetterMakePage() {
             notUsedClipList.map((clip) => {
                 unused.push(clip.clipId);
             });
-            console.log(">>usedClip",used)
-            console.log(">>UNusedClip",unused)
 
             //font의 경우 현재 구현 안되었으니 기본으로 고정
             // const nowStatus: Letter = {
@@ -925,7 +1105,7 @@ export default function LetterMakePage() {
     ///////////////////////////////////////////////렌더링///////////////////////////////////////////////////////////
     return (
         <section
-            className="relative section-top pt-16"
+            className="relative section-top pt-14"
             onMouseMove={(e) => {
                 if (selectedObj !== '') {
                     setMousePosition({
@@ -967,10 +1147,10 @@ export default function LetterMakePage() {
                 <></>
             )} */}
             {/* 중앙 섹션 */}
-            <div className="flex w-full editor-height">
+            <div className="flex w-full editor-height overflow-y-scroll">
                 {/* 좌측부분 */}
-                <div className="w-1/4 editor-height flex flex-col">
-                    <div className="flex items-center pl-12">
+                <div className="w-1/4 editor-height flex flex-col border-r">
+                    <div className="flex items-center pl-12 py-2 border-b-2 color-border-sublight">
                         <span
                             className="material-symbols-outlined cursor-pointer"
                             onClick={goBack}
@@ -982,13 +1162,21 @@ export default function LetterMakePage() {
                         </p>
                     </div>
                     {/* 카테고리 */}
-                    <div className="flex">
-                        <div className="relative w-1/5 color-text-main">
+                    <div className="flex h-full">
+                        <div className="relative w-16 h-full color-text-darkgray color-bg-lightgray1">
                             <div
                                 className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
                                 onClick={() => {
                                     setMode(0);
                                 }}
+                                style={
+                                    mode === 0
+                                        ? {
+                                              backgroundColor: 'white',
+                                              color: '#ff777f',
+                                          }
+                                        : {}
+                                }
                             >
                                 <div
                                     className={`${
@@ -1007,6 +1195,14 @@ export default function LetterMakePage() {
                                 onClick={() => {
                                     setMode(1);
                                 }}
+                                style={
+                                    mode === 1
+                                        ? {
+                                              backgroundColor: 'white',
+                                              color: '#ff777f',
+                                          }
+                                        : {}
+                                }
                             >
                                 <div
                                     className={`${
@@ -1016,7 +1212,7 @@ export default function LetterMakePage() {
                                     }`}
                                 ></div>
                                 <span className="material-symbols-outlined text-3xl">
-                                    kid_star
+                                    image
                                 </span>
                                 <p className="font-bold">프레임</p>
                             </div>
@@ -1025,6 +1221,14 @@ export default function LetterMakePage() {
                                 onClick={() => {
                                     setMode(2);
                                 }}
+                                style={
+                                    mode === 2
+                                        ? {
+                                              backgroundColor: 'white',
+                                              color: '#ff777f',
+                                          }
+                                        : {}
+                                }
                             >
                                 <div
                                     className={`${
@@ -1043,6 +1247,14 @@ export default function LetterMakePage() {
                                 onClick={() => {
                                     setMode(3);
                                 }}
+                                style={
+                                    mode === 3
+                                        ? {
+                                              backgroundColor: 'white',
+                                              color: '#ff777f',
+                                          }
+                                        : {}
+                                }
                             >
                                 <div
                                     className={`${
@@ -1061,6 +1273,14 @@ export default function LetterMakePage() {
                                 onClick={() => {
                                     setMode(4);
                                 }}
+                                style={
+                                    mode === 4
+                                        ? {
+                                              backgroundColor: 'white',
+                                              color: '#ff777f',
+                                          }
+                                        : {}
+                                }
                             >
                                 <div
                                     className={`${
@@ -1070,7 +1290,7 @@ export default function LetterMakePage() {
                                     }`}
                                 ></div>
                                 <span className="material-symbols-outlined text-3xl">
-                                    image
+                                    kid_star
                                 </span>
                                 <p className="font-bold">스티커</p>
                             </div>
@@ -1147,16 +1367,18 @@ export default function LetterMakePage() {
                                 </main>
                             </div>
                             {/* 저장 및 현재 편지 정보 */}
-                            <div className="relative w-1/5 h-full flex flex-col justify-evenly">
+                            <div className="relative w-1/5 h-full flex flex-col justify-center">
                                 <button
-                                    className="box-border btn-cover w-full bg-[#FF777F] text-white"
+                                    className="box-border mx-2 py-3 w-full text-xl rounded-lg color-bg-main text-white btn-animation"
                                     onClick={saveNowStatus}
                                 >
                                     저장하기
                                 </button>
-                                <div className="w-full flex flex-col rounded">
-                                    <h5 className="bg-[#FF777F]">편지 정보</h5>
-                                    <div>
+                                <div className="w-full flex mx-2 flex-col my-6 border-x border-b color-border-main rounded-lg bg-white">
+                                    <h5 className="color-bg-main border-t px-2 py-1 rounded-t-lg">
+                                        편지 정보
+                                    </h5>
+                                    <div className="p-2">
                                         <p>
                                             제목: {studioDetailInfo.studioTitle}
                                         </p>
@@ -1175,9 +1397,17 @@ export default function LetterMakePage() {
                                             선택 영상:{' '}
                                             {wholeVideoInfo.clipList.length}
                                         </p>
-                                        {wholeVideoInfo.clipList.map((clip) => {
-                                            return <p>{clip.clipTitle}</p>;
-                                        })}
+                                        <ul>
+                                            {wholeVideoInfo.clipList.map(
+                                                (clip) => {
+                                                    return (
+                                                        <li className="mx-1">
+                                                            {clip.clipTitle}
+                                                        </li>
+                                                    );
+                                                }
+                                            )}
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
@@ -1204,23 +1434,29 @@ export default function LetterMakePage() {
                                     </span>
                                 )}
                                 <span>
-                                    {cumulTime.length > 0 ? Math.floor(
-                                        (nowPlayingTime +
-                                            cumulTime[playingIdx.current]) /
-                                            60
-                                    ):
-                                    0}
+                                    {cumulTime.length > 0
+                                        ? Math.floor(
+                                              (nowPlayingTime +
+                                                  cumulTime[
+                                                      playingIdx.current
+                                                  ]) /
+                                                  60
+                                          )
+                                        : 0}
                                     분
-                                    {cumulTime.length > 0 ? Math.floor(
-                                            (nowPlayingTime +
-                                                cumulTime[playingIdx.current]) %
-                                                60
-                                    ) :
-                                    0}
+                                    {cumulTime.length > 0
+                                        ? Math.floor(
+                                              (nowPlayingTime +
+                                                  cumulTime[
+                                                      playingIdx.current
+                                                  ]) %
+                                                  60
+                                          )
+                                        : 0}
                                     초
                                 </span>
                             </div>
-                            <div className="w-11/12 flex items-center overflow-x-scroll">
+                            <div className="w-11/12 flex items-center overflow-x-scroll py-2">
                                 {usedClipList.map((clip, index) => {
                                     return (
                                         <SelectedVideoCard
