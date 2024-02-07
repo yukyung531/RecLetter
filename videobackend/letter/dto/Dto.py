@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 import os
 
-
 class ClipInfo(BaseModel):
     clip_id: str
     clip_title: str
