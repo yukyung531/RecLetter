@@ -180,6 +180,10 @@ export default function ClipEditPage() {
                 const getDetail = async (studioId: string) => {
                     await studioDetail(studioId).then((res) => {
                         if (res.status === httpStatusCode.OK) {
+                            setStudioDetailInfo(res.data);
+                            setSelectImgUrl(
+                                `/src/assets/frames/frame${res.data.studioFrameId}.png`
+                            );
                             // 채팅방 불러오기 설정
                             if (chatStudioList.length === 0) {
                                 dispatch(studioAddState(studioId));
@@ -222,18 +226,6 @@ export default function ClipEditPage() {
         if (loginValue === 'false' || !loginValue || !token) {
             alert('오류가 났습니다');
         }
-        const getDetail = async (studioId: string) => {
-            await studioDetail(studioId).then((res) => {
-                if (res.status === httpStatusCode.OK) {
-                    setStudioDetailInfo(res.data);
-                    setSelectImgUrl(
-                        `/src/assets/frames/frame${res.data.studioFrameId}.png`
-                    );
-                }
-            });
-            return;
-        };
-        getDetail(studioId);
 
         /** 페이지 새로고침 전에 실행 할 함수 */
         const reloadingStudioId = getlastPath();
