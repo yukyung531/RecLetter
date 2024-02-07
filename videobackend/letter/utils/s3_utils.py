@@ -3,7 +3,7 @@ import os.path
 from botocore.client import BaseClient
 from moviepy.video.io.VideoFileClip import VideoFileClip
 
-from videobackend.dto import ClipInfo
+from videobackend.letter.dto.ClipInfo import ClipInfo
 
 
 def clip_download_and_load(clip_info: ClipInfo, studio_id: str, bucket: str,
