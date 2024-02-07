@@ -32,21 +32,31 @@ services:
       - --collation-server=utf8mb4_unicode_ci
 
   zookeeper:
-    image: wurstmeister/zookeeper:latest
-    container_name: zookeeper
+    image: bitnami/zookeeper:3.8.3
+    container_name: RecLetterZookeeper
     ports:
       - "2181:2181"
+    networks:
+      - recletter-network
+    volumes:
+      - 'zookeeper_data:/bitnami'
   kafka:
     image: bitnami/kafka:3.6
-    container_name: kafka
+    container_name: RecLetterKafka
     ports:
       - "9092:9092"
+    networks:
+      - recletter-network
+    volumes:
+      - 'kafka_data:/bitnami'
     environment:
       KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
 volumes:
   redis-data:
   mariadb-data:
+  kafka-data:
+  zookeeper-data:
 
 networks:
   recletter-network:
