@@ -168,27 +168,14 @@ public class StudioController {
   //TODO- 스티커 적용 안 받았을 때 인풋 결정 : 일단 null로 진행
   //TODO- clipOrder 변경 transactional 고려
   @PutMapping()
-  public ResponseEntity<Void> updateStudio(@ModelAttribute UpdateStudioReq updateStudioReq, @AuthenticationPrincipal User user) throws JsonProcessingException {
+  public ResponseEntity<Void> updateStudio(@ModelAttribute UpdateStudioReq updateStudioReq, @AuthenticationPrincipal User user) throws JsonProcessingException { //@RequestParam Map<String,Object> map
     log.debug(updateStudioReq.toString());
-
-    ObjectMapper objectMapper = new ObjectMapper();
-
-    UsedClipInfo[] usedClipInfoList = objectMapper.readValue(updateStudioReq.getUsedClipList2(), UsedClipInfo[].class);
-    List<UsedClipInfo> usedClips=new ArrayList<>();
-    for(UsedClipInfo usedClipInfo : usedClipInfoList){
-      usedClips.add(usedClipInfo);
+    if (updateStudioReq.getUnusedClipList() == null) {
+      updateStudioReq.setUnusedClipList(new ArrayList<>());
     }
-    updateStudioReq.setUsedClipList(usedClips);
-
-    Integer[] unusedClipInfoList = objectMapper.readValue(updateStudioReq.getUnusedClipList2(), Integer[].class);
-    List<Integer> unusedClips=new ArrayList<>();
-    for(Integer clipId : unusedClipInfoList){
-      System.out.println(clipId);
-      unusedClips.add(clipId);
+    if (updateStudioReq.getUsedClipList() == null) {
+      updateStudioReq.setUsedClipList(new ArrayList<>());
     }
-    updateStudioReq.setUnusedClipList(unusedClips);
-
-    log.debug(updateStudioReq.toString());
 
     studioService.updateStudio(updateStudioReq,user);
 

@@ -158,7 +158,6 @@ public class StudioServiceImpl implements StudioService {
     return clipService.searchClipInfoList(studioId);
   }
 
-  //TODO- 스티커 적용 안 받았을 때 인풋 결정 : 일단 null로 진행
   //TODO- clipOrder 변경 transactional 고려
   @Override
   public void updateStudio(UpdateStudioReq updateStudioReq, User user) {

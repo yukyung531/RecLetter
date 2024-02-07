@@ -114,7 +114,7 @@ export default function LetterMakePage() {
     const [bgmList, setBGMList] = useState<BGMTemplate[]>([]); //추후 구현
 
     // 선택한 프레임
-    const [selectedFrame, setSelectedFrame] = useState<number>(-1);
+    const [selectedFrame, setSelectedFrame] = useState<number>(1);
     const [selectImgUrl, setSelectImgUrl] = useState<string>('');
 
     const selectImg = (frameId: number, source: string) => {
@@ -843,6 +843,8 @@ export default function LetterMakePage() {
             notUsedClipList.map((clip) => {
                 unused.push(clip.clipId);
             });
+            console.log(">>usedClip",used)
+            console.log(">>UNusedClip",unused)
 
             //font의 경우 현재 구현 안되었으니 기본으로 고정
             // const nowStatus: Letter = {
@@ -863,16 +865,16 @@ export default function LetterMakePage() {
             formData.append('studioId', studioId);
             used.forEach((item, index) => {
                 formData.append(
-                    `usedClipList[${index}][clipid],`,
+                    `usedClipList[${index}].clipId`,
                     String(item.clipId)
                 );
                 formData.append(
-                    `usedClipList[${index}][clipVolume],`,
+                    `usedClipList[${index}].clipVolume`,
                     String(item.clipVolume)
                 );
             });
             unused.forEach((item, index) => {
-                formData.append(`unusedClipList[${index}],`, String(item));
+                formData.append(`unusedClipList[${index}]`, String(item));
             });
             formData.append('studioFrameId', String(selectedFrame));
             formData.append('studioFontId', String(1));
