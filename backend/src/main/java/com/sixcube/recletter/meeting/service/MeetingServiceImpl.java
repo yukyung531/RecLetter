@@ -7,6 +7,7 @@ import com.sixcube.recletter.studio.exception.StudioNotFoundException;
 import com.sixcube.recletter.studio.repository.StudioRepository;
 import com.sixcube.recletter.user.dto.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MeetingServiceImpl implements MeetingService {
 
     private final StudioRepository studioRepository;
@@ -182,6 +184,7 @@ public class MeetingServiceImpl implements MeetingService {
 
         try {
             // 해당 세션 정보를 가져오기 위한 GET 요청을 보냄
+            log.info("openvidu_url: " + OPENVIDU_URL);
             ResponseEntity<String> response = restTemplate.exchange(OPENVIDU_URL + "/" + sessionId, HttpMethod.GET, entity, String.class);
 
             // HTTP 상태 코드가 200이면 세션 ID가 활성화되어 있음

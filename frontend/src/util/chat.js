@@ -6,6 +6,7 @@ import { enterChatting } from '../api/chat';
 // 배포용
 // const websocketUrl = 'wss://recletter.me/ws';
 const websocketUrl = import.meta.env.VITE_REACT_WEBSOCKET_URL;
+console.log("websocketUrl: " + websocketUrl);
 const topic = '/topic';
 const app = '/app/chat';
 let client = null;
