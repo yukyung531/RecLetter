@@ -44,7 +44,6 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public ChatMessage joinChat(String studioId, ChatMessage chatMessage, User user) throws StudioNotFoundException, AlreadyJoinedStudioException, ChatJoinFailureException {
         try {
-            log.debug("ChatServiceImpl.joinChat : start");
             // studioId에 해당하는 studio가 존재하는지 확인
             studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
 
@@ -70,7 +69,6 @@ public class ChatServiceImpl implements ChatService {
             // 참여 메시지 설정
             chatMessage.setContent(chatMessage.getSender() + "님이 참여하였습니다.");
 
-            log.debug("ChatServiceImpl.joinChat : end");
             // 메시지를 채팅방에 브로드캐스트한다.
             return chatMessage;
         } catch (Exception e) {
@@ -81,7 +79,6 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public ChatMessage sendMessage(String studioId, ChatMessage chatMessage, User user) throws StudioNotFoundException, ChatSendMessageFailureException {
         try {
-            log.debug("ChatServiceImpl.sendMessage : start");
             // studioId에 해당하는 studio가 존재하는지 확인
             studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
 
@@ -97,7 +94,6 @@ public class ChatServiceImpl implements ChatService {
             // 메시지를 보낸 시간 설정
             chatMessage.setTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
 
-            log.debug("ChatServiceImpl.sendMessage : end");
             return chatMessage;
         } catch (Exception e) {
             throw new ChatSendMessageFailureException(e);
@@ -107,7 +103,6 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public ChatMessage leaveChat(String studioId, ChatMessage chatMessage, User user) throws StudioNotFoundException, ChatLeaveFailureException {
         try {
-            log.debug("ChatServiceImpl.leaveChat : start");
 
             // studioId에 해당하는 studio가 존재하는지 확인
             studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
@@ -149,7 +144,6 @@ public class ChatServiceImpl implements ChatService {
 //                System.out.println(redisListService.getList(key).get(i));
 //            }
 
-            log.debug("ChatServiceImpl.leaveChat : end");
             return chatMessage;
         } catch (Exception e) {
             throw new ChatLeaveFailureException(e);
