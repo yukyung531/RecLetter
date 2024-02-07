@@ -7,6 +7,4 @@ public interface EmailService {
 
     public void sendEmail(String toEmail, String title, String text);
 
-    public SimpleMailMessage createEmailForm(String toEmail, String title, String text);
-
 }

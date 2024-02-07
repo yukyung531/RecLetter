@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>밍글 인증번호</title>
+</head>
+<body>
+<body style="padding: 20px;">
+<div style="width: 100wh; display: flex; justify-content: center;">
+    <div class="container"
+         style="width: max-content; border: 2px solid #FF777F; background-color: #FFE5E5; padding: 15px;">
+        <img src='cid:image' style="width: 100%; max-width: 600px;">
+        <!--            <img src='./images/image-1.png' style="width: 800px;">-->
+        <div class="message-wrap"
+             style="width: 100%; padding-top: 10px; padding-bottom: 30px; font-family: '오뮤 다예쁨체'; font-size: medium">
+            <div class="message" style="text-align: center;">
+                안녕하세요, REC : LETTER에서 요청하신 인증번호를 보내드립니다.
+            </div>
+            <div class="code" style="text-align: center; font-size: 24px; font-weight: 700; margin: 14px 0;"
+                 th:text="${code}">
+            </div>
+            <div class="footer" style="text-align: center; margin: 14px 0;">
+                위 인증번호 6자리를 인증번호 입력창에 입력해주세요.
+                <br>
+                본인이 인증번호를 요청하지 않았을 경우 본 이메일을 무시해주세요.
+            </div>
+            <div class="contact" style="display: flex; justify-content: center; align-items: center;">
+                <span class="email" style="text-align: center;">Email : recletter.official@gmail.com</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

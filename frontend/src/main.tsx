@@ -12,7 +12,7 @@ import FindPwPage from './pages/FindPwPage.tsx';
 import StudioListPage from './pages/StudioListPage.tsx';
 import StudioCreatePage from './pages/StudioCreatePage.tsx';
 import StudioMainPage from './pages/StudioMainPage.tsx';
-import ClipRecodePage from './pages/ClipRecodePage.tsx';
+import ClipRecordPage from './pages/ClipRecordPage.tsx';
 import ClipEditPage from './pages/ClipEditPage.tsx';
 import LetterMakePage from './pages/LetterMakePage.tsx';
 import LetterViewPage from './pages/LetterViewPage.tsx';
@@ -58,8 +58,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                             element={<StudioCreatePage />}
                         ></Route>
                         <Route
-                            path="/cliprecode/:studioId"
-                            element={<ClipRecodePage />}
+                            path="/cliprecord/:studioId"
+                            element={<ClipRecordPage />}
                         ></Route>
                         <Route
                             path="/clipedit/:studioId"

@@ -18,7 +18,7 @@ interface Const {
     video: boolean;
 }
 
-export default function ClipRecodePage() {
+export default function ClipRecordPage() {
     //모드 0:영상, 1:스크립트
     const [mode, setMode] = useState<number>(0);
 

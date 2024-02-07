@@ -412,11 +412,11 @@ export default function StudioMainPage() {
         });
     };
 
-    /** onClickRecodePage
+    /** onClickRecordPage
      * useNavigate를 이용하여 영상 녹화 화면으로 이동
      */
-    const onClickRecodePage = () => {
-        navigator(`/cliprecode/${studioDetailInfo.studioId}`);
+    const onClickRecordPage = () => {
+        navigator(`/cliprecord/${studioDetailInfo.studioId}`);
     };
 
     /** 리스트로 이동 */
@@ -615,7 +615,7 @@ export default function StudioMainPage() {
                             </a>
                             <div
                                 className="w-full h-24 mx-4 my-2 color-bg-main text-white text-xl flex flex-col justify-center items-center border rounded-md cursor-pointer hover:color-bg-subbold"
-                                onClick={onClickRecodePage}
+                                onClick={onClickRecordPage}
                             >
                                 <span className="material-symbols-outlined text-3xl">
                                     photo_camera
