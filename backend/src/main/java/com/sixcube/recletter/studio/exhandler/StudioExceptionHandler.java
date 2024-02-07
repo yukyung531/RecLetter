@@ -1,14 +1,6 @@
 package com.sixcube.recletter.studio.exhandler;
 
-import com.sixcube.recletter.studio.exception.AlreadyJoinedStudioException;
-import com.sixcube.recletter.studio.exception.MaxStudioOwnCountExceedException;
-import com.sixcube.recletter.studio.exception.StudioCreateFailureException;
-import com.sixcube.recletter.studio.exception.StudioDeleteFailureException;
-import com.sixcube.recletter.studio.exception.StudioNotFoundException;
-import com.sixcube.recletter.studio.exception.StudioParticipantNotFound;
-import com.sixcube.recletter.studio.exception.UnauthorizedToDeleteStudioException;
-import com.sixcube.recletter.studio.exception.UnauthorizedToSearchStudioException;
-import com.sixcube.recletter.studio.exception.UnauthorizedToUpdateStudioException;
+import com.sixcube.recletter.studio.exception.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -135,6 +127,19 @@ public class StudioExceptionHandler {
     return ResponseEntity.badRequest().body(errorMessage.toString());
   }
 
+  @ExceptionHandler(ExpiredStudioException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  protected ResponseEntity<String> expiredStudioExceptionHandler(
+          AlreadyJoinedStudioException e) {
+
+    StringBuilder errorMessage = new StringBuilder();
+
+    makeErrorMessage(errorMessage, e);
+
+    errorMessage.append("편집기한이 만료된 스튜디오입니다.");
+    return ResponseEntity.badRequest().body(errorMessage.toString());
+  }
+
   @ExceptionHandler(StudioParticipantNotFound.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   protected ResponseEntity<String> studioParticipantNotFoundExceptionHandler(
@@ -147,4 +152,55 @@ public class StudioExceptionHandler {
     errorMessage.append("이미 참여중인 스튜디오 정보를 찾을 수 없습니다.");
     return ResponseEntity.badRequest().body(errorMessage.toString());
   }
+
+  @ExceptionHandler(StudioParticipantCreateFailureException.class)
+  protected ResponseEntity<String> studioParticipantCreateFailureExceptionHandler(
+          StudioParticipantNotFound e) {
+
+    StringBuilder errorMessage = new StringBuilder();
+
+    makeErrorMessage(errorMessage, e);
+
+    errorMessage.append("스튜디오 참가에 실패했습니다.");
+    return ResponseEntity.badRequest().body(errorMessage.toString());
+  }
+
+  @ExceptionHandler(UnauthorizedToCompleteStudioException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  protected ResponseEntity<String> unauthorizedToCompleteStudioExceptionHandler(
+          UnauthorizedToUpdateStudioException e) {
+
+    StringBuilder errorMessage = new StringBuilder();
+
+    makeErrorMessage(errorMessage, e);
+
+    errorMessage.append("영상편지를 완성할 권한이 없습니다.");
+    return ResponseEntity.badRequest().body(errorMessage.toString());
+  }
+
+  @ExceptionHandler(InvalidStudioStickerFormatException.class)
+  protected ResponseEntity<String> invalidStudioStickerFormatExceptionHandler(
+          UnauthorizedToUpdateStudioException e) {
+
+    StringBuilder errorMessage = new StringBuilder();
+
+    makeErrorMessage(errorMessage, e);
+
+    errorMessage.append("올바르지 않은 형식의 파일입니다.");
+    return ResponseEntity.badRequest().body(errorMessage.toString());
+  }
+
+  //TODO- 따로 빼서 전반적으로 적용시켜둬야 할듯? - clip, chat에도 사용 중
+  @ExceptionHandler(UserNotInStudioException.class)
+  protected ResponseEntity<String> userNotInStudioExceptionHandler(
+          UnauthorizedToUpdateStudioException e) {
+
+    StringBuilder errorMessage = new StringBuilder();
+
+    makeErrorMessage(errorMessage, e);
+
+    errorMessage.append("스튜디오에 참여중인 사용자가 아닙니다.");
+    return ResponseEntity.badRequest().body(errorMessage.toString());
+  }
+
 }

@@ -230,7 +230,7 @@ public class StudioServiceImpl implements StudioService {
               .clipInfoList(clipService.searchLetterClipInfoByOrder(studioId))
               .build();
     } else{
-      throw new UnauthorizedToCreateLetterException(); //완성요청 접근 권한 없음
+      throw new UnauthorizedToCompleteStudioException(); //완성요청 접근 권한 없음
     }
   }
 
