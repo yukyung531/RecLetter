@@ -141,8 +141,8 @@ export default function ClipRecordPage() {
     const constraints = {
         audio: true,
         video: {
-            width: { max: 1280 },
-            height: { max: 720 },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
             facingMode: 'environment',
             frameRate: { max: 30 },
         },
@@ -612,6 +612,7 @@ export default function ClipRecordPage() {
             //mediaStream 소멸
             const trackList: MediaStreamTrack[] = mS.getTracks();
             for (let i = 0; i < trackList.length; i++) {
+                trackList[i].stop();
                 mS.removeTrack(trackList[i]);
             }
 
@@ -662,6 +663,7 @@ export default function ClipRecordPage() {
                                     const trackList: MediaStreamTrack[] =
                                         mS.getTracks();
                                     for (let i = 0; i < trackList.length; i++) {
+                                        trackList[i].stop();
                                         mS.removeTrack(trackList[i]);
                                     }
 

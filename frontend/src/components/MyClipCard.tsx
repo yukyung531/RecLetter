@@ -52,9 +52,9 @@ export default function MyClipCard({
                 )}
                 <p>
                     {props.clipLength >= 60 ? 1 : 0} :{' '}
-                    {props.clipLength % 60 < 10
-                        ? '0' + (props.clipLength % 60)
-                        : props.clipLength % 60}
+                    {Math.round(props.clipLength % 60) < 10
+                        ? '0' + Math.round(props.clipLength % 60)
+                        : Math.round(props.clipLength % 60)}
                 </p>
             </div>
             {!isEditingName ? (

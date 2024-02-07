@@ -466,7 +466,7 @@ export default function ClipEditPage() {
                                 className="material-symbols-outlined cursor-pointer"
                                 onClick={() => {
                                     //navigate
-                                    navigate(`/cliprecode/${studioId}`);
+                                    navigate(`/cliprecord/${studioId}`);
                                 }}
                             >
                                 arrow_back_ios
