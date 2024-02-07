@@ -7,7 +7,6 @@ import {
 } from 'react';
 import {
     FrameType,
-    Letter,
     StudioDetail,
     fontTemplate,
     UserInfo,
@@ -28,14 +27,13 @@ import {
     isSessionExistAPI,
 } from '../api/openvidu';
 import { useNavigate } from 'react-router-dom';
-import { getStudio, modifyStudioInfo, studioDetail } from '../api/studio';
+import { modifyStudioInfo, studioDetail } from '../api/studio';
 import SelectedVideoCard from '../components/SelectedVideoCard';
 import UnSelectedVideoCard from '../components/UnSelectedVideoCard';
 import BGMCard from '../components/BGMCard';
 import { disconnect } from '../util/chat';
 import CanvasItem from '../components/CanvasItem';
 import html2canvas from 'html2canvas';
-import { modifyLetter } from '../api/letter';
 
 interface mousePosition {
     positionX: number | null;

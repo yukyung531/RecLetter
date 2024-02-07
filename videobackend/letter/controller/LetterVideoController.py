@@ -2,7 +2,7 @@ import os
 import boto3
 from fastapi import APIRouter, BackgroundTasks
 
-from videobackend.letter.dto import MakeLetterReq
+from videobackend.letter.dto.Req import MakeLetterReq
 from videobackend.letter.service.LetterVideoService import create_letter
 
 # 환경변수
