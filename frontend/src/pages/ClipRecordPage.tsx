@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, BaseSyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ClipInfo, ScriptTemplate, UserInfo } from '../types/type';
+import {ClipInfo, ScriptTemplate, StudioDetail, UserInfo} from '../types/type';
 import MyClipCard from '../components/MyClipCard';
 import getBlobDuration from 'get-blob-duration';
 import DeleteCheckWindow from '../components/DeleteCheckWindow';
