@@ -1,5 +1,6 @@
 package com.sixcube.recletter.auth.jwt;
 
+import com.sixcube.recletter.auth.exception.InvalidTokenException;
 import com.sixcube.recletter.user.dto.User;
 import com.sixcube.recletter.user.repository.UserRepository;
 import jakarta.servlet.FilterChain;
@@ -52,7 +53,7 @@ public class JWTFilter extends OncePerRequestFilter {
         String role = jwtUtil.getRole(token);
 
         //user를 생성하여 값 set
-        User user = userRepository.findByUserId(userId).orElseThrow();
+        User user = userRepository.findByUserId(userId).orElseThrow(InvalidTokenException::new);
         user.setUserRole(role);
 
 
