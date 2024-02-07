@@ -440,10 +440,18 @@ export default function StudioMainPage() {
                 {/* 좌측부분 */}
                 <div className="w-1/4 h-full flex border border-r-2">
                     {/* 카테고리 */}
-                    <div className="relative w-1/6 color-text-main color-bg-lightgray1">
+                    <div className="relative w-16 color-text-darkgray color-bg-lightgray1">
                         <div
-                            className={`w-full h-16  flex flex-col justify-center items-center cursor-pointer `}
+                            className={`w-full h-16  flex flex-col justify-center items-center cursor-pointer`}
                             onClick={onPressMovieEdit}
+                            style={
+                                mode === 0
+                                    ? {
+                                          backgroundColor: 'white',
+                                          color: '#ff777f',
+                                      }
+                                    : {}
+                            }
                         >
                             <div
                                 className={`${
@@ -458,6 +466,14 @@ export default function StudioMainPage() {
                         <div
                             className={`h-16 flex flex-col justify-center items-center cursor-pointer `}
                             onClick={onPressChecklist}
+                            style={
+                                mode === 1
+                                    ? {
+                                          backgroundColor: 'white',
+                                          color: '#ff777f',
+                                      }
+                                    : {}
+                            }
                         >
                             <div
                                 className={`${
@@ -603,7 +619,7 @@ export default function StudioMainPage() {
                     </div>
 
                     {/* (영상 리스트, 참가자 관리) */}
-                    <div className="w-1/4 p-2 border border-l-2">
+                    <div className="w-1/4 p-2 border border-l-2 overflow-y-scroll">
                         <div className="w-full px-2 flex flex-col justify-center items-center">
                             <a className="flex items-center gap-3 w-52 text-center my-2 p-1 rounded-lg text-xl color-bg-yellow2 shadow-darkShadow color-text-main cursor-pointer transform hover:scale-105">
                                 <img

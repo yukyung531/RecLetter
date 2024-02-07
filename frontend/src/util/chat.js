@@ -43,7 +43,7 @@ export function connect(
                 chatList = setChattingList;
                 setCurrentPeople = currentPeopleFunc;
 
-                subscribe(stuId, username, uuid, chatList, setCurrentPeople);
+                subscribe(stuId, uuid, username, chatList, setCurrentPeople);
                 console.log(setConnect);
             },
         });
@@ -85,7 +85,7 @@ export function subscribe(
     setCurrentPeople = currentPeopleFunc;
     if (client === null) {
         console.log('현재 연결 상태: 재연결합니다');
-        connect(stuId, username, uuid, chatList, setCurrentPeople);
+        connect(stuId, uuid, username, chatList, setCurrentPeople);
     } else if (client.connected) {
         console.log('이미 연결된 상태입니다,');
         findPeopleAPI();
@@ -110,7 +110,7 @@ export function reSubscribe(reSubStudioParam) {
     stuId = reSubStudioParam;
     findPeopleAPI();
     setConnect = true;
-    subscribe(stuId, username, uuid, chatList, setCurrentPeople);
+    subscribe(stuId, uuid, username, chatList, setCurrentPeople);
     client.publish({
         destination: app + `/${stuId}/join`,
         body: JSON.stringify({
@@ -174,6 +174,8 @@ function showMessage(userName, uuid, time, content, type) {
 function onMeesageReceived(payload) {
     let message = JSON.parse(payload.body); // 메시지 객체를 파싱
     console.log('합합 메시지리븟 입니다!');
+    console.log('uuid 입니다' + uuid);
+    console.log('닉네임입니다' + username);
     console.log(message);
 
     if (message.type === 'JOIN' && message.uuid === uuid) {
