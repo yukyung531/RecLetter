@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import { BaseSyntheticEvent, useEffect, useRef, useState } from 'react';
-import { ClipInfo } from '../types/type';
+import {ClipInfo, StudioDetail} from '../types/type';
 
 //axios
 import { uploadClip } from '../api/clip';
