@@ -3,7 +3,9 @@ import * as StompJs from '@stomp/stompjs';
 import axios from 'axios';
 import { enterChatting } from '../api/chat';
 
-const websocketUrl = 'wss://recletter.me/ws';
+// 배포용
+// const websocketUrl = 'wss://recletter.me/ws';
+const websocketUrl = import.meta.env.VITE_REACT_WEBSOCKET_URL;
 const topic = '/topic';
 const app = '/app/chat';
 let client = null;
@@ -32,7 +34,7 @@ export function connect(
                 Authorization: `Bearer ${token}`, // JWT 토큰을 헤더에 추가
             },
             onConnect: () => {
-                // console.log('success');
+                console.log('success');
                 setConnect = true;
 
                 stuId = studioParam;
@@ -42,7 +44,7 @@ export function connect(
                 setCurrentPeople = currentPeopleFunc;
 
                 subscribe(stuId, username, uuid, chatList, setCurrentPeople);
-                // console.log(setConnect);
+                console.log(setConnect);
             },
         });
         client.activate();

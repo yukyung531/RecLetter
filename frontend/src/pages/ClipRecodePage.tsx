@@ -545,7 +545,9 @@ export default function ClipRecodePage() {
                             >
                                 arrow_back_ios
                             </span>
-                            <p className="text-2xl ms-3 w-64 truncate">{studioName}</p>
+                            <p className="text-2xl ms-3 w-64 truncate">
+                                {studioName}
+                            </p>
                         </div>
                     </div>
                     {/* 카테고리 */}

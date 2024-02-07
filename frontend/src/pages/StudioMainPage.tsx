@@ -604,13 +604,13 @@ export default function StudioMainPage() {
 
                     {/* (영상 리스트, 참가자 관리) */}
                     <div className="w-1/4 p-2 border border-l-2">
-                        <div className="w-full px-2 flex flex-col justify-center items-center">                      
+                        <div className="w-full px-2 flex flex-col justify-center items-center">
                             <a className="flex items-center gap-3 w-52 text-center my-2 p-1 rounded-lg text-xl color-bg-yellow2 shadow-darkShadow color-text-main cursor-pointer transform hover:scale-105">
-                            <img
-                                className="w-9 h-9 ml-2.5"
-                                src="/src/assets/icons/letter_complete2.svg"
-                                alt=""
-                            />
+                                <img
+                                    className="w-9 h-9 ml-2.5"
+                                    src="/src/assets/icons/letter_complete2.svg"
+                                    alt=""
+                                />
                                 영상편지 완성하기
                             </a>
                             <div

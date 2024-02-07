@@ -13,6 +13,7 @@ import {
     UserInfo,
     ClipInfo,
     BGMTemplate,
+    ClipList,
 } from '../types/type';
 import { getTemplate, getFont, getBgm } from '../api/template';
 import { httpStatusCode } from '../util/http-status';
@@ -310,6 +311,8 @@ export default function LetterMakePage() {
             }
             html2canvas(target, { scale: 2, backgroundColor: null }).then(
                 (canvas) => {
+                    const imageDataURL = canvas.toDataURL('image/png');
+                    console.log(imageDataURL);
                     onSaveAs(
                         canvas.toDataURL('image/png'),
                         'image-download.png'
@@ -800,53 +803,111 @@ export default function LetterMakePage() {
         };
     }, [endScreenShare]);
 
-    interface usedClip {
-        clipId: number;
-        clipVolume: number;
-    }
-
     /** saveNowStatus()
      *  현재 상태 저장 함수
      */
     const saveNowStatus = async () => {
-        //현재 정보 서버로 전송.
-        const used: usedClip[] = [];
-        usedClipList.map((clip) => {
-            used.push({
-                clipId: clip.clipId,
-                clipVolume: clip.clipVolume,
-            });
-        });
-        const unused: number[] = [];
-        notUsedClipList.map((clip) => {
-            unused.push(clip.clipId);
-        });
-
-        //font의 경우 현재 구현 안되었으니 기본으로 고정
-        const nowStatus = {
-            studioId: studioId,
-            usedClipList: used,
-            unusedClipList: unused,
-            studioFrameId: selectedFrame,
-            studioFontId: 1,
-            studioFontSize: 32,
-            studioFontBold: 0,
-            studioBgmId: selectedBGM,
-            studioVolume: 100,
-            studioSticker: '',
+        /* Canvas 이미지 설정 */
+        const target = canvasRef.current;
+        const onCapture = () => {
+            console.log('onCapture');
+            if (!target) {
+                return alert('결과 저장에 실패했습니다');
+            }
+            html2canvas(target, { scale: 2, backgroundColor: null }).then(
+                (canvas) => {
+                    const imageDataURL = canvas.toDataURL('image/png');
+                    uploadLetterAPI(imageDataURL);
+                }
+            );
         };
+        onCapture();
+    };
 
-        //전송
-        modifyStudioInfo(nowStatus)
-            .then((res) => {
-                console.log(res);
-            })
-            .catch((err) => {
-                console.log(err);
+    /** 영상 보내는 API */
+    const uploadLetterAPI = async (imageDataURL: string) => {
+        try {
+            // FormData 객체 생성
+            const formData = new FormData();
+
+            /* 기존에 있던 데이터 추가 */
+            const used: ClipList[] = [];
+            usedClipList.map((clip) => {
+                used.push({
+                    clipId: clip.clipId,
+                    clipVolume: clip.clipVolume,
+                });
+            });
+            const unused: number[] = [];
+            notUsedClipList.map((clip) => {
+                unused.push(clip.clipId);
             });
 
-        //세션 종료 후 뒤로 가기
-        await endScreenShare();
+            //font의 경우 현재 구현 안되었으니 기본으로 고정
+            // const nowStatus: Letter = {
+            //     studioId: studioId, //string
+            //     usedClipList: used, //ClipList{clipId:number,clipVolume:number}
+            //     unusedClipList: unused, //number[]
+            //     studioFrameId: selectedFrame, //number
+            //     studioFontId: 1, //number
+            //     studioFontSize: 32, //number
+            //     studioFontBold: false, //boolean
+            //     studioBgmId: selectedBGM, //number
+            //     studioVolume: 100, //number
+            //     studioSticker: '',
+            // };
+
+            // 이미지 데이터를 Blob으로 변환 후 FormData에 추가
+            const blob = await fetch(imageDataURL).then((res) => res.blob());
+            formData.append('studioId', studioId);
+            used.forEach((item, index) => {
+                formData.append(
+                    `usedClipList[${index}][clipid],`,
+                    String(item.clipId)
+                );
+                formData.append(
+                    `usedClipList[${index}][clipVolume],`,
+                    String(item.clipVolume)
+                );
+            });
+            unused.forEach((item, index) => {
+                formData.append(`unusedClipList[${index}],`, String(item));
+            });
+            formData.append('studioFrameId', String(selectedFrame));
+            formData.append('studioFontId', String(1));
+            formData.append('studioFontSize', String(32));
+            formData.append('studioFontBold', 'false');
+            formData.append('studioBgmId', String(selectedBGM));
+            formData.append('studioVolume', String(100));
+            formData.append('studioSticker', blob, 'sticker.png');
+
+            type ObjectType = {
+                [key: string]: FormDataEntryValue;
+            };
+            //formdata to json
+            const object: ObjectType = {};
+            console.log('FormData에 넣은 데이터ㅡㅡㅡㅡㅡㅡㅡㅡㅡ');
+            formData.forEach((value, key) => {
+                console.log('key / Value | ' + key + ' / ' + value);
+                object[key.toString()] = value;
+            });
+            console.log('ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ');
+            console.log(object);
+            //전송
+            await modifyStudioInfo(object)
+                .then((res) => {
+                    console.log(res);
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+
+            //세션 종료 후 뒤로 가기
+            await endScreenShare();
+        } catch (error) {
+            console.error('이미지 업로드 실패:', error);
+            alert('이미지 업로드에 실패했습니다.');
+        }
     };
 
     //////////////////////////////////////////유저 신규 참가 알림창//////////////////////////////////////////////////

@@ -133,7 +133,10 @@ export default function LoginPage() {
                 <p className="mb-2 text-2xl color-text-darkgray">
                     ------------------------- 또는 -------------------------
                 </p>
-                <a href={VITE_REACT_GOOGLE_LOGIN_URL} className="py-4">
+                <a
+                    href={VITE_REACT_GOOGLE_LOGIN_URL}
+                    className="py-4 btn-animation"
+                >
                     {logo}
                 </a>
                 <div className="flex justify-center items-center my-2">
