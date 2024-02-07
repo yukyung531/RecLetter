@@ -1,7 +1,7 @@
 import os
 from botocore.client import BaseClient
 
-from videobackend.letter.dto import MakeLetterReq
+from videobackend.letter.dto.Req import MakeLetterReq
 from videobackend.letter.utils.s3_utils import clip_download_and_load
 from videobackend.letter.utils.video_edit_utils import resize_clip, mirror_clip, tune_volume, \
     concat_clip, encode_frame
