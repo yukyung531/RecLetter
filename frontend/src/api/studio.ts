@@ -1,4 +1,4 @@
-import { StudioMake } from '../types/type';
+import { Letter, StudioMake } from '../types/type';
 import localAxios from '../util/http-commons';
 
 const local = localAxios();
@@ -43,6 +43,10 @@ export async function modifyStudioTitle(studioId: string, studioTitle: string) {
 }
 
 /** PUT 스튜디오 편집 정보 수정 */
-export async function modifyStudioInfo(studioInfo) {
-    return await local.put(`/api/studio`, studioInfo, {});
+export async function modifyStudioInfo(studioInfo: object) {
+    return await local.put(`/api/studio`, studioInfo, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
 }

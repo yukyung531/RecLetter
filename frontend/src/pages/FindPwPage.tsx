@@ -10,7 +10,7 @@ import {
 } from '../util/counter-slice';
 import { settingNewPassword } from '../api/user';
 import { deleteStorageData } from '../util/initialLocalStorage';
-import axios, {AxiosError} from "axios";
+import axios, { AxiosError } from 'axios';
 
 export default function FindPwPage() {
     const [inputEmail, setInputEmail] = useState<string>('');
@@ -64,7 +64,7 @@ export default function FindPwPage() {
             })
             .catch((e: Error) => {
                 if (axios.isAxiosError(e)) {
-                    const axiosError: AxiosError = e;
+                    const axiosError: any = e;
                     const originalString = axiosError.response.data;
                     const parts = originalString.split(':');
                     const firstPart = parts[1];
@@ -182,9 +182,7 @@ export default function FindPwPage() {
             return (
                 <div className="flex">
                     <p className="w-32 pb-4 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4"></p>
-                    <p className="w-128 h-3 color-text-main">
-                        {errorMessage}
-                    </p>
+                    <p className="w-128 h-3 color-text-main">{errorMessage}</p>
                 </div>
             );
         } else {

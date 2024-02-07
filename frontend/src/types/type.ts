@@ -111,14 +111,17 @@ export interface ClipModify {
 export interface Letter {
     studioId: string;
     usedClipList: ClipList[];
-    unusedClipList: string[];
-    studioFrameId: string;
-    studioFont: FontType;
-    studioBGM: string;
+    unusedClipList: number[];
+    studioFrameId: number;
+    studioFontId: number;
+    studioFontSize: number;
+    studioFontBold: boolean;
+    studioBgmId: number;
     studioVolume: number;
+    studioSticker: string;
 }
 export interface ClipList {
-    clipId: string;
+    clipId: number;
     clipVolume: number;
 }
 export interface FontType {
