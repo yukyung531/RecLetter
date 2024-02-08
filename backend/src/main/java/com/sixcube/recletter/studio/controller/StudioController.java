@@ -75,6 +75,8 @@ public class StudioController {
             .thumbnailUrl(studioService.searchMainClipInfo(studio.getStudioId()).getClipUrl())
             .expireDate(studio.getExpireDate())
             .hasMyClip(studioService.hasMyClip(studio.getStudioId(), user.getUserId()))
+            .studioFrameId(studio.getStudioFrameId())
+            .studioStickerUrl(studioService.searchStudioStickerUrl(studio.getStudioId()))
             .build()
         ).toList()
     );
@@ -103,7 +105,7 @@ public class StudioController {
         .studioBgmId(studio.getStudioBgmId())
         .studioStickerUrl(studioService.searchStudioStickerUrl(studioId))
         .build();
-
+    log.debug(result.toString());
     return ResponseEntity.ok().body(result);
   }
 

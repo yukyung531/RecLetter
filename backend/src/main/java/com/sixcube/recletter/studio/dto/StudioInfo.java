@@ -21,4 +21,6 @@ public class StudioInfo {
   private String thumbnailUrl;
   private LocalDateTime expireDate;
   private Boolean hasMyClip;
+  private Integer studioFrameId;
+  private String studioStickerUrl;
 }
