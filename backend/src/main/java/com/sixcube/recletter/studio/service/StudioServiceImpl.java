@@ -223,10 +223,8 @@ public class StudioServiceImpl implements StudioService {
               .studioId(studio.getStudioId())
               .studioFrameId(studio.getStudioFrameId())
               .studioFontId(studio.getStudioFontId())
-                .studioFontSize(studio.getStudioFontSize())
-                .studioFontBold(studio.getStudioFontBold())
               .studioBgmId(studio.getStudioBgmId())
-              .studioVolume(studio.getStudioVolume())
+              .studioVolumeId(studio.getStudioVolume())
               .clipInfoList(clipService.searchLetterClipInfoByOrder(studioId))
               .build();
     } else{

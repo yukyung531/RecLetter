@@ -47,8 +47,8 @@ public class StudioController {
 
   private final StudioService studioService;
   private final StudioParticipantService studioParticipantService;
-//  @Value("${VIDEO_SERVER_URI}")
-//  private String videoServerUri;
+  @Value("${VIDEO_SERVER_URI}")
+  private String videoServerUri;
 
 
   @GetMapping
@@ -188,15 +188,16 @@ public class StudioController {
   public ResponseEntity<Void> createLetter(@PathVariable String studioId, @AuthenticationPrincipal User user){
     LetterVideoReq letterVideoReq=studioService.createLetterVideoReq(studioId,user);
     log.debug(letterVideoReq.toString());
+    log.debug(videoServerUri + "/video/letter");
 
     //python server로 인코딩 요청전송
-//    RestClient restClient=RestClient.create();
-//    ResponseEntity<Void> response = restClient.post()
-//            .uri(videoServerUri + "/video")
-//            .contentType(APPLICATION_JSON)
-//            .body(letterVideoReq)
-//            .retrieve()
-//            .toBodilessEntity();
+    RestClient restClient=RestClient.create();
+    ResponseEntity<Void> response = restClient.post()
+            .uri(videoServerUri + "/video/letter")
+            .contentType(APPLICATION_JSON)
+            .body(letterVideoReq)
+            .retrieve()
+            .toBodilessEntity();
 
     studioService.updateStudioIsCompleted(studioId,true);
     return ResponseEntity.ok().build();

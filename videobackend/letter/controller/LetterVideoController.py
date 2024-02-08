@@ -23,5 +23,7 @@ letter_video_router = APIRouter()
 
 @letter_video_router.post("/letter")
 async def make_letter(make_letter_dto: MakeLetterReq) -> None:
+    print("make letter")
+    print(make_letter_dto)
     BackgroundTasks.add_task(create_letter, make_letter_dto, BUCKET, s3_client)
     # create_letter(make_letter_dto, BUCKET, s3_client)
