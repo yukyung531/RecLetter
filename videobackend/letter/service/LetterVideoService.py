@@ -2,11 +2,12 @@ import os
 from botocore.client import BaseClient
 
 from videobackend.letter.dto.Req import MakeLetterReq
-from videobackend.letter.utils.s3_utils import clip_download_and_load
+from videobackend.letter.utils.s3_utils import clip_download
 from videobackend.letter.utils.video_edit_utils import resize_clip, mirror_clip, tune_volume, \
     concat_clip, encode_frame
 
-
+def download_asset(make_letter_dto: MakeLetterReq, bucket: str,
+    client: BaseClient) -> None:
 def create_letter(make_letter_dto: MakeLetterReq, bucket: str,
     client: BaseClient) -> None:
 
@@ -16,7 +17,7 @@ def create_letter(make_letter_dto: MakeLetterReq, bucket: str,
         # 1. 클립 다운로드
         print("클립 다운로드")
         raw_clip = list(map(
-            lambda x: clip_download_and_load(x, studio_id, bucket, client),
+            lambda x: clip_download(x, studio_id, bucket, client),
             clip_list))
 
         # 2. 클립 사이즈 변경
