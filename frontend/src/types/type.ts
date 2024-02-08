@@ -81,6 +81,7 @@ export interface StudioDetail {
     studioFrameId: number;
     studioFontId: number;
     studioBGMId: number;
+    studioStickerUrl: string;
     // studioChecklist: number;
 }
 // clip 타입
@@ -156,4 +157,13 @@ export interface BGMTemplate {
     bgmId: number;
     bgmTitle: string;
     bgmUrl: string;
+}
+
+export interface CanvasFont {
+    fontContent: string;
+    fontSize: number;
+    fontColor: string;
+    fontFamily: string;
+    fontBorder: string;
+    fontShadow: string;
 }

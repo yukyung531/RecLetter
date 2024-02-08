@@ -40,6 +40,7 @@ export default function StudioMainPage() {
         studioFrameId: -1,
         studioFontId: -1,
         studioBGMId: -1,
+        studioStickerUrl: '',
     });
 
     //유저 정보
@@ -397,6 +398,7 @@ export default function StudioMainPage() {
         setIsEditingName(true);
         if (studioDetailInfo !== null) {
             const newValue = { ...studioDetailInfo };
+
             newValue.studioTitle = event.target.value;
             setStudioDetailInfo(newValue);
         }
@@ -578,6 +580,17 @@ export default function StudioMainPage() {
                                 <img
                                     src={selectImgUrl}
                                     className="absolute top-0 lef-0"
+                                    style={{
+                                        width: '800px',
+                                        aspectRatio: 16 / 9,
+                                    }}
+                                    alt=""
+                                />
+                                {/* 스티커 */}
+                                <img
+                                    src={studioDetailInfo.studioStickerUrl}
+                                    className="absolute top-0 lef-0"
+                                    crossOrigin="anonymous"
                                     style={{
                                         width: '800px',
                                         aspectRatio: 16 / 9,

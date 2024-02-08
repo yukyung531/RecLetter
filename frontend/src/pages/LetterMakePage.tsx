@@ -13,6 +13,7 @@ import {
     ClipInfo,
     BGMTemplate,
     ClipList,
+    CanvasFont,
 } from '../types/type';
 import { getTemplate, getFont, getBgm } from '../api/template';
 import { httpStatusCode } from '../util/http-status';
@@ -39,13 +40,15 @@ import BGMCard from '../components/BGMCard';
 import { disconnect } from '../util/chat';
 import CanvasItem from '../components/CanvasItem';
 import html2canvas from 'html2canvas';
-import { getlastPath } from '../util/get-func';
+import { getlastPath, hexToRgba } from '../util/get-func';
 import {
     studioAddState,
     studioDeleteState,
     studioNameState,
 } from '../util/counter-slice';
 import { useDispatch, useSelector } from 'react-redux';
+import ColorPalette from '../components/ColorPalette';
+import { uploadFile } from '../util/uploadFile';
 
 interface mousePosition {
     positionX: number | null;
@@ -70,6 +73,7 @@ export default function LetterMakePage() {
         studioFrameId: 1,
         studioFontId: 1,
         studioBGMId: 1,
+        studioStickerUrl: '',
     });
 
     //나중 결과물 산출용 상태 관리
@@ -84,6 +88,14 @@ export default function LetterMakePage() {
     const [stickerScale, setStickerScale] = useState<number>(160);
     const [stickerRotate, setStickerRotate] = useState<number>(0);
     const [keyState, setKeyState] = useState<string>('');
+    const [canvasTextSticker, setCanvasTextSticker] = useState<CanvasFont>({
+        fontContent: '',
+        fontSize: 16,
+        fontColor: '#626262',
+        fontFamily: 'omyu_pretty',
+        fontBorder: '',
+        fontShadow: '',
+    });
 
     /** 리덕스 설정 */
     const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
@@ -150,8 +162,14 @@ export default function LetterMakePage() {
         'sticker5',
         'sticker6',
     ]);
+    const [fontStickerList, setFontStickerList] = useState<string[]>([
+        'fontsticker1',
+    ]);
+    const [customSticker, setCustomSticker] = useState<string>('');
     // 선택된 스티커
     const [selectedObj, setSelectedObj] = useState<string>('');
+    // 스티커 모드
+    const [stickerMode, setStickerMode] = useState<number>(0);
     // 마우스 위치
     const [mousePosition, setMousePosition] = useState<mousePosition>({
         positionX: null,
@@ -159,9 +177,50 @@ export default function LetterMakePage() {
     });
     // 스티커 붙이기
     const [stickerFlag, setStickerFlag] = useState<boolean>(false);
+    // 스티커 파레트
+    const [paletteColorFlag, setPaletteColorFlag] = useState<boolean>(false);
+    const [paletteBorderFlag, setPaletteBorderFlag] = useState<boolean>(false);
+    const [paletteShadowFlag, setPaletteShadowFlag] = useState<boolean>(false);
     /** 스티커 선택 */
     const handleSelectedObj = (sticker: string) => {
         setSelectedObj(sticker);
+    };
+    /** 스티커 change */
+    const onChangeStickerText = (e: BaseSyntheticEvent) => {
+        setCanvasTextSticker((prev) => ({
+            ...prev, // 이전 상태를 복사합니다.
+            fontContent: e.target.value, // 특정 값을 수정합니다.
+        }));
+    };
+    const onChangeStickerSize = (e: BaseSyntheticEvent) => {
+        setCanvasTextSticker((prev) => ({
+            ...prev, // 이전 상태를 복사합니다.
+            fontSize: e.target.value, // 특정 값을 수정합니다.
+        }));
+    };
+    const onChangeStickerColor = (e: BaseSyntheticEvent) => {
+        setCanvasTextSticker((prev) => ({
+            ...prev, // 이전 상태를 복사합니다.
+            fontColor: e.target.value, // 특정 값을 수정합니다.
+        }));
+    };
+    const onChangeStickerFamily = (e: BaseSyntheticEvent) => {
+        setCanvasTextSticker((prev) => ({
+            ...prev, // 이전 상태를 복사합니다.
+            fontFamily: e.target.value, // 특정 값을 수정합니다.
+        }));
+    };
+    const onChangeStickerBorder = (e: BaseSyntheticEvent) => {
+        setCanvasTextSticker((prev) => ({
+            ...prev, // 이전 상태를 복사합니다.
+            fontBorder: e.target.value, // 특정 값을 수정합니다.
+        }));
+    };
+    const onChangeStickerShadow = (e: BaseSyntheticEvent) => {
+        setCanvasTextSticker((prev) => ({
+            ...prev, // 이전 상태를 복사합니다.
+            fontShadow: e.target.value, // 특정 값을 수정합니다.
+        }));
     };
     /** 마우스 포인터 정하기 */
     const handleMousePositionInSideBar = ({
@@ -603,6 +662,255 @@ export default function LetterMakePage() {
     /////////////////////////////////////mode에 따른 사이드바 추가////////////////////////////////////////////////////
     let sideBar = <></>;
 
+    const costomElement = () => {
+        return (
+            <>
+                <label
+                    className="input-file-button"
+                    htmlFor="maincharacterfile"
+                >
+                    <p className="button-upload">이미지 업로드</p>
+                </label>
+                <img
+                    src={customSticker}
+                    alt=""
+                    onClick={(e) => {
+                        handleSelectedObj(customSticker);
+                        handleMousePositionInSideBar({
+                            positionX: e.clientX,
+                            positionY: e.clientY,
+                        });
+                    }}
+                />
+                <input
+                    type="file"
+                    id="customstickerfile"
+                    accept="image/*, .gif"
+                    onChange={(event) => {
+                        uploadFile(event, setCustomSticker);
+                    }}
+                    style={{ display: 'none' }}
+                />
+            </>
+        );
+    };
+
+    const stickerElement = () => {
+        if (stickerMode === 0) {
+            return (
+                <div className="w-full flex flex-col justify-start text-xl">
+                    <p>스티커</p>
+                    <div className="flex flex-wrap m-2">
+                        {stickerList.map((item) => {
+                            const imgUrl = `/src/assets/sticker/${item}.png`;
+                            return (
+                                <div className="w-16 h-16 cursor-pointer rounded-lg hover:bg-gray-100 hover:border hover:color-border-main">
+                                    <img
+                                        src={imgUrl}
+                                        alt=""
+                                        onClick={(e) => {
+                                            handleSelectedObj(item);
+                                            handleMousePositionInSideBar({
+                                                positionX: e.clientX,
+                                                positionY: e.clientY,
+                                            });
+                                        }}
+                                    />
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <p>커스텀 스티커</p>
+                    <div className="flex flex-wrap m-2">{costomElement()}</div>
+                </div>
+            );
+        } else if (stickerMode === 1) {
+            return (
+                <div className="w-full flex flex-col justify-start text-xl">
+                    <p>텍스트 스티커</p>
+                    <div className="flex flex-wrap m-2">
+                        {fontStickerList.map((item) => {
+                            const imgUrl = `/src/assets/sticker/${item}.png`;
+                            return (
+                                <div className="w-16 h-16 cursor-pointer rounded-lg hover:bg-gray-100 hover:border hover:color-border-main">
+                                    <img
+                                        src={imgUrl}
+                                        alt=""
+                                        onClick={(e) => {
+                                            handleSelectedObj(item);
+                                            handleMousePositionInSideBar({
+                                                positionX: e.clientX,
+                                                positionY: e.clientY,
+                                            });
+                                        }}
+                                    />
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <div className="border rounded-lg text-center py-2">
+                        <p
+                            style={{
+                                color: canvasTextSticker.fontColor,
+                                fontSize: canvasTextSticker.fontSize + 'px',
+
+                                textShadow: hexToRgba(
+                                    canvasTextSticker.fontShadow,
+                                    0.5
+                                ),
+                            }}
+                        >
+                            {canvasTextSticker.fontContent === ''
+                                ? '샘플입니다. testText'
+                                : canvasTextSticker.fontContent}
+                        </p>
+                    </div>
+                    <p>텍스트 설정</p>
+                    <div>
+                        <div className="mx-2 my-2">
+                            <p>텍스트 내용</p>
+                            <input
+                                type="text"
+                                className="border rounded-lg"
+                                onChange={onChangeStickerText}
+                            />
+                        </div>
+                        <div className="mx-2 my-2">
+                            <p>텍스트 사이즈</p>
+                            <input
+                                type="number"
+                                className="border rounded-lg"
+                                onChange={onChangeStickerSize}
+                            />
+                        </div>
+                        <div className="mx-2 my-2">
+                            <div className="relative flex justify-between items-center pe-10">
+                                <p>텍스트 색상</p>
+                                {!paletteColorFlag ? (
+                                    <p
+                                        className=" text-sm cursor-pointer color-text-main btn-animation"
+                                        onClick={() => {
+                                            setPaletteColorFlag(true);
+                                        }}
+                                    >
+                                        열기
+                                    </p>
+                                ) : (
+                                    <p
+                                        className=" text-sm cursor-pointer color-text-main btn-animation"
+                                        onClick={() => {
+                                            setPaletteColorFlag(false);
+                                        }}
+                                    >
+                                        닫기
+                                    </p>
+                                )}
+                            </div>
+                            <div>
+                                <p
+                                    className="w-4 h-4 rounded-full"
+                                    style={{
+                                        backgroundColor: `${canvasTextSticker.fontColor}`,
+                                    }}
+                                ></p>
+                                <input
+                                    type="text"
+                                    className="border rounded-lg"
+                                    onChange={onChangeStickerColor}
+                                />
+                            </div>
+                        </div>
+                        <div className="mx-2 my-2">
+                            <p>텍스트 글꼴</p>
+                            <input
+                                type="text"
+                                className="border rounded-lg"
+                                style={{
+                                    fontFamily: `${canvasTextSticker.fontFamily}`,
+                                }}
+                            />
+                        </div>
+                        <div className="mx-2 my-2">
+                            <div className="relative flex justify-between items-center pe-10">
+                                <p>텍스트 테두리</p>
+                                {!paletteBorderFlag ? (
+                                    <p
+                                        className=" text-sm cursor-pointer color-text-main btn-animation"
+                                        onClick={() => {
+                                            setPaletteBorderFlag(true);
+                                        }}
+                                    >
+                                        열기
+                                    </p>
+                                ) : (
+                                    <p
+                                        className=" text-sm cursor-pointer color-text-main btn-animation"
+                                        onClick={() => {
+                                            setPaletteBorderFlag(false);
+                                        }}
+                                    >
+                                        닫기
+                                    </p>
+                                )}
+                            </div>
+                            <div>
+                                <p
+                                    className="w-4 h-4 rounded-full"
+                                    style={{
+                                        backgroundColor: `${canvasTextSticker.fontBorder}`,
+                                    }}
+                                ></p>
+                                <input
+                                    type="text"
+                                    className="border rounded-lg"
+                                    onChange={onChangeStickerBorder}
+                                />
+                            </div>
+                        </div>
+                        <div className="mx-2 my-2">
+                            <div className="relative flex justify-between items-center pe-10">
+                                <p>텍스트 그림자</p>
+                                {!paletteShadowFlag ? (
+                                    <p
+                                        className=" text-sm cursor-pointer color-text-main btn-animation"
+                                        onClick={() => {
+                                            setPaletteShadowFlag(true);
+                                        }}
+                                    >
+                                        열기
+                                    </p>
+                                ) : (
+                                    <p
+                                        className=" text-sm cursor-pointer color-text-main btn-animation"
+                                        onClick={() => {
+                                            setPaletteShadowFlag(false);
+                                        }}
+                                    >
+                                        닫기
+                                    </p>
+                                )}
+                            </div>
+                            <div>
+                                <p
+                                    className="w-4 h-4 rounded-full"
+                                    style={{
+                                        backgroundColor: `${canvasTextSticker.fontShadow}`,
+                                    }}
+                                ></p>
+                                <input
+                                    type="text"
+                                    className="border rounded-lg"
+                                    onChange={onChangeStickerShadow}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        } else {
+            return <></>;
+        }
+    };
     switch (mode) {
         case 0:
             sideBar = (
@@ -802,29 +1110,54 @@ export default function LetterMakePage() {
                                 </div>
                             </div>
                         </div>
+                        <div className="w-full flex justify-around mt-4 color-text-darkgray">
+                            <div
+                                className="flex flex-col items-center text-lg border px-2 py-1 rounded-lg cursor-pointer hover:color-bg-sublight btn-animation"
+                                onClick={() => setEraserFlag(!eraserFlag)}
+                            >
+                                <div className="flex flex-col justify-center items-center">
+                                    <p>지우기</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <button onClick={onHtmlToPng}>다운로드</button>
-                    <p>스티커</p>
-                    <div className="flex flex-wrap m-2">
-                        {stickerList.map((item) => {
-                            const imgUrl = `/src/assets/sticker/${item}.png`;
-                            return (
-                                <div className="w-16 h-16 cursor-pointer rounded-lg hover:bg-gray-100">
-                                    <img
-                                        src={imgUrl}
-                                        alt=""
-                                        onClick={(e) => {
-                                            handleSelectedObj(item);
-                                            handleMousePositionInSideBar({
-                                                positionX: e.clientX,
-                                                positionY: e.clientY,
-                                            });
-                                        }}
-                                    />
-                                </div>
-                            );
-                        })}
-                    </div>
+
+                    <ul className="flex justify-around">
+                        <li
+                            className="cursor-pointer hover:font-bold"
+                            onClick={() => {
+                                setStickerMode(0);
+                            }}
+                            style={
+                                stickerMode === 0
+                                    ? {
+                                          color: '#ff777f',
+                                          borderBottom: '2px solid #ff777f',
+                                      }
+                                    : {}
+                            }
+                        >
+                            스티커
+                        </li>
+                        <li
+                            className="cursor-pointer hover:font-bold"
+                            onClick={() => {
+                                setStickerMode(1);
+                            }}
+                            style={
+                                stickerMode === 1
+                                    ? {
+                                          color: '#ff777f',
+                                          borderBottom: '2px solid #ff777f',
+                                      }
+                                    : {}
+                            }
+                        >
+                            텍스트 스티커
+                        </li>
+                    </ul>
+                    {stickerElement()}
                 </div>
             );
             break;
@@ -1119,7 +1452,8 @@ export default function LetterMakePage() {
         >
             {selectedObj !== '' &&
             mousePosition.positionX &&
-            mousePosition.positionY ? (
+            mousePosition.positionY &&
+            stickerMode === 0 ? (
                 <div
                     className="sticker z-40"
                     style={{
@@ -1138,6 +1472,55 @@ export default function LetterMakePage() {
                     }}
                 ></div>
             ) : null}
+            {selectedObj !== '' &&
+            mousePosition.positionX &&
+            mousePosition.positionY &&
+            stickerMode === 1 ? (
+                <>
+                    <div
+                        className="sticker z-40"
+                        style={{
+                            position: 'absolute',
+                            left: mousePosition.positionX - stickerScale / 2,
+                            top: mousePosition.positionY - stickerScale / 2,
+                            backgroundImage: `url('/src/assets/sticker/${selectedObj}.png')`,
+                            backgroundSize: 'cover',
+                            width: stickerScale,
+                            height: stickerScale,
+                            rotate: stickerRotate + 'deg',
+                        }}
+                        onClick={(e) => {
+                            setStickerFlag(true);
+                            // setSelectedObj('');
+                        }}
+                    ></div>
+                    <p
+                        className="sticker z-50 text-center flex items-center justify-center cursor-default"
+                        style={{
+                            position: 'absolute',
+                            left: mousePosition.positionX - stickerScale / 2,
+                            top: mousePosition.positionY - stickerScale / 2,
+                            color: canvasTextSticker.fontColor,
+                            fontSize: canvasTextSticker.fontSize + 'px',
+                            textShadow: hexToRgba(
+                                canvasTextSticker.fontShadow,
+                                0.5
+                            ),
+                            width: stickerScale,
+                            height: stickerScale,
+                            rotate: stickerRotate + 'deg',
+                        }}
+                        onClick={(e) => {
+                            setStickerFlag(true);
+                            // setSelectedObj('');
+                        }}
+                    >
+                        {canvasTextSticker.fontContent === ''
+                            ? '샘플입니다. testText'
+                            : canvasTextSticker.fontContent}
+                    </p>
+                </>
+            ) : null}
             {/* {isParticipantAlertActive ? (
                 <ParticipantAlertWindow
                     onClickOK={allowAccess}
@@ -1147,7 +1530,7 @@ export default function LetterMakePage() {
                 <></>
             )} */}
             {/* 중앙 섹션 */}
-            <div className="flex w-full editor-height overflow-y-scroll">
+            <div className="flex w-full editor-height overflow-y-hidden">
                 {/* 좌측부분 */}
                 <div className="w-1/4 editor-height flex flex-col border-r">
                     <div className="flex items-center pl-12 py-2 border-b-2 color-border-sublight">
@@ -1296,8 +1679,43 @@ export default function LetterMakePage() {
                             </div>
                         </div>
                         {/* 카테고리 선택에 따라 */}
-                        <div className="w-4/5 flex flex-col items-center p-6 overflow-y-scroll">
+                        <div className="relative w-4/5 flex flex-col items-center p-6 overflow-y-scroll">
                             {sideBar}
+                        </div>
+                        <div className="absolute">
+                            {paletteColorFlag ? (
+                                <div className="absolute left-20 top-36">
+                                    <ColorPalette
+                                        setColor={setCanvasTextSticker}
+                                        target="fontColor"
+                                        flag={setPaletteColorFlag}
+                                    ></ColorPalette>
+                                </div>
+                            ) : (
+                                <></>
+                            )}
+                            {paletteBorderFlag ? (
+                                <div className="absolute left-20 top-36">
+                                    <ColorPalette
+                                        setColor={setCanvasTextSticker}
+                                        target="fontBorder"
+                                        flag={setPaletteBorderFlag}
+                                    ></ColorPalette>
+                                </div>
+                            ) : (
+                                <></>
+                            )}
+                            {paletteShadowFlag ? (
+                                <div className="absolute left-20 top-36">
+                                    <ColorPalette
+                                        setColor={setCanvasTextSticker}
+                                        target="fontShadow"
+                                        flag={setPaletteShadowFlag}
+                                    ></ColorPalette>
+                                </div>
+                            ) : (
+                                <></>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -1356,6 +1774,7 @@ export default function LetterMakePage() {
                                         canvasWidth={800}
                                         canvasHeight={450}
                                         sticker={selectedObj}
+                                        stickerText={canvasTextSticker}
                                         setSticker={setSelectedObj}
                                         eraser={eraserFlag}
                                         stickerFlag={stickerFlag}
@@ -1363,6 +1782,7 @@ export default function LetterMakePage() {
                                         mousePosition={mousePosition}
                                         scale={stickerScale}
                                         rotate={stickerRotate}
+                                        mode={stickerMode}
                                     ></CanvasItem>
                                 </main>
                             </div>
