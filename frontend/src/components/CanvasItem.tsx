@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
+import { CanvasFont } from '../types/type';
+import { hexToRgba } from '../util/get-func';
 
 type canvasType = {
     canvasWidth: number;
     canvasHeight: number;
     sticker: string;
+    stickerText: CanvasFont;
     eraser: boolean;
     stickerFlag: boolean;
     setSticker: React.Dispatch<React.SetStateAction<string>>;
@@ -11,6 +14,7 @@ type canvasType = {
     mousePosition: mousePosition;
     scale: number;
     rotate: number;
+    mode: number;
 };
 interface mousePosition {
     positionX: number | null;
@@ -22,6 +26,14 @@ export default function CanvasItem(props: canvasType) {
     const sticker = props.sticker;
     const stickerFlag = props.stickerFlag;
     const eraser = props.eraser;
+    const fontContent = props.stickerText.fontContent;
+    const fontColor = props.stickerText.fontColor;
+    const fontSize = props.stickerText.fontSize;
+    const fontFamily = props.stickerText.fontFamily;
+    const fontBorder = props.stickerText.fontBorder;
+    const fontShadow = props.stickerText.fontShadow;
+    const mode = props.mode;
+
     const [getCtx, setGetCtx] = useState<CanvasRenderingContext2D>();
     // painting state
     const [painting, setPainting] = useState(false);
@@ -96,6 +108,29 @@ export default function CanvasItem(props: canvasType) {
                         imageSize,
                         imageSize
                     );
+                    if (mode === 1) {
+                        const font = fontSize + 'px ' + fontFamily;
+                        ctx.font = font;
+                        if (fontColor !== '') {
+                            ctx.fillStyle = fontColor;
+                        }
+                        if (fontShadow !== '') {
+                            const rgbaColor = hexToRgba(fontShadow, 0.5);
+                            ctx.shadowColor = rgbaColor;
+                            ctx.shadowOffsetX = 2;
+                            ctx.shadowOffsetY = 2;
+                            ctx.shadowBlur = 5;
+                        }
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(fontContent, 0, 0);
+
+                        if (fontBorder !== '') {
+                            ctx.strokeStyle = fontBorder; // border 색상 설정
+                            ctx.lineWidth = 1; // border 두께 설정
+                            ctx.strokeText(fontContent, 0, 0);
+                        }
+                    }
                     ctx.restore();
                     props.setStickerFlag(false);
                     props.setSticker('');
