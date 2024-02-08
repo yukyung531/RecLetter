@@ -99,6 +99,7 @@ export default function StudioCreatePage() {
                             type="text"
                             placeholder="Placeholder"
                             onChange={changeTitle}
+                            maxLength={20}
                         />
                     </div>
                     <div>

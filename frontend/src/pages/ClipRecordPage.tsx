@@ -141,8 +141,8 @@ export default function ClipRecordPage() {
     const constraints = {
         audio: true,
         video: {
-            width: { max: 1280 },
-            height: { max: 720 },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
             facingMode: 'environment',
             frameRate: { max: 30 },
         },
@@ -216,6 +216,10 @@ export default function ClipRecordPage() {
                 const getDetail = async (studioId: string) => {
                     await studioDetail(studioId).then((res) => {
                         if (res.status === httpStatusCode.OK) {
+                            setStudioDetailInfo(res.data);
+                            setSelectImgUrl(
+                                `/src/assets/frames/frame${res.data.studioFrameId}.png`
+                            );
                             // 채팅방 불러오기 설정
                             if (chatStudioList.length === 0) {
                                 dispatch(studioAddState(studioId));
@@ -271,18 +275,6 @@ export default function ClipRecordPage() {
         if (loginValue === 'false' || !loginValue || !token) {
             alert('오류가 났습니다');
         }
-        const getDetail = async (studioId: string) => {
-            await studioDetail(studioId).then((res) => {
-                if (res.status === httpStatusCode.OK) {
-                    setStudioDetailInfo(res.data);
-                    setSelectImgUrl(
-                        `/src/assets/frames/frame${res.data.studioFrameId}.png`
-                    );
-                }
-            });
-            return;
-        };
-        getDetail(studioId);
 
         //+유저 정보 불러오기
         const getUserInfo = async () => {
@@ -620,6 +612,7 @@ export default function ClipRecordPage() {
             //mediaStream 소멸
             const trackList: MediaStreamTrack[] = mS.getTracks();
             for (let i = 0; i < trackList.length; i++) {
+                trackList[i].stop();
                 mS.removeTrack(trackList[i]);
             }
 
@@ -670,6 +663,7 @@ export default function ClipRecordPage() {
                                     const trackList: MediaStreamTrack[] =
                                         mS.getTracks();
                                     for (let i = 0; i < trackList.length; i++) {
+                                        trackList[i].stop();
                                         mS.removeTrack(trackList[i]);
                                     }
 
@@ -861,11 +855,11 @@ export default function ClipRecordPage() {
                             <div>
                                 {/* 녹화중 아니면 녹화버튼, 녹화중이면 정지 버튼 */}
                                 {!isRecording ? (
-                                    <div className="w-32 p-1 flex items-center justify-center border border-gray-100 rounded-lg shadow-md">
-                                        <span
-                                            className="mx-1 material-symbols-outlined text-2xl text-[#626262] cursor-pointer"
-                                            onClick={startRecord}
-                                        >
+                                    <div
+                                        className="w-32 p-1 flex items-center justify-center border border-gray-100 rounded-lg shadow-md cursor-pointer"
+                                        onClick={startRecord}
+                                    >
+                                        <span className="mx-1 material-symbols-outlined text-2xl text-[#626262]">
                                             radio_button_checked
                                         </span>
                                         <span
@@ -879,12 +873,12 @@ export default function ClipRecordPage() {
                                         </span>
                                     </div>
                                 ) : (
-                                    <div className="w-32 p-1 flex flex-col items-center justify-center border color-border-main rounded-lg shadow-md">
+                                    <div
+                                        className="w-32 p-1 flex flex-col items-center justify-center border color-border-main rounded-lg shadow-md cursor-pointer"
+                                        onClick={endRecord}
+                                    >
                                         <div className="flex items-center justify-center">
-                                            <span
-                                                className="material-symbols-outlined text-2xl color-text-main mx-2  cursor-pointer"
-                                                onClick={endRecord}
-                                            >
+                                            <span className="material-symbols-outlined text-2xl color-text-main mx-2">
                                                 radio_button_checked
                                             </span>
                                             <span

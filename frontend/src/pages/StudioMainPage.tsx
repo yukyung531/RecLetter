@@ -159,7 +159,7 @@ export default function StudioMainPage() {
         };
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => {
-            console.log('사라지기전 ' + reloadingStudioId + '입니다');
+            // console.log('사라지기전 ' + reloadingStudioId + '입니다');
             dispatch(studioDeleteState(reloadingStudioId));
             disconnect(reloadingStudioId);
             window.removeEventListener('beforeunload', handleBeforeUnload);
@@ -395,12 +395,17 @@ export default function StudioMainPage() {
     };
 
     const updateStudioName = (event: BaseSyntheticEvent) => {
-        setIsEditingName(true);
-        if (studioDetailInfo !== null) {
-            const newValue = { ...studioDetailInfo };
-
-            newValue.studioTitle = event.target.value;
-            setStudioDetailInfo(newValue);
+        //스튜디오 주인만 수정 가능하도록
+        if (userInfo.userId !== studioDetailInfo.studioOwner) {
+            alert('스튜디오 이름 변경은 스튜디오 주인장만 가능합니다.');
+            return;
+        } else {
+            setIsEditingName(true);
+            if (studioDetailInfo !== null) {
+                const newValue = { ...studioDetailInfo };
+                newValue.studioTitle = event.target.value;
+                setStudioDetailInfo(newValue);
+            }
         }
     };
 
@@ -408,7 +413,6 @@ export default function StudioMainPage() {
     const putStudiotitleAPI = async () => {
         const id = studioDetailInfo.studioId;
         const title = studioDetailInfo.studioTitle;
-        console.log(id, title);
         await modifyStudioTitle(id, title).then((res) => {
             if (res.status === httpStatusCode.OK) {
                 console.log('제목이 수정되었습니닷!!!!');
@@ -509,7 +513,19 @@ export default function StudioMainPage() {
                                         type="text"
                                         value={studioDetailInfo?.studioTitle}
                                         className="w-3/4 border-b-2 color-bg-sublight flex items-center text-2xl text-white ms-2"
+                                        maxLength={20}
                                         onChange={updateStudioName}
+                                        onKeyDown={(event) => {
+                                            //스튜디오 주인만 이름 변경 가능, 엔터키 눌리면 변경 가능
+                                            if (
+                                                event.key === 'Enter' &&
+                                                isEditingName &&
+                                                studioDetailInfo.studioOwner ===
+                                                    userInfo.userId
+                                            ) {
+                                                handleStudioName();
+                                            }
+                                        }}
                                     />
                                     {isEditingName ? (
                                         <span

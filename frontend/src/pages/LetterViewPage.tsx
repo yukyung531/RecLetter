@@ -138,6 +138,7 @@ export default function LetterViewPage() {
      */
     const createToken = async (sessionId: string) => {
         const response = await connectSessionAPI(sessionId);
+        console.log(response);
         return response.data.token; // The token
     };
 

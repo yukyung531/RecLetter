@@ -325,7 +325,7 @@ export default function LetterMakePage() {
 
             // openvidu 화면 공유 시작
             //현재 주석 처리. 주석 풀것!!! (주석해제위치)
-            startScreenShare();
+            // startScreenShare();
         };
         initSetting();
 

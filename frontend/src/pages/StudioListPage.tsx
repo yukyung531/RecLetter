@@ -56,7 +56,17 @@ export default function StudioListPage() {
                         setCreateStudioList([]);
                         setAttendStudioList([]);
                         const studioDivide = res.data.studioInfoList;
-                        studioDivide.map(
+                        //일단 정렬 먼저
+                        const sortedStudioDivide = studioDivide.sort(
+                            (studioA, studioB) => {
+                                return (
+                                    new Date(studioA.expireDate).getDate() -
+                                    new Date(studioB.expireDate).getDate()
+                                );
+                            }
+                        );
+                        //그 후 분류
+                        sortedStudioDivide.map(
                             (studio: StudioInfo, studiokey: number) => {
                                 if (studio.isCompleted) {
                                     setFinishStudioList((prev) => [
@@ -224,7 +234,9 @@ export default function StudioListPage() {
                                 <StudioCard
                                     key={studio.studioId}
                                     props={studio}
-                                    editMode={1 ? null : null}
+                                    editMode={
+                                        studio.isStudioOwner ? null : null
+                                    }
                                     onClick={() =>
                                         onClickSCard(studio.studioId)
                                     }

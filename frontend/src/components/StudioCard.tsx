@@ -33,7 +33,7 @@ export default function StudioCard({
 
     return (
         <div
-            className="relative w-30per flex flex-col mx-2 my-2 justify-around items-center cursor-pointer"
+            className="relative w-30per h-[240px] flex flex-col mx-2 my-2 justify-start items-center cursor-pointer"
             id={studioId}
             onClick={(e) => {
                 onClick(e);
@@ -48,7 +48,7 @@ export default function StudioCard({
                 controlsList="nodownload"
             />{' '}
             {/*"https://d3kbsbmyfcnq5r.cloudfront.net/favicon.png" */}
-            <div className="flex justify-center items-center w-full px-4 text-xl">
+            <div className="flex justify-center items-center w-full h-[112px] px-4 text-xl">
                 {editMode ? (
                     <div className="relative min-w-4 w-4 h-4 -start-3 flex justify-center items-center border rounded-full border-black">
                         {selected && (
@@ -58,18 +58,20 @@ export default function StudioCard({
                 ) : (
                     <div></div>
                 )}
-                <div className="flex items-center justify-center">
-                    {props.studioTitle}
-                </div>
+                <div className="flex items-center w-full h-full">
+                    <div className="w-2/3 flex items-center justify-center">
+                        {props.studioTitle}
+                    </div>
 
-                <p className="mx-5">|</p>
-                <p>
-                    D-
-                    {Math.floor(
-                        (expireDate.getTime() - Date.now()) /
-                            (1000 * 60 * 60 * 24)
-                    )}
-                </p>
+                    <p className="mx-3">|</p>
+                    <p className="w-[40px]">
+                        D-
+                        {Math.floor(
+                            (expireDate.getTime() - Date.now()) /
+                                (1000 * 60 * 60 * 24)
+                        )}
+                    </p>
+                </div>
             </div>
         </div>
     );
