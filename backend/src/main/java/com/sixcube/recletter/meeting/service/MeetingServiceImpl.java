@@ -46,8 +46,8 @@ public class MeetingServiceImpl implements MeetingService {
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         headers.setBasicAuth("OPENVIDUAPP", OPENVIDU_SECRET);
 
-        // 요청 본문 생성
-        String requestJson = "{\"customSessionId\":\"" + studioId + "\"}";
+        // 요청 본문 생성(sessionId에 studioId를, name에 userId를 넣어서 각 세션에서 편집을 시작한 유저의 정보를 편리하게 관리하고자 함)
+        String requestJson = "{\"customSessionId\":\"" + studioId + "\", \"defaultRecordingProperties\": {\"name\": \"" + user.getUserId() + "\"}}";
 
         // HttpEntity 생성 (헤더와 본문 포함)
         HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
@@ -62,9 +62,6 @@ public class MeetingServiceImpl implements MeetingService {
             // 세션 객체(JSON 문자열)를 Map으로 변환(editingUserId를 세션 정보에 추가하기 위해)
             Map<String, Object> sessionInfoMap = mapper.readValue(response.getBody(), new TypeReference<Map<String, Object>>() {
             });
-
-            // 세션 정보에 사용자 ID 추가
-            sessionInfoMap.put("editingUserId", user.getUserId());
 
             // 세션 정보를 JSON 문자열로 변환(HTTP 응답 본문은 문자열 형태로 전달되기 때문)
             String sessionInfo = mapper.writeValueAsString(sessionInfoMap);
@@ -166,7 +163,7 @@ public class MeetingServiceImpl implements MeetingService {
         }
     }
 
-    public Boolean checkSession(String sessionId) throws StudioNotFoundException, MeetingCheckSessionFailureException {
+    public String checkSession(String sessionId) throws StudioNotFoundException, MeetingCheckSessionFailureException {
         // 스튜디오 존재 확인
         studioRepository.findById(sessionId).orElseThrow(StudioNotFoundException::new);
 
@@ -187,18 +184,18 @@ public class MeetingServiceImpl implements MeetingService {
             log.info("openvidu_url: " + OPENVIDU_URL);
             ResponseEntity<String> response = restTemplate.exchange(OPENVIDU_URL + "/" + sessionId, HttpMethod.GET, entity, String.class);
 
-            // HTTP 상태 코드가 200이면 세션 ID가 활성화되어 있음
+            // HTTP 상태 코드가 200이면 세션 ID가 활성화되어 있으므로, 세션 객체를 반환
             if (response.getStatusCode() == HttpStatus.OK) {
-                return true;
+                return response.getBody();
             }
 
         } catch (HttpClientErrorException e) {
             // HTTP 상태 코드가 404이면 세션 ID가 존재하지 않음
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                return false;
+                return "no exists";
             } else throw new MeetingCheckSessionFailureException(e);
         }
 
-        return false;
+        return "no exists";
     }
 }

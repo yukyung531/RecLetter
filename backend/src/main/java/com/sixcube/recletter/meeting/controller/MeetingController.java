@@ -67,11 +67,11 @@ public class MeetingController {
     /**
      * sessionId가 활성화되어 있는지 여부를 알려주는 메서드
      * @param sessionId
-     * @return 활성화되어있다면 true, 아니면 false 반환
+     * @return 활성화되어있다면 세션 객체를, 아니라면 false 반환
      */
     @GetMapping("/{sessionId}/exists")
-    public ResponseEntity<Boolean> checkSession(@PathVariable("sessionId") String sessionId) {
-        Boolean isExists = meetingService.checkSession(sessionId);
-        return ResponseEntity.ok().body(isExists);
+    public ResponseEntity<String> checkSession(@PathVariable("sessionId") String sessionId) {
+        String sessionInfo = meetingService.checkSession(sessionId);
+        return ResponseEntity.ok().body(sessionInfo);
     }
 }
