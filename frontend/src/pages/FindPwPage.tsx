@@ -51,6 +51,7 @@ export default function FindPwPage() {
     };
     /** POST 비밀번호 초기화 이메일 발송 요청 */
     const sendPasswordEmail = async () => {
+        setEmailFlag(1);
         await requestPasswordEmail({ userEmail: inputEmail })
             .then((res) => {
                 if (res.status === httpStatusCode.OK) {
