@@ -50,9 +50,7 @@ public class AuthServiceImpl implements AuthService {
             key = RedisPrefix.REGIST.prefix() + toEmail;
         } else { //emailType.equals("RESET")
             userRepository.findByUserEmailAndDeletedAtIsNull(toEmail).orElseThrow(() -> new NoEmailException());
-//            if(!userRepository.findByUserEmailAndDeletedAtIsNull(toEmail).isPresent()){
-//                throw new NoEmailException();
-//            }
+
             title = "Recletter 비밀번호 재설정";
             key = RedisPrefix.RESET_PASSOWRD.prefix() + toEmail;
         }
