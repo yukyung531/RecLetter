@@ -25,14 +25,4 @@ public class Frame {
 
     @Column(name = "frame_title")
     private String frameTitle;
-
-    @JoinColumn(name = "font_id", referencedColumnName = "font_id")
-    private Integer fontId;
-
-    @Column(name = "font_size")
-    private String fontSize;
-
-    @Column(name = "font_bold")
-    private String fontBold;
-
 }
