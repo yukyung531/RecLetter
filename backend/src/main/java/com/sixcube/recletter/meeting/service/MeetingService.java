@@ -7,5 +7,5 @@ public interface MeetingService {
     String createConnection(String sessionId, User user);
     void deleteSession(String sessionId, User user);
 
-    Boolean checkSession(String sessionId);
+    String checkSession(String sessionId);
 }
