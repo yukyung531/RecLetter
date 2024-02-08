@@ -5,7 +5,7 @@ interface Prop {
     clip: ClipInfo;
     unselectClip: React.MouseEventHandler<HTMLButtonElement>;
     changeVolume: React.ChangeEventHandler<HTMLInputElement>;
-    getDuration: (clipId: number, duration: number) => void;
+    // getDuration: (clipId: number, duration: number) => void;
     propVideoRef: React.RefObject<HTMLVideoElement>;
     percent: number;
     selectCard: React.MouseEventHandler<HTMLDivElement>;
@@ -15,7 +15,7 @@ export default function SelectedVideoCard({
     clip,
     unselectClip,
     changeVolume,
-    getDuration,
+    // getDuration,
     propVideoRef,
     percent,
     selectCard,
@@ -26,9 +26,9 @@ export default function SelectedVideoCard({
     const progressBar = useRef<HTMLDivElement>(null);
 
     const metadataLoad = () => {
-        if (videoRef.current) {
-            getDuration(clip.clipId, videoRef.current.duration);
-        }
+        // if (videoRef.current) {
+        //     getDuration(clip.clipId, videoRef.current.duration);
+        // }
     };
 
     return (

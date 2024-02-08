@@ -78,6 +78,10 @@ export default function StudioMainPage() {
     const dispatch = useDispatch();
     const navigator = useNavigate();
 
+    //사용한 비디오, 사용하지 않은 비디오
+    const [usedVideoList, setUsedVideoList] = useState<ClipInfo[]>([]);
+    const [unUsedVideoList, setUnUsedVideoList] = useState<ClipInfo[]>([]);
+
     //영상 서버로부터 불러오기
     useEffect(() => {
         const loginValue = localStorage.getItem('is-login');
@@ -112,9 +116,35 @@ export default function StudioMainPage() {
 
                             dispatch(studioNameState(res.data.studioTitle));
                             setStudioDetailInfo(res.data);
+                            //프레임
                             setSelectImgUrl(
                                 `/src/assets/frames/frame${res.data.studioFrameId}.png`
                             );
+
+                            //순서 불러오기
+                            //우선 정렬을 한 후, 사용한 비디오, 아닌 비디오로 분리
+                            const clipList = res.data.clipInfoList.sort(
+                                (clipA: ClipInfo, clipB: ClipInfo) =>
+                                    clipA.clipOrder - clipB.clipOrder
+                            );
+                            clipList.map((clip: ClipInfo) => {
+                                if (clip.clipOrder === -1) {
+                                    setUnUsedVideoList((prev) => [
+                                        ...prev,
+                                        clip,
+                                    ]);
+                                } else {
+                                    setUsedVideoList((prev) => [...prev, clip]);
+                                    // 사용한 비디오 있으면? 그거 기본으로
+                                    if (
+                                        videoRef.current &&
+                                        selectedVideo.clipId === -1
+                                    ) {
+                                        console.log('hello');
+                                        selectVideo(clip.clipId);
+                                    }
+                                }
+                            });
                         }
                     });
                     return;
@@ -305,27 +335,25 @@ export default function StudioMainPage() {
                 <p>선택된 영상</p>
             </div>
 
-            {studioDetailInfo.clipInfoList ? (
-                studioDetailInfo.clipInfoList.map((clip) => {
-                    if (clip.clipOrder != -1) {
-                        return (
-                            <VideoCard
-                                key={clip.clipId}
-                                onDelete={() => {
-                                    onDelete(clip.clipId);
-                                }}
-                                onClick={() => {
-                                    onClickEdit(clip.clipId);
-                                }}
-                                selectVideo={() => {
-                                    selectVideo(clip.clipId);
-                                }}
-                                props={clip}
-                                presentUser={userInfo.userId}
-                                selectedClip={selectedVideo}
-                            />
-                        );
-                    }
+            {usedVideoList ? (
+                usedVideoList.map((clip) => {
+                    return (
+                        <VideoCard
+                            key={clip.clipId}
+                            onDelete={() => {
+                                onDelete(clip.clipId);
+                            }}
+                            onClick={() => {
+                                onClickEdit(clip.clipId);
+                            }}
+                            selectVideo={() => {
+                                selectVideo(clip.clipId);
+                            }}
+                            props={clip}
+                            presentUser={userInfo.userId}
+                            selectedClip={selectedVideo}
+                        />
+                    );
                 })
             ) : (
                 <></>
@@ -333,27 +361,25 @@ export default function StudioMainPage() {
             <div className="w-full flex justify-start text-xl ">
                 <p>선택되지 않은 영상</p>
             </div>
-            {studioDetailInfo ? (
-                studioDetailInfo.clipInfoList.map((clip) => {
-                    if (clip.clipOrder == -1) {
-                        return (
-                            <VideoCard
-                                key={clip.clipId}
-                                onDelete={() => {
-                                    onDelete(clip.clipId);
-                                }}
-                                onClick={() => {
-                                    onClickEdit(clip.clipId);
-                                }}
-                                selectVideo={() => {
-                                    selectVideo(clip.clipId);
-                                }}
-                                props={clip}
-                                presentUser={userInfo.userId}
-                                selectedClip={selectedVideo}
-                            />
-                        );
-                    }
+            {unUsedVideoList ? (
+                unUsedVideoList.map((clip) => {
+                    return (
+                        <VideoCard
+                            key={clip.clipId}
+                            onDelete={() => {
+                                onDelete(clip.clipId);
+                            }}
+                            onClick={() => {
+                                onClickEdit(clip.clipId);
+                            }}
+                            selectVideo={() => {
+                                selectVideo(clip.clipId);
+                            }}
+                            props={clip}
+                            presentUser={userInfo.userId}
+                            selectedClip={selectedVideo}
+                        />
+                    );
                 })
             ) : (
                 <></>

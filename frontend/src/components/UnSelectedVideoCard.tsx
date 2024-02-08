@@ -3,13 +3,13 @@ import { useRef, useState } from 'react';
 
 interface VideoCardProp {
     selectVideo: React.MouseEventHandler<HTMLDivElement>;
-    getDuration: (clipId: number, duration: number) => void;
+    // getDuration: (clipId: number, duration: number) => void;
     props: ClipInfo;
 }
 
 export default function UnSelectedVideoCard({
     selectVideo,
-    getDuration,
+    // getDuration,
     props,
 }: VideoCardProp) {
     //clipId 문자열 변형
@@ -23,7 +23,7 @@ export default function UnSelectedVideoCard({
     const metadataLoad = () => {
         if (videoRef.current) {
             setDuration(Math.floor(videoRef.current.duration));
-            getDuration(props.clipId, videoRef.current.duration);
+            // getDuration(props.clipId, videoRef.current.duration);
         }
     };
 

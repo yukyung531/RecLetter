@@ -240,21 +240,26 @@ export default function LetterMakePage() {
     //현재 재생 중
     const [playing, setPlaying] = useState<boolean>(false);
 
-    /** duration 정보 끌어올리기 */
-    const getDuration = (clipId: number, length: number) => {
-        for (let i = 0; i < studioDetailInfo.clipInfoList.length; i++) {
-            if (studioDetailInfo.clipInfoList[i].clipId === clipId) {
-                studioDetailInfo.clipInfoList[i].clipLength = length;
-                break;
-            }
-        }
-    };
-
     useEffect(() => {
+        //유저정보 불러오기
+        const getUserInfo = async () => {
+            const resuser = await getUser();
+            const tempObj = { ...resuser.data };
+            // console.log(tempObj);
+            setUserInfo({
+                userId: tempObj.userId,
+                userNickname: tempObj.userNickname,
+                userEmail: tempObj.userEmail,
+            });
+        };
+        getUserInfo();
+
         /**initSetting()
          * 초기 설정
          */
         const initSetting = async () => {
+            //유저 정보 받아오기
+
             //스튜디오 상세 정보 받아오기
             studioDetail(studioId)
                 .then((res) => {
@@ -263,6 +268,16 @@ export default function LetterMakePage() {
                         setStudioDetailInfo({ ...res.data });
                         //사용 영상, 사용하지 않은 영상 리스트 출력
                         const clipList = res.data.clipInfoList;
+
+                        // clipList.map((clip, index) => {
+                        //     getVideoDurationInSeconds(clip.clipUrl).then(
+                        //         (duration) => {
+                        //             console.log(clip, duration);
+                        //             clipList[index].clipLength = duration;
+                        //         }
+                        //     );
+                        // });
+
                         const initialUsedVideo = [];
                         const nonInitialUsedVideo = [];
                         for (let i = 0; i < clipList.length; i++) {
@@ -325,7 +340,7 @@ export default function LetterMakePage() {
 
             // openvidu 화면 공유 시작
             //현재 주석 처리. 주석 풀것!!! (주석해제위치)
-            // startScreenShare();
+            startScreenShare();
         };
         initSetting();
 
@@ -382,19 +397,6 @@ export default function LetterMakePage() {
                 };
                 enterStudioAPI(studioId);
             }
-
-            //유저정보 불러오기
-            const getUserInfo = async () => {
-                const resuser = await getUser();
-                const tempObj = { ...resuser.data };
-                // console.log(tempObj);
-                setUserInfo({
-                    userId: tempObj.userId,
-                    userNickname: tempObj.userNickname,
-                    userEmail: tempObj.userEmail,
-                });
-            };
-            getUserInfo();
         }
         if (loginValue === 'false' || !loginValue || !token) {
             navigator(`/login`);
@@ -922,9 +924,9 @@ export default function LetterMakePage() {
                                 key={clip.clipId}
                                 props={clip}
                                 selectVideo={() => selectVideo(clip.clipId)}
-                                getDuration={(clipId: number, length: number) =>
-                                    getDuration(clipId, length)
-                                }
+                                // getDuration={(clipId: number, length: number) =>
+                                //     getDuration(clipId, length)
+                                // }
                             />
                         );
                     })}
@@ -1277,17 +1279,35 @@ export default function LetterMakePage() {
      */
     const getToken = async (studioId: string) => {
         //우선은 세션 활성화 여부 조회
-        const isExistSession = await isSessionExistAPI(studioId);
-
-        //이미 있는 세션이면 navigate
-        if (isExistSession.data) {
-            navigate(`/letterview/${studioId}`);
+        const existSessionInfo = await isSessionExistAPI(studioId);
+        let user: any = userInfo;
+        //유저 아이디가 로딩 안되는 문제 있음
+        //만약 아직 로딩 안되었으면 받아오기
+        if (userInfo.userId === '') {
+            const res = await getUser();
+            user = res.data;
         }
 
-        //studioId가 세션 id가 된다.
-        const sessionId = await createSession(studioId);
-        //세션 아이디로 토큰을 만든다.
-        return await createToken(sessionId);
+        //세션이 없다. -> 일단 생성부터
+        if (existSessionInfo.data === 'no exists') {
+            //studioId가 세션 id가 된다.
+            const sessionId = await createSession(studioId);
+            //세션 아이디로 토큰을 만든다.
+            return await createToken(sessionId);
+        } else {
+            if (
+                existSessionInfo.data.defaultRecordingProperties.name ===
+                user.userId
+            ) {
+                //세션 생성자였을 경우(새로고침, 오류 등으로 재접속)
+                //여기서 바로 커넥션, sessionId를 항상 studioId로 통일함.
+                return await createToken(studioId);
+            } else {
+                //세션 생성자가 아니었을 경우
+                //편집 감상 페이지로 이동
+                navigate(`/letterview/${studioId}`);
+            }
+        }
     };
 
     /**createSession(sessionId), 세션 정보를 받아오거나 생성한다. */
@@ -1888,10 +1908,10 @@ export default function LetterMakePage() {
                                             changeVolume={(event) =>
                                                 changeVolume(clip.clipId, event)
                                             }
-                                            getDuration={(
-                                                clipId: number,
-                                                length: number
-                                            ) => getDuration(clipId, length)}
+                                            // getDuration={(
+                                            //     clipId: number,
+                                            //     length: number
+                                            // ) => getDuration(clipId, length)}
                                             propVideoRef={videoRef}
                                             percent={percent}
                                             selectCard={() => selectIdx(index)}
