@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StudioInfo } from '../types/type';
+import { enterChatting } from '../api/chat';
+import { httpStatusCode } from '../util/http-status';
 
 interface StudioCardProp {
     props: StudioInfo;
@@ -14,43 +16,83 @@ export default function StudioCard({
 }: StudioCardProp) {
     //참여 여부
     let isUploadUi = (
-        <p className="absolute px-3 top-2 right-2 border-2 color-bg-blue3 text-center text-lg rounded-xl text-white">
+        <p className="px-3 color-bg-blue3 text-center text-sm rounded-xl text-white">
             참여 완료
         </p>
     );
     if (!props.hasMyClip) {
         isUploadUi = (
-            <p className="absolute px-3 top-2 right-2 border-2 border-white color-bg-subbold text-center text-lg rounded-xl text-white">
+            <p className="px-3 color-bg-subbold text-center text-sm rounded-xl text-white">
                 미참여
             </p>
         );
     }
 
     const [selected, setSelected] = useState<boolean>(false);
+    const [peopleNum, setPeopleNum] = useState<number>(0);
     const studioId: string = props.studioId + '';
 
     const expireDate: Date = new Date(props.expireDate);
+    const stickerUrl: string = props.thumbnailUrl;
+    const stickerFrame: number = props.studioFrameId;
 
+    useEffect(() => {
+        const findPeopleNum = async () => {
+            await enterChatting(studioId).then((res) => {
+                if (res.status === httpStatusCode.OK) {
+                    setPeopleNum(res.data.length);
+                }
+            });
+        };
+        findPeopleNum();
+    }, []);
     return (
         <div
-            className="relative w-30per h-[240px] flex flex-col mx-2 my-2 justify-start items-center cursor-pointer"
+            className="relative w-1/5 p-3 bg-white border rounded-lg flex flex-col mx-2 my-2 justify-start items-center cursor-pointer"
             id={studioId}
             onClick={(e) => {
                 onClick(e);
                 setSelected(!selected);
             }}
+            style={selected ? { border: '1px solid #ffa9a9' } : {}}
         >
-            {isUploadUi}
             <video
-                className="w-full h-32 color-bg-sublight rounded-lg"
+                className="w-full bg-black rounded-lg"
+                style={{
+                    aspectRatio: 16 / 9,
+                }}
                 src={props.thumbnailUrl}
                 crossOrigin="anonymous"
                 controlsList="nodownload"
-            />{' '}
+            />
             {/*"https://d3kbsbmyfcnq5r.cloudfront.net/favicon.png" */}
-            <div className="flex justify-center items-center w-full h-[112px] px-4 text-xl">
+            <div
+                className="absolute w-full top-0 z-10"
+                style={{
+                    aspectRatio: 16 / 9,
+                }}
+            >
+                {stickerUrl !== '' ? <img src={stickerUrl} alt="" /> : <></>}
+            </div>
+
+            <div
+                className="absolute p-3 w-full top-0 z-10"
+                style={{
+                    aspectRatio: 16 / 9,
+                }}
+            >
+                {stickerFrame ? (
+                    <img
+                        src={'/src/assets/frames/frame' + stickerFrame + '.png'}
+                        alt=""
+                    />
+                ) : (
+                    <></>
+                )}
+            </div>
+            <div className="flex justify-center items-center w-full text-xl">
                 {editMode ? (
-                    <div className="relative min-w-4 w-4 h-4 -start-3 flex justify-center items-center border rounded-full border-black">
+                    <div className="absolute min-w-4 w-4 h-4 top-3 left-3 bg-white -start-3 flex justify-center items-center border rounded-full color-border-darkgray z-10">
                         {selected && (
                             <div className="w-2 h-2 rounded-full color-bg-main"></div>
                         )}
@@ -58,13 +100,20 @@ export default function StudioCard({
                 ) : (
                     <div></div>
                 )}
-                <div className="flex items-center w-full h-full">
-                    <div className="w-2/3 flex items-center justify-center">
-                        {props.studioTitle}
+                <div className="flex items-center justify-between w-full mt-2">
+                    <div className="text-xl flex items-center">
+                        {props.isStudioOwner ? (
+                            <img
+                                className="w-4 h-4 me-2"
+                                src="/src/assets/icons/owner-crown.png"
+                            />
+                        ) : (
+                            <></>
+                        )}
+                        <p>{props.studioTitle}</p>
                     </div>
 
-                    <p className="mx-3">|</p>
-                    <p className="w-[40px]">
+                    <p className="w-[40px] text-2xl">
                         D-
                         {Math.floor(
                             (expireDate.getTime() - Date.now()) /
@@ -72,6 +121,27 @@ export default function StudioCard({
                         )}
                     </p>
                 </div>
+            </div>
+            <div className="w-full flex justify-between">
+                <div className="flex">
+                    <div className="flex items-center">
+                        <img
+                            className="w-3 h-3"
+                            src="/src/assets/icons/group.png"
+                            alt=""
+                        />
+                        <p className="mx-1">{peopleNum}</p>
+                    </div>
+                    <div className="mx-2 flex items-center">
+                        <img
+                            className="w-3 h-3"
+                            src="/src/assets/icons/message.png"
+                            alt=""
+                        />
+                        <p className="mx-1">{peopleNum}</p>
+                    </div>
+                </div>
+                <div>{isUploadUi}</div>
             </div>
         </div>
     );

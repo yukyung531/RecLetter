@@ -70,6 +70,8 @@ export interface StudioInfo {
     hasMyClip: boolean;
     thumbnailUrl: string;
     expireDate: Date;
+    studioFrameId: number;
+    studioStickerUrl: string;
 }
 
 export interface StudioDetail {
@@ -165,5 +167,8 @@ export interface CanvasFont {
     fontColor: string;
     fontFamily: string;
     fontBorder: string;
+    fontBorderWidth: number;
     fontShadow: string;
+    fontShadowWidth: number;
+    fontShadowBlur: number;
 }

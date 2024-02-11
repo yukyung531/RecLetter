@@ -8,10 +8,15 @@ export const uploadFile = (
     } else {
         for (const file of event.target.files) {
             const reader = new FileReader();
+            reader.readAsDataURL(file);
             reader.onload = (e: any) => {
+                const mimeType = e.target.result
+                    .split(',')[0]
+                    .split(':')[1]
+                    .split(';')[0];
+                console.log('이미지 타입 : ' + mimeType);
                 state(e.target.result);
             };
-            reader.readAsDataURL(file);
         }
     }
 };

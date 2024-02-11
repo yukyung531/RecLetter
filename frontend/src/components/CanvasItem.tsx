@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { CanvasFont } from '../types/type';
 import { hexToRgba } from '../util/get-func';
+import html2canvas from 'html2canvas';
 
 type canvasType = {
     canvasWidth: number;
@@ -15,6 +16,16 @@ type canvasType = {
     scale: number;
     rotate: number;
     mode: number;
+    stickerLayout: string[];
+    setStickerLayout: React.Dispatch<React.SetStateAction<string[]>>;
+    saveFlag: number;
+    setSaveFlag: React.Dispatch<React.SetStateAction<number>>;
+    setCanvasDownload: React.Dispatch<React.SetStateAction<number>>;
+    setCanvasSave: React.Dispatch<React.SetStateAction<number>>;
+    clearCanvas: boolean;
+    customSticker: string;
+    setCustomStickerFlag: React.Dispatch<React.SetStateAction<boolean>>;
+    customStickerFlag: boolean;
 };
 interface mousePosition {
     positionX: number | null;
@@ -31,8 +42,13 @@ export default function CanvasItem(props: canvasType) {
     const fontSize = props.stickerText.fontSize;
     const fontFamily = props.stickerText.fontFamily;
     const fontBorder = props.stickerText.fontBorder;
+    const fontBorderWidth = props.stickerText.fontBorderWidth;
     const fontShadow = props.stickerText.fontShadow;
+    const fontShadowWidth = props.stickerText.fontShadowWidth;
+    const fontShadowBlur = props.stickerText.fontShadowBlur;
     const mode = props.mode;
+    const saveFlag = props.saveFlag;
+    const setSaveFlag = props.setSaveFlag;
 
     const [getCtx, setGetCtx] = useState<CanvasRenderingContext2D>();
     // painting state
@@ -59,6 +75,9 @@ export default function CanvasItem(props: canvasType) {
     }, []);
 
     useEffect(() => {
+        props.setStickerLayout([]);
+    }, [eraser]);
+    useEffect(() => {
         const canvas = canvasRef.current;
         if (canvas) {
             const ctx = canvas.getContext('2d');
@@ -66,7 +85,13 @@ export default function CanvasItem(props: canvasType) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
         }
-    }, [eraser]);
+    }, [props.clearCanvas]);
+
+    useEffect(() => {
+        if (saveFlag != 0) {
+            saveCanvas();
+        }
+    }, [saveFlag]);
 
     useEffect(() => {
         if (stickerFlag) {
@@ -92,7 +117,14 @@ export default function CanvasItem(props: canvasType) {
                 // 이미지 설정
                 const objImage = new Image();
                 // onload와 onerror 핸들러 설정 후 이미지 소스 지정
-                objImage.src = `/src/assets/sticker/${sticker}.png`;
+
+                //일반이랑 사용자랑 url이 달라서 해줘야함
+                if (mode == 0 && props.customStickerFlag === true) {
+                    objImage.src = props.customSticker;
+                    props.setCustomStickerFlag(false);
+                } else {
+                    objImage.src = `/src/assets/sticker/${sticker}.png`;
+                }
                 // 이미지 크기 조절
                 const imageSize = scale; // 이미지의 새로운 크기
                 objImage.onload = () => {
@@ -117,9 +149,9 @@ export default function CanvasItem(props: canvasType) {
                         if (fontShadow !== '') {
                             const rgbaColor = hexToRgba(fontShadow, 0.5);
                             ctx.shadowColor = rgbaColor;
-                            ctx.shadowOffsetX = 2;
-                            ctx.shadowOffsetY = 2;
-                            ctx.shadowBlur = 5;
+                            ctx.shadowOffsetX = fontShadowWidth;
+                            ctx.shadowOffsetY = fontShadowWidth;
+                            ctx.shadowBlur = fontShadowBlur;
                         }
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
@@ -127,11 +159,14 @@ export default function CanvasItem(props: canvasType) {
 
                         if (fontBorder !== '') {
                             ctx.strokeStyle = fontBorder; // border 색상 설정
-                            ctx.lineWidth = 1; // border 두께 설정
+                            ctx.lineWidth = fontBorderWidth; // border 두께 설정
                             ctx.strokeText(fontContent, 0, 0);
                         }
                     }
                     ctx.restore();
+                    saveImgUrl();
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
                     props.setStickerFlag(false);
                     props.setSticker('');
                 };
@@ -163,6 +198,59 @@ export default function CanvasItem(props: canvasType) {
         } else {
             getCtx?.lineTo(mouseX, mouseY);
             getCtx?.stroke();
+        }
+    };
+
+    const saveImgUrl = async () => {
+        /* Canvas 이미지 설정 */
+        const target = canvasRef.current;
+        const onCapture = () => {
+            console.log('onCapture');
+            if (!target) {
+                return alert('결과 저장에 실패했습니다');
+            }
+            html2canvas(target, { scale: 2, backgroundColor: null }).then(
+                (canvas) => {
+                    const imageDataURL = canvas.toDataURL('image/png');
+                    props.setStickerLayout((prev) => [...prev, imageDataURL]);
+                }
+            );
+        };
+        onCapture();
+    };
+
+    const saveCanvas = () => {
+        const canvas = canvasRef.current;
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            if (ctx && positionX && positionY) {
+                props.stickerLayout.map((item, index) => {
+                    const objImage = new Image();
+                    objImage.src = item;
+                    objImage.onload = () => {
+                        // 이미지가 로드된 후에 실행됩니다.
+                        console.log('작동');
+
+                        ctx.drawImage(
+                            objImage,
+                            0,
+                            0,
+                            canvas.width / 2,
+                            canvas.height / 2
+                        );
+                        if (saveFlag === 1) {
+                            props.setCanvasDownload(index + 1);
+                        } else if (saveFlag === 2) {
+                            props.setCanvasSave(index + 1);
+                        }
+                    };
+                    // 이미지 로드 중 에러 처리
+                    objImage.onerror = (error) => {
+                        console.error('이미지 로딩 중 에러:', error);
+                    };
+                });
+            }
+            setSaveFlag(0);
         }
     };
 

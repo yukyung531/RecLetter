@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef, BaseSyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {ClipInfo, ScriptTemplate, StudioDetail, UserInfo} from '../types/type';
+import {
+    ClipInfo,
+    ScriptTemplate,
+    StudioDetail,
+    UserInfo,
+} from '../types/type';
 import MyClipCard from '../components/MyClipCard';
 import getBlobDuration from 'get-blob-duration';
 import DeleteCheckWindow from '../components/DeleteCheckWindow';
@@ -158,6 +163,7 @@ export default function ClipRecordPage() {
         studioFrameId: -1,
         studioFontId: -1,
         studioBGMId: -1,
+        studioStickerUrl: '',
     });
 
     //studioId
@@ -205,9 +211,8 @@ export default function ClipRecordPage() {
         };
         loadScript();
 
-        const loginValue = localStorage.getItem('is-login');
         const token = localStorage.getItem('access-token');
-        if (loginValue === 'true' && isLogin) {
+        if (isLogin) {
             //API 불러오는 함수로 clipInfo를 받아옴
             //우선 url query String으로부터 스튜디오 상세 정보 받아오기
 
@@ -272,7 +277,7 @@ export default function ClipRecordPage() {
             };
             getUserInfo();
         }
-        if (loginValue === 'false' || !loginValue || !token) {
+        if (!token || !isLogin) {
             alert('오류가 났습니다');
         }
 

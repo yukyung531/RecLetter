@@ -120,6 +120,10 @@ body {
 .top-30per {
     top: 30%;
 }
+input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
 .btn-cover {
     width: fit-content;
     padding: 0.75rem 2.5rem;
@@ -155,10 +159,137 @@ body {
     font-weight: normal;
     font-style: normal;
 }
+
 @font-face {
-    font-family: ELAND_Choice_M;
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts-20-12@1.0/ELAND_Choice_M.woff')
+    font-family: Pretendard-Regular;
+    src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff')
         format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: seolleimcool-SemiBold;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2312-1@1.1/seolleimcool-SemiBold.woff2')
+        format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: WagleWagle;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2301-wagle@1.0/WagleWagle.woff')
+        format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: OG_Renaissance_Secret-Rg;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2312-1@1.1/OG_Renaissance_Secret-Rg.woff2')
+        format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: YClover-Bold;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_231029@1.1/YClover-Bold.woff2')
+        format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: JalnanGothic;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_231029@1.1/JalnanGothic.woff')
+        format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: TAEBAEKmilkyway;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2310@1.0/TAEBAEKmilkyway.woff2')
+        format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: Orbit-Regular;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2310@1.0/Orbit-Regular.woff2')
+        format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: SOYOMapleBoldTTF;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2310@1.0/SOYOMapleBoldTTF.woff2')
+        format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: DOSPilgiMedium;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-2@1.0/DOSPilgiMedium.woff2')
+        format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: Dovemayo_gothic;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.1/Dovemayo_gothic.woff2')
+        format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: KCC-Ganpan;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/KCC-Ganpan.woff2')
+        format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: Dovemayo_wild;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/Dovemayo_wild.woff2')
+        format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: NanumSquareNeo-Variable;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_11-01@1.0/NanumSquareNeo-Variable.woff2')
+        format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: LINESeedKR-Bd;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_11-01@1.0/LINESeedKR-Bd.woff2')
+        format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: EF_jejudoldam;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2210-EF@1.0/EF_jejudoldam.woff2')
+        format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: Cafe24Ssurround;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/Cafe24Ssurround.woff')
+        format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: WandohopeR;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/WandohopeR.woff')
+        format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: RixMomsBlanketR;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/RixMomsBlanketR.woff2')
+        format('woff2');
     font-weight: normal;
     font-style: normal;
 }
@@ -188,6 +319,12 @@ body {
     transform: translate(var(--tw-translate-x), var(--tw-translate-y))
         rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y))
         scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.hover\:letter-animation:hover {
+    transition: all 0.4s ease;
+    transform-origin: right;
+    transform: rotate(10deg);
 }
 
 .animation-shining {

@@ -32,11 +32,7 @@ export default function LoginPage() {
     }, []);
 
     useEffect(() => {
-        const loginValue = localStorage.getItem('is-login');
-        if (loginValue === 'true') {
-            dispatch(loginState(true));
-        }
-        if (isLogin && loginValue) {
+        if (isLogin) {
             navigate(`/studiolist`);
         }
     }, [isLogin]);
@@ -77,7 +73,6 @@ export default function LoginPage() {
                         'refresh-token',
                         res.data.refreshToken
                     );
-                    localStorage.setItem('is-login', 'true');
                     dispatch(loginState(true));
                     navigate(`/studiolist`);
                 } else if (res.status === httpStatusCode.BADREQUEST) {

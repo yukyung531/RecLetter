@@ -5,12 +5,14 @@ export interface LoginState {
     studioId: string[];
     studioName: string;
     theme: number;
+    customColorSet: string[];
 }
 const initialState: LoginState = {
     isLogin: false,
     studioId: [],
     studioName: '',
     theme: 0,
+    customColorSet: [],
 };
 
 export const loginSlice = createSlice({
@@ -38,6 +40,16 @@ export const loginSlice = createSlice({
         themeState: (state, action) => {
             state.theme = action.payload;
         },
+        colorAddState: (state, action) => {
+            const newItem: string = action.payload;
+            state.customColorSet = [...state.customColorSet, newItem];
+        },
+        colorDeleteState: (state, action) => {
+            const payload = action.payload;
+            state.customColorSet = state.customColorSet.filter(
+                (color) => color !== payload
+            );
+        },
     },
 });
 export const {
@@ -47,5 +59,7 @@ export const {
     studioDeleteState,
     studioNameState,
     themeState,
+    colorAddState,
+    colorDeleteState,
 } = loginSlice.actions;
 export default loginSlice.reducer;

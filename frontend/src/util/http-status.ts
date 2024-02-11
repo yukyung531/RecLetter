@@ -14,5 +14,6 @@ export const httpStatusCode = {
     FORBIDDEN: 403,
     // 없음
     NOTFOUND: 404,
+    NOTPROCESS: 422,
     INTERNALSERVER: 500,
 };
