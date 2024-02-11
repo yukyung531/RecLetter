@@ -318,12 +318,17 @@ export default function FindPwPage() {
             {codeWord()}
             {passwordElement()}
             <button
-                className="w-88 py-3 px-3 my-12 rounded-md py-2 text-2xl text-center color-bg-main text-white cursor-pointer hover:color-bg-subbold hover:text-white"
+                className="w-88 py-1 px-1 my-5 rounded-md py-2 text-2xl text-center color-bg-main text-white cursor-pointer hover:color-bg-subbold hover:text-white"
                 onClick={setNewPassword}
             >
                 비밀번호 재설정
             </button>
-            <Link to="/login">돌아가기</Link>
+            <div
+                className="text-xl underline my-6 text-center cursor-pointer text-gray-400"
+            >
+                <Link to="/login">돌아가기</Link>
+            </div>
+
         </section>
     );
 
