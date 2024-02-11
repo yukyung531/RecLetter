@@ -18,7 +18,7 @@ export default function RegistPage() {
     const [codeCheck, setCodeCheck] = useState<boolean>(false);
     const [emailFlag, setEmailFlag] = useState<number>(0);
     const [codeFlag, setCodeFlag] = useState<boolean>(false);
-    const [count, setCount] = useState<number>(60);
+    const [count, setCount] = useState<number>(600);
     const [isCounting, setIsCounting] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
     const navigate = useNavigate();
@@ -142,7 +142,7 @@ export default function RegistPage() {
     };
     /** 카운팅 시작 */
     const startCounting = () => {
-        setCount(30);
+        setCount(600); //10분
         setIsCounting(true);
     };
     /** 카운팅 종료 */
@@ -175,7 +175,7 @@ export default function RegistPage() {
                     <p className="w-128 h-3 text-green-600">인증되었습니다.</p>
                 </div>
             );
-        } else if (count <= 0) {
+        } else if (count <= 0 && emailFlag !== 1) {
             return (
                 <div className="flex">
                     <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4"></p>
@@ -191,7 +191,7 @@ export default function RegistPage() {
                 <div className="flex">
                     <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4"></p>
                     <p className="w-128 h-3 color-text-blue2">
-                        이메일을 발송중입니다.
+                        이메일을 발송 중입니다.
                     </p>
                 </div>
             );
