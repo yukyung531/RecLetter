@@ -73,7 +73,7 @@ public class StudioServiceImpl implements StudioService {
   public void createStudio(CreateStudioReq createStudioReq, User user)
       throws StudioCreateFailureException, MaxStudioOwnCountExceedException {
 
-    List<Studio> myStudioList = studioRepository.findAllByStudioOwner(user.getUserId());
+    List<Studio> myStudioList = studioRepository.findAllByStudioOwnerAndIsCompletedIsFalse(user.getUserId());
 
     // 최대 생성 가능 수 확인
     if (myStudioList.size() >= MAX_STUDIO_OWN_COUNT) {
