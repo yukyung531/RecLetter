@@ -375,6 +375,12 @@ export default function ChattingBox() {
         }
     };
 
+    const [selectedTheme, setSelectedTheme] = useState(0);
+    const handleThemeChange = (theme: number) => { 
+        setSelectedTheme(theme);
+        dispatch(themeState(theme));
+    }
+
     const showChattingRoom = () => {
         const openLogoSrc =
             '/src/assets/icons/' + themeObj[chatTheme].openLogo + '.png';
@@ -421,22 +427,28 @@ export default function ChattingBox() {
                                 <p className="mx-1">{currentPeople.length}</p>
                             </div>
                             <div className="flex justify-center items-center">
+                            <div
+                                className={`w-4 h-4 rounded-full color-bg-darkgray mx-1 border-2 border-white cursor-pointer ${selectedTheme === 2 ? 'transform scale-125' : ''}`}
+                                style={{ borderWidth: `${selectedTheme === 2 ? '3px' : '2px'}` }}
+                                onClick={() => {
+                                    dispatch(themeState(2));
+                                    handleThemeChange(2);
+                                }}
+                            ></div>
                                 <div
-                                    className="w-4 h-4 rounded-full color-bg-darkgray mx-1 border-2 border-white"
-                                    onClick={() => {
-                                        dispatch(themeState(2));
-                                    }}
-                                ></div>
-                                <div
-                                    className="w-4 h-4 rounded-full color-bg-yellow2 mx-1 border-2 border-white"
+                                    className={`w-4 h-4 rounded-full color-bg-yellow2 mx-1 border-2 border-white cursor-pointer ${selectedTheme === 1 ? 'transform scale-125' : ''}`}
+                                    style={{ borderWidth: `${selectedTheme === 1 ? '3px' : '2px'}` }}
                                     onClick={() => {
                                         dispatch(themeState(1));
+                                        handleThemeChange(1);
                                     }}
                                 ></div>
                                 <div
-                                    className="w-4 h-4 rounded-full color-bg-main mx-1 border-2 border-white"
+                                    className={`w-4 h-4 rounded-full color-bg-main mx-1 border-2 border-white cursor-pointer ${selectedTheme === 0 ? 'transform scale-125' : ''}`}
+                                    style={{ borderWidth: `${selectedTheme === 0 ? '3px' : '2px'}` }}
                                     onClick={() => {
                                         dispatch(themeState(0));
+                                        handleThemeChange(0);
                                     }}
                                 ></div>
                             </div>
