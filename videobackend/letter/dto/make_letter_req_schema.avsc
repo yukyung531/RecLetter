@@ -1,0 +1,48 @@
+{
+  "type": "record",
+  "name": "ClipInfo",
+  "fields": [
+    {
+      "name": "clip_id",
+      "type": "string"
+    },
+    {
+      "name": "clip_title",
+      "type": "string"
+    },
+    {
+      "name": "clip_volume",
+      "type": "int"
+    }
+  ]
+}
+
+{
+  "type": "record",
+  "name": "MakeLetterReq",
+  "fields": [
+    {
+      "name": "studio_id",
+      "type": "string"
+    },
+    {
+      "name": "studio_frame_id",
+      "type": "int"
+    },
+    {
+      "name": "studio_bgm_id",
+      "type": "int"
+    },
+    {
+      "name": "studio_volume",
+      "type": "int"
+    },
+    {
+      "name": "clip_info_list",
+      "type": {
+        "type": "array",
+        "items": "ClipInfo"
+      }
+    }
+  ]
+}
