@@ -17,6 +17,7 @@ import { deleteClip } from '../api/clip';
 import { httpStatusCode } from '../util/http-status';
 import { getlastPath } from '../util/get-func';
 import ChattingBox from '../components/ChattingBox';
+import {encodingLetter} from "../api/letter.ts";
 
 export default function StudioMainPage() {
     //mode 0: 영상, 1: 관리
@@ -427,6 +428,34 @@ export default function StudioMainPage() {
         navigator(`/cliprecord/${studioDetailInfo.studioId}`);
     };
 
+
+    //선택된 영상이 있는지 여부를 반환
+    const isSelectedClipList=()=>{
+    let selectedClipListLength=0
+    if (studioDetailInfo.clipInfoList){
+        studioDetailInfo.clipInfoList.map((clip) => {
+            if (clip.clipOrder != -1) {
+                selectedClipListLength+=1;
+            }
+        })
+    }
+    return selectedClipListLength>0;
+    }
+
+    const onClickCompletePage = async () => {
+        if(!isSelectedClipList()){
+            alert("하나 이상의 영상을 선택해야 영상 편지 완성이 가능합니다")
+            return;
+        }
+        console.log("complete letter")
+        await encodingLetter(studioDetailInfo.studioId)
+            .then((res) => {
+            console.log(res);
+            moveStudioList();
+        });
+    };
+
+
     /** 리스트로 이동 */
     const moveStudioList = () => {
         navigator(`/studiolist`);
@@ -655,7 +684,8 @@ export default function StudioMainPage() {
                     {/* (영상 리스트, 참가자 관리) */}
                     <div className="w-1/4 p-2 border border-l-2 overflow-y-scroll">
                         <div className="w-full px-2 flex flex-col justify-center items-center">
-                            <a className="flex items-center gap-3 w-52 text-center my-2 p-1 rounded-lg text-xl color-bg-yellow2 shadow-darkShadow color-text-main cursor-pointer transform hover:scale-105">
+                            <a className="flex items-center gap-3 w-52 text-center my-2 p-1 rounded-lg text-xl color-bg-yellow2 shadow-darkShadow color-text-main cursor-pointer transform hover:scale-105"
+                            onClick={onClickCompletePage}>
                                 <img
                                     className="w-9 h-9 ml-2.5"
                                     src="/src/assets/icons/letter_complete2.svg"

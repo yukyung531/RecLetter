@@ -73,7 +73,7 @@ public class StudioServiceImpl implements StudioService {
   public void createStudio(CreateStudioReq createStudioReq, User user)
       throws StudioCreateFailureException, MaxStudioOwnCountExceedException {
 
-    List<Studio> myStudioList = studioRepository.findAllByStudioOwner(user.getUserId());
+    List<Studio> myStudioList = studioRepository.findAllByStudioOwnerAndIsCompletedIsFalse(user.getUserId());
 
     // 최대 생성 가능 수 확인
     if (myStudioList.size() >= MAX_STUDIO_OWN_COUNT) {
@@ -223,8 +223,6 @@ public class StudioServiceImpl implements StudioService {
               .studioId(studio.getStudioId())
               .studioFrameId(studio.getStudioFrameId())
               .studioFontId(studio.getStudioFontId())
-                .studioFontSize(studio.getStudioFontSize())
-                .studioFontBold(studio.getStudioFontBold())
               .studioBgmId(studio.getStudioBgmId())
               .studioVolume(studio.getStudioVolume())
               .clipInfoList(clipService.searchLetterClipInfoByOrder(studioId))
@@ -239,6 +237,16 @@ public class StudioServiceImpl implements StudioService {
     Studio studio=studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
     studio.setIsCompleted(isCompleted);
     studioRepository.save(studio);
+  }
+
+  @Override
+  public String downloadLetter(String studioId){
+    String url="";
+    String fileName=studioId+".mp4";
+    if(s3Util.isObject(fileName)){
+      url=s3Util.getSignedUrl(fileName);
+    }
+    return url;
   }
 
 }

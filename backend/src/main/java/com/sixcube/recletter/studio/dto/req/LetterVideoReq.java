@@ -4,6 +4,7 @@ import com.sixcube.recletter.clip.dto.ClipInfo;
 import com.sixcube.recletter.studio.dto.LetterClipInfo;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Getter
@@ -12,15 +13,13 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ToString
-public class LetterVideoReq {
+public class LetterVideoReq implements Serializable {
 
     String studioId;
     Integer studioFrameId;
     Integer studioBgmId;
     Integer studioVolume;
     Integer studioFontId;
-    Integer studioFontSize;
-    Boolean studioFontBold;
     List<LetterClipInfo> clipInfoList;
 
 }
