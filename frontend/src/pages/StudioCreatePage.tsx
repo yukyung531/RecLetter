@@ -133,14 +133,14 @@ export default function StudioCreatePage() {
                                 '.png';
                             return (
                                 <div
-                                    key={'frameId :' + index}
+                                    key={'frameId :' + item.frameId}
                                     className="flex flex-col justify-center items-center py-1 rounded-lg"
                                     onClick={() => {
                                         selectFrame(item.frameId);
                                     }}
                                     style={{
                                         border:
-                                            index + 1 === frame
+                                            item.frameId === frame
                                                 ? '2px solid #ff777f'
                                                 : '2px solid white',
                                     }}

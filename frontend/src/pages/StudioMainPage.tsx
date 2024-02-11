@@ -20,9 +20,6 @@ import ChattingBox from '../components/ChattingBox';
 import {encodingLetter} from "../api/letter.ts";
 
 export default function StudioMainPage() {
-    //mode 0: 영상, 1: 관리
-    const [mode, setMode] = useState<number>(0);
-
     //영상 편집 여부
     const [isEditingName, setIsEditingName] = useState<boolean>(false);
 
@@ -79,6 +76,10 @@ export default function StudioMainPage() {
     const dispatch = useDispatch();
     const navigator = useNavigate();
 
+    //사용한 비디오, 사용하지 않은 비디오
+    const [usedVideoList, setUsedVideoList] = useState<ClipInfo[]>([]);
+    const [unUsedVideoList, setUnUsedVideoList] = useState<ClipInfo[]>([]);
+
     //영상 서버로부터 불러오기
     useEffect(() => {
         const token = localStorage.getItem('access-token');
@@ -112,9 +113,42 @@ export default function StudioMainPage() {
 
                             dispatch(studioNameState(res.data.studioTitle));
                             setStudioDetailInfo(res.data);
+                            //프레임
                             setSelectImgUrl(
                                 `/src/assets/frames/frame${res.data.studioFrameId}.png`
                             );
+
+                            //순서 불러오기
+                            //우선 정렬을 한 후, 사용한 비디오, 아닌 비디오로 분리
+                            const clipList = res.data.clipInfoList.sort(
+                                (clipA: ClipInfo, clipB: ClipInfo) =>
+                                    clipA.clipOrder - clipB.clipOrder
+                            );
+
+                            const usedVidArr: ClipInfo[] = [];
+                            const unUsedVidArr: ClipInfo[] = [];
+
+                            clipList.map((clip: ClipInfo) => {
+                                if (clip.clipOrder === -1) {
+                                    unUsedVidArr.push(clip);
+                                } else {
+                                    usedVidArr.push(clip);
+                                }
+                            });
+
+                            //set
+                            setUnUsedVideoList(unUsedVidArr);
+                            setUsedVideoList(usedVidArr);
+                            //사용한 첫 영상 자동재생
+                            if (usedVidArr.length > 0) {
+                                //selectVideo함수를 사용하기에는 부적합
+                                //왜냐하면 아직 studioDetailInfo가 업데이트 되지 않았기 때문
+                                //그래서 직접 조작 필요
+                                if (videoRef.current) {
+                                    setSelectedVideo(usedVidArr[0]);
+                                    setPlayingVideo(true);
+                                }
+                            }
                         }
                     });
                     return;
@@ -250,7 +284,7 @@ export default function StudioMainPage() {
         for (let i = 0; i < studioDetailInfo.clipInfoList.length; i++) {
             if (studioDetailInfo.clipInfoList[i].clipId === clipId) {
                 setSelectedVideo(studioDetailInfo.clipInfoList[i]);
-                setPlayingVideo(true);
+                playVideo();
                 return;
             }
         }
@@ -279,6 +313,19 @@ export default function StudioMainPage() {
         if (videoRef.current) {
             videoRef.current.pause();
         }
+
+        //만약 전체 영상 재생 중이었다면?
+        if (playAllSelectedVideoRef.current) {
+            playingIdxRef.current += 1;
+            //범위 내에 있는 비디오면?
+            if (playingIdxRef.current < usedVideoList.length) {
+                selectVideo(usedVideoList[playingIdxRef.current].clipId);
+            } else {
+                //다 봤으면 재생 종료
+                playAllSelectedVideoRef.current = false;
+                playingIdxRef.current = 0;
+            }
+        }
     };
 
     /** formatTime(time: number)
@@ -297,87 +344,6 @@ export default function StudioMainPage() {
 
     const [videoNowPosition, setVideoNowPosition] = useState<number>(0);
     const [wholeDuration, setWholeDuration] = useState<number>(0);
-
-    //좌측 사이드바
-    let leftSideBar = (
-        <div className="w-4/5 h-full flex flex-col items-center px-4 py-4 overflow-y-scroll ">
-            <div className="w-full flex justify-start text-xl ">
-                <p>선택된 영상</p>
-            </div>
-
-            {studioDetailInfo.clipInfoList ? (
-                studioDetailInfo.clipInfoList.map((clip) => {
-                    if (clip.clipOrder != -1) {
-                        return (
-                            <VideoCard
-                                key={clip.clipId}
-                                onDelete={() => {
-                                    onDelete(clip.clipId);
-                                }}
-                                onClick={() => {
-                                    onClickEdit(clip.clipId);
-                                }}
-                                selectVideo={() => {
-                                    selectVideo(clip.clipId);
-                                }}
-                                props={clip}
-                                presentUser={userInfo.userId}
-                                selectedClip={selectedVideo}
-                            />
-                        );
-                    }
-                })
-            ) : (
-                <></>
-            )}
-            <div className="w-full flex justify-start text-xl ">
-                <p>선택되지 않은 영상</p>
-            </div>
-            {studioDetailInfo ? (
-                studioDetailInfo.clipInfoList.map((clip) => {
-                    if (clip.clipOrder == -1) {
-                        return (
-                            <VideoCard
-                                key={clip.clipId}
-                                onDelete={() => {
-                                    onDelete(clip.clipId);
-                                }}
-                                onClick={() => {
-                                    onClickEdit(clip.clipId);
-                                }}
-                                selectVideo={() => {
-                                    selectVideo(clip.clipId);
-                                }}
-                                props={clip}
-                                presentUser={userInfo.userId}
-                                selectedClip={selectedVideo}
-                            />
-                        );
-                    }
-                })
-            ) : (
-                <></>
-            )}
-        </div>
-    );
-    if (mode == 1) {
-        leftSideBar = (
-            <div className="w-4/5 flex flex-col items-center p-6 overflow-y-scroll">
-                <div className="w-full flex justify-start text-xl ">
-                    <p>참여자 관리 창입니다.</p>
-                </div>
-            </div>
-        );
-    }
-
-    //event handling(메뉴 누르기)
-    const onPressMovieEdit = () => {
-        setMode(0);
-    };
-
-    const onPressChecklist = () => {
-        setMode(1);
-    };
 
     //스튜디오 이름 변경
     const handleStudioEditing = () => {
@@ -460,6 +426,37 @@ export default function StudioMainPage() {
         navigator(`/studiolist`);
     };
 
+    //////////////////////////////////전체편지 자동재생////////////////////////////////////////////////////////
+    const playAllSelectedVideoRef = useRef<boolean>(false);
+    const playingIdxRef = useRef<number>(0);
+
+    /** stopButtonPressed()
+     * 비디오 플레이어 일시 정지 버튼이 눌렸을 때 수행할 함수
+     */
+    const stopButtonPressed = () => {
+        //자동 재생 중이었다면 초기화
+        playAllSelectedVideoRef.current = false;
+        playingIdxRef.current = 0;
+        //영상 정지
+        stopVideo();
+    };
+
+    /** startPlayList()
+     *  비디오 연속 재생을 한다. 영상의 시작부터 차근차근
+     */
+    const startPlayList = () => {
+        playAllSelectedVideoRef.current = true;
+        //시간 초기화
+        if (videoRef.current) {
+            videoRef.current.currentTime = 0;
+        }
+        if (usedVideoList.length > 0) {
+            selectVideo(usedVideoList[0].clipId);
+        }
+    };
+
+    //////////////////////////////////////////랜더링////////////////////////////////////////////////////////////
+
     return (
         <section className="relative section-top pt-14 ">
             {isDeleting ? (
@@ -479,51 +476,74 @@ export default function StudioMainPage() {
                     <div className="relative w-16 color-text-darkgray color-bg-lightgray1">
                         <div
                             className={`w-full h-16  flex flex-col justify-center items-center cursor-pointer`}
-                            onClick={onPressMovieEdit}
-                            style={
-                                mode === 0
-                                    ? {
-                                          backgroundColor: 'white',
-                                          color: '#ff777f',
-                                      }
-                                    : {}
-                            }
+                            style={{
+                                backgroundColor: 'white',
+                                color: '#ff777f',
+                            }}
                         >
-                            <div
-                                className={`${
-                                    mode === 0 ? 'h-16 categori-selected' : ''
-                                }`}
-                            ></div>
+                            <div className="h-16 categori-selected"></div>
                             <span className="material-symbols-outlined text-3xl">
                                 movie_edit
                             </span>
                             <p className="font-bold">영상</p>
                         </div>
-                        <div
-                            className={`h-16 flex flex-col justify-center items-center cursor-pointer `}
-                            onClick={onPressChecklist}
-                            style={
-                                mode === 1
-                                    ? {
-                                          backgroundColor: 'white',
-                                          color: '#ff777f',
-                                      }
-                                    : {}
-                            }
-                        >
-                            <div
-                                className={`${
-                                    mode === 1 ? 'h-16 categori-selected ' : ''
-                                }`}
-                            ></div>
-                            <span className="material-symbols-outlined text-3xl">
-                                checklist
-                            </span>
-                            <p className="font-bold">관리</p>
-                        </div>
                     </div>
-                    {/* 카테고리 선택에 따라 */}
-                    {leftSideBar}
+                    {/* 좌측사이드바 */}
+                    <div className="w-4/5 h-full flex flex-col items-center px-4 py-4 overflow-y-scroll ">
+                        <div className="w-full flex justify-start text-xl ">
+                            <p>선택된 영상</p>
+                        </div>
+
+                        {usedVideoList ? (
+                            usedVideoList.map((clip) => {
+                                return (
+                                    <VideoCard
+                                        key={clip.clipId}
+                                        onDelete={() => {
+                                            onDelete(clip.clipId);
+                                        }}
+                                        onClick={() => {
+                                            onClickEdit(clip.clipId);
+                                        }}
+                                        selectVideo={() => {
+                                            selectVideo(clip.clipId);
+                                        }}
+                                        props={clip}
+                                        presentUser={userInfo.userId}
+                                        selectedClip={selectedVideo}
+                                    />
+                                );
+                            })
+                        ) : (
+                            <></>
+                        )}
+                        <div className="w-full flex justify-start text-xl ">
+                            <p>선택되지 않은 영상</p>
+                        </div>
+                        {unUsedVideoList ? (
+                            unUsedVideoList.map((clip) => {
+                                return (
+                                    <VideoCard
+                                        key={clip.clipId}
+                                        onDelete={() => {
+                                            onDelete(clip.clipId);
+                                        }}
+                                        onClick={() => {
+                                            onClickEdit(clip.clipId);
+                                        }}
+                                        selectVideo={() => {
+                                            selectVideo(clip.clipId);
+                                        }}
+                                        props={clip}
+                                        presentUser={userInfo.userId}
+                                        selectedClip={selectedVideo}
+                                    />
+                                );
+                            })
+                        ) : (
+                            <></>
+                        )}
+                    </div>
                 </div>
                 {/* 우측부분 */}
                 <div className="w-3/4 h-full flex justify-between">
@@ -572,7 +592,10 @@ export default function StudioMainPage() {
                                     )}
                                 </div>
 
-                                <div className="relative right-24 px-6 my-2 flex items-center justify-center bg-white border-2 rounded-md color-text-main color-border-main cursor-pointer hover:color-bg-sublight hover:text-white hover:border-white">
+                                <div
+                                    className="relative right-24 px-6 my-2 flex items-center justify-center bg-white border-2 rounded-md color-text-main color-border-main cursor-pointer hover:color-bg-sublight hover:text-white hover:border-white"
+                                    onClick={startPlayList}
+                                >
                                     <span className="material-symbols-outlined text-4xl">
                                         arrow_right
                                     </span>
@@ -656,7 +679,7 @@ export default function StudioMainPage() {
                                         className="me-[9px] h-[29px]"
                                         src="/src/assets/icons/pause_icon.png"
                                         alt="정지"
-                                        onClick={stopVideo}
+                                        onClick={stopButtonPressed}
                                     />
                                 )}
                                 <div className="w-full h-2 bg-black relative">
