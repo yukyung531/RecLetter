@@ -278,6 +278,13 @@ export default function ChattingBox() {
         }
     };
 
+    useEffect(() => {
+        if (messageEndRef.current) {
+            messageEndRef.current.scrollIntoView({ behavior: 'auto' });
+        }
+    }, [chatToggle]);
+    
+
     // 채팅 리스트 표시
     const chatting = () => {
         const studioPath = getlastPath();
