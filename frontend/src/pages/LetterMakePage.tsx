@@ -1279,7 +1279,8 @@ export default function LetterMakePage() {
                         min={1}
                         max={100}
                         value={studioBGMVolume}
-                        defaultValue={studioDetailInfo.studioVolume}
+                        // defaultValue={studioDetailInfo.studioVolume}
+                        defaultValue={100}
                         onChange={(event) => {
                             setStudioBGMVolume(+event.target.value);
                             if (bgmRef.current) {
