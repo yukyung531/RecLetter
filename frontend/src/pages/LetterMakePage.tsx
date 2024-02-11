@@ -49,6 +49,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import ColorPalette from '../components/ColorPalette';
 import { uploadFile } from '../util/uploadFile';
+import { Toggle } from '../components/Toggle';
 
 interface mousePosition {
     positionX: number | null;
@@ -84,6 +85,7 @@ export default function LetterMakePage() {
     //선택된 정보들
     const [selectedBGM, setSelectedBGM] = useState<number>(1);
     const [eraserFlag, setEraserFlag] = useState<boolean>(false);
+    const [clearCanvas, setClearCanvas] = useState<boolean>(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [stickerScale, setStickerScale] = useState<number>(160);
     const [stickerRotate, setStickerRotate] = useState<number>(0);
@@ -94,7 +96,10 @@ export default function LetterMakePage() {
         fontColor: '#626262',
         fontFamily: 'omyu_pretty',
         fontBorder: '',
+        fontBorderWidth: 1,
         fontShadow: '',
+        fontShadowWidth: 2,
+        fontShadowBlur: 3,
     });
 
     /** 리덕스 설정 */
@@ -164,8 +169,14 @@ export default function LetterMakePage() {
     ]);
     const [fontStickerList, setFontStickerList] = useState<string[]>([
         'fontsticker1',
+        'fontsticker2',
+        'fontsticker3',
     ]);
+    // 스티커 레이아웃 이미지
+    const [stickerLayoutList, setStickerLayoutList] = useState<string[]>([]);
+
     const [customSticker, setCustomSticker] = useState<string>('');
+    const [customStickerFlag, setCustomStickerFlag] = useState<boolean>(false);
     // 선택된 스티커
     const [selectedObj, setSelectedObj] = useState<string>('');
     // 스티커 모드
@@ -177,6 +188,9 @@ export default function LetterMakePage() {
     });
     // 스티커 붙이기
     const [stickerFlag, setStickerFlag] = useState<boolean>(false);
+    const [canvasFlag, setCanvasFlag] = useState<number>(0);
+    const [canvasDownloadNum, setCavnasDownloadNum] = useState<number>(0);
+    const [canvasSaveNum, setCanvasSaveNum] = useState<number>(0);
     // 스티커 파레트
     const [paletteColorFlag, setPaletteColorFlag] = useState<boolean>(false);
     const [paletteBorderFlag, setPaletteBorderFlag] = useState<boolean>(false);
@@ -204,22 +218,40 @@ export default function LetterMakePage() {
             fontColor: e.target.value, // 특정 값을 수정합니다.
         }));
     };
+    const onChangeStickerColorCode = (value: string) => {
+        setCanvasTextSticker((prev) => ({
+            ...prev, // 이전 상태를 복사합니다.
+            fontColor: value, // 특정 값을 수정합니다.
+        }));
+    };
     const onChangeStickerFamily = (e: BaseSyntheticEvent) => {
         setCanvasTextSticker((prev) => ({
             ...prev, // 이전 상태를 복사합니다.
             fontFamily: e.target.value, // 특정 값을 수정합니다.
         }));
     };
-    const onChangeStickerBorder = (e: BaseSyntheticEvent) => {
+    const onChangeStickerBorderCode = (value: string) => {
         setCanvasTextSticker((prev) => ({
             ...prev, // 이전 상태를 복사합니다.
-            fontBorder: e.target.value, // 특정 값을 수정합니다.
+            fontBorder: value, // 특정 값을 수정합니다.
         }));
     };
-    const onChangeStickerShadow = (e: BaseSyntheticEvent) => {
+    const onChangeStickerBorderWidth = (e: BaseSyntheticEvent) => {
         setCanvasTextSticker((prev) => ({
             ...prev, // 이전 상태를 복사합니다.
-            fontShadow: e.target.value, // 특정 값을 수정합니다.
+            fontBorderWidth: e.target.value, // 특정 값을 수정합니다.
+        }));
+    };
+    const onChangeStickerShadowWidth = (e: BaseSyntheticEvent) => {
+        setCanvasTextSticker((prev) => ({
+            ...prev, // 이전 상태를 복사합니다.
+            fontShadowWidth: e.target.value, // 특정 값을 수정합니다.
+        }));
+    };
+    const onChangeStickerShadowBlur = (e: BaseSyntheticEvent) => {
+        setCanvasTextSticker((prev) => ({
+            ...prev, // 이전 상태를 복사합니다.
+            fontShadowBlur: e.target.value, // 특정 값을 수정합니다.
         }));
     };
     /** 마우스 포인터 정하기 */
@@ -329,9 +361,8 @@ export default function LetterMakePage() {
         };
         initSetting();
 
-        const loginValue = localStorage.getItem('is-login');
         const token = localStorage.getItem('access-token');
-        if (loginValue === 'true' && isLogin) {
+        if (isLogin) {
             //API 불러오는 함수로 clipInfo를 받아옴
             //우선 url query String으로부터 스튜디오 상세 정보 받아오기
 
@@ -396,7 +427,7 @@ export default function LetterMakePage() {
             };
             getUserInfo();
         }
-        if (loginValue === 'false' || !loginValue || !token) {
+        if (!token || !isLogin) {
             navigator(`/login`);
         }
 
@@ -428,18 +459,34 @@ export default function LetterMakePage() {
                     rotate -= 4;
                     setStickerRotate(rotate + 2);
                     setKeyState('q');
+                } else if (event.key === 'ㅂ') {
+                    rotate -= 4;
+                    setStickerRotate(rotate + 2);
+                    setKeyState('ㅂ');
                 } else if (event.key === 'e') {
                     rotate += 4;
                     setStickerRotate(rotate + 2);
                     setKeyState('e');
+                } else if (event.key === 'ㄷ') {
+                    rotate += 4;
+                    setStickerRotate(rotate + 2);
+                    setKeyState('ㄷ');
                 } else if (event.key === 'w') {
                     scale += 4;
                     setStickerScale(scale + 2);
                     setKeyState('w');
+                } else if (event.key === 'ㅈ') {
+                    scale += 4;
+                    setStickerScale(scale + 2);
+                    setKeyState('ㅈ');
                 } else if (event.key === 's') {
                     scale -= 4;
                     setStickerScale(scale + 2);
                     setKeyState('s');
+                } else if (event.key === 'ㄴ') {
+                    scale -= 4;
+                    setStickerScale(scale + 2);
+                    setKeyState('ㄴ');
                 }
             }
         };
@@ -454,34 +501,90 @@ export default function LetterMakePage() {
         };
     }, [selectedObj]);
 
-    const onHtmlToPng = () => {
-        const target = canvasRef.current;
-        const onCapture = () => {
-            console.log('onCapture');
-            if (!target) {
-                return alert('결과 저장에 실패했습니다');
-            }
-            html2canvas(target, { scale: 2, backgroundColor: null }).then(
-                (canvas) => {
-                    const imageDataURL = canvas.toDataURL('image/png');
-                    console.log(imageDataURL);
-                    onSaveAs(
-                        canvas.toDataURL('image/png'),
-                        'image-download.png'
-                    );
+    useEffect(() => {
+        if (canvasDownloadNum !== 0) {
+            const target = canvasRef.current;
+            const onCapture = () => {
+                console.log('onCapture');
+                if (!target) {
+                    return alert('결과 저장에 실패했습니다');
                 }
-            );
-        };
+                html2canvas(target, { scale: 2, backgroundColor: null }).then(
+                    (canvas) => {
+                        const imageDataURL = canvas.toDataURL('image/png');
+                        console.log(imageDataURL);
+                        onSaveAs(
+                            canvas.toDataURL('image/png'),
+                            'image-download.png'
+                        );
+                    }
+                );
+            };
 
-        const onSaveAs = (uri: string, filename: string) => {
-            const link = document.createElement('a');
-            document.body.appendChild(link);
-            link.href = uri;
-            link.download = filename;
-            link.click();
-            document.body.removeChild(link);
-        };
-        onCapture();
+            const onSaveAs = (uri: string, filename: string) => {
+                const link = document.createElement('a');
+                document.body.appendChild(link);
+                link.href = uri;
+                link.download = filename;
+                link.click();
+                document.body.removeChild(link);
+            };
+            onCapture();
+            setCavnasDownloadNum(0);
+            setClearCanvas(!clearCanvas);
+        }
+    }, [canvasDownloadNum]);
+
+    useEffect(() => {
+        if (canvasSaveNum !== 0) {
+            const target = canvasRef.current;
+            const onCapture = () => {
+                console.log('onCapture');
+                if (!target) {
+                    return alert('결과 저장에 실패했습니다');
+                }
+                html2canvas(target, { scale: 2, backgroundColor: null }).then(
+                    (canvas) => {
+                        const imageDataURL = canvas.toDataURL('image/png');
+                        uploadLetterAPI(imageDataURL);
+                    }
+                );
+            };
+            onCapture();
+            setCanvasSaveNum(0);
+            setClearCanvas(!clearCanvas);
+        }
+    }, [canvasSaveNum]);
+
+    const onHtmlToPng = () => {
+        setCanvasFlag(1);
+        // const target = canvasRef.current;
+        // const onCapture = () => {
+        //     console.log('onCapture');
+        //     if (!target) {
+        //         return alert('결과 저장에 실패했습니다');
+        //     }
+        //     html2canvas(target, { scale: 2, backgroundColor: null }).then(
+        //         (canvas) => {
+        //             const imageDataURL = canvas.toDataURL('image/png');
+        //             console.log(imageDataURL);
+        //             onSaveAs(
+        //                 canvas.toDataURL('image/png'),
+        //                 'image-download.png'
+        //             );
+        //         }
+        //     );
+        // };
+
+        // const onSaveAs = (uri: string, filename: string) => {
+        //     const link = document.createElement('a');
+        //     document.body.appendChild(link);
+        //     link.href = uri;
+        //     link.download = filename;
+        //     link.click();
+        //     document.body.removeChild(link);
+        // };
+        // onCapture();
     };
 
     ////////////////////////////////////////영상 순서 결정////////////////////////////////////////////////////////////
@@ -664,22 +767,29 @@ export default function LetterMakePage() {
 
     const costomElement = () => {
         return (
-            <>
+            <div className="my-4">
                 <label
-                    className="input-file-button"
-                    htmlFor="maincharacterfile"
+                    className="input-file-button border flex flex-col items-center justify-center cursor-pointer"
+                    htmlFor="customstickerfile"
                 >
                     <p className="button-upload">이미지 업로드</p>
                 </label>
                 <img
-                    src={customSticker}
+                    src={
+                        customSticker === ''
+                            ? '/src/assets/images/nothumb.png'
+                            : customSticker
+                    }
+                    className="w-16 h-16 cursor-pointer rounded-lg hover:bg-gray-100 hover:border hover:color-border-main"
                     alt=""
                     onClick={(e) => {
                         handleSelectedObj(customSticker);
+                        console.log(customSticker);
                         handleMousePositionInSideBar({
                             positionX: e.clientX,
                             positionY: e.clientY,
                         });
+                        setCustomStickerFlag(true);
                     }}
                 />
                 <input
@@ -691,7 +801,7 @@ export default function LetterMakePage() {
                     }}
                     style={{ display: 'none' }}
                 />
-            </>
+            </div>
         );
     };
 
@@ -701,10 +811,13 @@ export default function LetterMakePage() {
                 <div className="w-full flex flex-col justify-start text-xl">
                     <p>스티커</p>
                     <div className="flex flex-wrap m-2">
-                        {stickerList.map((item) => {
+                        {stickerList.map((item, index) => {
                             const imgUrl = `/src/assets/sticker/${item}.png`;
                             return (
-                                <div className="w-16 h-16 cursor-pointer rounded-lg hover:bg-gray-100 hover:border hover:color-border-main">
+                                <div
+                                    key={'sticker : ' + index}
+                                    className="w-16 h-16 cursor-pointer rounded-lg hover:bg-gray-100 hover:border hover:color-border-main"
+                                >
                                     <img
                                         src={imgUrl}
                                         alt=""
@@ -720,40 +833,49 @@ export default function LetterMakePage() {
                             );
                         })}
                     </div>
+
                     <p>커스텀 스티커</p>
                     <div className="flex flex-wrap m-2">{costomElement()}</div>
                 </div>
             );
         } else if (stickerMode === 1) {
             return (
-                <div className="w-full flex flex-col justify-start text-xl">
+                <div className="w-full flex flex-col justify-start text-xl pb-10">
                     <p>텍스트 스티커</p>
                     <div className="flex flex-wrap m-2">
                         {fontStickerList.map((item) => {
                             const imgUrl = `/src/assets/sticker/${item}.png`;
                             return (
-                                <div className="w-16 h-16 cursor-pointer rounded-lg hover:bg-gray-100 hover:border hover:color-border-main">
-                                    <img
-                                        src={imgUrl}
-                                        alt=""
-                                        onClick={(e) => {
-                                            handleSelectedObj(item);
-                                            handleMousePositionInSideBar({
-                                                positionX: e.clientX,
-                                                positionY: e.clientY,
-                                            });
-                                        }}
-                                    />
+                                <div
+                                    className="relative w-16 h-12 m-1 flex items-center justify-center border cursor-pointer rounded-lg hover:bg-gray-100 hover:border hover:color-border-main"
+                                    onClick={(e) => {
+                                        handleSelectedObj(item);
+                                        handleMousePositionInSideBar({
+                                            positionX: e.clientX,
+                                            positionY: e.clientY,
+                                        });
+                                    }}
+                                >
+                                    <img src={imgUrl} alt="" />
+                                    {canvasTextSticker.fontContent === '' ? (
+                                        <p className="absolute top-0 bottom-0 px-2 color-text-gray flex justify-center items-center text-xs text-center">
+                                            텍스트 입력 후 눌러주세요!
+                                        </p>
+                                    ) : (
+                                        <p className="absolute top-0 bottom-0 px-2 color-text-gray flex justify-center items-center text-xs text-center">
+                                            크기/회전 조작 후 붙여주세요
+                                        </p>
+                                    )}
                                 </div>
                             );
                         })}
                     </div>
-                    <div className="border rounded-lg text-center py-2">
+                    <div className="border rounded-lg color-border-darkgray text-center py-6">
                         <p
                             style={{
                                 color: canvasTextSticker.fontColor,
                                 fontSize: canvasTextSticker.fontSize + 'px',
-
+                                fontFamily: `${canvasTextSticker.fontFamily}`,
                                 textShadow: hexToRgba(
                                     canvasTextSticker.fontShadow,
                                     0.5
@@ -761,148 +883,203 @@ export default function LetterMakePage() {
                             }}
                         >
                             {canvasTextSticker.fontContent === ''
-                                ? '샘플입니다. testText'
+                                ? '텍스트 미리보기'
                                 : canvasTextSticker.fontContent}
                         </p>
                     </div>
-                    <p>텍스트 설정</p>
                     <div>
-                        <div className="mx-2 my-2">
-                            <p>텍스트 내용</p>
+                        <div className="my-2">
                             <input
                                 type="text"
-                                className="border rounded-lg"
+                                className="w-full ps-2 py-1 outline-none text-lg border color-border-darkgray rounded-lg"
                                 onChange={onChangeStickerText}
+                                placeholder="텍스트를 입력하세요"
                             />
                         </div>
-                        <div className="mx-2 my-2">
-                            <p>텍스트 사이즈</p>
-                            <input
-                                type="number"
-                                className="border rounded-lg"
-                                onChange={onChangeStickerSize}
-                            />
-                        </div>
-                        <div className="mx-2 my-2">
-                            <div className="relative flex justify-between items-center pe-10">
-                                <p>텍스트 색상</p>
-                                {!paletteColorFlag ? (
-                                    <p
-                                        className=" text-sm cursor-pointer color-text-main btn-animation"
-                                        onClick={() => {
-                                            setPaletteColorFlag(true);
-                                        }}
-                                    >
-                                        열기
-                                    </p>
-                                ) : (
-                                    <p
-                                        className=" text-sm cursor-pointer color-text-main btn-animation"
-                                        onClick={() => {
-                                            setPaletteColorFlag(false);
-                                        }}
-                                    >
-                                        닫기
-                                    </p>
-                                )}
-                            </div>
-                            <div>
-                                <p
-                                    className="w-4 h-4 rounded-full"
-                                    style={{
-                                        backgroundColor: `${canvasTextSticker.fontColor}`,
-                                    }}
-                                ></p>
-                                <input
-                                    type="text"
-                                    className="border rounded-lg"
-                                    onChange={onChangeStickerColor}
-                                />
-                            </div>
-                        </div>
-                        <div className="mx-2 my-2">
-                            <p>텍스트 글꼴</p>
-                            <input
-                                type="text"
-                                className="border rounded-lg"
+                        <div className="my-2">
+                            <select
+                                className="w-full border rounded-md py-1 outline-none"
+                                name=""
+                                onChange={onChangeStickerFamily}
                                 style={{
                                     fontFamily: `${canvasTextSticker.fontFamily}`,
                                 }}
-                            />
+                            >
+                                {fontList.map((item, key) => (
+                                    <option
+                                        className=" text-base"
+                                        value={item.fontFamily}
+                                        style={{
+                                            fontFamily: `${item.fontFamily}`,
+                                        }}
+                                    >
+                                        {item.fontTitle}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                         <div className="mx-2 my-2">
-                            <div className="relative flex justify-between items-center pe-10">
-                                <p>텍스트 테두리</p>
-                                {!paletteBorderFlag ? (
-                                    <p
-                                        className=" text-sm cursor-pointer color-text-main btn-animation"
-                                        onClick={() => {
-                                            setPaletteBorderFlag(true);
-                                        }}
-                                    >
-                                        열기
-                                    </p>
-                                ) : (
-                                    <p
-                                        className=" text-sm cursor-pointer color-text-main btn-animation"
-                                        onClick={() => {
-                                            setPaletteBorderFlag(false);
-                                        }}
-                                    >
-                                        닫기
-                                    </p>
-                                )}
-                            </div>
-                            <div>
+                            <p>텍스트 사이즈</p>
+                            <div className="flex w-fit">
                                 <p
-                                    className="w-4 h-4 rounded-full"
-                                    style={{
-                                        backgroundColor: `${canvasTextSticker.fontBorder}`,
+                                    className="w-6 text-center font-bold border rounded-ss-lg rounded-es-lg cursor-pointer"
+                                    onClick={() => {
+                                        setCanvasTextSticker((prev) => ({
+                                            ...prev, // 이전 상태를 복사합니다.
+                                            fontSize:
+                                                Number(
+                                                    canvasTextSticker.fontSize
+                                                ) - 1, // 특정 값을 수정합니다.
+                                        }));
                                     }}
-                                ></p>
+                                >
+                                    -
+                                </p>
                                 <input
-                                    type="text"
-                                    className="border rounded-lg"
-                                    onChange={onChangeStickerBorder}
+                                    type="number"
+                                    className="w-14 text-lg appearance-none flex border-y text-center"
+                                    onChange={onChangeStickerSize}
+                                    value={canvasTextSticker.fontSize}
                                 />
+                                <p
+                                    className="w-6 text-center font-bold border rounded-se-lg rounded-ee-lg cursor-pointer"
+                                    onClick={() => {
+                                        setCanvasTextSticker((prev) => ({
+                                            ...prev, // 이전 상태를 복사합니다.
+                                            fontSize:
+                                                Number(
+                                                    canvasTextSticker.fontSize
+                                                ) + 1, // 특정 값을 수정합니다.
+                                        }));
+                                    }}
+                                >
+                                    +
+                                </p>
                             </div>
                         </div>
                         <div className="mx-2 my-2">
-                            <div className="relative flex justify-between items-center pe-10">
-                                <p>텍스트 그림자</p>
-                                {!paletteShadowFlag ? (
-                                    <p
-                                        className=" text-sm cursor-pointer color-text-main btn-animation"
-                                        onClick={() => {
-                                            setPaletteShadowFlag(true);
-                                        }}
-                                    >
-                                        열기
-                                    </p>
-                                ) : (
-                                    <p
-                                        className=" text-sm cursor-pointer color-text-main btn-animation"
-                                        onClick={() => {
-                                            setPaletteShadowFlag(false);
-                                        }}
-                                    >
-                                        닫기
-                                    </p>
-                                )}
+                            <div className="relative flex items-center pe-10">
+                                <p>텍스트 색상</p>
+                                <div className="mx-4">
+                                    <Toggle
+                                        flag={paletteColorFlag}
+                                        setFlag={setPaletteColorFlag}
+                                    />
+                                </div>
                             </div>
-                            <div>
-                                <p
-                                    className="w-4 h-4 rounded-full"
-                                    style={{
-                                        backgroundColor: `${canvasTextSticker.fontShadow}`,
-                                    }}
-                                ></p>
-                                <input
-                                    type="text"
-                                    className="border rounded-lg"
-                                    onChange={onChangeStickerShadow}
-                                />
+                            {paletteColorFlag ? (
+                                <div>
+                                    <ColorPalette
+                                        setColor={setCanvasTextSticker}
+                                        target="fontColor"
+                                    />
+                                </div>
+                            ) : (
+                                <></>
+                            )}
+                        </div>
+
+                        <div className="mx-2 my-2">
+                            <div className="relative flex items-center pe-10">
+                                <p>외각선</p>
+                                <div className="mx-4">
+                                    <Toggle
+                                        flag={paletteBorderFlag}
+                                        setFlag={setPaletteBorderFlag}
+                                    />
+                                </div>
                             </div>
+                            {paletteBorderFlag ? (
+                                <div>
+                                    <ColorPalette
+                                        setColor={setCanvasTextSticker}
+                                        target="fontBorder"
+                                    />
+                                    <div className="flex my-4">
+                                        <p className="color-text-darkgray">
+                                            두께
+                                        </p>
+                                        <div className=" mx-2 ">
+                                            <input
+                                                className="w-16 text-center border px-4 rounded-lg"
+                                                type="number"
+                                                value={
+                                                    canvasTextSticker.fontBorderWidth
+                                                }
+                                                onChange={
+                                                    onChangeStickerBorderWidth
+                                                }
+                                            />
+                                            <div className="mx-2">
+                                                ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <></>
+                            )}
+                        </div>
+                        <div className="mx-2 my-2">
+                            <div className="relative flex items-center pe-10">
+                                <p>그림자</p>
+                                <div className="mx-4">
+                                    <Toggle
+                                        flag={paletteShadowFlag}
+                                        setFlag={setPaletteShadowFlag}
+                                    />
+                                </div>
+                            </div>
+                            {paletteShadowFlag ? (
+                                <div>
+                                    <ColorPalette
+                                        setColor={setCanvasTextSticker}
+                                        target="fontShadow"
+                                    />
+                                    <div className="flex my-4">
+                                        <p className="color-text-darkgray">
+                                            길이
+                                        </p>
+                                        <div className=" mx-2 ">
+                                            <input
+                                                className="w-16 text-center border px-4 rounded-lg"
+                                                type="number"
+                                                value={
+                                                    canvasTextSticker.fontShadowWidth
+                                                }
+                                                onChange={
+                                                    onChangeStickerShadowWidth
+                                                }
+                                            />
+                                            <div className="mx-2">
+                                                ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex my-4">
+                                        <p className="color-text-darkgray">
+                                            밝기
+                                        </p>
+                                        <div className=" mx-2 ">
+                                            <input
+                                                className="w-16 text-center border px-4 rounded-lg"
+                                                type="number"
+                                                value={
+                                                    canvasTextSticker.fontShadowBlur
+                                                }
+                                                onChange={
+                                                    onChangeStickerShadowBlur
+                                                }
+                                            />
+                                            <div className="mx-2">
+                                                ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <></>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -1033,7 +1210,7 @@ export default function LetterMakePage() {
                     <div className="w-full h-full px-4 py-2 text-xl border rounded-2xl flex flex-wrap items-center justify-center">
                         <p className="w-full text-left mb-2">크기 회전 조작</p>
                         <div className="relative">
-                            {keyState === 'q' ? (
+                            {keyState === ('q' || 'ㅂ') ? (
                                 <img
                                     className="absolute w-8 h-8 -top-6 -right-5 z-20"
                                     src="/src/assets/images/keyActive11.png"
@@ -1044,12 +1221,16 @@ export default function LetterMakePage() {
                             )}
                             <img
                                 src="/src/assets/images/keyQ.png"
-                                style={keyState === 'q' ? { scale: '1.2' } : {}}
+                                style={
+                                    keyState === ('q' || 'ㅂ')
+                                        ? { scale: '1.2' }
+                                        : {}
+                                }
                                 alt=""
                             />
                         </div>
                         <div className="relative">
-                            {keyState === 'w' ? (
+                            {keyState === ('w' || 'ㅈ') ? (
                                 <img
                                     className="absolute w-8 h-8 -top-6 -right-5 z-20"
                                     src="/src/assets/images/keyActive12.png"
@@ -1060,12 +1241,16 @@ export default function LetterMakePage() {
                             )}
                             <img
                                 src="/src/assets/images/keyW.png"
-                                style={keyState === 'w' ? { scale: '1.2' } : {}}
+                                style={
+                                    keyState === ('w' || 'ㅈ')
+                                        ? { scale: '1.2' }
+                                        : {}
+                                }
                                 alt=""
                             />
                         </div>
                         <div className="relative">
-                            {keyState === 'e' ? (
+                            {keyState === ('e' || 'ㄷ') ? (
                                 <img
                                     className="absolute w-8 h-8 -top-6 -right-5 z-20"
                                     src="/src/assets/images/keyActive11.png"
@@ -1076,12 +1261,16 @@ export default function LetterMakePage() {
                             )}
                             <img
                                 src="/src/assets/images/keyE.png"
-                                style={keyState === 'e' ? { scale: '1.2' } : {}}
+                                style={
+                                    keyState === ('e' || 'ㄷ')
+                                        ? { scale: '1.2' }
+                                        : {}
+                                }
                                 alt=""
                             />
                         </div>
                         <div className="relative">
-                            {keyState === 's' ? (
+                            {keyState === ('s' || 'ㄴ') ? (
                                 <img
                                     className="absolute w-8 h-8 -top-6 -right-5 z-20"
                                     src="/src/assets/images/keyActive12.png"
@@ -1092,7 +1281,11 @@ export default function LetterMakePage() {
                             )}
                             <img
                                 src="/src/assets/images/keyS.png"
-                                style={keyState === 's' ? { scale: '1.2' } : {}}
+                                style={
+                                    keyState === ('s' || 'ㄴ')
+                                        ? { scale: '1.2' }
+                                        : {}
+                                }
                                 alt=""
                             />
                         </div>
@@ -1116,7 +1309,7 @@ export default function LetterMakePage() {
                                 onClick={() => setEraserFlag(!eraserFlag)}
                             >
                                 <div className="flex flex-col justify-center items-center">
-                                    <p>지우기</p>
+                                    <p>전체 지우기</p>
                                 </div>
                             </div>
                         </div>
@@ -1322,20 +1515,7 @@ export default function LetterMakePage() {
      */
     const saveNowStatus = async () => {
         /* Canvas 이미지 설정 */
-        const target = canvasRef.current;
-        const onCapture = () => {
-            console.log('onCapture');
-            if (!target) {
-                return alert('결과 저장에 실패했습니다');
-            }
-            html2canvas(target, { scale: 2, backgroundColor: null }).then(
-                (canvas) => {
-                    const imageDataURL = canvas.toDataURL('image/png');
-                    uploadLetterAPI(imageDataURL);
-                }
-            );
-        };
-        onCapture();
+        setCanvasFlag(2);
     };
 
     /** 영상 보내는 API */
@@ -1460,7 +1640,11 @@ export default function LetterMakePage() {
                         position: 'absolute',
                         left: mousePosition.positionX - stickerScale / 2,
                         top: mousePosition.positionY - stickerScale / 2,
-                        backgroundImage: `url('/src/assets/sticker/${selectedObj}.png')`,
+                        backgroundImage: `url('${
+                            customStickerFlag !== true
+                                ? `/src/assets/sticker/${selectedObj}.png')`
+                                : `${customSticker}')`
+                        }`,
                         backgroundSize: 'cover',
                         width: stickerScale,
                         height: stickerScale,
@@ -1516,7 +1700,7 @@ export default function LetterMakePage() {
                         }}
                     >
                         {canvasTextSticker.fontContent === ''
-                            ? '샘플입니다. testText'
+                            ? '텍스트 미리보기. testText'
                             : canvasTextSticker.fontContent}
                     </p>
                 </>
@@ -1682,41 +1866,6 @@ export default function LetterMakePage() {
                         <div className="relative w-4/5 flex flex-col items-center p-6 overflow-y-scroll">
                             {sideBar}
                         </div>
-                        <div className="absolute">
-                            {paletteColorFlag ? (
-                                <div className="absolute left-20 top-36">
-                                    <ColorPalette
-                                        setColor={setCanvasTextSticker}
-                                        target="fontColor"
-                                        flag={setPaletteColorFlag}
-                                    ></ColorPalette>
-                                </div>
-                            ) : (
-                                <></>
-                            )}
-                            {paletteBorderFlag ? (
-                                <div className="absolute left-20 top-36">
-                                    <ColorPalette
-                                        setColor={setCanvasTextSticker}
-                                        target="fontBorder"
-                                        flag={setPaletteBorderFlag}
-                                    ></ColorPalette>
-                                </div>
-                            ) : (
-                                <></>
-                            )}
-                            {paletteShadowFlag ? (
-                                <div className="absolute left-20 top-36">
-                                    <ColorPalette
-                                        setColor={setCanvasTextSticker}
-                                        target="fontShadow"
-                                        flag={setPaletteShadowFlag}
-                                    ></ColorPalette>
-                                </div>
-                            ) : (
-                                <></>
-                            )}
-                        </div>
                     </div>
                 </div>
                 {/* 우측부분 */}
@@ -1768,6 +1917,20 @@ export default function LetterMakePage() {
                                     }}
                                     alt=""
                                 />
+                                {stickerLayoutList.map((item, index) => {
+                                    return (
+                                        <img
+                                            key={'show Layout : ' + index}
+                                            src={item}
+                                            className="absolute top-0 lef-0"
+                                            style={{
+                                                width: '800px',
+                                                aspectRatio: 16 / 9,
+                                            }}
+                                            alt=""
+                                        />
+                                    );
+                                })}
                                 {/* 스티커 */}
                                 <main className="absolute" ref={canvasRef}>
                                     <CanvasItem
@@ -1783,6 +1946,18 @@ export default function LetterMakePage() {
                                         scale={stickerScale}
                                         rotate={stickerRotate}
                                         mode={stickerMode}
+                                        stickerLayout={stickerLayoutList}
+                                        setStickerLayout={setStickerLayoutList}
+                                        saveFlag={canvasFlag}
+                                        setSaveFlag={setCanvasFlag}
+                                        setCanvasDownload={setCavnasDownloadNum}
+                                        setCanvasSave={setCanvasSaveNum}
+                                        clearCanvas={clearCanvas}
+                                        customSticker={customSticker}
+                                        setCustomStickerFlag={
+                                            setCustomStickerFlag
+                                        }
+                                        customStickerFlag={customStickerFlag}
                                     ></CanvasItem>
                                 </main>
                             </div>
@@ -1794,6 +1969,40 @@ export default function LetterMakePage() {
                                 >
                                     저장하기
                                 </button>
+                                <div className="h-28 overflow-y-scroll">
+                                    {stickerLayoutList.map((item, index) => {
+                                        return (
+                                            <div
+                                                key={'layout : ' + index}
+                                                className="border my-1 rounded-md p-1 flex items-center justify-between"
+                                            >
+                                                <div className="flex items-center">
+                                                    <p>레이어 : {index}</p>
+                                                    <img
+                                                        src={item}
+                                                        className="w-16 h-9 border mx-2"
+                                                        alt=""
+                                                    />
+                                                </div>
+                                                <img
+                                                    onClick={() => {
+                                                        const updateItems =
+                                                            stickerLayoutList.filter(
+                                                                (_, order) =>
+                                                                    order !==
+                                                                    index
+                                                            );
+                                                        setStickerLayoutList(
+                                                            updateItems
+                                                        );
+                                                    }}
+                                                    className="mx-2 cursor-pointer"
+                                                    src="/src/assets/icons/minus-button.png"
+                                                />
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                                 <div className="w-full flex mx-2 flex-col my-6 border-x border-b color-border-main rounded-lg bg-white">
                                     <h5 className="color-bg-main border-t px-2 py-1 rounded-t-lg">
                                         편지 정보

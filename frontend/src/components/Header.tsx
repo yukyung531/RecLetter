@@ -12,14 +12,6 @@ export default function Header() {
     const dispatch = useDispatch();
     const navigator = useNavigate();
 
-    useEffect(() => {
-        const loginValue = localStorage.getItem('is-login');
-        if (loginValue) {
-            dispatch(loginState(true));
-        } else {
-            dispatch(loginState(false));
-        }
-    }, [isLogin]);
     /** 로그아웃 */
     const onLogout = () => {
         logoutAPI();
@@ -77,8 +69,10 @@ export default function Header() {
             return (
                 <div className="flex justify-center items-center">
                     <div className="flex mx-2 text-xl justify-center items-center cursor-pointer color-text-ivory">
-                        <div className="flex justify-center items-center bg-white rounded-full w-6 h-6 mx-2"
-                        style={{ width: '1.25rem', height: '1.25rem' }}>
+                        <div
+                            className="flex justify-center items-center bg-white rounded-full w-6 h-6 mx-2"
+                            style={{ width: '1.25rem', height: '1.25rem' }}
+                        >
                             <span
                                 className="material-symbols-outlined color-text-main text-base"
                                 style={{ padding: '1px 2px 0 0' }}
@@ -95,8 +89,7 @@ export default function Header() {
 
     /** 메인으로 갈 때 나오는 Link 변화 */
     const moveMainElement = () => {
-        const loginValue = localStorage.getItem('is-login');
-        if (loginValue === 'true' && isLogin) {
+        if (isLogin) {
             return (
                 <Link to="/studiolist">
                     <img

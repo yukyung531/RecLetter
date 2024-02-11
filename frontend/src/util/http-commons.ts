@@ -62,11 +62,7 @@ export default function localAxios() {
                 } = error;
                 // 페이지가 새로고침되어 저장된 accessToken이 없어진 경우.
                 // 토큰 자체가 만료되어 더 이상 진행할 수 없는 경우.
-                if (
-                    localStorage.getItem('is-login') === 'true' &&
-                    (status === httpStatusCode.UNAUTHORIZED ||
-                        status == httpStatusCode.FORBIDDEN)
-                ) {
+                if (status === httpStatusCode.UNAUTHORIZED) {
                     // 요청 상태 저장
                     console.log('토큰이 없어 재생성합니다.');
                     const originalRequest = config;
@@ -85,10 +81,7 @@ export default function localAxios() {
                                 'refreshToken이 없어 localhost 지우기 작동'
                             );
                             deleteStorageData();
-                            const dispatch = useDispatch();
-                            dispatch(loginState(false));
-                            const navigator = useNavigate();
-                            navigator('/');
+                            window.location.href = '/';
                             return;
                         }
                         instance.defaults.headers.common['Authorization'] =
@@ -118,15 +111,27 @@ export default function localAxios() {
                                 if (count < 3) {
                                     return instance(originalRequest);
                                 } else {
-                                    alert('오류가 발생하였습니다.');
+                                    alert(
+                                        '오류가 발생하여 로그인 페이지로 돌아갑니다.'
+                                    );
+                                    deleteStorageData();
+                                    window.location.href = '/login';
                                 }
                             })
                             .catch((e) => {
                                 console.log(e);
                             });
                     }
+                } else if (status === httpStatusCode.NOTPROCESS) {
+                    deleteStorageData();
+                    window.location.href = '/login';
+                } else if (status === httpStatusCode.BADREQUEST) {
+                    deleteStorageData();
+                    alert('요청이 잘못되었습니다');
+                    window.location.href = './';
                 } else if (status == httpStatusCode.FORBIDDEN) {
-                    console.log('포비든오류');
+                    alert('접근이 올바르지 않습니다.');
+                    window.location.href = '/login';
                 } else {
                     console.log('오류떠쎠');
                 }

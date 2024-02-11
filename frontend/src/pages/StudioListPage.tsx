@@ -20,6 +20,7 @@ export default function StudioListPage() {
     const [attendStudioList, setAttendStudioList] = useState<StudioInfo[]>([]);
     const [finishStudioList, setFinishStudioList] = useState<StudioInfo[]>([]);
     const [editMode, setEditMode] = useState<boolean>(false);
+    const [listTab, setListTab] = useState<number>(0);
     const [deleteList, setDeleteList] = useState<string[]>([]);
 
     const token = localStorage.getItem('access-token');
@@ -29,8 +30,7 @@ export default function StudioListPage() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const loginValue = localStorage.getItem('is-login');
-        if (loginValue === 'true' && isLogin) {
+        if (isLogin) {
             if (token) {
                 dispatch(studioState([]));
                 dispatch(studioNameState(''));
@@ -38,8 +38,9 @@ export default function StudioListPage() {
             }
             dispatch(loginState(true));
         }
-        if (loginValue === 'false' || !loginValue || !token) {
-            navigate(`/`);
+        if (!token || !isLogin) {
+            dispatch(loginState(false));
+            navigate('/login');
         }
     }, [isLogin]);
     /** 리덕스 설정 */
@@ -58,7 +59,7 @@ export default function StudioListPage() {
                         const studioDivide = res.data.studioInfoList;
                         //일단 정렬 먼저
                         const sortedStudioDivide = studioDivide.sort(
-                            (studioA, studioB) => {
+                            (studioA: any, studioB: any) => {
                                 return (
                                     new Date(studioA.expireDate).getDate() -
                                     new Date(studioB.expireDate).getDate()
@@ -78,7 +79,8 @@ export default function StudioListPage() {
                                         ...prev,
                                         studio,
                                     ]);
-                                } else if (!studio.isStudioOwner) {
+                                }
+                                if (!studio.isCompleted) {
                                     setAttendStudioList((prev) => [
                                         ...prev,
                                         studio,
@@ -127,18 +129,25 @@ export default function StudioListPage() {
             navigate(`/studiomain/${studioId}`);
         }
     };
+    const changeListTab = (num: number) => {
+        setListTab(num);
+    };
 
     /** 방 생성 Element. 3개 이상이면 사라지는 구문 */
     const createElement = () => {
         if (createStudioList.length >= 3) {
-            return <></>;
+            return (
+                <div className="rounded-lg text-xl mt-2 my-6 px-4 py-1 flex items-center justify-center text-white color-bg-main">
+                    방 생성은 3개까지 가능합니다
+                </div>
+            );
         } else {
             return (
                 <Link
                     to="/create"
-                    className="border-dashed border-2 rounded-lg text-xl border-gray-600 w-30per h-32 my-2 flex items-center justify-center"
+                    className="rounded-lg text-xl mt-2 my-6 px-4 py-1 flex items-center justify-center text-white color-bg-main btn-animation"
                 >
-                    + 방 생성
+                    + 새로운 스튜디오 생성
                 </Link>
             );
         }
@@ -192,80 +201,87 @@ export default function StudioListPage() {
     //스튜디오 정보 불러오기
 
     return (
-        <section className="relative w-full base-height flex mt-14 ml-8">
-            <ul className="w-3/5 flex flex-col items-center ">
-                <li className=" w-5/6 pt-12">
-                    <div className="flex justify-between items-center">
-                        <p className="text-2xl font-bold">
-                            내가 생성한 스튜디오
+        <section className="relative w-full base-height items-center flex flex-col mt-14 ml-8">
+            <div className="relative w-4/5 h-5/6">
+                <div className="relative w-full flex justify-between mt-12">
+                    <div className="flex items-center">
+                        <p
+                            className="text-2xl px-2 py-2 cursor-pointer"
+                            style={
+                                listTab === 0
+                                    ? { borderBottom: '2px solid #ff4954' }
+                                    : {}
+                            }
+                            onClick={() => {
+                                changeListTab(0);
+                            }}
+                        >
+                            영상 스튜디오
+                        </p>
+                        <p
+                            className="text-2xl mx-4 px-2 py-2 cursor-pointer"
+                            style={
+                                listTab === 1
+                                    ? { borderBottom: '2px solid #ff4954' }
+                                    : {}
+                            }
+                            onClick={() => {
+                                changeListTab(1);
+                            }}
+                        >
+                            완성된 비디오
                         </p>
                         {editElement()}
+                        <div className="absolute w-full border bottom-2 -z-10"></div>
                     </div>
-                    {!editMode && (
-                        <div className="w-full h-1 color-bg-gray my-2" />
-                    )}
-                    {editMode && (
-                        <div className="w-full h-1 color-bg-main my-2 " />
-                    )}
-                    <div className="flex my-4 flex-wrap">
-                        {createElement()}
-                        {createStudioList.map((studio) => {
-                            return (
-                                <StudioCard
-                                    key={studio.studioId}
-                                    props={studio}
-                                    editMode={editMode}
-                                    onClick={() =>
-                                        onClickSCard(studio.studioId)
-                                    }
-                                />
-                            );
-                        })}
-                    </div>
-                </li>
-                <li className=" w-5/6 pt-12">
-                    <div className="flex justify-between items-center">
-                        <p className="text-2xl font-bold">참여 중인 스튜디오</p>
-                    </div>
-                    <div className="w-full h-1 color-bg-main my-2 color-bg-lightgray1" />
-                    <div className="flex my-4 flex-wrap">
-                        {attendStudioList.map((studio) => {
-                            return (
-                                <StudioCard
-                                    key={studio.studioId}
-                                    props={studio}
-                                    editMode={
-                                        studio.isStudioOwner ? null : null
-                                    }
-                                    onClick={() =>
-                                        onClickSCard(studio.studioId)
-                                    }
-                                />
-                            );
-                        })}
-                    </div>
-                </li>
-            </ul>
-            <div className="w-2/5 color-bg-yellowbg">
-                <div className="w-5/6 py-12 ps-4">
-                    <div className="flex items-center">
-                        <span className="material-symbols-outlined">mail</span>
-                        <p className="mx-2 text-2xl font-bold">완성된 비디오</p>
-                    </div>
-                    <div className="flex my-4 flex-wrap">
-                        {finishStudioList.map((studio) => {
-                            return (
-                                <StudioFinishCard
-                                    key={studio.studioId}
-                                    props={studio}
-                                    onClick={() =>
-                                        onClickSCard(studio.studioId)
-                                    }
-                                />
-                            );
-                        })}
-                    </div>
+
+                    <div>{createElement()}</div>
                 </div>
+
+                {/* 영상 스튜디오 */}
+                {listTab === 0 ? (
+                    <ul className="w-full h-full flex flex-col items-center ">
+                        <li className=" w-full ">
+                            <div className="flex my-4 flex-wrap">
+                                {attendStudioList.map((studio) => {
+                                    return (
+                                        <StudioCard
+                                            key={studio.studioId}
+                                            props={studio}
+                                            editMode={editMode}
+                                            onClick={() =>
+                                                onClickSCard(studio.studioId)
+                                            }
+                                        />
+                                    );
+                                })}
+                            </div>
+                        </li>
+                    </ul>
+                ) : (
+                    <></>
+                )}
+                {listTab === 1 ? (
+                    <ul className="w-full h-full flex flex-col items-center ">
+                        <li className=" w-full ">
+                            <div className="flex my-32 flex-wrap">
+                                {attendStudioList.map((studio) => {
+                                    return (
+                                        <StudioFinishCard
+                                            key={studio.studioId}
+                                            props={studio}
+                                            onClick={() =>
+                                                onClickSCard(studio.studioId)
+                                            }
+                                        />
+                                    );
+                                })}
+                            </div>
+                        </li>
+                    </ul>
+                ) : (
+                    <></>
+                )}
             </div>
         </section>
     );

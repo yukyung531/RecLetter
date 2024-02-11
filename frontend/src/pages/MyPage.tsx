@@ -28,9 +28,8 @@ export default function MyPage() {
     const disabledStyle: React.CSSProperties = {
         borderColor: '#ccc', // 테두리 색상
         backgroundColor: '#ccc',
-        color: "darkgray",        // 글씨 색상
+        color: 'darkgray', // 글씨 색상
     };
-
 
     useEffect(() => {
         dispatch(studioState([]));
@@ -38,14 +37,11 @@ export default function MyPage() {
     }, []);
 
     useEffect(() => {
-        const loginValue = localStorage.getItem('is-login');
-        if (loginValue === 'true') {
-            dispatch(loginState(true));
+        if (isLogin) {
             console.log(isLogin);
-
             getUserInfo();
         }
-        if (loginValue === 'false' || !loginValue) {
+        if (!isLogin) {
             navigate(`/`);
         }
     }, [isLogin]);
@@ -56,9 +52,9 @@ export default function MyPage() {
             if (res.status === httpStatusCode.OK) {
                 setUserNickname(res.data.userNickname);
                 setUserEmail(res.data.userEmail);
-                if(res.data.userRole==="ROLE_SOCIAL"){
+                if (res.data.userRole === 'ROLE_SOCIAL') {
                     setIsDisabled(true);
-                    console.log("안댕")
+                    console.log('안댕');
                 }
             }
         });
@@ -148,7 +144,9 @@ export default function MyPage() {
             return (
                 <div className="flex flex-col items-center">
                     <p className="text-3xl mx-4 my-2">마이페이지</p>
-                    <p className="mx-4 mb-4">내 개인 정보를 수정할 수 있습니다.</p>
+                    <p className="mx-4 mb-4">
+                        내 개인 정보를 수정할 수 있습니다.
+                    </p>
                     <div className="my-14">
                         <div className="flex h-12 my-5 items-center justify-center">
                             <p className="w-16 text-xl color-text-darkgray me-4 text-end">
@@ -180,21 +178,26 @@ export default function MyPage() {
                     </div>
 
                     <div
-                        className={`w-128 rounded-md py-2 text-2xl my-2 border-2 text-center mx-2 cursor-pointer ${isDisabled ? '' : 'hover:color-bg-main hover:text-white hover:transition-all'}`}
+                        className={`w-128 rounded-md py-2 text-2xl my-2 border-2 text-center mx-2 cursor-pointer ${
+                            isDisabled
+                                ? ''
+                                : 'hover:color-bg-main hover:text-white hover:transition-all'
+                        }`}
                         style={isDisabled ? disabledStyle : {}}
                         // 버튼이 비활성화된 경우 disabled 속성을 추가
                         // React에서는 일반적으로 비활성화된 상태일 때는 onClick 이벤트를 처리하지 않으므로 disabled 속성은 선택적으로 추가할 수 있습니다.
                         // 하지만 표현력을 높이고 명시성을 유지하기 위해 포함하는 것이 좋습니다.
                         //disabled={isDisabled}
                         onClick={changeFlag}
-                    >비밀번호 변경
+                    >
+                        비밀번호 변경
                     </div>
-                    
+
                     <div
                         className="text-xl underline my-6 text-center cursor-pointer text-gray-400"
                         onClick={deleteUserState}
                     >
-                       회원 탈퇴
+                        회원 탈퇴
                     </div>
                 </div>
             );

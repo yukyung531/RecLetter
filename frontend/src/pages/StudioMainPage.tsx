@@ -80,9 +80,8 @@ export default function StudioMainPage() {
 
     //영상 서버로부터 불러오기
     useEffect(() => {
-        const loginValue = localStorage.getItem('is-login');
         const token = localStorage.getItem('access-token');
-        if (loginValue === 'true' && isLogin) {
+        if (isLogin) {
             //API 불러오는 함수로 clipInfo를 받아옴
             //우선 url query String으로부터 스튜디오 상세 정보 받아오기
 
@@ -147,7 +146,7 @@ export default function StudioMainPage() {
             };
             getUserInfo();
         }
-        if (loginValue === 'false' || !loginValue || !token) {
+        if (!token) {
             navigator(`/login`);
         }
 

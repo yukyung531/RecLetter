@@ -19,11 +19,7 @@ export default function Mainpage() {
     }, []);
 
     useEffect(() => {
-        const loginValue = localStorage.getItem('is-login');
-        if (loginValue === 'true') {
-            dispatch(loginState(true));
-        }
-        if (isLogin && loginValue) {
+        if (isLogin) {
             navigator(`/studiolist`);
         }
     }, [isLogin]);

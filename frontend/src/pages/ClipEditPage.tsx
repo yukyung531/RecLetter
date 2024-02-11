@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import { BaseSyntheticEvent, useEffect, useRef, useState } from 'react';
-import {ClipInfo, StudioDetail} from '../types/type';
+import { ClipInfo, StudioDetail } from '../types/type';
 
 //axios
 import { uploadClip } from '../api/clip';
@@ -58,6 +58,7 @@ export default function ClipEditPage() {
         studioFrameId: -1,
         studioFontId: -1,
         studioBGMId: -1,
+        studioStickerUrl: '',
     });
 
     //비디오 재생중인가
@@ -169,9 +170,8 @@ export default function ClipEditPage() {
         };
         loading();
 
-        const loginValue = localStorage.getItem('is-login');
         const token = localStorage.getItem('access-token');
-        if (loginValue === 'true' && isLogin) {
+        if (isLogin) {
             //API 불러오는 함수로 clipInfo를 받아옴
             //우선 url query String으로부터 스튜디오 상세 정보 받아오기
 
@@ -223,7 +223,7 @@ export default function ClipEditPage() {
                 enterStudioAPI(studioId);
             }
         }
-        if (loginValue === 'false' || !loginValue || !token) {
+        if (!token || !isLogin) {
             alert('오류가 났습니다');
         }
 
