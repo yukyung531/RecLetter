@@ -428,11 +428,30 @@ export default function StudioMainPage() {
         navigator(`/cliprecord/${studioDetailInfo.studioId}`);
     };
 
+
+    //선택된 영상이 있는지 여부를 반환
+    const isSelectedClipList=()=>{
+    let selectedClipListLength=0
+    if (studioDetailInfo.clipInfoList){
+        studioDetailInfo.clipInfoList.map((clip) => {
+            if (clip.clipOrder != -1) {
+                selectedClipListLength+=1;
+            }
+        })
+    }
+    return selectedClipListLength>0;
+    }
+
     const onClickCompletePage = async () => {
+        if(!isSelectedClipList()){
+            alert("하나 이상의 영상을 선택해야 영상 편지 완성이 가능합니다")
+            return;
+        }
         console.log("complete letter")
         await encodingLetter(studioDetailInfo.studioId)
             .then((res) => {
             console.log(res);
+            moveStudioList();
         });
     };
 
