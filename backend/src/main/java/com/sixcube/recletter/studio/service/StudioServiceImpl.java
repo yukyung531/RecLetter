@@ -224,7 +224,7 @@ public class StudioServiceImpl implements StudioService {
               .studioFrameId(studio.getStudioFrameId())
               .studioFontId(studio.getStudioFontId())
               .studioBgmId(studio.getStudioBgmId())
-              .studioVolumeId(studio.getStudioVolume())
+              .studioVolume(studio.getStudioVolume())
               .clipInfoList(clipService.searchLetterClipInfoByOrder(studioId))
               .build();
     } else{
@@ -237,6 +237,16 @@ public class StudioServiceImpl implements StudioService {
     Studio studio=studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
     studio.setIsCompleted(isCompleted);
     studioRepository.save(studio);
+  }
+
+  @Override
+  public String downloadLetter(String studioId){
+    String url="";
+    String fileName=studioId+".mp4";
+    if(s3Util.isObject(fileName)){
+      url=s3Util.getSignedUrl(fileName);
+    }
+    return url;
   }
 
 }

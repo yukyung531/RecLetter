@@ -45,4 +45,6 @@ public interface StudioService {
 
   public void updateStudioIsCompleted(String studioId, boolean isCompleted);
 
+  String downloadLetter(String studioId);
+
 }

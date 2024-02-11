@@ -212,4 +212,11 @@ public class StudioController {
     return ResponseEntity.ok().build();
   }
 
+  //url + 누구나 접근 가능해야 함!!!!!!
+  @GetMapping("/{studioId}/download")
+  public ResponseEntity<String> downloadLetter(@PathVariable String studioId){
+    String url=studioService.downloadLetter(studioId);
+    log.debug(url); //빈 값이면 객체 없음.
+    return ResponseEntity.ok(url);
+  }
 }
