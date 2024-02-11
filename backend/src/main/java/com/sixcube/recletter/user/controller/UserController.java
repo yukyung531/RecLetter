@@ -26,7 +26,7 @@ public class UserController {
 
     //회원가입
     @PostMapping
-    public ResponseEntity<Void> createUser(@Valid @RequestBody CreateUserReq createUserReq){
+    public ResponseEntity<Void> createUser(@Valid @RequestBody CreateUserReq createUserReq) {
         User result = userService.createUser(createUserReq);
 
         if (result == null) {
@@ -53,7 +53,7 @@ public class UserController {
 
     @DeleteMapping
     public void deleteUser(@AuthenticationPrincipal User user) throws URISyntaxException {
-       userService.deleteUser(user);
+        userService.deleteUser(user);
     }
 
     @GetMapping
@@ -72,7 +72,7 @@ public class UserController {
     @PostMapping("/password")
     public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordReq resetPasswordReq) {
         String password = resetPasswordReq.getNewPassword();
-        String email=resetPasswordReq.getUserEmail();
+        String email = resetPasswordReq.getUserEmail();
         userService.resetPassword(password, email);
 
         return ResponseEntity.ok().build();
