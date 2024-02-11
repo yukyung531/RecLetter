@@ -23,12 +23,28 @@ export default function FindPwPage() {
     const [codeFlag, setCodeFlag] = useState<boolean>(false);
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState<string>('');
+    const [count, setCount] = useState<number>(600);
+    const [isCounting, setIsCounting] = useState<boolean>(false);
 
     const dispatch = useDispatch();
     useEffect(() => {
         dispatch(studioState([]));
         dispatch(studioNameState(''));
     }, []);
+
+    useEffect(() => {
+        let intervalId: any;
+
+        if (isCounting) {
+            intervalId = setInterval(() => {
+                setCount((prevCount) => prevCount - 1);
+            }, 1000);
+        }
+
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, [isCounting]);
 
     /** 이메일 변화 감지 */
     const changeEmail = (e: BaseSyntheticEvent) => {
@@ -49,6 +65,14 @@ export default function FindPwPage() {
     const changePasswordConfirm = (e: BaseSyntheticEvent) => {
         setPasswordConfirm(e.target.value);
     };
+
+    /** 카운팅 시작 */
+    const startCounting = () => {
+        setCount(600); //10분
+        setIsCounting(true);
+    };
+
+
     /** POST 비밀번호 초기화 이메일 발송 요청 */
     const sendPasswordEmail = async () => {
         setEmailFlag(1);
@@ -58,6 +82,8 @@ export default function FindPwPage() {
                     console.log('이메일을 보냈습니다.');
                     setEmailFlag(2);
                     setEmailCheck(true);
+                    setCodeCheck(false);
+                    startCounting();
                 } else {
                     setEmailFlag(4);
                     setEmailCheck(false);
@@ -89,6 +115,7 @@ export default function FindPwPage() {
                     console.log(res.data);
                     setCodeFlag(false);
                 } else {
+                    setEmailFlag(3);
                     setCodeFlag(true);
                     console.log('코드확인이 실패하였습니다.');
                 }
@@ -120,11 +147,11 @@ export default function FindPwPage() {
         return (
             <div>
                 <div className="flex h-12 my-3 items-center justify-center">
-                    <p className="w-32 text-xl color-text-darkgray me-4 text-end">
+                    <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4">
                         비밀번호
                     </p>
                     <input
-                        className="input-88"
+                        className="w-128 h-12 ps-3 text-2xl border rounded-md"
                         type="password"
                         onChange={(e) => {
                             changePassword(e);
@@ -134,11 +161,11 @@ export default function FindPwPage() {
                     />
                 </div>
                 <div className="flex h-12 my-3 items-center justify-center">
-                    <p className="w-32 text-xl color-text-darkgray me-4 text-end">
-                        비밀번호 재확인
+                    <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4">
+                    비밀번호 확인
                     </p>
                     <input
-                        className="input-88"
+                        className="w-128 h-12 ps-3 text-2xl border rounded-md"
                         type="password"
                         onChange={(e) => {
                             changePasswordConfirm(e);
@@ -150,16 +177,49 @@ export default function FindPwPage() {
             </div>
         );
     };
+
+    /** 인증코드 입력 부분 워딩 */
+    const codeWord = () => {
+        if (emailFlag === 0) {
+            return <></>;
+        } else if (codeFlag && emailFlag === 3 && count > 0) {
+            return (
+                <div className="flex">
+                    <p className="w-300 h-3 color-text-main">
+                        인증에 실패했습니다.
+                    </p>
+                </div>
+            );
+        }
+    }
+
     /** Email 컴포넌트 */
     const checkEmailElement = () => {
-        if (emailFlag === 0) {
+        if (emailFlag === 3 && emailCheck && codeCheck) {
+            return (
+                <div className="flex">
+                    <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4"></p>
+                    <p className="w-128 h-3 text-green-600">인증되었습니다.</p>
+                </div>
+            );
+        } else if (count <= 0 && emailFlag !== 1) {
+            return (
+                <div className="flex">
+                    <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4"></p>
+                    <p className="w-128 h-3 color-text-main">
+                        인증이 만료되었습니다.
+                    </p>
+                </div>
+            );
+        }
+        else if (emailFlag === 0) {
             return <></>;
         } else if (emailFlag === 1) {
             return (
                 <div className="flex">
                     <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4"></p>
                     <p className="w-128 h-3 color-text-blue2">
-                        이메일을 발송중입니다.
+                        이메일을 발송 중입니다.
                     </p>
                 </div>
             );
@@ -172,13 +232,6 @@ export default function FindPwPage() {
                     </p>
                 </div>
             );
-        } else if (emailFlag === 3 && emailCheck && codeCheck) {
-            return (
-                <div className="flex">
-                    <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4"></p>
-                    <p className="w-128 h-3 text-green-600">인증되었습니다.</p>
-                </div>
-            );
         } else if (emailFlag === 4) {
             return (
                 <div className="flex">
@@ -186,29 +239,33 @@ export default function FindPwPage() {
                     <p className="w-128 h-3 color-text-main">{errorMessage}</p>
                 </div>
             );
-        } else {
-            return (
-                <div className="flex">
-                    <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4"></p>
-                    <p className="w-128 h-3 color-text-main">
-                        사용 할 수 없습니다.
-                    </p>
-                </div>
-            );
         }
     };
     /** Code 컴포넌트 */
     const checkCodeElement = () => {
+        if (count <= 0) {
+            checkEmailElement();
+            return <></>;
+        }
         if (emailFlag === 0) {
             return <></>;
-        } else if (codeFlag) {
+        }  else if ((emailFlag === 2 || emailFlag === 3) && emailCheck && codeCheck) {
+
+            return <></>;
+
+        } else if (emailCheck && (emailFlag === 2 || emailFlag === 3))  {
             return (
                 <li className="flex mt-4">
                     <p className="w-32 me-4"></p>
                     <div className="flex w-128">
-                        <p className="w-32 rounded-md flex justify-start items-center color-text-darkgray text-2xl ">
-                            인증코드
-                        </p>
+                        <div>
+                            <p className="w-32 rounded-md flex justify-start items-center color-text-darkgray text-2xl ">
+                                인증코드
+                            </p>
+                            <p className="h-1">
+                                {Math.floor(count / 60)}분 {count % 60}초
+                            </p>
+                        </div>
                         <input
                             type="text"
                             className="w-94 w-64 h-12 ps-3 text-2xl border rounded-md"
@@ -226,34 +283,7 @@ export default function FindPwPage() {
                     </div>
                 </li>
             );
-        } else if (emailCheck && emailFlag === 2) {
-            return (
-                <li className="flex mt-4">
-                    <p className="w-32 me-4"></p>
-                    <div className="flex w-128">
-                        <p className="w-32 rounded-md flex justify-start items-center color-text-darkgray text-2xl ">
-                            인증코드
-                        </p>
-                        <input
-                            type="text"
-                            className="w-94 w-64 h-12 ps-3 text-2xl border rounded-md"
-                            onChange={(e) => {
-                                changeCode(e);
-                            }}
-                            placeholder="인증코드 입력"
-                        />
-                        <p
-                            className="w-32 border-2 rounded-md flex justify-center items-center text-2xl color-border-main color-text-main mx-2 cursor-pointer hover:color-bg-main hover:text-white hover:transition-all"
-                            onClick={checkPasswordCode}
-                        >
-                            확인
-                        </p>
-                    </div>
-                </li>
-            );
-        } else if (emailFlag === 2 && emailCheck && codeCheck) {
-            return <></>;
-        } else {
+        }else {
             return <></>;
         }
     };
@@ -285,9 +315,10 @@ export default function FindPwPage() {
             </div>
             {checkEmailElement()}
             {checkCodeElement()}
+            {codeWord()}
             {passwordElement()}
             <button
-                className="w-88 py-3 px-3 my-12 rounded text-xl color-bg-yellow2 text-center"
+                className="w-88 py-3 px-3 my-12 rounded-md py-2 text-2xl text-center color-bg-main text-white cursor-pointer hover:color-bg-subbold hover:text-white"
                 onClick={setNewPassword}
             >
                 비밀번호 재설정
@@ -295,4 +326,6 @@ export default function FindPwPage() {
             <Link to="/login">돌아가기</Link>
         </section>
     );
+
+
 }
