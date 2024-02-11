@@ -6,6 +6,7 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -28,11 +29,14 @@ public class EmailServiceImpl implements EmailService {
     private final JavaMailSender emailSender;
     private final SpringTemplateEngine springTemplateEngine;
 
+    @Value("${spring.mail.username}")
+    private String fromEmail;
+
     public void sendEmail(String toEmail, String title, String code) throws EmailSendException {
         try {
             MimeMessage mimeMessage = emailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "utf-8");
-            helper.setFrom("recletter.official@gmail.com"); //yml에서 @Value로 가져온 보내는 송신자 이메일 주소
+            helper.setFrom(fromEmail); //yml에서 @Value로 가져온 보내는 송신자 이메일 주소
             helper.setTo(toEmail); //인자로 받은 이메일 수신자 주소
             helper.setSubject(title); //제목
             //helper.setText(text, true); //템플릿 사용으로 주석처리

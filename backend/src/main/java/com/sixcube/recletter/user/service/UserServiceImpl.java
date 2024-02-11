@@ -152,7 +152,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
         String unencryptedPassword = password;
         String encryptedPassword = passwordEncoder.encode(unencryptedPassword);
-        User user = userRepository.findByUserEmail(email).orElseThrow();
+        User user = userRepository.findByUserEmailAndDeletedAtIsNull(email).orElseThrow();
         user.setUserPassword(encryptedPassword);
         userRepository.save(user);
     }
