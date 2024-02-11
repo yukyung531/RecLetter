@@ -120,6 +120,32 @@ export default function ClipRecordPage() {
     };
     ///////////////////////타이머 기능 종료///////////////////////////////////////////////////
 
+
+    ////////////////////////스크립트 좌우////////////////////////////////////////////////
+    const selectedScriptRef = useRef<HTMLDivElement>(null);
+
+    /** goUp()
+     *  스크립트 < 버튼 누를 시 실행
+     *  위쪽 스크립트 보여주기
+     */
+    const goUp = () => {
+        if(selectedScriptRef.current){
+            selectedScriptRef.current.scrollTop -= 56;
+        }
+    }
+
+    /** goDown()
+     *  스크립트 > 버튼 누를 시 실행
+     *  아래쪽 스크립트 보여주기
+     */
+    const goDown = () => {
+        if(selectedScriptRef.current){
+            selectedScriptRef.current.scrollTop += 56;
+        }
+    }
+ 
+
+
     /////////웹캠 구간////////////////////////////////////////////////////////////
 
     //미디어스트림 저장 변수
@@ -803,8 +829,12 @@ export default function ClipRecordPage() {
                 {/* 우측부분 */}
                 <div className="w-3/4  editor-height bg-gray-50 flex justify-between">
                     <div className="w-4/5 px-4 py-4 flex flex-col justify-center items-center">
-                        <div className="box-border my-3 py-3 min-h-[80px] h-[80px] rounded-full border-2 border-black movie-width text-xl whitespace-pre-wrap flex align-middle justify-center text-center overflow-hidden">
-                            {selectedScript}
+                        <div className="box-border my-3 py-3 min-h-[80px] h-[80px] rounded-full border-2 border-black movie-width text-xl whitespace-pre-wrap flex align-middle justify-between text-center">
+                            <button className='pl-4' onClick={goUp}>&#60;</button>
+                            <div className='min-h-[56px] h-[56px] overflow-hidden'  ref={selectedScriptRef}>
+                                {selectedScript}
+                            </div>
+                            <button className='pr-4' onClick={goDown}>&#62;</button>
                         </div>
                         <div className="w-[800px] h-[450px] flex justify-center align-middle bg-black relative">
                             {/*영상 촬영 화면*/}

@@ -49,6 +49,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import ColorPalette from '../components/ColorPalette';
 import { uploadFile } from '../util/uploadFile';
+import { display } from 'html2canvas/dist/types/css/property-descriptors/display';
 
 interface mousePosition {
     positionX: number | null;
@@ -83,6 +84,7 @@ export default function LetterMakePage() {
     const [notUsedClipList, setNotUsedClipList] = useState<ClipInfo[]>([]);
     //선택된 정보들
     const [selectedBGM, setSelectedBGM] = useState<number>(1);
+    const [selectedBGMUrl, setSelectedBGMUrl] = useState<string>('');
     const [eraserFlag, setEraserFlag] = useState<boolean>(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [stickerScale, setStickerScale] = useState<number>(160);
@@ -96,6 +98,7 @@ export default function LetterMakePage() {
         fontBorder: '',
         fontShadow: '',
     });
+    const [studioBGMVolume, setStudioBGMVolume] = useState<number>(100);
 
     /** 리덕스 설정 */
     const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
@@ -267,7 +270,7 @@ export default function LetterMakePage() {
                         //저장
                         setStudioDetailInfo({ ...res.data });
                         //사용 영상, 사용하지 않은 영상 리스트 출력
-                        const clipList = res.data.clipInfoList;
+                        const tempClipList = res.data.clipInfoList;
 
                         // clipList.map((clip, index) => {
                         //     getVideoDurationInSeconds(clip.clipUrl).then(
@@ -277,6 +280,13 @@ export default function LetterMakePage() {
                         //         }
                         //     );
                         // });
+
+                        //클립리스트 정렬
+                        const clipList = tempClipList.sort(
+                            (clipA: ClipInfo, clipB: ClipInfo) => {
+                                return clipA.clipOrder - clipB.clipOrder;
+                            }
+                        );
 
                         const initialUsedVideo = [];
                         const nonInitialUsedVideo = [];
@@ -293,6 +303,17 @@ export default function LetterMakePage() {
                         setSelectImgUrl(
                             `/src/assets/frames/frame${res.data.studioFrameId}.png`
                         );
+
+                        //studioBGM
+                        setSelectedBGM(res.data.studioBGMId);
+                        selectBGMUrl(res.data.studioBGMId);
+
+                        //studioBGMVolume
+                        if (bgmRef.current) {
+                            bgmRef.current.volume =
+                                +res.data.studioVolume / 100;
+                        }
+                        setStudioBGMVolume(res.data.studioVolume);
                     } else {
                         console.log('Network Error');
                     }
@@ -340,9 +361,11 @@ export default function LetterMakePage() {
 
             // openvidu 화면 공유 시작
             //현재 주석 처리. 주석 풀것!!! (주석해제위치)
-            startScreenShare();
+            // startScreenShare();
         };
         initSetting();
+
+        //////////////////////////////bgm 관련 함수/////////////////////////////////
 
         const loginValue = localStorage.getItem('is-login');
         const token = localStorage.getItem('access-token');
@@ -488,7 +511,10 @@ export default function LetterMakePage() {
 
     ////////////////////////////////////////영상 순서 결정////////////////////////////////////////////////////////////
 
-    //클립 선택
+    /** selectVideo(clipId)
+     *  클립을 선택한다.
+     * @param clipId
+     */
     const selectVideo = (clipId: number) => {
         //클립 제거
         const newNotSelected = notUsedClipList.filter(
@@ -512,7 +538,10 @@ export default function LetterMakePage() {
         updateWhole(newSelected);
     };
 
-    //클립 선택 취소
+    /** unselectClip(clipId)
+     *  클립의 선택을 취소한다.
+     * @param clipId
+     */
     const unselectClip = (clipId: number) => {
         //클립 제거
         const newSelected = usedClipList.filter(
@@ -542,7 +571,11 @@ export default function LetterMakePage() {
         }
     };
 
-    //클립 볼륨 조절
+    /** changeVolume(clipId, event)
+     *  클립의 볼륨을 조절한다.
+     * @param clipId
+     * @param event
+     */
     const changeVolume = (clipId: number, event: BaseSyntheticEvent) => {
         for (let i = 0; i < usedClipList.length; i++) {
             if (usedClipList[i].clipId === clipId) {
@@ -576,10 +609,56 @@ export default function LetterMakePage() {
         setCumulTime([...cumul]);
     };
 
+    /** calculateDuration(clipId, event)
+     *  클립의 duration이 로드되면 정보를 추가한다.
+     * @param clipId
+     * @param event
+     */
+    const calculateDuration = (clipId: number, event: BaseSyntheticEvent) => {
+        //usedClip, notUsedClip을 기준으로 돌아가니, 이쪽의 정보 업데이트
+        for (let i = 0; i < usedClipList.length; i++) {
+            if (usedClipList[i].clipId === clipId) {
+                console.log(
+                    'duration calculated',
+                    clipId,
+                    event.target.duration
+                );
+                usedClipList[i].clipLength = event.target.duration;
+                //누적합 갱신
+                updateWhole(usedClipList);
+            }
+        }
+        for (let i = 0; i < notUsedClipList.length; i++) {
+            if (notUsedClipList[i].clipId === clipId) {
+                notUsedClipList[i].clipLength = event.target.duration;
+            }
+        }
+    };
+
     ////////////////////////////////////////BGM 결정////////////////////////////////////////////////////////////////
+    /** selectBGM
+     *  현재 bgm을 선택한다.
+     * @param bgmId
+     */
     const selectBGM = (bgmId: number) => {
         setSelectedBGM(bgmId);
     };
+
+    /** selectBGMUrl
+     * bgm을 선택한대로 업로드한다.
+     * @param bgmId
+     * @returns
+     */
+    const selectBGMUrl = (bgmId: number) => {
+        for (let i = 0; i < bgmList.length; i++) {
+            if (bgmList[i].bgmId === bgmId) {
+                setSelectedBGMUrl(bgmList[i].bgmUrl);
+                return;
+            }
+        }
+    };
+
+    const bgmRef = useRef<HTMLAudioElement>(null);
 
     ///////////////////////////////////////비디오 플레이어////////////////////////////////////////////////////////////
 
@@ -656,6 +735,10 @@ export default function LetterMakePage() {
     const [percent, setPercent] = useState<number>(0);
 
     //////////////////////////////////////뒤로가기 버튼 누르면 뒤로가기///////////////////////////////////////////////
+
+    /** goBack()
+     * 뒤로 가기 버튼을 누르면 뒤로 가진다.
+     */
     const goBack = async () => {
         await endScreenShare();
         navigate(`/studiomain/${studioId}`);
@@ -970,66 +1053,132 @@ export default function LetterMakePage() {
             break;
         case 2:
             sideBar = (
-                <div className="w-full text-xl ">
-                    <div className="w-full text-2xl">글꼴</div>
-                    <p className="text-sm">글꼴 스타일</p>
-                    <select name="font" className="w-full">
-                        {fontList.map((font) => {
+                <div className="w-full flex flex-col justify-start text-xl ">
+                    <p>BGM</p>
+                    <select
+                        name="bgm"
+                        id="bgm"
+                        onChange={(event) => {
+                            selectBGM(+event.target.value);
+                            selectBGMUrl(+event.target.value);
+                        }}
+                    >
+                        {bgmList.map((bgm) => {
                             return (
-                                <option
-                                    key={font.fontId}
-                                    value={font.fontFamily}
-                                >
-                                    {font.fontTitle}
+                                <option value={bgm.bgmId}>
+                                    {bgm.bgmTitle}
                                 </option>
                             );
                         })}
-                        ;
                     </select>
-                    <div className="flex justify-between">
-                        <div className="flex flex-col">
-                            <p className="text-sm">글꼴 크기</p>
-                            <div>
-                                <button>-</button>
-                                <input
-                                    type="number"
-                                    defaultValue={32}
-                                    className="w-10"
-                                ></input>
-                                <button>+</button>
-                            </div>
-                        </div>
-                        <div className="flex flex-col">
-                            <p className="text-sm">글꼴 꾸미기</p>
-                            <div>
-                                <button className="font-bold">B</button>
-                                <button className="italic">I</button>
-                                <button>
-                                    <u>U</u>
-                                </button>
-                            </div>
-                        </div>
+                    <button
+                        onClick={() => {
+                            if (bgmRef.current) {
+                                bgmRef.current.play();
+                            }
+                        }}
+                    >
+                        Play
+                    </button>
+                    <button
+                        onClick={() => {
+                            if (bgmRef.current) {
+                                //멈추고 처음으로
+                                bgmRef.current.pause();
+                                bgmRef.current.currentTime = 0;
+                            }
+                        }}
+                    >
+                        Stop
+                    </button>
+                    <audio
+                        src={selectedBGMUrl}
+                        crossOrigin="anonymous"
+                        controls
+                        ref={bgmRef}
+                        style={{ display: 'none' }}
+                    >
+                        오디오
+                    </audio>
+                    <p>배경 음악 볼륨</p>
+                    <input
+                        className="w-full"
+                        type="range"
+                        min={1}
+                        max={100}
+                        value={studioBGMVolume}
+                        defaultValue={studioDetailInfo.studioVolume}
+                        onChange={(event) => {
+                            setStudioBGMVolume(+event.target.value);
+                            if (bgmRef.current) {
+                                bgmRef.current.volume =
+                                    +event.target.value / 100;
+                            }
+                        }}
+                    />
+                    <p>전체 영상 볼륨 조절</p>
+                    <div className="w-full flex">
+                        <button
+                            className="border-2 border-black flex-grow"
+                            onClick={() => {
+                                usedClipList.map((clip) => {
+                                    clip.clipVolume = +clip.clipVolume - 5;
+                                    if (clip.clipVolume < 0) {
+                                        clip.clipVolume = 0;
+                                    }
+                                });
+                                setUsedClipList([...usedClipList]);
+                            }}
+                        >
+                            -5
+                        </button>
+                        <button
+                            className="border-2 border-black flex-grow"
+                            onClick={() => {
+                                usedClipList.map((clip) => {
+                                    clip.clipVolume = +clip.clipVolume - 1;
+                                    if (clip.clipVolume < 0) {
+                                        clip.clipVolume = 0;
+                                    }
+                                });
+                                setUsedClipList([...usedClipList]);
+                            }}
+                        >
+                            -1
+                        </button>
+                        <button
+                            className="border-2 border-black flex-grow"
+                            onClick={() => {
+                                usedClipList.map((clip) => {
+                                    clip.clipVolume = +clip.clipVolume + 1;
+                                    if (clip.clipVolume > 100) {
+                                        clip.clipVolume = 100;
+                                    }
+                                });
+                                setUsedClipList([...usedClipList]);
+                            }}
+                        >
+                            +1
+                        </button>
+                        <button
+                            className="border-2 border-black flex-grow"
+                            onClick={() => {
+                                usedClipList.map((clip) => {
+                                    clip.clipVolume = +clip.clipVolume + 5;
+                                    if (clip.clipVolume > 100) {
+                                        clip.clipVolume = 100;
+                                    }
+                                });
+                                setUsedClipList([...usedClipList]);
+                            }}
+                        >
+                            +5
+                        </button>
                     </div>
                 </div>
             );
             break;
         case 3:
-            sideBar = (
-                <div className="w-full flex flex-col justify-start text-xl ">
-                    <p>BGM</p>
-                    {bgmList.map((bgm) => {
-                        return (
-                            <BGMCard
-                                key={bgm.bgmId}
-                                bgm={bgm}
-                                selectBGM={() => selectBGM(bgm.bgmId)}
-                            />
-                        );
-                    })}
-                </div>
-            );
-            break;
-        case 4:
             sideBar = (
                 <div className="w-full flex flex-col justify-start text-xl">
                     <div className="w-full h-full px-4 py-2 text-xl border rounded-2xl flex flex-wrap items-center justify-center">
@@ -1412,7 +1561,7 @@ export default function LetterMakePage() {
             formData.append('studioFontSize', String(32));
             formData.append('studioFontBold', 'false');
             formData.append('studioBgmId', String(selectedBGM));
-            formData.append('studioVolume', String(100));
+            formData.append('studioVolume', String(studioBGMVolume));
             formData.append('studioSticker', blob, 'sticker.png');
 
             type ObjectType = {
@@ -1641,9 +1790,9 @@ export default function LetterMakePage() {
                                     }`}
                                 ></div>
                                 <span className="material-symbols-outlined text-3xl">
-                                    title
+                                    volume_up
                                 </span>
-                                <p className="font-bold">텍스트</p>
+                                <p className="font-bold">오디오</p>
                             </div>
                             <div
                                 className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
@@ -1662,32 +1811,6 @@ export default function LetterMakePage() {
                                 <div
                                     className={`${
                                         mode === 3
-                                            ? 'h-16 categori-selected'
-                                            : ''
-                                    }`}
-                                ></div>
-                                <span className="material-symbols-outlined text-3xl">
-                                    volume_up
-                                </span>
-                                <p className="font-bold">오디오</p>
-                            </div>
-                            <div
-                                className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
-                                onClick={() => {
-                                    setMode(4);
-                                }}
-                                style={
-                                    mode === 4
-                                        ? {
-                                              backgroundColor: 'white',
-                                              color: '#ff777f',
-                                          }
-                                        : {}
-                                }
-                            >
-                                <div
-                                    className={`${
-                                        mode === 4
                                             ? 'h-16 categori-selected'
                                             : ''
                                     }`}
@@ -1898,6 +2021,7 @@ export default function LetterMakePage() {
                             </div>
                             <div className="w-11/12 flex items-center overflow-x-scroll py-2">
                                 {usedClipList.map((clip, index) => {
+                                    console.log(clip);
                                     return (
                                         <SelectedVideoCard
                                             key={clip.clipId}
@@ -1908,10 +2032,6 @@ export default function LetterMakePage() {
                                             changeVolume={(event) =>
                                                 changeVolume(clip.clipId, event)
                                             }
-                                            // getDuration={(
-                                            //     clipId: number,
-                                            //     length: number
-                                            // ) => getDuration(clipId, length)}
                                             propVideoRef={videoRef}
                                             percent={percent}
                                             selectCard={() => selectIdx(index)}
@@ -1931,6 +2051,19 @@ export default function LetterMakePage() {
             ) : (
                 <></>
             )} */}
+            {/* 길이 로드용 metadata 추출 video */}
+            {studioDetailInfo.clipInfoList.map((clip) => {
+                return (
+                    <video
+                        src={clip.clipUrl}
+                        style={{ display: 'none' }}
+                        crossOrigin="anonymous"
+                        onLoadedMetadata={(event: BaseSyntheticEvent) =>
+                            calculateDuration(clip.clipId, event)
+                        }
+                    ></video>
+                );
+            })}
         </section>
     );
 }

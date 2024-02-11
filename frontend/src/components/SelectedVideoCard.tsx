@@ -33,44 +33,45 @@ export default function SelectedVideoCard({
 
     return (
         <>
-            <div
-                className={`relative w-28 flex flex-col justify-center mx-2`}
-                onClick={selectCard}
-            >
-                {propVideoRef.current &&
-                propVideoRef.current.src === clip.clipUrl ? (
-                    <div
-                        className={`w-[2px] h-full absolute bg-red-500 z-10`}
-                        ref={progressBar}
-                        style={{ left: percent * 112 }}
-                    ></div>
-                ) : (
-                    <></>
-                )}
+            <div className={`relative w-28 flex flex-col justify-center mx-2`}>
                 <button
                     className="absolute w-6 h-6 -right-2 -top-2 color-bg-main rounded-full z-10 flex justify-center items-center text-white"
                     onClick={unselectClip}
                 >
                     -
                 </button>
-                <video
-                    src={clip.clipUrl}
-                    style={{ transform: `rotateY(180deg)` }}
-                    crossOrigin="anonymous"
-                    preload="metadata"
-                    ref={videoRef}
-                    onLoadedData={metadataLoad}
-                    className=""
-                />
-                <p>{clip.clipTitle}</p>
-                <input
-                    className="w-28"
-                    type="range"
-                    min={1}
-                    max={100}
-                    defaultValue={clip.clipVolume}
-                    onChange={changeVolume}
-                />
+                <div onClick={selectCard}>
+                    {propVideoRef.current &&
+                    propVideoRef.current.src === clip.clipUrl ? (
+                        <div
+                            className={`w-[2px] h-full absolute bg-red-500 z-10`}
+                            ref={progressBar}
+                            style={{ left: percent * 112 }}
+                        ></div>
+                    ) : (
+                        <></>
+                    )}
+
+                    <video
+                        src={clip.clipUrl}
+                        style={{ transform: `rotateY(180deg)` }}
+                        crossOrigin="anonymous"
+                        preload="metadata"
+                        ref={videoRef}
+                        onLoadedData={metadataLoad}
+                        className=""
+                    />
+                    <p>{clip.clipTitle}</p>
+                    <input
+                        className="w-28"
+                        type="range"
+                        min={1}
+                        max={100}
+                        defaultValue={clip.clipVolume}
+                        value={clip.clipVolume}
+                        onChange={changeVolume}
+                    />
+                </div>
             </div>
         </>
     );
