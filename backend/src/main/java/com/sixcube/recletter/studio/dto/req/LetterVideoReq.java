@@ -18,7 +18,7 @@ public class LetterVideoReq implements Serializable {
     String studioId;
     Integer studioFrameId;
     Integer studioBgmId;
-    Integer studioVolumeId;
+    Integer studioVolume;
     Integer studioFontId;
     List<LetterClipInfo> clipInfoList;
 
