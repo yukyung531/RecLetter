@@ -74,6 +74,19 @@ export default function MyPage() {
             }
         });
     };
+
+    /** 회원탈퇴 확인 알림창 */
+    const handleWithdrawal = () => {
+        const confirmed = window.confirm('정말 탈퇴하시겠습니까?');
+        if (confirmed) {
+            // 탈퇴 로직을 실행합니다.
+            deleteUserState();
+            console.log('사용자가 탈퇴했습니다.');
+        } else {
+            console.log('사용자가 탈퇴를 취소했습니다.');
+        }
+    };
+
     /** 유저 삭제 API */
     const deleteUserAPI = async () => {
         await deleteUser().then((res) => {
@@ -192,7 +205,7 @@ export default function MyPage() {
                     
                     <div
                         className="text-xl underline my-6 text-center cursor-pointer text-gray-400"
-                        onClick={deleteUserState}
+                        onClick={handleWithdrawal}
                     >
                        회원 탈퇴
                     </div>
