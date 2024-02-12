@@ -72,7 +72,6 @@ export default function FindPwPage() {
         setIsCounting(true);
     };
 
-
     /** POST 비밀번호 초기화 이메일 발송 요청 */
     const sendPasswordEmail = async () => {
         setEmailFlag(1);
@@ -162,7 +161,7 @@ export default function FindPwPage() {
                 </div>
                 <div className="flex h-12 my-3 items-center justify-center">
                     <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4">
-                    비밀번호 확인
+                        비밀번호 확인
                     </p>
                     <input
                         className="w-128 h-12 ps-3 text-2xl border rounded-md"
@@ -191,7 +190,7 @@ export default function FindPwPage() {
                 </div>
             );
         }
-    }
+    };
 
     /** Email 컴포넌트 */
     const checkEmailElement = () => {
@@ -211,8 +210,7 @@ export default function FindPwPage() {
                     </p>
                 </div>
             );
-        }
-        else if (emailFlag === 0) {
+        } else if (emailFlag === 0) {
             return <></>;
         } else if (emailFlag === 1) {
             return (
@@ -249,11 +247,13 @@ export default function FindPwPage() {
         }
         if (emailFlag === 0) {
             return <></>;
-        }  else if ((emailFlag === 2 || emailFlag === 3) && emailCheck && codeCheck) {
-
+        } else if (
+            (emailFlag === 2 || emailFlag === 3) &&
+            emailCheck &&
+            codeCheck
+        ) {
             return <></>;
-
-        } else if (emailCheck && (emailFlag === 2 || emailFlag === 3))  {
+        } else if (emailCheck && (emailFlag === 2 || emailFlag === 3)) {
             return (
                 <li className="flex mt-4">
                     <p className="w-32 me-4"></p>
@@ -283,7 +283,7 @@ export default function FindPwPage() {
                     </div>
                 </li>
             );
-        }else {
+        } else {
             return <></>;
         }
     };
@@ -323,14 +323,9 @@ export default function FindPwPage() {
             >
                 비밀번호 재설정
             </button>
-            <div
-                className="text-xl underline my-6 text-center cursor-pointer text-gray-400"
-            >
+            <div className="text-xl underline my-6 text-center cursor-pointer text-gray-400">
                 <Link to="/login">돌아가기</Link>
             </div>
-
         </section>
     );
-
-
 }
