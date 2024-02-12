@@ -148,6 +148,15 @@ export default function ClipRecordPage() {
         }
     };
 
+    /** 방향키 위 아래 */
+    window.onkeydown = (event: KeyboardEvent) => {
+        if (event.key === 'ArrowLeft') {
+            goUp();
+        } else if (event.key === 'ArrowRight') {
+            goDown();
+        }
+    };
+
     /////////웹캠 구간////////////////////////////////////////////////////////////
 
     //미디어스트림 저장 변수

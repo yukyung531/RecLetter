@@ -103,7 +103,7 @@ export default function LetterMakePage() {
         fontShadowWidth: 2,
         fontShadowBlur: 3,
     });
-    const [studioBGMVolume, setStudioBGMVolume] = useState<number>(100);
+    const [studioBGMVolume, setStudioBGMVolume] = useState<number>(50);
 
     /** 리덕스 설정 */
     const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
@@ -352,15 +352,20 @@ export default function LetterMakePage() {
                         }
 
                         //studioBGM
-                        setSelectedBGM(res.data.studioBGMId);
-                        selectBGMUrl(res.data.studioBGMId);
+                        // console.log(res.data);
+                        if (res.data.studioBGMId) {
+                            setSelectedBGM(res.data.studioBGMId);
+                            selectBGMUrl(res.data.studioBGMId);
+                        }
 
                         //studioBGMVolume
-                        if (bgmRef.current) {
-                            bgmRef.current.volume =
-                                +res.data.studioVolume / 100;
+                        if (res.data.studioVolume) {
+                            if (bgmRef.current) {
+                                bgmRef.current.volume =
+                                    +res.data.studioVolume / 100;
+                            }
+                            setStudioBGMVolume(res.data.studioVolume);
                         }
-                        setStudioBGMVolume(res.data.studioVolume);
                     } else {
                         console.log('Network Error');
                     }
@@ -405,10 +410,6 @@ export default function LetterMakePage() {
                 .catch((err) => {
                     console.log(err);
                 });
-
-            // openvidu 화면 공유 시작
-            //현재 주석 처리. 주석 풀것!!! (주석해제위치)
-            // startScreenShare();
         };
         initSetting();
 
@@ -468,6 +469,9 @@ export default function LetterMakePage() {
         if (!token || !isLogin) {
             navigate(`/login`);
         }
+        // openvidu 화면 공유 시작
+        //현재 주석 처리. 주석 풀것!!! (주석해제위치)
+        // startScreenShare();
 
         /** 페이지 새로고침 전에 실행 할 함수 */
         const reloadingStudioId = getlastPath();
@@ -841,7 +845,8 @@ export default function LetterMakePage() {
     const playVideo = () => {
         setPercent(0);
         setPlaying(true);
-        if (videoRef.current) {
+        //video play && bgm play
+        if (videoRef.current && bgmRef.current) {
             //idx 범위 내부면 비디오 재생 및 다음으로 넘기는 함수
             if (
                 playingIdx.current >= 0 &&
@@ -853,6 +858,12 @@ export default function LetterMakePage() {
                 videoRef.current.volume =
                     usedClipList[playingIdx.current].clipVolume / 100;
                 videoRef.current.play();
+
+                //bgm실행
+                bgmRef.current.volume = studioBGMVolume / 100;
+                bgmRef.current.currentTime =
+                    cumulTime[playingIdx.current] % bgmRef.current.duration;
+                bgmRef.current.play();
             } else {
                 //범위 밖이면 맨 처음 영상으로 돌아간 후 정지
                 playingIdx.current = 0;
@@ -870,8 +881,11 @@ export default function LetterMakePage() {
      */
     const stopVideo = () => {
         setPlaying(false);
-        if (videoRef.current) {
+        if (videoRef.current && bgmRef.current) {
+            videoRef.current.currentTime = 0;
+            bgmRef.current.currentTime = 0;
             videoRef.current.pause();
+            bgmRef.current.pause();
         }
     };
 
@@ -1278,49 +1292,59 @@ export default function LetterMakePage() {
         case 2:
             sideBar = (
                 <div className="w-full flex flex-col justify-start text-xl ">
-                    <p>BGM</p>
+                    <div className="flex justify-between">
+                        <p>BGM</p>
+                        <div>
+                            <button
+                                onClick={() => {
+                                    if (bgmRef.current) {
+                                        bgmRef.current.play();
+                                    }
+                                }}
+                            >
+                                ▶
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (bgmRef.current) {
+                                        //멈추고 처음으로
+                                        bgmRef.current.pause();
+                                        bgmRef.current.currentTime = 0;
+                                    }
+                                }}
+                            >
+                                ■
+                            </button>
+                        </div>
+                    </div>
                     <select
                         name="bgm"
                         id="bgm"
                         onChange={(event) => {
+                            stopVideo();
                             selectBGM(+event.target.value);
                             selectBGMUrl(+event.target.value);
                         }}
                     >
                         {bgmList.map((bgm) => {
                             return (
-                                <option value={bgm.bgmId}>
+                                <option
+                                    value={bgm.bgmId}
+                                    selected={bgm.bgmId === selectedBGM}
+                                >
                                     {bgm.bgmTitle}
                                 </option>
                             );
                         })}
                     </select>
-                    <button
-                        onClick={() => {
-                            if (bgmRef.current) {
-                                bgmRef.current.play();
-                            }
-                        }}
-                    >
-                        Play
-                    </button>
-                    <button
-                        onClick={() => {
-                            if (bgmRef.current) {
-                                //멈추고 처음으로
-                                bgmRef.current.pause();
-                                bgmRef.current.currentTime = 0;
-                            }
-                        }}
-                    >
-                        Stop
-                    </button>
+
                     <audio
                         src={selectedBGMUrl}
                         crossOrigin="anonymous"
                         controls
                         ref={bgmRef}
                         style={{ display: 'none' }}
+                        loop
                     >
                         오디오
                     </audio>
@@ -1331,8 +1355,7 @@ export default function LetterMakePage() {
                         min={1}
                         max={100}
                         value={studioBGMVolume}
-                        defaultValue={100}
-                        // defaultValue={studioDetailInfo.studioVolume}
+                        defaultValue={50}
                         onChange={(event) => {
                             setStudioBGMVolume(+event.target.value);
                             if (bgmRef.current) {
@@ -1630,10 +1653,15 @@ export default function LetterMakePage() {
 
         // 세션 연결
         const token = await getToken(studioId); //토큰 받아오기
+        let user = userInfo;
+        if (userInfo.userId === '') {
+            const res = await getUser();
+            user = res.data;
+        }
 
         // 세션 연결 시작
         newSession
-            .connect(token, { clientData: userInfo.userId })
+            .connect(token, { clientData: user.userNickname })
             .then(async () => {
                 console.log('Connected');
                 //publisher 초기화(videoSource = screen)
@@ -1753,6 +1781,7 @@ export default function LetterMakePage() {
     const saveNowStatus = async () => {
         /* Canvas 이미지 설정 */
         setCanvasFlag(2);
+        // uploadLetterAPI()
     };
 
     /** 영상 보내는 API */
@@ -2340,7 +2369,6 @@ export default function LetterMakePage() {
                             </div>
                             <div className="w-11/12 flex items-center overflow-x-scroll py-2">
                                 {usedClipList.map((clip, index) => {
-                                    console.log(clip);
                                     return (
                                         <SelectedVideoCard
                                             key={clip.clipId}

@@ -32,6 +32,7 @@ export default function LetterViewPage() {
             userNickname: tempObj.userNickname,
         });
     };
+    getUserInfo();
 
     /////////////////////////////openvidu///////////////////
 
@@ -82,7 +83,6 @@ export default function LetterViewPage() {
         });
 
         newSession.on('sessionDisconnected', () => {
-            alert('session closed');
             endScreenShare();
         });
 
@@ -91,7 +91,7 @@ export default function LetterViewPage() {
 
         // 세션 연결 시작
         newSession
-            .connect(token, { clientData: userInfo.userId })
+            .connect(token, { clientData: userInfo.userNickname })
             .then(async () => {
                 console.log('Connected to Session');
             })
@@ -109,6 +109,7 @@ export default function LetterViewPage() {
     }, []);
 
     const endScreenShare = useCallback(() => {
+        alert('세션에서 나갑니다.');
         //세션이 있으면 연결을 멈춘다.
         if (session) {
             session.disconnect();
@@ -171,22 +172,33 @@ export default function LetterViewPage() {
     }, []);
 
     return (
-        <section className="relative section-top pt-16">
-            <h1>Welcome to Letter View Page</h1>
-            <p>지금 다른 사람이 수정하고 있으니 쉬고 계세요.</p>
-            <div id="video-container">
-                {subscribers.length >= 1 ? (
-                    subscribers.map((subscriber) => {
-                        return (
-                            <OpenViduVideoCard
-                                key={subscriber.id}
-                                streamManager={subscriber}
-                            />
-                        );
-                    })
-                ) : (
-                    <></>
-                )}
+        <section className="relative section-top pt-16 bg-black">
+            <div className="flex">
+                <div id="video-container">
+                    {subscribers.length >= 1 ? (
+                        subscribers.map((subscriber) => {
+                            console.log(subscriber);
+                            return (
+                                <>
+                                    <OpenViduVideoCard
+                                        key={subscriber.id}
+                                        streamManager={subscriber}
+                                    />
+                                </>
+                            );
+                        })
+                    ) : (
+                        <></>
+                    )}
+                </div>
+                <div id="button" className="w-1/5">
+                    <button
+                        className="w-full h-[10%] rounded text-3xl bg-[#FF777F] text-white"
+                        onClick={endScreenShare}
+                    >
+                        회의나가기
+                    </button>
+                </div>
             </div>
         </section>
     );

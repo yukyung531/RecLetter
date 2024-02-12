@@ -261,6 +261,39 @@ export default function StudioMainPage() {
                 const newList: ClipInfo[] = [...prevList];
                 const newValue = { ...prevValue };
                 newValue.clipInfoList = newList;
+
+                //자른 후 정렬, 사용/미사용 나누기
+                //우선 정렬을 한 후, 사용한 비디오, 아닌 비디오로 분리
+                const clipList = newList.sort(
+                    (clipA: ClipInfo, clipB: ClipInfo) =>
+                        clipA.clipOrder - clipB.clipOrder
+                );
+
+                const usedVidArr: ClipInfo[] = [];
+                const unUsedVidArr: ClipInfo[] = [];
+
+                clipList.map((clip: ClipInfo) => {
+                    if (clip.clipOrder === -1) {
+                        unUsedVidArr.push(clip);
+                    } else {
+                        usedVidArr.push(clip);
+                    }
+                });
+
+                //set
+                setUnUsedVideoList(unUsedVidArr);
+                setUsedVideoList(usedVidArr);
+                //사용한 첫 영상 자동재생
+                if (usedVidArr.length > 0) {
+                    //selectVideo함수를 사용하기에는 부적합
+                    //왜냐하면 아직 studioDetailInfo가 업데이트 되지 않았기 때문
+                    //그래서 직접 조작 필요
+                    if (videoRef.current) {
+                        setSelectedVideo(usedVidArr[0]);
+                        setPlayingVideo(true);
+                    }
+                }
+
                 return newValue;
             });
         }

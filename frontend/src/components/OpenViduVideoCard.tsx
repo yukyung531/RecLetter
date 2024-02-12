@@ -19,13 +19,15 @@ export default function OpenViduVideoCard({ streamManager }: props) {
     }, [streamManager]);
 
     return (
-        <div id={userNickname}>
+        <div id={userNickname} className="m-2">
+            <p className="text-2xl text-center text-white">
+                {userNickname}님의 편집화면을 보는 중입니다.
+            </p>
             <video
                 ref={videoRef}
                 autoPlay={true}
-                style={{ width: '640px', height: '480px' }}
+                style={{ width: '100%', borderRadius: '10px', border: 'white' }}
             ></video>
-            <p>{userNickname}</p>
         </div>
     );
 }

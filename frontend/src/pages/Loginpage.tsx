@@ -11,6 +11,7 @@ import {
 } from '../util/counter-slice';
 import axios from 'axios';
 import Image from '../assets/icons/google_icon.svg';
+import LoginErrorModal from '../components/LoginErrorModal';
 
 export default function LoginPage() {
     const [inputEmail, setInputEmail] = useState<string>('');
@@ -20,6 +21,10 @@ export default function LoginPage() {
     const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    /** 모달창 */
+    const [isErrorModalActive, setIsErrorModalActive] =
+        useState<boolean>(false);
 
     const logo = <img src={Image} alt="로고" width={250}></img>;
 
@@ -82,18 +87,32 @@ export default function LoginPage() {
                 }
             })
             .catch((error) => {
+                console.log(error);
+                alert(error);
                 if (axios.isAxiosError(error)) {
                     if (
                         error.response?.status === httpStatusCode.UNAUTHORIZED
                     ) {
-                        alert('아이디나 비밀번호가 잘못되었습니다.');
+                        setIsErrorModalActive(true);
                     }
                 }
             });
     };
 
+    /** closeModal()
+     *  모달창을 닫는다.
+     */
+    const closeModal = () => {
+        setIsErrorModalActive(false);
+    };
+
     return (
         <section className="section-center">
+            {isErrorModalActive ? (
+                <LoginErrorModal onClick={closeModal} />
+            ) : (
+                <></>
+            )}
             <div className="w-1/3 flex flex-col justify-center items-center">
                 <h5 className="mt-4 mb-8 text-4xl text-center p-4">Login</h5>
                 <div className="flex flex-col justify-center items-center">

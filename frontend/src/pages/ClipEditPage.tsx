@@ -306,7 +306,7 @@ export default function ClipEditPage() {
                 const clipForm = new FormData();
                 clipForm.append('studioId', studioId);
                 clipForm.append('clipTitle', clipName);
-                clipForm.append('clipContent', inputText);
+                clipForm.append('clipContent', '');
                 clipForm.append('clip', newBlob);
 
                 type ObjectType = {
@@ -317,7 +317,6 @@ export default function ClipEditPage() {
                 clipForm.forEach((value, key) => {
                     object[key.toString()] = value;
                 });
-                console.log(object);
 
                 await uploadClip(object)
                     .then((response) => {
@@ -370,7 +369,6 @@ export default function ClipEditPage() {
     const resetSettings = () => {
         setStartTime(0);
         setEndTime(endMaxtime);
-        setInputText('');
     };
 
     ///영상 재생//////////////////////////////////////////////////////////////////////////////
@@ -505,15 +503,6 @@ export default function ClipEditPage() {
                                 ></input>
                             </div>
 
-                            <div className="w-56 flex justify-start text-xl ">
-                                <p>서브 텍스트 입력</p>
-                            </div>
-                            <input
-                                className="w-56 my-2 p-2 border border-black rounded"
-                                placeholder="텍스트를 입력해주세요."
-                                onChange={changeText}
-                                value={inputText}
-                            ></input>
                             <button
                                 className="w-56 mt-6 p-2 border border-[#FF777F] rounded text-[#FF777F] text-xl"
                                 onClick={resetSettings}
@@ -629,17 +618,13 @@ export default function ClipEditPage() {
                         >
                             저장하기
                         </div>
-                        <div className="w-full h-[200px] p-2">
+                        <div className="w-full p-2">
                             <div className="w-full rounded-t-lg text-lg pl-2 bg-[#FF777F]">
                                 영상 정보
                             </div>
                             <div className="w-full h-full rounded-b-lg text-lg p-2 border-2 border-[#FF777F] bg-white whitespace-normal">
                                 <p>제목: {clipName}</p>
                                 <p>길이: {formatTime(wholeDuration)}</p>
-                                <p>
-                                    서브 텍스트: <br />
-                                    {inputText}
-                                </p>
                             </div>
                         </div>
                     </div>

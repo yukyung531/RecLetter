@@ -5,12 +5,23 @@ import { logout } from '../api/auth';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginState } from '../util/counter-slice';
 import { deleteStorageData } from '../util/initialLocalStorage';
+import LogOutModal from './LogOutModal';
 
 export default function Header() {
     /** 리덕스 함수 */
     const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
     const dispatch = useDispatch();
     const navigator = useNavigate();
+
+    /** 모달 상태 */
+    const [isModalActive, setIsModalActive] = useState<boolean>(false);
+
+    //로그인과 동시에 모달 뜨는 오류 해결
+    useEffect(() => {
+        if (isLogin) {
+            setIsModalActive(false);
+        }
+    }, []);
 
     /** 로그아웃 */
     const onLogout = () => {
@@ -21,20 +32,32 @@ export default function Header() {
     const logoutAPI = async () => {
         await logout()
             .then(() => {
-                deleteStorageData();
-                alert('로그아웃이 되었습니다.');
-                dispatch(loginState(false));
-                navigator('/');
+                //모달 활성화
+                setIsModalActive(true);
             })
             .catch((e: Error) => {
                 console.log(e);
             });
     };
+
+    /**모달 클릭 */
+    const clickModal = () => {
+        setIsModalActive(false);
+        deleteStorageData();
+        dispatch(loginState(false));
+        navigator('/');
+    };
+
     /** 로그인 상태변화 Element */
     const loginStateElement = () => {
         if (isLogin) {
             return (
                 <div className="flex justify-center items-center color-text-ivory">
+                    {isModalActive ? (
+                        <LogOutModal onClick={clickModal} />
+                    ) : (
+                        <></>
+                    )}
                     <Link
                         to="/mypage"
                         className="flex mx-2 text-xl justify-center items-center"
