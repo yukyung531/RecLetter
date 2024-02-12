@@ -222,13 +222,14 @@ public class StudioServiceImpl implements StudioService {
     //- 만료 기한 이틀 전에는 모든 사용자들에게 완료(인코딩) 권한이 주어짐
     if(leftDays<0){
       throw new ExpiredStudioException(); //기한 만료 스튜디오
-    } else if (leftDays<2 || studio.getStudioOwner().equals(user.getUserId())){ //기한이 2일 이내 남았거나, 방장인 경우
+    } else if (leftDays<=2 || studio.getStudioOwner().equals(user.getUserId())){ //기한이 2일 이내 남았거나, 방장인 경우
       //진행
         return LetterVideoReq.builder()
               .studioId(studio.getStudioId())
               .studioFrameId(studio.getStudioFrameId())
               .studioBgmId(studio.getStudioBgmId())
               .studioBgmVolume(studio.getStudioBgmVolume())
+              .studioSticker(studio.getStudioSticker())
               .clipInfoList(clipService.searchLetterClipInfoByOrder(studioId))
               .build();
     } else{
@@ -246,9 +247,13 @@ public class StudioServiceImpl implements StudioService {
   @Override
   public String downloadLetter(String studioId){
     String url="";
-    String fileName=studioId+".mp4";
-    if(s3Util.isObject(fileName)){
-      url=s3Util.getSignedUrl(fileName);
+
+    Studio studio=studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
+    if(studio.getStudioStatus()==StudioStatus.COMPLETE){
+      String fileName=studioId+".mp4";
+      if(s3Util.isObject(fileName)){
+        url=s3Util.getSignedUrl(fileName);
+      }
     }
     return url;
   }
