@@ -3,8 +3,7 @@ import shutil
 import time
 
 import boto3
-from celery import Celery, shared_task
-from dotenv.main import load_dotenv
+from dotenv import load_dotenv
 from kafka import KafkaConsumer, KafkaProducer
 from json import loads, dumps
 
@@ -66,8 +65,12 @@ def download_assets():
             try:
                 print("다운로드 시작:", make_letter_req.studio_id)
                 asset_download(make_letter_req, BUCKET, s3_client)
-                producer.send(topic=KAFKA_ASSET_DOWNLOADINFO_TOPIC,
-                              value=message.value)
+
+                producer.send(
+                    topic=KAFKA_ASSET_DOWNLOADINFO_TOPIC,
+                    value=message.value
+                )
+
                 producer.flush()
                 print("다운로드 완료")
             except Exception as e:
@@ -121,8 +124,7 @@ def encode_letter():
 
                 # 각 클립의 볼륨 조절
                 volume_tuned_clip = list(
-                    map(lambda x: tune_volume(x[1],
-                                              clip_info_list[x[0]].clip_volume),
+                    map(lambda x: tune_volume(x[1], clip_info_list[x[0]].clip_volume),
                         enumerate(mirrored_clip)))
                 del mirrored_clip
 
@@ -133,13 +135,16 @@ def encode_letter():
                 # 연결된 영상에 프레임 인코딩
                 frame_added_letter = encode_frame(
                     concatenated_letter,
-                    make_letter_req.studio_frame_id
+                    make_letter_req.studio_frame_id,
+                    make_letter_req.get_sticker_file_path()
                 )
                 del concatenated_letter
 
                 # 스티커 인코딩
-                # sticker_added_letter = encode_sticker(frame_added_letter,
-                #                                       make_letter_req.get_sticker_file_path())
+                # sticker_added_letter = encode_sticker(
+                #     frame_added_letter,
+                #     make_letter_req.get_sticker_file_path()
+                # )
                 # del frame_added_letter
 
                 # 전체 영상 볼륨 조절

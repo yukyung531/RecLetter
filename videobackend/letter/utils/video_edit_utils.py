@@ -23,21 +23,17 @@ def resize_clip(clip: VideoClip) -> VideoClip:
     return clip.fx(vfx.resize, (1280, 720))
 
 
-def encode_frame(clip: VideoClip, frame_id: int) -> VideoClip:
+def encode_frame(clip: VideoClip, frame_id: int, sticker_file_path: str) -> VideoClip:
     file_route = "./assets/frames/frame" + str(frame_id) + ".png"
 
-    if os.path.exists(file_route):
-        frame = ImageClip(file_route, duration=clip.duration)
-        return CompositeVideoClip([clip, frame])
-    else:
-        print("encode_frame: frame not found")
-        return clip
-
+    frame = ImageClip(file_route, duration=clip.duration)
+    sticker = ImageClip("./assets/frames/1707758060518.png", duration=clip.duration)
+    return CompositeVideoClip([clip, frame])
 
 def encode_sticker(clip: VideoClip, sticker_file_path: str) -> VideoClip:
     if os.path.exists(sticker_file_path):
         frame = ImageClip(sticker_file_path, duration=clip.duration)
-        return CompositeVideoClip([clip, frame])
+        return CompositeVideoClip([clip])
     else:
         print("encode_sticker: sticker not found")
         return clip

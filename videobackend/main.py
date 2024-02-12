@@ -3,16 +3,11 @@ from threading import Thread
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
-from videobackend.letter.celery.celery_app import celery_app
-from videobackend.letter.celery.tasks import download_assets, encode_letter, \
+from videobackend.letter.thread.tasks import download_assets, encode_letter, \
     upload_letter, delete_assets
 from videobackend.letter.controller.letter_video_controller import letter_video_router
 
 load_dotenv(dotenv_path="./.env")
-
-# kafka_celery = celery_app
-# kafka_celery.autodiscover_tasks()
-# kafka_celery.worker_main(['worker', '--loglevel=info'])
 
 thread1 = Thread(target=download_assets)
 thread2 = Thread(target=encode_letter)

@@ -40,26 +40,27 @@ async def test() -> None:
     )
 
     value = {
-        "studioId": "a1d1d6a7-d605-46b5-b752-0c18b30bbde4",
-        "studioFrameId": 7,
+        "studioId": "9ab5bc8c-1f13-45c5-9c7c-01ef4f54dd3c",
+        "studioFrameId": 1,
+        "studioSticker": "9ab5bc8c-1f13-45c5-9c7c-01ef4f54dd3c/1707758060518.png",
         "studioBgmId": 1,
-        "bgmVolume": 100,
+        "studioBgmVolume": 100,
         "clipInfoList": [
             {
-                "clipId":2,
+                "clipId": 1,
                 "clipTitle": "김연수 1",
                 "clipVolume": 100
-            },
-            {
-                "clipId": 3,
-                "clipTitle": "김연수 1",
-                "clipVolume": 100
-            },
-            {
-                "clipId": 4,
-                "clipTitle": "김연수 1",
-                "clipVolume": 100
-            },
+            }
+            # {
+            #     "clipId": 2,
+            #     "clipTitle": "김연수 2",
+            #     "clipVolume": 100
+            # },
+            # {
+            #     "clipId": 3,
+            #     "clipTitle": "영상3",
+            #     "clipVolume": 100
+            # },
         ]
     }
 
