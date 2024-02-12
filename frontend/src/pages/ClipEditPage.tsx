@@ -52,13 +52,13 @@ export default function ClipEditPage() {
     const [studioDetailInfo, setStudioDetailInfo] = useState<StudioDetail>({
         studioId: '',
         studioTitle: '',
-        isCompleted: false,
+        studioStatus: '',
         studioOwner: '',
         clipInfoList: [],
         studioFrameId: -1,
-        studioFontId: -1,
         studioBGMId: -1,
         studioStickerUrl: '',
+        studioBGMVolume: 100,
     });
 
     //비디오 재생중인가

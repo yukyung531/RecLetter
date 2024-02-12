@@ -46,6 +46,11 @@ export default function StudioCard({
         };
         findPeopleNum();
     }, []);
+    useEffect(() => {
+        if (editMode === false) {
+            setSelected(false);
+        }
+    }, [editMode]);
     return (
         <div
             className="relative w-1/5 p-3 bg-white border rounded-lg flex flex-col mx-2 my-2 justify-start items-center cursor-pointer"

@@ -50,6 +50,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import ColorPalette from '../components/ColorPalette';
 import { uploadFile } from '../util/uploadFile';
 import { Toggle } from '../components/Toggle';
+import { webkitTextStrokeWidth } from 'html2canvas/dist/types/css/property-descriptors/webkit-text-stroke-width';
 
 interface mousePosition {
     positionX: number | null;
@@ -69,12 +70,12 @@ export default function LetterMakePage() {
         studioId: '',
         studioTitle: '',
         studioOwner: '',
-        isCompleted: false,
+        studioStatus: '',
         clipInfoList: [],
         studioFrameId: 1,
-        studioFontId: 1,
         studioBGMId: 1,
         studioStickerUrl: '',
+        studioBGMVolume: 100,
     });
 
     //나중 결과물 산출용 상태 관리
@@ -110,7 +111,6 @@ export default function LetterMakePage() {
         (state: any) => state.loginFlag.studioId
     );
     const dispatch = useDispatch();
-    const navigator = useNavigate();
 
     interface WholeVideo {
         length: number;
@@ -154,6 +154,8 @@ export default function LetterMakePage() {
     // 선택한 프레임
     const [selectedFrame, setSelectedFrame] = useState<number>(1);
     const [selectImgUrl, setSelectImgUrl] = useState<string>('');
+    const regex =
+        /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(:[0-9]+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
 
     const selectImg = (frameId: number, source: string) => {
         setSelectedFrame(frameId);
@@ -198,6 +200,8 @@ export default function LetterMakePage() {
     const [paletteBorderFlag, setPaletteBorderFlag] = useState<boolean>(false);
     const [paletteShadowFlag, setPaletteShadowFlag] = useState<boolean>(false);
     /** 스티커 선택 */
+
+    const [scrollY, setScrollY] = useState<number>(0);
     const handleSelectedObj = (sticker: string) => {
         setSelectedObj(sticker);
     };
@@ -275,6 +279,11 @@ export default function LetterMakePage() {
     const [playing, setPlaying] = useState<boolean>(false);
 
     useEffect(() => {
+        const studioId = getlastPath();
+        if (studioId === '') {
+            alert('에러가 발생하여 돌아갑니다');
+            navigate('/login');
+        }
         //유저정보 불러오기
         const getUserInfo = async () => {
             const resuser = await getUser();
@@ -332,6 +341,15 @@ export default function LetterMakePage() {
                         setSelectImgUrl(
                             `/src/assets/frames/frame${res.data.studioFrameId}.png`
                         );
+
+                        //스티커 기본 정보 초기화
+                        /* 스티커 */
+                        console.log('스티커 관련');
+                        if (res.data.studioStickerUrl.match(regex)) {
+                            setCustomSticker(res.data.studioStickerUrl);
+                            setCustomStickerFlag(true);
+                            setStickerFlag(true);
+                        }
 
                         //studioBGM
                         setSelectedBGM(res.data.studioBGMId);
@@ -448,7 +466,7 @@ export default function LetterMakePage() {
             }
         }
         if (!token || !isLogin) {
-            navigator(`/login`);
+            navigate(`/login`);
         }
 
         /** 페이지 새로고침 전에 실행 할 함수 */
@@ -457,12 +475,17 @@ export default function LetterMakePage() {
             const studioId = getlastPath();
             disconnect(studioId);
         };
+        const handleScroll = () => {
+            setScrollY(window.scrollY);
+        };
+        window.addEventListener('scroll', handleScroll);
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => {
             console.log('사라지기전 ' + reloadingStudioId + '입니다');
             dispatch(studioDeleteState(reloadingStudioId));
             disconnect(reloadingStudioId);
             window.removeEventListener('beforeunload', handleBeforeUnload);
+            window.removeEventListener('scroll', handleScroll);
         };
     }, []);
 
@@ -507,6 +530,11 @@ export default function LetterMakePage() {
                     scale -= 4;
                     setStickerScale(scale + 2);
                     setKeyState('ㄴ');
+                } else if (event.key === 'Escape') {
+                    setCustomStickerFlag(false);
+                    setStickerFlag(false);
+                    setSelectedObj('');
+                    setKeyState('Escape');
                 }
             }
         };
@@ -575,6 +603,35 @@ export default function LetterMakePage() {
             setClearCanvas(!clearCanvas);
         }
     }, [canvasSaveNum]);
+
+    //Toogle 초기화
+    useEffect(() => {
+        if (!paletteColorFlag) {
+            setCanvasTextSticker((prev) => ({
+                ...prev, // 이전 상태를 복사합니다.
+                fontColor: '#626262',
+            }));
+        }
+    }, [paletteColorFlag]);
+    useEffect(() => {
+        if (!paletteBorderFlag) {
+            setCanvasTextSticker((prev) => ({
+                ...prev, // 이전 상태를 복사합니다.
+                fontBorder: '',
+                fontBorderWidth: 0.1,
+            }));
+        }
+    }, [paletteBorderFlag]);
+    useEffect(() => {
+        if (!paletteShadowFlag) {
+            setCanvasTextSticker((prev) => ({
+                ...prev, // 이전 상태를 복사합니다.
+                fontShadow: '',
+                fontShadowWidth: 2,
+                fontShadowBlur: 3,
+            }));
+        }
+    }, [paletteShadowFlag]);
 
     const onHtmlToPng = () => {
         setCanvasFlag(1);
@@ -863,13 +920,14 @@ export default function LetterMakePage() {
                     className="w-16 h-16 cursor-pointer rounded-lg hover:bg-gray-100 hover:border hover:color-border-main"
                     alt=""
                     onClick={(e) => {
-                        handleSelectedObj(customSticker);
-                        console.log(customSticker);
-                        handleMousePositionInSideBar({
-                            positionX: e.clientX,
-                            positionY: e.clientY,
-                        });
-                        setCustomStickerFlag(true);
+                        if (customSticker) {
+                            handleSelectedObj(customSticker);
+                            handleMousePositionInSideBar({
+                                positionX: e.clientX,
+                                positionY: e.clientY,
+                            });
+                            setCustomStickerFlag(true);
+                        }
                     }}
                 />
                 <input
@@ -960,6 +1018,9 @@ export default function LetterMakePage() {
                                     canvasTextSticker.fontShadow,
                                     0.5
                                 ),
+                                WebkitTextStroke: `${
+                                    canvasTextSticker.fontBorderWidth + 'px'
+                                } ${canvasTextSticker.fontBorder}`,
                             }}
                         >
                             {canvasTextSticker.fontContent === ''
@@ -1061,7 +1122,7 @@ export default function LetterMakePage() {
 
                         <div className="mx-2 my-2">
                             <div className="relative flex items-center pe-10">
-                                <p>외각선</p>
+                                <p>외곽선</p>
                                 <div className="mx-4">
                                     <Toggle
                                         flag={paletteBorderFlag}
@@ -1090,9 +1151,6 @@ export default function LetterMakePage() {
                                                     onChangeStickerBorderWidth
                                                 }
                                             />
-                                            <div className="mx-2">
-                                                ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1131,9 +1189,6 @@ export default function LetterMakePage() {
                                                     onChangeStickerShadowWidth
                                                 }
                                             />
-                                            <div className="mx-2">
-                                                ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
-                                            </div>
                                         </div>
                                     </div>
                                     <div className="flex my-4">
@@ -1151,9 +1206,6 @@ export default function LetterMakePage() {
                                                     onChangeStickerShadowBlur
                                                 }
                                             />
-                                            <div className="mx-2">
-                                                ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1279,7 +1331,8 @@ export default function LetterMakePage() {
                         min={1}
                         max={100}
                         value={studioBGMVolume}
-                        defaultValue={studioDetailInfo.studioVolume}
+                        defaultValue={100}
+                        // defaultValue={studioDetailInfo.studioVolume}
                         onChange={(event) => {
                             setStudioBGMVolume(+event.target.value);
                             if (bgmRef.current) {
@@ -1429,6 +1482,26 @@ export default function LetterMakePage() {
                                 src="/src/assets/images/keyS.png"
                                 style={
                                     keyState === ('s' || 'ㄴ')
+                                        ? { scale: '1.2' }
+                                        : {}
+                                }
+                                alt=""
+                            />
+                        </div>
+                        <div className="relative">
+                            {keyState === 'Escape' ? (
+                                <img
+                                    className="absolute w-8 h-8 -top-6 -right-5 z-20"
+                                    src="/src/assets/images/keyActive12.png"
+                                    alt=""
+                                />
+                            ) : (
+                                <></>
+                            )}
+                            <img
+                                src="/src/assets/images/keyS.png"
+                                style={
+                                    keyState === 'Escape'
                                         ? { scale: '1.2' }
                                         : {}
                                 }
@@ -1735,8 +1808,10 @@ export default function LetterMakePage() {
             formData.append('studioFontId', String(1));
             formData.append('studioFontSize', String(32));
             formData.append('studioFontBold', 'false');
-            formData.append('studioBgmId', String(selectedBGM));
-            formData.append('studioVolume', String(studioBGMVolume));
+            // formData.append('studioBgmId', String(selectedBGM));
+            formData.append('studioBgmId', String(1));
+            // formData.append('studioVolume', String(studioBGMVolume));
+            formData.append('studioVolume', String(100));
             formData.append('studioSticker', blob, 'sticker.png');
 
             type ObjectType = {
@@ -1803,13 +1878,18 @@ export default function LetterMakePage() {
                     style={{
                         position: 'absolute',
                         left: mousePosition.positionX - stickerScale / 2,
-                        top: mousePosition.positionY - stickerScale / 2,
+                        top:
+                            mousePosition.positionY -
+                            stickerScale / 2 +
+                            scrollY,
                         backgroundImage: `url('${
                             customStickerFlag !== true
                                 ? `/src/assets/sticker/${selectedObj}.png')`
                                 : `${customSticker}')`
                         }`,
-                        backgroundSize: 'cover',
+                        backgroundSize: 'contain',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'center',
                         width: stickerScale,
                         height: stickerScale,
                         rotate: stickerRotate + 'deg',
@@ -1830,9 +1910,14 @@ export default function LetterMakePage() {
                         style={{
                             position: 'absolute',
                             left: mousePosition.positionX - stickerScale / 2,
-                            top: mousePosition.positionY - stickerScale / 2,
+                            top:
+                                mousePosition.positionY -
+                                stickerScale / 2 +
+                                scrollY,
                             backgroundImage: `url('/src/assets/sticker/${selectedObj}.png')`,
-                            backgroundSize: 'cover',
+                            backgroundSize: 'contain',
+                            backgroundRepeat: 'no-repeat',
+                            backgroundPosition: 'center',
                             width: stickerScale,
                             height: stickerScale,
                             rotate: stickerRotate + 'deg',
@@ -1846,17 +1931,23 @@ export default function LetterMakePage() {
                         className="sticker z-50 text-center flex items-center justify-center cursor-default"
                         style={{
                             position: 'absolute',
-                            left: mousePosition.positionX - stickerScale / 2,
-                            top: mousePosition.positionY - stickerScale / 2,
+                            left: mousePosition.positionX - 400,
+                            top:
+                                mousePosition.positionY -
+                                stickerScale / 2 +
+                                scrollY,
                             color: canvasTextSticker.fontColor,
                             fontSize: canvasTextSticker.fontSize + 'px',
                             textShadow: hexToRgba(
                                 canvasTextSticker.fontShadow,
                                 0.5
                             ),
-                            width: stickerScale,
+                            width: '800px',
                             height: stickerScale,
                             rotate: stickerRotate + 'deg',
+                            WebkitTextStroke: `${
+                                canvasTextSticker.fontBorderWidth + 'px'
+                            } ${canvasTextSticker.fontBorder}`,
                         }}
                         onClick={(e) => {
                             setStickerFlag(true);
@@ -2017,7 +2108,7 @@ export default function LetterMakePage() {
                         </div>
                         <div className="flex w-full">
                             {/* 영상 표시 부분 */}
-                            <div className="relative w-4/5 h-full flex flex-col justify-center items-center">
+                            <div className="relative w-4/5 h-full flex flex-col items-center">
                                 {/* 영상 */}
                                 <video
                                     className="bg-black border"
@@ -2069,7 +2160,7 @@ export default function LetterMakePage() {
                                         />
                                     );
                                 })}
-                                {/* 스티커 */}
+
                                 <main className="absolute" ref={canvasRef}>
                                     <CanvasItem
                                         canvasWidth={800}
@@ -2092,6 +2183,7 @@ export default function LetterMakePage() {
                                         setCanvasSave={setCanvasSaveNum}
                                         clearCanvas={clearCanvas}
                                         customSticker={customSticker}
+                                        setCustomSticker={setCustomSticker}
                                         setCustomStickerFlag={
                                             setCustomStickerFlag
                                         }
@@ -2100,14 +2192,68 @@ export default function LetterMakePage() {
                                 </main>
                             </div>
                             {/* 저장 및 현재 편지 정보 */}
-                            <div className="relative w-1/5 h-full flex flex-col justify-center">
+                            <div className="relative w-1/5 h-full flex flex-col justify-center items-center">
                                 <button
                                     className="box-border mx-2 py-3 w-full text-xl rounded-lg color-bg-main text-white btn-animation"
                                     onClick={saveNowStatus}
                                 >
                                     저장하기
                                 </button>
-                                <div className="h-28 overflow-y-scroll">
+
+                                <div className="w-full min-h-36 max-h-44 flex mx-2 flex-col my-3 border-x border-b color-border-sublight rounded-lg bg-white">
+                                    <h5 className="color-bg-sublight text-lg border-t px-2 rounded-t-lg text-white">
+                                        편지 정보
+                                    </h5>
+
+                                    <div className="p-2 ms-1 overflow-y-scroll">
+                                        <p className="flex">
+                                            <p className="font-bold">제목:</p>
+                                            <p className="mx-2">
+                                                {studioDetailInfo.studioTitle}
+                                            </p>
+                                        </p>
+                                        <p className="flex">
+                                            <p className="font-bold">길이:</p>
+                                            <p className="mx-2">
+                                                {Math.floor(
+                                                    wholeVideoInfo.length / 60
+                                                )}
+                                                분{' '}
+                                                {Math.floor(
+                                                    wholeVideoInfo.length % 60
+                                                )}
+                                                초
+                                            </p>
+                                        </p>
+                                        <p className="flex">
+                                            <p className="font-bold">
+                                                선택 영상:
+                                            </p>
+                                            <p className="mx-2">
+                                                {'('}
+                                                {wholeVideoInfo.clipList.length}
+                                                {')'}
+                                            </p>
+                                        </p>
+                                        <ul className="list-disc">
+                                            {wholeVideoInfo.clipList.map(
+                                                (clip) => {
+                                                    return (
+                                                        <li className="ms-6">
+                                                            {clip.clipTitle}
+                                                        </li>
+                                                    );
+                                                }
+                                            )}
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div className="w-full h-40 overflow-y-scroll border rounded-lg min-h-40 px-1 py-1">
+                                    <p className="color-text-main text-lg">
+                                        스티커 레이어 {'('}
+                                        {stickerLayoutList.length}
+                                        {')'}
+                                    </p>
                                     {stickerLayoutList.map((item, index) => {
                                         return (
                                             <div
@@ -2141,42 +2287,6 @@ export default function LetterMakePage() {
                                         );
                                     })}
                                 </div>
-                                <div className="w-full flex mx-2 flex-col my-6 border-x border-b color-border-main rounded-lg bg-white">
-                                    <h5 className="color-bg-main border-t px-2 py-1 rounded-t-lg">
-                                        편지 정보
-                                    </h5>
-                                    <div className="p-2">
-                                        <p>
-                                            제목: {studioDetailInfo.studioTitle}
-                                        </p>
-                                        <p>
-                                            길이:{' '}
-                                            {Math.floor(
-                                                wholeVideoInfo.length / 60
-                                            )}
-                                            분{' '}
-                                            {Math.floor(
-                                                wholeVideoInfo.length % 60
-                                            )}
-                                            초
-                                        </p>
-                                        <p>
-                                            선택 영상:{' '}
-                                            {wholeVideoInfo.clipList.length}
-                                        </p>
-                                        <ul>
-                                            {wholeVideoInfo.clipList.map(
-                                                (clip) => {
-                                                    return (
-                                                        <li className="mx-1">
-                                                            {clip.clipTitle}
-                                                        </li>
-                                                    );
-                                                }
-                                            )}
-                                        </ul>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -2185,43 +2295,48 @@ export default function LetterMakePage() {
                         <div className="w-full flex items-center my-4">
                             <div className=" w-1/12 flex justify-center items-center">
                                 {/* 재생버튼 */}
-                                {!playing ? (
-                                    <span
-                                        className="material-symbols-outlined me-1 text-4xl"
-                                        onClick={playVideo}
-                                    >
-                                        play_circle
+                                <div className="flex flex-col items-center">
+                                    {!playing ? (
+                                        <span
+                                            className="material-symbols-outlined me-1 text-4xl cursor-pointer"
+                                            onClick={playVideo}
+                                        >
+                                            play_circle
+                                        </span>
+                                    ) : (
+                                        <span
+                                            className="material-symbols-outlined me-1 text-4xl cursor-pointer"
+                                            onClick={stopVideo}
+                                        >
+                                            stop_circle
+                                        </span>
+                                    )}
+                                    <span>
+                                        {cumulTime.length > 0
+                                            ? Math.floor(
+                                                  (nowPlayingTime +
+                                                      cumulTime[
+                                                          playingIdx.current
+                                                      ]) /
+                                                      60
+                                              )
+                                            : 0}
+                                        분
+                                        {cumulTime.length > 0
+                                            ? Math.floor(
+                                                  (nowPlayingTime +
+                                                      cumulTime[
+                                                          playingIdx.current
+                                                      ]) %
+                                                      60
+                                              )
+                                            : 0}
+                                        초
                                     </span>
-                                ) : (
-                                    <span
-                                        className="material-symbols-outlined me-1 text-4xl"
-                                        onClick={stopVideo}
-                                    >
-                                        stop_circle
-                                    </span>
-                                )}
-                                <span>
-                                    {cumulTime.length > 0
-                                        ? Math.floor(
-                                              (nowPlayingTime +
-                                                  cumulTime[
-                                                      playingIdx.current
-                                                  ]) /
-                                                  60
-                                          )
-                                        : 0}
-                                    분
-                                    {cumulTime.length > 0
-                                        ? Math.floor(
-                                              (nowPlayingTime +
-                                                  cumulTime[
-                                                      playingIdx.current
-                                                  ]) %
-                                                  60
-                                          )
-                                        : 0}
-                                    초
-                                </span>
+                                    <div className="text-center color-text-main">
+                                        음량조절
+                                    </div>
+                                </div>
                             </div>
                             <div className="w-11/12 flex items-center overflow-x-scroll py-2">
                                 {usedClipList.map((clip, index) => {

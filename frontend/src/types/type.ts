@@ -65,7 +65,7 @@ export interface StudioMake {
 export interface StudioInfo {
     studioId: string;
     studioTitle: string;
-    isCompleted: boolean;
+    studioStatus: string;
     isStudioOwner: boolean;
     hasMyClip: boolean;
     thumbnailUrl: string;
@@ -77,12 +77,12 @@ export interface StudioInfo {
 export interface StudioDetail {
     studioId: string;
     studioTitle: string;
-    isCompleted: boolean;
+    studioStatus: string;
     studioOwner: string;
     clipInfoList: ClipInfo[];
     studioFrameId: number;
-    studioFontId: number;
     studioBGMId: number;
+    studioBGMVolume: number;
     studioStickerUrl: string;
     // studioChecklist: number;
 }
@@ -116,11 +116,8 @@ export interface Letter {
     usedClipList: ClipList[];
     unusedClipList: number[];
     studioFrameId: number;
-    studioFontId: number;
-    studioFontSize: number;
-    studioFontBold: boolean;
     studioBgmId: number;
-    studioVolume: number;
+    studioBgmVolume: number;
     studioSticker: string;
 }
 export interface ClipList {

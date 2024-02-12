@@ -26,6 +26,7 @@ import ChattingBox from './components/ChattingBox.tsx';
 import { PersistGate } from 'redux-persist/integration/react';
 import SocialPage from './pages/SocialPage.tsx';
 import DesignTest from './pages/DesignTest.tsx';
+import ErrorPage from './pages/ErrorPage.tsx';
 
 const queryClient = new QueryClient();
 
@@ -36,7 +37,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 <BrowserRouter>
                     <Header />
                     <Routes>
-                        <Route path="/" element={<Mainpage />}></Route>
+                        <Route
+                            path="/"
+                            element={<Mainpage />}
+                            errorElement={<ErrorPage />}
+                        ></Route>
                         <Route path="/login" element={<LoginPage />}></Route>
                         <Route path="/mypage" element={<MyPage />}></Route>
                         <Route path="/regist" element={<RegistPage />}></Route>
@@ -64,7 +69,12 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                         ></Route>
                         <Route
                             path="/clipedit/:studioId"
+                            errorElement={<ErrorPage />}
                             element={<ClipEditPage />}
+                        ></Route>
+                        <Route
+                            path="/lettermake"
+                            element={<LetterMakePage />}
                         ></Route>
                         <Route
                             path="/lettermake/:studioId"

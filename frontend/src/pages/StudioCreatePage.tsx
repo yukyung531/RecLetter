@@ -97,7 +97,7 @@ export default function StudioCreatePage() {
                         <input
                             className="w-128 py-2 px-3 my-4 border-2 rounded-xl text-xl"
                             type="text"
-                            placeholder="Placeholder"
+                            placeholder="스튜디오 제목을 입력해주세요."
                             onChange={changeTitle}
                             maxLength={20}
                         />
