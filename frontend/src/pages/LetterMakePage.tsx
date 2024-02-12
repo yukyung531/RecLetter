@@ -1834,13 +1834,10 @@ export default function LetterMakePage() {
                 formData.append(`unusedClipList[${index}]`, String(item));
             });
             formData.append('studioFrameId', String(selectedFrame));
-            formData.append('studioFontId', String(1));
-            formData.append('studioFontSize', String(32));
-            formData.append('studioFontBold', 'false');
             // formData.append('studioBgmId', String(selectedBGM));
             formData.append('studioBgmId', String(1));
             // formData.append('studioVolume', String(studioBGMVolume));
-            formData.append('studioVolume', String(100));
+            formData.append('studioBgmVolume', String(100));
             formData.append('studioSticker', blob, 'sticker.png');
 
             type ObjectType = {
