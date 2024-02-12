@@ -23,6 +23,8 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -172,7 +174,6 @@ public class StudioServiceImpl implements StudioService {
     studio.setStudioBgmId(updateStudioReq.getStudioBgmId());
     studio.setStudioFrameId(updateStudioReq.getStudioFrameId());
     studio.setStudioBgmVolume(updateStudioReq.getStudioBgmVolume());
-
     //스튜디오 스티커 이미지 저장
     MultipartFile studioSticker= updateStudioReq.getStudioSticker();
     try {
@@ -182,11 +183,10 @@ public class StudioServiceImpl implements StudioService {
         }
         String prevSticker=studio.getStudioSticker();
         StringBuilder stickerName=new StringBuilder();
-        stickerName.append(studio.getStudioId()).append("/").append(now()).append(".png");
+        stickerName.append(studio.getStudioId()).append("/").append(System.currentTimeMillis()).append(".png");
 
         s3Util.saveObject(stickerName.toString(), updateStudioReq.getStudioSticker());
-        studio.setStudioSticker(studioSticker.toString());
-
+        studio.setStudioSticker(stickerName.toString());
         if(prevSticker!=null){
           s3Util.deleteObject(prevSticker);
         }
