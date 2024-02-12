@@ -5,6 +5,24 @@
 #root {
     width: 100%;
 }
+input[type='range'] {
+    -webkit-appearance: none;
+    background: var(--color-main);
+    color: black;
+    height: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    background: #ffffff;
+    cursor: pointer;
+    border: 2px solid var(--color-subbold);
+    height: 16px;
+    width: 16px;
+    border-radius: 100%;
+}
+
 .chat-text-setting {
     white-space: pre-wrap;
     word-wrap: break-word;

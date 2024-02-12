@@ -13,7 +13,7 @@
     --color-yellow1: #fffacf;
     --color-yellow2: #fff593;
     --color-yellow3: #ffc165;
-    --color-yellow4: #F0DF86;
+    --color-yellow4: #f0df86;
     --color-yellowbg: #fffacf;
     --color-ivory: #fafaf0;
     --color-strawberry: #fff5f5;
@@ -161,6 +161,9 @@
 }
 .color-bg-lightgray1 {
     background-color: var(--color-lightgray1);
+}
+.color-text-lightgray1 {
+    color: var(--color-lightgray1);
 }
 .color-bg-gray {
     background-color: var(--color-gray);

@@ -24,6 +24,7 @@ type canvasType = {
     setCanvasSave: React.Dispatch<React.SetStateAction<number>>;
     clearCanvas: boolean;
     customSticker: string;
+    setCustomSticker: React.Dispatch<React.SetStateAction<string>>;
     setCustomStickerFlag: React.Dispatch<React.SetStateAction<boolean>>;
     customStickerFlag: boolean;
 };
@@ -104,6 +105,42 @@ export default function CanvasItem(props: canvasType) {
         const canvas = canvasRef.current;
         if (canvas) {
             const ctx = canvas.getContext('2d');
+
+            //시작 캔버스 넣기
+            if (ctx && !positionX && !positionY && props.customStickerFlag) {
+                const objImage = new Image();
+                objImage.crossOrigin = 'anonymous';
+                objImage.style.objectFit = 'contain';
+                objImage.src = props.customSticker;
+                props.setCustomStickerFlag(false);
+
+                objImage.onload = () => {
+                    // 이미지가 로드된 후에 실행됩니다.
+                    console.log('작동');
+                    ctx.save();
+                    ctx.drawImage(
+                        objImage,
+                        0,
+                        0,
+                        canvas.width / 2,
+                        canvas.height / 2
+                    );
+                    ctx.restore();
+                    saveImgUrl();
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    props.setStickerFlag(false);
+                    props.setSticker('');
+                    props.setCustomSticker('');
+                };
+
+                // 이미지 로드 중 에러 처리
+                objImage.onerror = (error) => {
+                    console.error('이미지 로딩 중 에러:', error);
+                };
+
+                if (ctx === null) return;
+            }
             if (ctx && positionX && positionY) {
                 // mouse position
                 console.log(canvas.getBoundingClientRect().left);
@@ -133,12 +170,17 @@ export default function CanvasItem(props: canvasType) {
                     ctx.save();
                     ctx.translate(mouseX, mouseY);
                     ctx.rotate((rotate % 360) * (Math.PI / 180));
+
+                    var aspectRatio = objImage.width / objImage.height;
+
+                    // Canvas에 그릴 영역 계산
+
                     ctx.drawImage(
                         objImage,
                         -imageSize / 2,
-                        -imageSize / 2,
+                        -(imageSize / aspectRatio) / 2,
                         imageSize,
-                        imageSize
+                        imageSize / aspectRatio
                     );
                     if (mode === 1) {
                         const font = fontSize + 'px ' + fontFamily;
@@ -223,32 +265,56 @@ export default function CanvasItem(props: canvasType) {
         const canvas = canvasRef.current;
         if (canvas) {
             const ctx = canvas.getContext('2d');
-            if (ctx && positionX && positionY) {
-                props.stickerLayout.map((item, index) => {
+            if (ctx) {
+                if (props.stickerLayout.length === 0) {
                     const objImage = new Image();
-                    objImage.src = item;
-                    objImage.onload = () => {
-                        // 이미지가 로드된 후에 실행됩니다.
-                        console.log('작동');
+                    ctx.drawImage(
+                        objImage,
+                        0,
+                        0,
+                        canvas.width / 2,
+                        canvas.height / 2
+                    );
+                    if (saveFlag === 1) {
+                        props.setCanvasDownload(1);
+                    } else if (saveFlag === 2) {
+                        props.setCanvasSave(1);
+                    }
+                } else {
+                    props.stickerLayout.map((item, index) => {
+                        const objImage = new Image();
+                        objImage.src = item;
+                        objImage.onload = () => {
+                            // 이미지가 로드된 후에 실행됩니다.
+                            console.log('작동');
 
-                        ctx.drawImage(
-                            objImage,
-                            0,
-                            0,
-                            canvas.width / 2,
-                            canvas.height / 2
-                        );
-                        if (saveFlag === 1) {
-                            props.setCanvasDownload(index + 1);
-                        } else if (saveFlag === 2) {
-                            props.setCanvasSave(index + 1);
-                        }
-                    };
-                    // 이미지 로드 중 에러 처리
-                    objImage.onerror = (error) => {
-                        console.error('이미지 로딩 중 에러:', error);
-                    };
-                });
+                            ctx.drawImage(
+                                objImage,
+                                0,
+                                0,
+                                canvas.width / 2,
+                                canvas.height / 2
+                            );
+                            if (
+                                saveFlag === 1 &&
+                                props.stickerLayout.length === index + 1
+                            ) {
+                                console.log('다운로드하장');
+                                props.setCanvasDownload(index + 1);
+                            } else if (
+                                saveFlag === 2 &&
+                                props.stickerLayout.length === index + 1
+                            ) {
+                                console.log('저장하장');
+                                props.setCanvasSave(index + 1);
+                            }
+                        };
+                        // 이미지 로드 중 에러 처리
+                        objImage.onerror = (error) => {
+                            console.error('이미지 로딩 중 에러:', error);
+                        };
+                    });
+                }
             }
             setSaveFlag(0);
         }

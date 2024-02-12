@@ -81,7 +81,7 @@ export default function localAxios() {
                                 'refreshToken이 없어 localhost 지우기 작동'
                             );
                             deleteStorageData();
-                            window.location.href = '/';
+                            window.location.href = '/login';
                             return;
                         }
                         instance.defaults.headers.common['Authorization'] =
@@ -122,17 +122,15 @@ export default function localAxios() {
                                 console.log(e);
                             });
                     }
-                } else if (status === httpStatusCode.NOTPROCESS) {
-                    deleteStorageData();
-                    window.location.href = '/login';
-                } else if (status === httpStatusCode.BADREQUEST) {
-                    deleteStorageData();
-                    alert('요청이 잘못되었습니다');
-                    window.location.href = './';
-                } else if (status == httpStatusCode.FORBIDDEN) {
-                    alert('접근이 올바르지 않습니다.');
-                    window.location.href = '/login';
-                } else {
+                }
+                // else if (status === httpStatusCode.NOTPROCESS) {
+                //     deleteStorageData();
+                //     window.location.href = '/login';
+                // } else if (status == httpStatusCode.FORBIDDEN) {
+                //     alert('접근이 올바르지 않습니다.');
+                //     window.location.href = '/login';
+                // }
+                else {
                     console.log('오류떠쎠');
                 }
             } else {

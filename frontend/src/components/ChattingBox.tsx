@@ -14,6 +14,7 @@ import { httpStatusCode } from '../util/http-status';
 import {
     studioAddState,
     studioDeleteState,
+    studioNameState,
     studioState,
     themeState,
 } from '../util/counter-slice';
@@ -52,6 +53,10 @@ export default function ChattingBox() {
 
     // 리덕스 테마 값
     const chatTheme = useSelector((state: any) => state.loginFlag.theme);
+    const studioNameRedux = useSelector(
+        (state: any) => state.loginFlag.studioName
+    );
+    const [studioName, setStudioName] = useState<string>('');
     const [themeObj, setThemeObj] = useState<themeInterface[]>([
         {
             bgColor: '#ffa9a9',
@@ -121,6 +126,10 @@ export default function ChattingBox() {
             messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [chattingList]);
+
+    useEffect(() => {
+        setStudioName(studioNameRedux);
+    }, [studioNameRedux]);
 
     /** 유저 API 설정 */
     const chatInitialAPI = async () => {
@@ -383,10 +392,10 @@ export default function ChattingBox() {
     };
 
     const [selectedTheme, setSelectedTheme] = useState(0);
-    const handleThemeChange = (theme: number) => { 
+    const handleThemeChange = (theme: number) => {
         setSelectedTheme(theme);
         dispatch(themeState(theme));
-    }
+    };
 
     const showChattingRoom = () => {
         const openLogoSrc =
@@ -407,7 +416,7 @@ export default function ChattingBox() {
                                     color: `${themeObj[chatTheme].chatColor}`,
                                 }}
                             >
-                                studio1
+                                {studioName}
                             </p>
                             <p
                                 className="relative text-center left-3 bottom-3 text-xl cursor-pointer"
@@ -434,25 +443,49 @@ export default function ChattingBox() {
                                 <p className="mx-1">{currentPeople.length}</p>
                             </div>
                             <div className="flex justify-center items-center">
-                            <div
-                                className={`w-4 h-4 rounded-full color-bg-darkgray mx-1 border-2 border-white cursor-pointer ${selectedTheme === 2 ? 'transform scale-125' : ''}`}
-                                style={{ borderWidth: `${selectedTheme === 2 ? '3px' : '2px'}` }}
-                                onClick={() => {
-                                    dispatch(themeState(2));
-                                    handleThemeChange(2);
-                                }}
-                            ></div>
                                 <div
-                                    className={`w-4 h-4 rounded-full color-bg-yellow2 mx-1 border-2 border-white cursor-pointer ${selectedTheme === 1 ? 'transform scale-125' : ''}`}
-                                    style={{ borderWidth: `${selectedTheme === 1 ? '3px' : '2px'}` }}
+                                    className={`w-4 h-4 rounded-full color-bg-darkgray mx-1 border-2 border-white cursor-pointer ${
+                                        selectedTheme === 2
+                                            ? 'transform scale-125'
+                                            : ''
+                                    }`}
+                                    style={{
+                                        borderWidth: `${
+                                            selectedTheme === 2 ? '3px' : '2px'
+                                        }`,
+                                    }}
+                                    onClick={() => {
+                                        dispatch(themeState(2));
+                                        handleThemeChange(2);
+                                    }}
+                                ></div>
+                                <div
+                                    className={`w-4 h-4 rounded-full color-bg-yellow2 mx-1 border-2 border-white cursor-pointer ${
+                                        selectedTheme === 1
+                                            ? 'transform scale-125'
+                                            : ''
+                                    }`}
+                                    style={{
+                                        borderWidth: `${
+                                            selectedTheme === 1 ? '3px' : '2px'
+                                        }`,
+                                    }}
                                     onClick={() => {
                                         dispatch(themeState(1));
                                         handleThemeChange(1);
                                     }}
                                 ></div>
                                 <div
-                                    className={`w-4 h-4 rounded-full color-bg-main mx-1 border-2 border-white cursor-pointer ${selectedTheme === 0 ? 'transform scale-125' : ''}`}
-                                    style={{ borderWidth: `${selectedTheme === 0 ? '3px' : '2px'}` }}
+                                    className={`w-4 h-4 rounded-full color-bg-main mx-1 border-2 border-white cursor-pointer ${
+                                        selectedTheme === 0
+                                            ? 'transform scale-125'
+                                            : ''
+                                    }`}
+                                    style={{
+                                        borderWidth: `${
+                                            selectedTheme === 0 ? '3px' : '2px'
+                                        }`,
+                                    }}
                                     onClick={() => {
                                         dispatch(themeState(0));
                                         handleThemeChange(0);

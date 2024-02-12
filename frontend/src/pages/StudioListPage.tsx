@@ -69,7 +69,10 @@ export default function StudioListPage() {
                         //그 후 분류
                         sortedStudioDivide.map(
                             (studio: StudioInfo, studiokey: number) => {
-                                if (studio.isCompleted) {
+                                if (
+                                    studio.studioStatus === 'COMPLETE' ||
+                                    studio.studioStatus === 'FAIL'
+                                ) {
                                     setFinishStudioList((prev) => [
                                         ...prev,
                                         studio,
@@ -80,7 +83,7 @@ export default function StudioListPage() {
                                         studio,
                                     ]);
                                 }
-                                if (!studio.isCompleted) {
+                                if (studio.studioStatus === 'INCOMPLETE') {
                                     setAttendStudioList((prev) => [
                                         ...prev,
                                         studio,
@@ -107,6 +110,7 @@ export default function StudioListPage() {
                 console.log('삭제되었습니다.');
                 alert('삭제되었습니다');
                 setEditMode(false);
+                setDeleteList([]);
                 makeStudioListAPI();
             }
         });
@@ -172,7 +176,10 @@ export default function StudioListPage() {
                     )}
                     <p
                         className="mx-2 color-text-main cursor-pointer hover:color-text-subbold"
-                        onClick={() => setEditMode(false)}
+                        onClick={() => {
+                            setEditMode(false);
+                            setDeleteList([]);
+                        }}
                     >
                         취소
                     </p>
@@ -241,6 +248,26 @@ export default function StudioListPage() {
                 {/* 영상 스튜디오 */}
                 {listTab === 0 ? (
                     <ul className="w-full h-full flex flex-col items-center ">
+                        {attendStudioList.length === 0 ? (
+                            <div className="my-auto">
+                                <img
+                                    className="relative mx-auto mb-8 left-4"
+                                    src="/src/assets/images/nostudio.png"
+                                    alt=""
+                                />
+                                <div className="mx-auto mb-16 flex flex-col justify-center items-center text-2xl text-gray-400">
+                                    <p className="w-fit">
+                                        아직 참여 중인 스튜디오가 없습니다
+                                    </p>
+                                    <p className="w-fit text-center">
+                                        스튜디오에서 영상 편지를 만들어 당신의
+                                        마음을 전해주세요
+                                    </p>
+                                </div>
+                            </div>
+                        ) : (
+                            <></>
+                        )}
                         <li className=" w-full ">
                             <div className="flex my-4 flex-wrap">
                                 {attendStudioList.map((studio) => {
