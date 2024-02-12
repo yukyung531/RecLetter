@@ -7,20 +7,20 @@ from pydantic.alias_generators import to_camel
 from videobackend.letter.dto.dto import ClipInfo
 
 
-class MakeLetterReq(BaseModel):
+class MakeLetterReq:
     studio_id: str
     studio_frame_id: int
     studio_bgm_id: int
-    studio_volume: int
+    bgm_volume: int
     clip_info_list: List[ClipInfo]
 
-    def __init__(self, avro_dict: dict):
-        self.studio_id = avro_dict['studio_id']
-        self.studio_frame_id = avro_dict['studio_frame_id']
-        self.studio_bgm_id = avro_dict['studio_bgm_id']
-        self.studio_volume = avro_dict['studio_volume']
+    def __init__(self, value: dict):
+        self.studio_id = value['studioId']
+        self.studio_frame_id = value['studioFrameId']
+        self.studio_bgm_id = value['studioBgmId']
+        self.bgm_volume = value['bgmVolume']
         self.clip_info_list = list(
-            map(lambda x: ClipInfo(x), avro_dict['clip_info_list']))
+            map(lambda x: ClipInfo(x), value['clipInfoList']))
 
     def get_assets_directory(self):
         return os.environ.get("DOWNLOAD_PATH",
