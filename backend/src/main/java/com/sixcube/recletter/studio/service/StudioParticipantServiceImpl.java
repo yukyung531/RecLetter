@@ -51,8 +51,13 @@ public class StudioParticipantServiceImpl implements StudioParticipantService {
   }
 
   @Override
-  public void deleteStudioParticipant(String studioId) {
+  public void deleteAllStudioParticipant(String studioId) {
     List<StudioParticipant> studioParticipants=studioParticipantRepository.findAllByStudioId(studioId);
     studioParticipantRepository.deleteAll(studioParticipants);
+  }
+
+  @Override
+  public void deleteStudioParticipant(String studioId, String userId){
+    studioParticipantRepository.deleteById(new StudioParticipantId(studioId,userId));
   }
 }

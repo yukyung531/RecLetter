@@ -23,7 +23,6 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -107,9 +106,9 @@ public class StudioServiceImpl implements StudioService {
       throws StudioNotFoundException, UnauthorizedToDeleteStudioException, StudioDeleteFailureException {
 
     StringTokenizer st = new StringTokenizer(concatenatedStudioId, ",");
-    if (st.countTokens() > 3) {
-      throw new UnauthorizedToDeleteStudioException();
-    }
+//    if (st.countTokens() > 3) {
+//      throw new UnauthorizedToDeleteStudioException();
+//    }
 
     while (st.hasMoreTokens()) {
       String studioId = st.nextToken();
@@ -118,13 +117,14 @@ public class StudioServiceImpl implements StudioService {
 
       if (user.getUserId().equals(result.getStudioOwner())) {
         try {
-          studioParticipantService.deleteStudioParticipant(studioId);
+          studioParticipantService.deleteAllStudioParticipant(studioId);
           studioRepository.deleteById(studioId);
         } catch (Exception e) {
           throw new StudioDeleteFailureException(e);
         }
       } else {
-        throw new UnauthorizedToDeleteStudioException();
+        studioParticipantService.deleteStudioParticipant(studioId,user.getUserId());
+//        throw new UnauthorizedToDeleteStudioException();
       }
     }
   }

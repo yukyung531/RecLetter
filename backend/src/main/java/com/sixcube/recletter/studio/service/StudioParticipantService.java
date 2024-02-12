@@ -15,6 +15,8 @@ public interface StudioParticipantService {
 
   StudioParticipant searchStudioParticipantByUserIdAndStudioId(String studioId, String userId);
 
-  void deleteStudioParticipant(String studioId);
+  void deleteAllStudioParticipant(String studioId);
+
+  void deleteStudioParticipant(String studioId, String userId);
 
 }
