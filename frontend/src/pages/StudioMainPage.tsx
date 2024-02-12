@@ -17,7 +17,7 @@ import { deleteClip } from '../api/clip';
 import { httpStatusCode } from '../util/http-status';
 import { getlastPath } from '../util/get-func';
 import ChattingBox from '../components/ChattingBox';
-import {encodingLetter} from "../api/letter.ts";
+import { encodingLetter } from '../api/letter.ts';
 
 export default function StudioMainPage() {
     //영상 편집 여부
@@ -258,6 +258,39 @@ export default function StudioMainPage() {
                 const newList: ClipInfo[] = [...prevList];
                 const newValue = { ...prevValue };
                 newValue.clipInfoList = newList;
+
+                //자른 후 정렬, 사용/미사용 나누기
+                //우선 정렬을 한 후, 사용한 비디오, 아닌 비디오로 분리
+                const clipList = newList.sort(
+                    (clipA: ClipInfo, clipB: ClipInfo) =>
+                        clipA.clipOrder - clipB.clipOrder
+                );
+
+                const usedVidArr: ClipInfo[] = [];
+                const unUsedVidArr: ClipInfo[] = [];
+
+                clipList.map((clip: ClipInfo) => {
+                    if (clip.clipOrder === -1) {
+                        unUsedVidArr.push(clip);
+                    } else {
+                        usedVidArr.push(clip);
+                    }
+                });
+
+                //set
+                setUnUsedVideoList(unUsedVidArr);
+                setUsedVideoList(usedVidArr);
+                //사용한 첫 영상 자동재생
+                if (usedVidArr.length > 0) {
+                    //selectVideo함수를 사용하기에는 부적합
+                    //왜냐하면 아직 studioDetailInfo가 업데이트 되지 않았기 때문
+                    //그래서 직접 조작 필요
+                    if (videoRef.current) {
+                        setSelectedVideo(usedVidArr[0]);
+                        setPlayingVideo(true);
+                    }
+                }
+
                 return newValue;
             });
         }
@@ -393,33 +426,30 @@ export default function StudioMainPage() {
         navigator(`/cliprecord/${studioDetailInfo.studioId}`);
     };
 
-
     //선택된 영상이 있는지 여부를 반환
-    const isSelectedClipList=()=>{
-    let selectedClipListLength=0
-    if (studioDetailInfo.clipInfoList){
-        studioDetailInfo.clipInfoList.map((clip) => {
-            if (clip.clipOrder != -1) {
-                selectedClipListLength+=1;
-            }
-        })
-    }
-    return selectedClipListLength>0;
-    }
+    const isSelectedClipList = () => {
+        let selectedClipListLength = 0;
+        if (studioDetailInfo.clipInfoList) {
+            studioDetailInfo.clipInfoList.map((clip) => {
+                if (clip.clipOrder != -1) {
+                    selectedClipListLength += 1;
+                }
+            });
+        }
+        return selectedClipListLength > 0;
+    };
 
     const onClickCompletePage = async () => {
-        if(!isSelectedClipList()){
-            alert("하나 이상의 영상을 선택해야 영상 편지 완성이 가능합니다")
+        if (!isSelectedClipList()) {
+            alert('하나 이상의 영상을 선택해야 영상 편지 완성이 가능합니다');
             return;
         }
-        console.log("complete letter")
-        await encodingLetter(studioDetailInfo.studioId)
-            .then((res) => {
+        console.log('complete letter');
+        await encodingLetter(studioDetailInfo.studioId).then((res) => {
             console.log(res);
             moveStudioList();
         });
     };
-
 
     /** 리스트로 이동 */
     const moveStudioList = () => {
@@ -706,8 +736,10 @@ export default function StudioMainPage() {
                     {/* (영상 리스트, 참가자 관리) */}
                     <div className="w-1/4 p-2 border border-l-2 overflow-y-scroll">
                         <div className="w-full px-2 flex flex-col justify-center items-center">
-                            <a className="flex items-center gap-3 w-52 text-center my-2 p-1 rounded-lg text-xl color-bg-yellow2 shadow-darkShadow color-text-main cursor-pointer transform hover:scale-105"
-                            onClick={onClickCompletePage}>
+                            <a
+                                className="flex items-center gap-3 w-52 text-center my-2 p-1 rounded-lg text-xl color-bg-yellow2 shadow-darkShadow color-text-main cursor-pointer transform hover:scale-105"
+                                onClick={onClickCompletePage}
+                            >
                                 <img
                                     className="w-9 h-9 ml-2.5"
                                     src="/src/assets/icons/letter_complete2.svg"
