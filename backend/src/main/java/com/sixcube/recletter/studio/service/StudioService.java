@@ -2,6 +2,7 @@ package com.sixcube.recletter.studio.service;
 
 import com.sixcube.recletter.clip.dto.ClipInfo;
 import com.sixcube.recletter.studio.dto.Studio;
+import com.sixcube.recletter.studio.dto.StudioStatus;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.dto.req.LetterVideoReq;
 import com.sixcube.recletter.studio.dto.req.UpdateStudioReq;
@@ -43,7 +44,8 @@ public interface StudioService {
 
   public LetterVideoReq createLetterVideoReq(String studioId, User user);
 
-  public void updateStudioIsCompleted(String studioId, boolean isCompleted);
+
+  void updateStudioStatus(String studioId, StudioStatus studioStatus);
 
   String downloadLetter(String studioId);
 

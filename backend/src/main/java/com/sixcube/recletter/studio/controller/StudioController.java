@@ -3,10 +3,7 @@ package com.sixcube.recletter.studio.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sixcube.recletter.studio.dto.Studio;
-import com.sixcube.recletter.studio.dto.StudioInfo;
-import com.sixcube.recletter.studio.dto.StudioParticipant;
-import com.sixcube.recletter.studio.dto.UsedClipInfo;
+import com.sixcube.recletter.studio.dto.*;
 import com.sixcube.recletter.studio.dto.req.CompleteLetterReq;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.dto.req.LetterVideoReq;
@@ -53,7 +50,6 @@ public class StudioController {
 
   @GetMapping
   public ResponseEntity<SearchStudioListRes> searchStudioList(@AuthenticationPrincipal User user) {
-//    log.debug("StudioController.searchStudioList : start");
     // 참가중인 studio의 studioId 불러오기
     List<String> participantStudioIdList = studioParticipantService.searchStudioParticipantByUser(user)
         .stream()
@@ -71,7 +67,8 @@ public class StudioController {
             .studioId(studio.getStudioId())
             .studioTitle(studio.getStudioTitle())
             .isStudioOwner(user.getUserId().equals(studio.getStudioOwner()))
-            .isCompleted(studio.getIsCompleted())
+//            .isCompleted(studio.getIsCompleted())
+            .studioStatus(studio.getStudioStatus())
             .thumbnailUrl(studioService.searchMainClipInfo(studio.getStudioId()).getClipUrl())
             .expireDate(studio.getExpireDate())
             .hasMyClip(studioService.hasMyClip(studio.getStudioId(), user.getUserId()))
@@ -97,12 +94,13 @@ public class StudioController {
     SearchStudioDetailRes result = SearchStudioDetailRes.builder()
         .studioId(studio.getStudioId())
         .studioTitle(studio.getStudioTitle())
-        .isCompleted(studio.getIsCompleted())
+//        .isCompleted(studio.getIsCompleted())
+        .studioStatus(studio.getStudioStatus())
         .studioOwner(studio.getStudioOwner())
         .clipInfoList(studioService.searchStudioClipInfoList(studioId))
         .studioFrameId(studio.getStudioFrameId())
-        .studioFontId(studio.getStudioFontId())
         .studioBgmId(studio.getStudioBgmId())
+        .studioBgmVolume(studio.getStudioBgmVolume())
         .studioStickerUrl(studioService.searchStudioStickerUrl(studioId))
         .build();
     log.debug(result.toString());
@@ -184,6 +182,7 @@ public class StudioController {
     return ResponseEntity.ok().build();
   }
 
+  //인코딩 요청
   @GetMapping("/{studioId}/letter")
   public ResponseEntity<Void> createLetter(@PathVariable String studioId, @AuthenticationPrincipal User user){
     LetterVideoReq letterVideoReq=studioService.createLetterVideoReq(studioId,user);
@@ -199,15 +198,17 @@ public class StudioController {
             .retrieve()
             .toBodilessEntity();
 
-    studioService.updateStudioIsCompleted(studioId,true);
+    studioService.updateStudioStatus(studioId, StudioStatus.ENCODING);
     return ResponseEntity.ok().build();
   }
 
   //TODO- python 요청 시 security 생각!
   @PostMapping("/{studioId}/letter")
   public ResponseEntity<Void> completeLetter(@PathVariable String studioId, @RequestBody CompleteLetterReq completeLetterReq){
-    if(!completeLetterReq.getIsCompleted()){
-      studioService.updateStudioIsCompleted(studioId,completeLetterReq.getIsCompleted());
+    if(completeLetterReq.getIsCompleted()){
+      studioService.updateStudioStatus(studioId,StudioStatus.COMPLETE);
+    } else{
+      studioService.updateStudioStatus(studioId,StudioStatus.FAIL);
     }
     return ResponseEntity.ok().build();
   }

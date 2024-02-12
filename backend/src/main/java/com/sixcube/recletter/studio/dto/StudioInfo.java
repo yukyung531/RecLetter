@@ -17,7 +17,7 @@ public class StudioInfo {
   private String studioId;
   private String studioTitle;
   private Boolean isStudioOwner;
-  private Boolean isCompleted;
+  private StudioStatus studioStatus;
   private String thumbnailUrl;
   private LocalDateTime expireDate;
   private Boolean hasMyClip;

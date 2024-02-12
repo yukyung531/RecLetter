@@ -5,6 +5,7 @@ import com.sixcube.recletter.clip.service.ClipService;
 import com.sixcube.recletter.studio.S3Util;
 import com.sixcube.recletter.studio.StudioUtil;
 import com.sixcube.recletter.studio.dto.Studio;
+import com.sixcube.recletter.studio.dto.StudioStatus;
 import com.sixcube.recletter.studio.dto.UsedClipInfo;
 import com.sixcube.recletter.studio.dto.req.LetterVideoReq;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
@@ -73,7 +74,7 @@ public class StudioServiceImpl implements StudioService {
   public void createStudio(CreateStudioReq createStudioReq, User user)
       throws StudioCreateFailureException, MaxStudioOwnCountExceedException {
 
-    List<Studio> myStudioList = studioRepository.findAllByStudioOwnerAndIsCompletedIsFalse(user.getUserId());
+    List<Studio> myStudioList = studioRepository.findAllByStudioOwnerAndStudioStatus(user.getUserId(),StudioStatus.INCOMPLETE);
 
     // 최대 생성 가능 수 확인
     if (myStudioList.size() >= MAX_STUDIO_OWN_COUNT) {
@@ -169,11 +170,8 @@ public class StudioServiceImpl implements StudioService {
     //받아온 정보를 바탕으로 스튜디오 객체 업데이트
     Studio studio=studioRepository.findById(updateStudioReq.getStudioId()).orElseThrow(StudioNotFoundException::new);
     studio.setStudioBgmId(updateStudioReq.getStudioBgmId());
-    studio.setStudioFontId(updateStudioReq.getStudioFontId());
     studio.setStudioFrameId(updateStudioReq.getStudioFrameId());
-    studio.setStudioFontBold(updateStudioReq.getStudioFontBold());
-    studio.setStudioFontSize(updateStudioReq.getStudioFontSize());
-    studio.setStudioVolume(updateStudioReq.getStudioVolume());
+    studio.setStudioBgmVolume(updateStudioReq.getStudioBgmVolume());
 
     //스튜디오 스티커 이미지 저장
     MultipartFile studioSticker= updateStudioReq.getStudioSticker();
@@ -182,7 +180,16 @@ public class StudioServiceImpl implements StudioService {
         if(!"image/png".equals(studioSticker.getContentType())) {
           throw new InvalidStudioStickerFormatException();
         }
-        s3Util.saveObject(studio.getStudioId() + ".png", updateStudioReq.getStudioSticker());
+        String prevSticker=studio.getStudioSticker();
+        StringBuilder stickerName=new StringBuilder();
+        stickerName.append(studio.getStudioId()).append("/").append(now()).append(".png");
+
+        s3Util.saveObject(stickerName.toString(), updateStudioReq.getStudioSticker());
+        studio.setStudioSticker(studioSticker.toString());
+
+        if(prevSticker!=null){
+          s3Util.deleteObject(prevSticker);
+        }
       }
     } catch (IOException e) {
       throw new InvalidStudioStickerFormatException();
@@ -200,11 +207,9 @@ public class StudioServiceImpl implements StudioService {
 
   @Override
   public String searchStudioStickerUrl(String studioId){
-    StringBuilder fileName=new StringBuilder()
-            .append(studioId)
-            .append(".png");
-    if(s3Util.isObject(fileName.toString())){
-      return s3Util.getSignedUrl(fileName.toString());
+    Studio studio=studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
+    if(studio.getStudioSticker()!=null){ // && s3Util.isObject(studio.getStudioSticker())
+      return s3Util.getSignedUrl(studio.getStudioSticker());
     }
     return "";
   }
@@ -222,9 +227,8 @@ public class StudioServiceImpl implements StudioService {
         return LetterVideoReq.builder()
               .studioId(studio.getStudioId())
               .studioFrameId(studio.getStudioFrameId())
-              .studioFontId(studio.getStudioFontId())
               .studioBgmId(studio.getStudioBgmId())
-              .studioVolume(studio.getStudioVolume())
+              .studioBgmVolume(studio.getStudioBgmVolume())
               .clipInfoList(clipService.searchLetterClipInfoByOrder(studioId))
               .build();
     } else{
@@ -233,9 +237,9 @@ public class StudioServiceImpl implements StudioService {
   }
 
   @Override
-  public void updateStudioIsCompleted(String studioId, boolean isCompleted){
+  public void updateStudioStatus(String studioId, StudioStatus studioStatus){
     Studio studio=studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
-    studio.setIsCompleted(isCompleted);
+    studio.setStudioStatus(studioStatus);
     studioRepository.save(studio);
   }
 
