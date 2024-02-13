@@ -10,6 +10,8 @@ public interface StudioParticipantService {
 
   List<StudioParticipant> searchStudioParticipantByUser(User user);
 
+  List<StudioParticipant> searchStudioParticipantByStudioId(String studioId);
+
   void createStudioParticipant(String studioId, User user)
       throws StudioParticipantCreateFailureException, AlreadyJoinedStudioException;
 

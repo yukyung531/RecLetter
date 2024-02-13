@@ -25,6 +25,11 @@ public class StudioParticipantServiceImpl implements StudioParticipantService {
   }
 
   @Override
+  public List<StudioParticipant> searchStudioParticipantByStudioId(String studioId) {
+    return studioParticipantRepository.findAllByStudioId(studioId);
+  }
+
+  @Override
   public void createStudioParticipant(String studioId, User user)
       throws StudioParticipantCreateFailureException, AlreadyJoinedStudioException {
     studioParticipantRepository.findById(new StudioParticipantId(studioId, user.getUserId()))

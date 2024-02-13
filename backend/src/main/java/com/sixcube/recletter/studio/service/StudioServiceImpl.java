@@ -151,6 +151,11 @@ public class StudioServiceImpl implements StudioService {
   }
 
   @Override
+  public Integer attendMember(String studioId){
+    return studioParticipantService.searchStudioParticipantByStudioId(studioId).size();
+  }
+
+  @Override
   public List<ClipInfo> searchStudioClipInfoList(String studioId) {
     return clipService.searchClipInfoList(studioId);
   }
