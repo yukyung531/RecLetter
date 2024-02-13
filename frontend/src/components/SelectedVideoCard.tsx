@@ -65,8 +65,8 @@ export default function SelectedVideoCard({
                     <input
                         className="w-28"
                         type="range"
-                        min={1}
-                        max={100}
+                        min={0}
+                        max={200}
                         defaultValue={clip.clipVolume}
                         value={clip.clipVolume}
                         onChange={changeVolume}

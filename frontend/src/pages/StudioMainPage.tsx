@@ -370,11 +370,11 @@ export default function StudioMainPage() {
      * @returns
      */
     const formatTime = (time: number) => {
-        const min = Math.round(time / 60);
+        const min = Math.floor(time / 60);
         const sec =
-            Math.round(time % 60) < 10
-                ? '0' + Math.round(time % 60)
-                : '' + Math.round(time % 60);
+            Math.floor(time % 60) < 10
+                ? '0' + Math.floor(time % 60)
+                : '' + Math.floor(time % 60);
         return `${min}:${sec}`;
     };
 
