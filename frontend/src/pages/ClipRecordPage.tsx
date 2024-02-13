@@ -806,7 +806,7 @@ export default function ClipRecordPage() {
                                 </button> */}
                             </div>
                         ) : (
-                            <div className="w-4/5 flex flex-col items-center p-6 overflow-y-scroll">
+                            <div className="w-4/5 flex flex-col items-center p-6">
                                 <div className="w-full my-2 flex justify-start text-xl ">
                                     <p>스크립트</p>
                                 </div>
@@ -815,24 +815,27 @@ export default function ClipRecordPage() {
                                     onChange={handleScript}
                                     rows={4}
                                     placeholder={`하고 싶은 말을 자유롭게 메모하세요.\n녹화하면서 확인할 수 있어요.`}
-                                    className="text-base pl-2 text-black w-full border-black border-solid border-2 rounded"
+                                    className="text-base mb-3 pl-2 text-black min-h-36 w-full border-black border-solid border-2 rounded overflow-y-scroll"
                                 ></textarea>
-                                <div className="my-2 w-full flex justify-start text-xl ">
+
+                                <div className="mb-2 w-full flex justify-start text-xl">
                                     <p>템플릿 불러오기</p>
                                 </div>
-                                {scriptList.map((script) => {
-                                    return (
-                                        <ScriptTemplateCard
-                                            key={script.scriptId}
-                                            props={script}
-                                            onClick={() =>
-                                                setSelectedScript(
-                                                    script.scriptContent
-                                                )
-                                            }
-                                        />
-                                    );
-                                })}
+                                <div className="overflow-y-scroll">
+                                    {scriptList.map((script) => {
+                                        return (
+                                            <ScriptTemplateCard
+                                                key={script.scriptId}
+                                                props={script}
+                                                onClick={() =>
+                                                    setSelectedScript(
+                                                        script.scriptContent
+                                                    )
+                                                }
+                                            />
+                                        );
+                                    })}
+                                </div>
                             </div>
                         )}
                     </div>
