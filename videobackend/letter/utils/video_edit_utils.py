@@ -31,26 +31,15 @@ def encode_frame(clip: VideoClip, frame_id: int, sticker_file_path: str) -> Vide
 
     return CompositeVideoClip([clip, frame, sticker])
 
-def encode_sticker(clip: VideoClip, sticker_file_path: str) -> VideoClip:
-    if os.path.exists(sticker_file_path):
-        frame = ImageClip(sticker_file_path, duration=clip.duration)
-        return CompositeVideoClip([clip])
-    else:
-        print("encode_sticker: sticker not found")
-        return clip
-
 
 def tune_volume(clip: VideoClip, volume_ratio: int) -> VideoClip:
     return clip.afx(volumex, volume_ratio / 100)
 
 
-def make_bgm_loop():
-    pass
+def insert_bgm(clip: VideoClip, volume_id: int, volume_ratio: int) -> VideoClip:
+    bgm_file_path = "./assets/bgm" + str(volume_id) + ".mp3"
+    bgm = AudioFileClip(bgm_file_path)
+    bgm = bgm.fx(vfx.audio_loop, duration=clip.duration)
+    bgm = bgm.fx(vfx.volumex, volume_ratio / 100)
 
-
-def insert_bgm():
-    pass
-
-
-def change_size():
-    pass
+    return CompositeVideoClip([clip, bgm])

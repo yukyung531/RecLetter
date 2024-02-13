@@ -140,9 +140,12 @@ def encode_letter():
                 )
                 del concatenated_letter
 
-                # 전체 영상 볼륨 조절
-                # volume_tuned_letter = tune_volume(frame_added_letter,
-                #                                   make_letter_req.studio_volume)
+                # # bgm 삽입
+                # bgm_inserted_letter = insert_bgm(
+                #     frame_added_letter,
+                #     make_letter_req.studio_bgm_id,
+                #     make_letter_req.studio_bgm_volume
+                # )
                 # del frame_added_letter
 
                 # letter 완성 후 저장
