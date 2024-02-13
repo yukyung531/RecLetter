@@ -1,5 +1,7 @@
+import os
 from threading import Thread
 
+import uvicorn
 from dotenv.main import load_dotenv
 from fastapi import FastAPI
 
@@ -7,7 +9,8 @@ from videobackend.letter.thread.tasks import download_assets, encode_letter, \
     upload_letter, delete_assets
 from videobackend.letter.controller.letter_video_controller import letter_video_router
 
-load_dotenv(dotenv_path="./.env")
+load_dotenv()
+PORT_NUMBER = os.environ.get("PORT_NUMBER")
 
 download_assets_thread = Thread(target=download_assets)
 encode_letter_thread = Thread(target=encode_letter)
@@ -22,3 +25,6 @@ delete_assets_thread.start()
 app = FastAPI()
 
 app.include_router(letter_video_router, prefix="/video")
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=int(PORT_NUMBER))
