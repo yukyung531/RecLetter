@@ -291,8 +291,8 @@ export default function StudioListPage() {
                 {listTab === 1 ? (
                     <ul className="w-full h-full flex flex-col items-center ">
                         <li className=" w-full ">
-                            <div className="flex my-32 flex-wrap">
-                                {attendStudioList.map((studio) => {
+                            <div className="flex flex-wrap">
+                                {finishStudioList.map((studio) => {
                                     return (
                                         <StudioFinishCard
                                             key={studio.studioId}

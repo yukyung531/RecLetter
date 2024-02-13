@@ -27,92 +27,185 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
     const stickerUrl: string = props.thumbnailUrl;
     const stickerFrame: number = props.studioFrameId;
 
-    return (
-        <div
-            className="relative w-1/5 p-3 flex flex-col mx-2 my-2 justify-start items-center cursor-pointer"
-            id={studioId}
-            onClick={onClick}
-        >
-            <img
-                className="absolute bottom-0 -z-20"
-                src="/src/assets/images/finish-video-back.png"
-                alt=""
-            />
-            <div className="relative z-10 bottom-1/2 border rounded-xl hover:letter-animation">
-                <img
-                    className="w-full  rounded-lg "
-                    style={{
-                        aspectRatio: 16 / 9,
-                    }}
-                    src="/src/assets/images/nothumb.png"
-                />
+    const encodingElement = () => {
+        if (props.studioStatus === 'ENCODING') {
+            return (
                 <div
-                    className="absolute w-full top-0"
-                    style={{
-                        aspectRatio: 16 / 9,
-                    }}
+                    className="relative w-1/4 flex flex-col mx-2 my-2 justify-start items-center cursor-pointer"
+                    id={studioId}
                 >
-                    {stickerUrl !== '' ? (
-                        <img src={stickerUrl} alt="" />
-                    ) : (
-                        <></>
-                    )}
+                    <div
+                        className="relative flex w-full h-full flex-col justify-end pb-2 px-2"
+                        style={{
+                            aspectRatio: 16 / 9,
+                            backgroundImage:
+                                'url(/src/assets/images/encoding-video.png)',
+                            backgroundRepeat: 'no-repeat',
+                            backgroundSize: 'contain',
+                            backgroundPosition: 'center',
+                        }}
+                    >
+                        <div className="flex flex-col justify-between w-full z-30 p-2">
+                            <div className="text-2xl flex items-center -ms-3 mb-1 text-center justify-center">
+                                {props.isStudioOwner ? (
+                                    <img
+                                        className="w-4 h-4 me-2"
+                                        src="/src/assets/icons/owner-crown.png"
+                                    />
+                                ) : (
+                                    <></>
+                                )}
+                                <p>{props.studioTitle}</p>
+                            </div>
+
+                            <div className="w-full flex justify-between -ms-2">
+                                <p></p>
+                                <p className="text-xl color-text-darkgray">
+                                    ~
+                                    {Math.floor(
+                                        (expireDate.getTime() - Date.now()) /
+                                            (1000 * 60 * 60 * 24)
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            );
+        } else if (props.studioStatus === 'COMPLETE') {
+            return (
                 <div
-                    className="absolute w-full top-0"
-                    style={{
-                        aspectRatio: 16 / 9,
-                    }}
+                    className="relative w-1/5 p-3 flex flex-col mx-2 my-2 justify-start items-center cursor-pointer mt-28"
+                    id={studioId}
+                    onClick={onClick}
                 >
-                    {stickerFrame ? (
+                    <img
+                        className="absolute bottom-0 -z-20"
+                        src="/src/assets/images/finish-video-back.png"
+                        alt=""
+                    />
+                    <div className="relative z-10 bottom-1/2 border rounded-xl hover:letter-animation">
                         <img
-                            src={
-                                '/src/assets/frames/frame' +
-                                stickerFrame +
-                                '.png'
-                            }
+                            className="w-full  rounded-lg "
+                            style={{
+                                aspectRatio: 16 / 9,
+                            }}
+                            src="/src/assets/images/nothumb.png"
+                        />
+                        <div
+                            className="absolute w-full top-0"
+                            style={{
+                                aspectRatio: 16 / 9,
+                            }}
+                        >
+                            {stickerUrl !== '' ? (
+                                <img src={stickerUrl} alt="" />
+                            ) : (
+                                <></>
+                            )}
+                        </div>
+                        <div
+                            className="absolute w-full top-0"
+                            style={{
+                                aspectRatio: 16 / 9,
+                            }}
+                        >
+                            {stickerFrame ? (
+                                <img
+                                    src={
+                                        '/src/assets/frames/frame' +
+                                        stickerFrame +
+                                        '.png'
+                                    }
+                                    alt=""
+                                />
+                            ) : (
+                                <></>
+                            )}
+                        </div>
+                    </div>
+
+                    <div
+                        className="absolute flex w-full h-full flex-col justify-center"
+                        style={{}}
+                    >
+                        <img
+                            className="absolute bottom-0 z-10"
+                            src="/src/assets/images/finish-video-front.png"
                             alt=""
                         />
-                    ) : (
-                        <></>
-                    )}
-                </div>
-            </div>
+                        <div className="flex flex-col justify-between w-full mt-2 z-30 p-2">
+                            <div className="text-xl flex items-center">
+                                {props.isStudioOwner ? (
+                                    <img
+                                        className="w-4 h-4 me-2"
+                                        src="/src/assets/icons/owner-crown.png"
+                                    />
+                                ) : (
+                                    <></>
+                                )}
+                                <p>{props.studioTitle}</p>
+                            </div>
 
-            <div
-                className="absolute flex w-full h-full flex-col justify-center"
-                style={{}}
-            >
-                <img
-                    className="absolute bottom-0 z-10"
-                    src="/src/assets/images/finish-video-front.png"
-                    alt=""
-                />
-                <div className="flex flex-col justify-between w-full mt-2 z-30 p-2">
-                    <div className="text-xl flex items-center">
-                        {props.isStudioOwner ? (
-                            <img
-                                className="w-4 h-4 me-2"
-                                src="/src/assets/icons/owner-crown.png"
-                            />
-                        ) : (
-                            <></>
-                        )}
-                        <p>{props.studioTitle}</p>
-                    </div>
-
-                    <div className="w-full flex justify-between">
-                        <p></p>
-                        <p className="text-xl color-text-darkgray">
-                            ~
-                            {Math.floor(
-                                (expireDate.getTime() - Date.now()) /
-                                    (1000 * 60 * 60 * 24)
-                            )}
-                        </p>
+                            <div className="w-full flex justify-between">
+                                <p></p>
+                                <p className="text-xl color-text-darkgray">
+                                    ~
+                                    {Math.floor(
+                                        (expireDate.getTime() - Date.now()) /
+                                            (1000 * 60 * 60 * 24)
+                                    )}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    );
+            );
+        } else {
+            return (
+                <div
+                    className="relative w-1/4 flex flex-col mx-2 my-2 justify-start items-center cursor-pointer"
+                    id={studioId}
+                >
+                    <div
+                        className="relative flex w-full h-full flex-col justify-end pb-2 px-2"
+                        style={{
+                            aspectRatio: 16 / 9,
+                            backgroundImage:
+                                'url(/src/assets/images/encoding-video.png)',
+                            backgroundRepeat: 'no-repeat',
+                            backgroundSize: 'contain',
+                            backgroundPosition: 'center',
+                        }}
+                    >
+                        <div className="flex flex-col justify-between w-full z-30 p-2">
+                            <div className="text-2xl flex items-center -ms-3 mb-1 text-center justify-center">
+                                {props.isStudioOwner ? (
+                                    <img
+                                        className="w-4 h-4 me-2"
+                                        src="/src/assets/icons/owner-crown.png"
+                                    />
+                                ) : (
+                                    <></>
+                                )}
+                                <p>인코딩에 실패하였습니다</p>
+                            </div>
+
+                            <div className="w-full flex justify-between -ms-2">
+                                <p></p>
+                                <p className="text-xl color-text-darkgray">
+                                    ~
+                                    {Math.floor(
+                                        (expireDate.getTime() - Date.now()) /
+                                            (1000 * 60 * 60 * 24)
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+    };
+    return <>{encodingElement()}</>;
 }

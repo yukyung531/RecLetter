@@ -63,6 +63,7 @@ export default function ClipEditPage() {
         studioBGMId: -1,
         studioStickerUrl: '',
         studioBGMVolume: 100,
+        expireDate: new Date(),
     });
 
     //비디오 재생중인가

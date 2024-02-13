@@ -180,19 +180,19 @@ function onMeesageReceived(payload) {
     console.log(message);
 
     if (message.type === 'JOIN' && message.uuid === uuid) {
-        findPeopleAPI();
-        console.log('유저가 같아서 표시되지 않습니다.');
+        // findPeopleAPI();
+        // console.log('유저가 같아서 표시되지 않습니다.');
     }
     //이름이 같지 않을 때
     else if (message.type === 'JOIN' || message.type === 'LEAVE') {
-        findPeopleAPI();
-        showMessage(
-            message.sender,
-            message.uuid,
-            message.time,
-            message.content,
-            'alarm'
-        );
+        // findPeopleAPI();
+        // showMessage(
+        //     message.sender,
+        //     message.uuid,
+        //     message.time,
+        //     message.content,
+        //     'alarm'
+        // );
     } else {
         showMessage(
             message.sender,

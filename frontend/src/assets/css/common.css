@@ -2,8 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+    height: 100vh;
+}
 #root {
     width: 100%;
+    height: 100vh;
 }
 input[type='range'] {
     -webkit-appearance: none;
@@ -42,7 +46,8 @@ input[type='range']::-webkit-slider-thumb {
     height: 864px;
 }
 .editor-height {
-    height: 640px;
+    /* height: 640px; */
+    height: 100%;
 }
 .movie-width {
     width: 720px;
@@ -56,7 +61,7 @@ input[type='range']::-webkit-slider-thumb {
 }
 
 .section-top {
-    height: 808px;
+    height: 100%;
     margin: 0 auto;
     display: flex;
     position: relative;

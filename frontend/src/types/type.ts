@@ -70,6 +70,8 @@ export interface StudioInfo {
     hasMyClip: boolean;
     thumbnailUrl: string;
     expireDate: Date;
+    videoCount: number;
+    attendMember: number;
     studioFrameId: number;
     studioStickerUrl: string;
 }
@@ -84,6 +86,7 @@ export interface StudioDetail {
     studioBGMId: number;
     studioBGMVolume: number;
     studioStickerUrl: string;
+    expireDate: Date;
     // studioChecklist: number;
 }
 // clip 타입

@@ -39,6 +39,7 @@ export default function StudioMainPage() {
         studioBGMId: -1,
         studioStickerUrl: '',
         studioBGMVolume: 100,
+        expireDate: new Date(),
     });
 
     //유저 정보
@@ -443,15 +444,27 @@ export default function StudioMainPage() {
     };
 
     const onClickCompletePage = async () => {
+        const expireDate: Date = new Date(studioDetailInfo.expireDate);
+        if (
+            Math.floor(
+                (expireDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+            ) < 2
+        ) {
+            await encodingLetter(studioDetailInfo.studioId).then((res) => {
+                console.log(res);
+                moveStudioList();
+            });
+        } else if (studioDetailInfo.studioOwner === userInfo.userId) {
+            await encodingLetter(studioDetailInfo.studioId).then((res) => {
+                console.log(res);
+                moveStudioList();
+            });
+        }
+
         if (!isSelectedClipList()) {
             alert('하나 이상의 영상을 선택해야 영상 편지 완성이 가능합니다');
             return;
         }
-        console.log('complete letter');
-        await encodingLetter(studioDetailInfo.studioId).then((res) => {
-            console.log(res);
-            moveStudioList();
-        });
     };
 
     /** 리스트로 이동 */
@@ -608,7 +621,8 @@ export default function StudioMainPage() {
                                             }
                                         }}
                                     />
-                                    {isEditingName ? (
+                                    {studioDetailInfo.studioOwner ===
+                                        userInfo.userId && isEditingName ? (
                                         <span
                                             className="material-symbols-outlined mx-2 text-2xl text-white cursor-pointer"
                                             onClick={handleStudioName}
@@ -616,12 +630,18 @@ export default function StudioMainPage() {
                                             check_circle
                                         </span>
                                     ) : (
+                                        <></>
+                                    )}
+                                    {studioDetailInfo.studioOwner ===
+                                        userInfo.userId && !isEditingName ? (
                                         <span
                                             className="material-symbols-outlined mx-2 text-2xl text-white cursor-pointer"
                                             onClick={handleStudioName}
                                         >
                                             edit
                                         </span>
+                                    ) : (
+                                        <></>
                                     )}
                                 </div>
 
