@@ -641,7 +641,7 @@ export default function StudioMainPage() {
                         </div>
                         <div className=" flex flex-col justify-center items-center">
                             <div className="w-full  flex justify-start items-center">
-                                <p className="mt-8 ms-12 mb-4 text-2xl">
+                                <p className="mt-8 ms-12 mb-4 text-2xl min-h-[32px]">
                                     {selectedVideo.clipTitle}
                                 </p>
                             </div>
@@ -780,8 +780,33 @@ export default function StudioMainPage() {
                             <div className="w-full flex justify-start text-xl ">
                                 <p>나의 영상</p>
                             </div>
-                            {studioDetailInfo.clipInfoList ? (
-                                studioDetailInfo.clipInfoList.map((clip) => {
+                            {usedVideoList ? (
+                                usedVideoList.map((clip) => {
+                                    if (clip.clipOwner === userInfo.userId) {
+                                        return (
+                                            <VideoCard
+                                                key={clip.clipId}
+                                                onDelete={() => {
+                                                    onDelete(clip.clipId);
+                                                }}
+                                                onClick={() => {
+                                                    onClickEdit(clip.clipId);
+                                                }}
+                                                selectVideo={() => {
+                                                    selectVideo(clip.clipId);
+                                                }}
+                                                props={clip}
+                                                presentUser={userInfo.userId}
+                                                selectedClip={selectedVideo}
+                                            />
+                                        );
+                                    }
+                                })
+                            ) : (
+                                <></>
+                            )}
+                            {unUsedVideoList ? (
+                                unUsedVideoList.map((clip) => {
                                     if (clip.clipOwner === userInfo.userId) {
                                         return (
                                             <VideoCard
