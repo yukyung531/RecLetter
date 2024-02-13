@@ -34,7 +34,7 @@ services:
     volumes:
       - zookeeper-data:/bitnami/zookeeper
     networks:
-      - recletter-network
+      - RecLetterNetwork
 
   kafka:
     image: bitnami/kafka:3.6
@@ -55,7 +55,7 @@ services:
     depends_on:
       - zookeeper
     networks:
-      - recletter-network
+      - RecLetterNetwork
     volumes:
       - kafka-data:/bitnami/kafka
 volumes:

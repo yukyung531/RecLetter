@@ -75,7 +75,7 @@ services:
         KAFKA_LETTER_RESULTINFO_CONSUMER_GROUP_ID: ${KAFKA_LETTER_RESULTINFO_CONSUMER_GROUP_ID}
         KAFKA_LETTER_RESULTINFO_DELETE_CONSUMER_GROUP_ID: ${KAFKA_LETTER_RESULTINFO_DELETE_CONSUMER_GROUP_ID}
       volumes:
-        - video-data:/videobackend/${DOWNLOAD_PATH:download}
+        - video-data:/videobackend/${DOWNLOAD_PATH:-download}
 
   video2:
     image: ssuyas/recletter_video
@@ -102,7 +102,7 @@ services:
       KAFKA_LETTER_RESULTINFO_CONSUMER_GROUP_ID: ${KAFKA_LETTER_RESULTINFO_CONSUMER_GROUP_ID}
       KAFKA_LETTER_RESULTINFO_DELETE_CONSUMER_GROUP_ID: ${KAFKA_LETTER_RESULTINFO_DELETE_CONSUMER_GROUP_ID}
     volumes:
-      - video-data:/videobackend/${DOWNLOAD_PATH:download}
+      - video-data:/videobackend/${DOWNLOAD_PATH:-download}
 
   video3:
     image: ssuyas/recletter_video
@@ -129,7 +129,7 @@ services:
       KAFKA_LETTER_RESULTINFO_CONSUMER_GROUP_ID: ${KAFKA_LETTER_RESULTINFO_CONSUMER_GROUP_ID}
       KAFKA_LETTER_RESULTINFO_DELETE_CONSUMER_GROUP_ID: ${KAFKA_LETTER_RESULTINFO_DELETE_CONSUMER_GROUP_ID}
     volumes:
-      - video-data:/videobackend/${DOWNLOAD_PATH:download}
+      - video-data:/videobackend/${DOWNLOAD_PATH:-download}
 
   app:
     image: ssuyas/recletter_frontend
