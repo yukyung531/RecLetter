@@ -11,6 +11,8 @@ import {
 import { settingNewPassword } from '../api/user';
 import { deleteStorageData } from '../util/initialLocalStorage';
 import axios, { AxiosError } from 'axios';
+import ErrorModal from '../components/ErrorModal';
+import SuccessModal from '../components/SuccessModal';
 
 export default function FindPwPage() {
     const [inputEmail, setInputEmail] = useState<string>('');
@@ -25,6 +27,27 @@ export default function FindPwPage() {
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [count, setCount] = useState<number>(600);
     const [isCounting, setIsCounting] = useState<boolean>(false);
+
+    //모달창
+    const [isSuccessModalActive, setIsSuccessModalActive] =
+        useState<boolean>(false);
+    const [isErrorModalActive, setIsErrorModalActive] =
+        useState<boolean>(false);
+
+    /** closeSuccessModal()
+     *  비밀번호 변경 성공창 닫기
+     */
+    const closeSuccessModal = () => {
+        setIsSuccessModalActive(false);
+        navigate('/');
+    };
+
+    /** closeErrorModal()
+     *  비밀번호 변경 실패창 닫기
+     */
+    const closeErrorModal = () => {
+        setIsErrorModalActive(false);
+    };
 
     const dispatch = useDispatch();
     useEffect(() => {
@@ -71,7 +94,6 @@ export default function FindPwPage() {
         setCount(600); //10분
         setIsCounting(true);
     };
-
 
     /** POST 비밀번호 초기화 이메일 발송 요청 */
     const sendPasswordEmail = async () => {
@@ -127,16 +149,15 @@ export default function FindPwPage() {
     /** POST 비밀번호 초기화 후 비밀번호 재설정 */
     const setNewPassword = async () => {
         if (password !== passwordConfirm) {
-            alert('비밀번호를 다시 확인해주세요.');
+            setIsErrorModalActive(true);
         } else {
             await settingNewPassword({
                 userEmail: inputEmail,
                 newPassword: password,
             }).then((res) => {
                 if (res.status === httpStatusCode.OK) {
-                    alert('비밀번호가 재설정되었습니다.');
+                    setIsSuccessModalActive(true);
                     deleteStorageData();
-                    navigate('/');
                 } else {
                     console.log('인증코드 관련이 잘못되었습니다');
                 }
@@ -162,7 +183,7 @@ export default function FindPwPage() {
                 </div>
                 <div className="flex h-12 my-3 items-center justify-center">
                     <p className="w-32 flex flex-col justify-center text-2xl color-text-darkgray text-right me-4">
-                    비밀번호 확인
+                        비밀번호 확인
                     </p>
                     <input
                         className="w-128 h-12 ps-3 text-2xl border rounded-md"
@@ -191,7 +212,7 @@ export default function FindPwPage() {
                 </div>
             );
         }
-    }
+    };
 
     /** Email 컴포넌트 */
     const checkEmailElement = () => {
@@ -211,8 +232,7 @@ export default function FindPwPage() {
                     </p>
                 </div>
             );
-        }
-        else if (emailFlag === 0) {
+        } else if (emailFlag === 0) {
             return <></>;
         } else if (emailFlag === 1) {
             return (
@@ -249,11 +269,13 @@ export default function FindPwPage() {
         }
         if (emailFlag === 0) {
             return <></>;
-        }  else if ((emailFlag === 2 || emailFlag === 3) && emailCheck && codeCheck) {
-
+        } else if (
+            (emailFlag === 2 || emailFlag === 3) &&
+            emailCheck &&
+            codeCheck
+        ) {
             return <></>;
-
-        } else if (emailCheck && (emailFlag === 2 || emailFlag === 3))  {
+        } else if (emailCheck && (emailFlag === 2 || emailFlag === 3)) {
             return (
                 <li className="flex mt-4">
                     <p className="w-32 me-4"></p>
@@ -283,12 +305,28 @@ export default function FindPwPage() {
                     </div>
                 </li>
             );
-        }else {
+        } else {
             return <></>;
         }
     };
     return (
         <section className="section-center">
+            {isErrorModalActive ? (
+                <ErrorModal
+                    onClick={closeErrorModal}
+                    message="비밀번호를 다시 확인해주세요."
+                />
+            ) : (
+                <></>
+            )}
+            {isSuccessModalActive ? (
+                <SuccessModal
+                    onClick={closeSuccessModal}
+                    message="비밀번호가 재설정되었습니다."
+                />
+            ) : (
+                <></>
+            )}
             <p className="text-3xl mx-4 my-6">비밀번호 찾기</p>
             <div className="flex flex-col items-center justify-center">
                 <li className="flex mt-4">
@@ -323,14 +361,9 @@ export default function FindPwPage() {
             >
                 비밀번호 재설정
             </button>
-            <div
-                className="text-xl underline my-6 text-center cursor-pointer text-gray-400"
-            >
+            <div className="text-xl underline my-6 text-center cursor-pointer text-gray-400">
                 <Link to="/login">돌아가기</Link>
             </div>
-
         </section>
     );
-
-
 }

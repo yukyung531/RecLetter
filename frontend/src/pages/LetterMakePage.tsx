@@ -51,6 +51,7 @@ import ColorPalette from '../components/ColorPalette';
 import { uploadFile } from '../util/uploadFile';
 import { Toggle } from '../components/Toggle';
 import { webkitTextStrokeWidth } from 'html2canvas/dist/types/css/property-descriptors/webkit-text-stroke-width';
+import ErrorModal from '../components/ErrorModal';
 
 interface mousePosition {
     positionX: number | null;
@@ -62,6 +63,21 @@ export default function LetterMakePage() {
 
     //mode - 0:영상리스트, 1:프레임, 2:텍스트, 3:오디오
     const [mode, setMode] = useState<number>(0);
+
+    //에러 모달
+    const [isModalActive, setIsModalActive] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+
+    const closeModal = () => {
+        setIsModalActive(false);
+    };
+
+    const [isNavaigateErrorModalActive, setIsNavigateErrorModalActive] =
+        useState<boolean>(false);
+    const closeNavModal = () => {
+        setIsNavigateErrorModalActive(false);
+        navigate('/login');
+    };
 
     ///////////////////////////////////////////////초기 설정////////////////////////////////////////////////////////
 
@@ -105,6 +121,9 @@ export default function LetterMakePage() {
         fontShadowBlur: 3,
     });
     const [studioBGMVolume, setStudioBGMVolume] = useState<number>(50);
+
+    //BGM 미리듣기 재생 중
+    const [bgmPlaying, setBgmPlaying] = useState<boolean>(false);
 
     /** 리덕스 설정 */
     const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
@@ -319,8 +338,7 @@ export default function LetterMakePage() {
     useEffect(() => {
         const studioId = getlastPath();
         if (studioId === '') {
-            alert('에러가 발생하여 돌아갑니다');
-            navigate('/login');
+            setIsNavigateErrorModalActive(true);
         }
         //유저정보 불러오기
         const getUserInfo = async () => {
@@ -598,7 +616,8 @@ export default function LetterMakePage() {
             const onCapture = () => {
                 console.log('onCapture');
                 if (!target) {
-                    return alert('결과 저장에 실패했습니다');
+                    setErrorMessage('결과 저장에 실패했습니다');
+                    return setIsModalActive(true);
                 }
                 html2canvas(target, { scale: 2, backgroundColor: null }).then(
                     (canvas) => {
@@ -632,7 +651,8 @@ export default function LetterMakePage() {
             const onCapture = () => {
                 console.log('onCapture');
                 if (!target) {
-                    return alert('결과 저장에 실패했습니다');
+                    setErrorMessage('결과 저장에 실패했습니다');
+                    return setIsModalActive(true);
                 }
                 html2canvas(target, { scale: 2, backgroundColor: null }).then(
                     (canvas) => {
@@ -882,6 +902,16 @@ export default function LetterMakePage() {
      *  비디오를 플레이한다.
      */
     const playVideo = () => {
+        if (bgmRef.current) {
+            bgmRef.current.pause;
+            setBgmPlaying(false);
+        }
+
+        //재생할게 없으면 return
+        if (usedClipList.length === 0) {
+            return;
+        }
+
         setPercent(0);
         setPlaying(true);
         //video play && bgm play
@@ -1341,36 +1371,52 @@ export default function LetterMakePage() {
                         <div>
                             {playing ? (
                                 <>
-                                    <button className="text-[#D5D5D5] border-2 border-[#D5D5D5] pl-2 rounded-l-2xl text-sm border-collapse">
-                                        ▶
+                                    <button className="text-[#D5D5D5] border-2 border-[#D5D5D5] px-[10px] rounded-[10px] text-sm material-symbols-outlined">
+                                        play_arrow
                                     </button>
-                                    <button className="text-[#D5D5D5] border-2 border-[#D5D5D5] pr-2 rounded-r-2xl text-sm border-collapse">
-                                        ■
+                                    <button className="text-[#D5D5D5] border-2 border-[#D5D5D5] px-[10px] rounded-[10px] text-sm ml-2 material-symbols-outlined">
+                                        stop
                                     </button>
                                 </>
                             ) : (
                                 <>
+                                    {bgmPlaying ? (
+                                        <button
+                                            className="text-[#FF777F] border-2 border-[#FF777F] px-[10px] rounded-[10px] text-sm material-symbols-outlined"
+                                            onClick={() => {
+                                                if (bgmRef.current) {
+                                                    bgmRef.current.pause();
+                                                    setBgmPlaying(false);
+                                                }
+                                            }}
+                                        >
+                                            pause
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="text-[#FF777F] border-2 border-[#FF777F] px-[10px] rounded-[10px] text-sm material-symbols-outlined"
+                                            onClick={() => {
+                                                if (bgmRef.current) {
+                                                    bgmRef.current.play();
+                                                    setBgmPlaying(true);
+                                                }
+                                            }}
+                                        >
+                                            play_arrow
+                                        </button>
+                                    )}
                                     <button
-                                        className="text-[#FF777F] border-2 border-[#FF777F] pl-2 rounded-l-2xl text-sm border-collapse"
-                                        onClick={() => {
-                                            if (bgmRef.current) {
-                                                bgmRef.current.play();
-                                            }
-                                        }}
-                                    >
-                                        ▶
-                                    </button>
-                                    <button
-                                        className="text-[#FF777F] border-2 border-[#FF777F] pr-2 rounded-r-2xl text-sm border-collapse"
+                                        className="text-[#FF777F] border-2 border-[#FF777F] px-[10px] rounded-[10px] text-sm ml-2 material-symbols-outlined"
                                         onClick={() => {
                                             if (bgmRef.current) {
                                                 //멈추고 처음으로
+                                                setBgmPlaying(false);
                                                 bgmRef.current.pause();
                                                 bgmRef.current.currentTime = 0;
                                             }
                                         }}
                                     >
-                                        ■
+                                        stop
                                     </button>
                                 </>
                             )}
@@ -1384,6 +1430,7 @@ export default function LetterMakePage() {
                             selectBGM(+event.target.value);
                             selectBGMUrl(+event.target.value);
                         }}
+                        className="border-2 border-black rounded my-2"
                     >
                         {bgmList.map((bgm) => {
                             return (
@@ -1935,7 +1982,8 @@ export default function LetterMakePage() {
             await endScreenShare();
         } catch (error) {
             console.error('이미지 업로드 실패:', error);
-            alert('이미지 업로드에 실패했습니다.');
+            setErrorMessage('이미지 업로드에 실패했습니다.');
+            setIsModalActive(true);
         }
     };
 
@@ -1965,6 +2013,19 @@ export default function LetterMakePage() {
                 }
             }}
         >
+            {isModalActive ? (
+                <ErrorModal onClick={closeModal} message={errorMessage} />
+            ) : (
+                <></>
+            )}
+            {isNavaigateErrorModalActive ? (
+                <ErrorModal
+                    onClick={closeNavModal}
+                    message="에러가 발생하여 돌아갑니다"
+                />
+            ) : (
+                <></>
+            )}
             {selectedObj !== '' &&
             mousePosition.positionX &&
             mousePosition.positionY &&

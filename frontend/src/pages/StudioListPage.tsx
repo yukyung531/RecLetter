@@ -13,6 +13,7 @@ import {
 import { httpStatusCode } from '../util/http-status';
 import StudioFinishCard from '../components/StudioFinishCard';
 import { getlastPath } from '../util/get-func';
+import SuccessModal from '../components/SuccessModal';
 
 export default function StudioListPage() {
     const [studioList, setStudioList] = useState<StudioInfo[]>([]);
@@ -22,6 +23,9 @@ export default function StudioListPage() {
     const [editMode, setEditMode] = useState<boolean>(false);
     const [listTab, setListTab] = useState<number>(0);
     const [deleteList, setDeleteList] = useState<string[]>([]);
+
+    //모달창 활성화
+    const [isModalActive, setIsModalActive] = useState<boolean>(false);
 
     const token = localStorage.getItem('access-token');
     /** 리덕스 설정 */
@@ -108,14 +112,21 @@ export default function StudioListPage() {
         deleteString = deleteString.slice(0, -1);
         await deleteStudio(deleteString).then((res) => {
             if (res.status === httpStatusCode.OK) {
-                console.log('삭제되었습니다.');
-                alert('삭제되었습니다');
                 setEditMode(false);
                 setDeleteList([]);
                 makeStudioListAPI();
+                setIsModalActive(true);
             }
         });
     };
+
+    /** closeModal()
+     *  모달창 닫기
+     */
+    const closeModal = () => {
+        setIsModalActive(false);
+    };
+
     /** 카드를 클릭 했을 때 */
     const onClickSCard = (studioId: string) => {
         if (editMode) {
@@ -210,6 +221,11 @@ export default function StudioListPage() {
 
     return (
         <section className="relative w-full base-height items-center flex flex-col mt-14 ml-8">
+            {isModalActive ? (
+                <SuccessModal onClick={closeModal} message="삭제되었습니다." />
+            ) : (
+                <></>
+            )}
             <div className="relative w-4/5 h-5/6">
                 <div className="relative w-full flex justify-between mt-12">
                     <div className="flex items-center">

@@ -61,7 +61,7 @@ export default function SelectedVideoCard({
                         onLoadedData={metadataLoad}
                         className=""
                     />
-                    <p>{clip.clipTitle}</p>
+                    <p className="min-h-[48px]">{clip.clipTitle}</p>
                     <input
                         className="w-28"
                         type="range"

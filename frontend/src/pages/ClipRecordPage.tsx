@@ -24,6 +24,7 @@ import {
     studioNameState,
 } from '../util/counter-slice';
 import { enterStudio, studioDetail } from '../api/studio';
+import ErrorModal from '../components/ErrorModal';
 
 interface Const {
     audio: boolean;
@@ -31,6 +32,16 @@ interface Const {
 }
 
 export default function ClipRecordPage() {
+    //모달
+    const [isModalActive, setIsModalActive] = useState<boolean>(false);
+
+    /** closeModal()
+     *  모달 닫기
+     */
+    const closeModal = () => {
+        setIsModalActive(false);
+    };
+
     //모드 0:영상, 1:스크립트
     const [mode, setMode] = useState<number>(0);
 
@@ -315,7 +326,7 @@ export default function ClipRecordPage() {
             getUserInfo();
         }
         if (!token || !isLogin) {
-            alert('오류가 났습니다');
+            setIsModalActive(true);
         }
 
         //+유저 정보 불러오기
@@ -673,7 +684,11 @@ export default function ClipRecordPage() {
     ///////////////////////////////렌더링 화면//////////////////////////////////////////
     return (
         <section className="relative section-top pt-14 ">
-            {/* 상단바 */}
+            {isModalActive ? (
+                <ErrorModal onClick={closeModal} message="오류가 났습니다" />
+            ) : (
+                <></>
+            )}
 
             {/* 중앙 섹션 */}
             <div className="flex w-full editor-height">

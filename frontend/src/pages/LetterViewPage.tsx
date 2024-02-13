@@ -6,10 +6,33 @@ import { connectSessionAPI } from '../api/openvidu';
 import { useNavigate } from 'react-router-dom';
 import OpenViduVideoCard from '../components/OpenViduVideoCard';
 import { disconnect } from '../util/chat';
+import ErrorModal from '../components/ErrorModal';
 
 export default function LetterViewPage() {
     //navigate
     const navigate = useNavigate();
+
+    //에러 모달
+    const [isModalActive, setIsModalActive] = useState<boolean>(false);
+
+    /** closeModal()
+     *  모달을 닫습니다.
+     */
+    const closeModal = () => {
+        //세션이 있으면 연결을 멈춘다.
+        if (session) {
+            session.disconnect();
+        }
+
+        //OV 초기화
+        OV.current = new OpenVidu();
+        setSession(undefined);
+        setSubscribers([]);
+
+        //메인 페이지로
+        setIsModalActive(false);
+        navigate(`/studiomain/${studioId}`);
+    };
 
     //studioId 가져오기
     const splitUrl = document.location.href.split('/');
@@ -109,19 +132,7 @@ export default function LetterViewPage() {
     }, []);
 
     const endScreenShare = useCallback(() => {
-        alert('세션에서 나갑니다.');
-        //세션이 있으면 연결을 멈춘다.
-        if (session) {
-            session.disconnect();
-        }
-
-        //OV 초기화
-        OV.current = new OpenVidu();
-        setSession(undefined);
-        setSubscribers([]);
-
-        //메인 페이지로
-        navigate(`/studiomain/${studioId}`);
+        setIsModalActive(true);
     }, []);
 
     /** getToken()
@@ -173,6 +184,14 @@ export default function LetterViewPage() {
 
     return (
         <section className="relative section-top pt-16 bg-black">
+            {isModalActive ? (
+                <ErrorModal
+                    onClick={closeModal}
+                    message="세션 연결이 종료되었습니다."
+                />
+            ) : (
+                <></>
+            )}
             <div className="flex">
                 <div id="video-container">
                     {subscribers.length >= 1 ? (

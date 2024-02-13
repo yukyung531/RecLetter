@@ -5,7 +5,7 @@ import { logout } from '../api/auth';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginState } from '../util/counter-slice';
 import { deleteStorageData } from '../util/initialLocalStorage';
-import LogOutModal from './LogOutModal';
+import SuccessModal from './SuccessModal';
 
 export default function Header() {
     /** 리덕스 함수 */
@@ -57,7 +57,10 @@ export default function Header() {
             return (
                 <div className="flex justify-center items-center color-text-ivory">
                     {isModalActive ? (
-                        <LogOutModal onClick={clickModal} />
+                        <SuccessModal
+                            onClick={clickModal}
+                            message="로그아웃 되었습니다."
+                        />
                     ) : (
                         <></>
                     )}
