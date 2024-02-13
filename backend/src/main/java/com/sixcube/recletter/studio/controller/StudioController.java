@@ -79,15 +79,15 @@ public class StudioController {
       @AuthenticationPrincipal User user) {
     // 찾을 수 없을 경우 StudioNotFoundException 발생
     // 자신이 참여하지 않은 Studio를 검색할 경우 UnauthorizedToSearchStudioException 발생
-    // TODO- studioSticker
+    // studioSticker는 없으면 빈 값
     Studio studio = studioService.searchStudioByStudioId(studioId, user);
 
     SearchStudioDetailRes result = SearchStudioDetailRes.builder()
         .studioId(studio.getStudioId())
         .studioTitle(studio.getStudioTitle())
-//        .isCompleted(studio.getIsCompleted())
         .studioStatus(studio.getStudioStatus())
         .studioOwner(studio.getStudioOwner())
+        .expireDate(studio.getExpireDate())
         .clipInfoList(studioService.searchStudioClipInfoList(studioId))
         .studioFrameId(studio.getStudioFrameId())
         .studioBgmId(studio.getStudioBgmId())

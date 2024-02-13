@@ -1,6 +1,8 @@
 package com.sixcube.recletter.studio.dto.res;
 
 import com.sixcube.recletter.clip.dto.ClipInfo;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,6 +23,7 @@ public class SearchStudioDetailRes {
   private String studioTitle;
   private StudioStatus studioStatus;
   private String studioOwner;
+  private LocalDateTime expireDate;
   private List<ClipInfo> clipInfoList;
   private Integer studioFrameId;
   private Integer studioBgmId;
