@@ -65,6 +65,7 @@ export default function StudioCard({
                 className="w-full bg-black rounded-lg"
                 style={{
                     aspectRatio: 16 / 9,
+                    transform: `rotateY(180deg)`,
                 }}
                 src={props.thumbnailUrl}
                 crossOrigin="anonymous"
