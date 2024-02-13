@@ -141,13 +141,13 @@ def encode_letter():
                 )
                 del concatenated_letter
 
-                # # bgm 삽입
-                # bgm_inserted_letter = insert_bgm(
-                #     frame_added_letter,
-                #     make_letter_req.studio_bgm_id,
-                #     make_letter_req.studio_bgm_volume
-                # )
-                # del frame_added_letter
+                # bgm 삽입
+                bgm_inserted_letter = insert_bgm(
+                    frame_added_letter,
+                    make_letter_req.studio_bgm_id,
+                    make_letter_req.studio_bgm_volume
+                )
+                del frame_added_letter
 
                 # letter 완성 후 저장
                 directory = make_letter_req.get_assets_directory()
@@ -156,13 +156,15 @@ def encode_letter():
                 if not os.path.exists(directory):
                     os.makedirs(directory)
 
-                frame_added_letter.write_videofile(
+                bgm_inserted_letter.write_videofile(
                     complete_file_name,
                     fps=30,
-                    codec='libx264'
+                    codec='libx264',
+                    audio_codec='aac',
+                    remove_temp=True
                 )
 
-                frame_added_letter.close()
+                bgm_inserted_letter.close()
 
                 # produce
                 print("create_letter: success")

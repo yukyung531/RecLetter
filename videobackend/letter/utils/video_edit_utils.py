@@ -10,7 +10,7 @@ def load_clip(clip_info: ClipInfo, studio_id: str) -> VideoFileClip:
 
 
 def concat_clip(clip_list: List[VideoClip]) -> VideoClip:
-    fadein_clip_list = list(map(lambda x: x.crossfadein(1), clip_list))
+    fadein_clip_list = list(map(lambda x: x.crossfadeout(0.5).crossfadein(0.5), clip_list))
 
     return concatenate_videoclips(fadein_clip_list, method="compose")
 
@@ -37,9 +37,11 @@ def tune_volume(clip: VideoClip, volume_ratio: int) -> VideoClip:
 
 
 def insert_bgm(clip: VideoClip, volume_id: int, volume_ratio: int) -> VideoClip:
-    bgm_file_path = "./assets/bgm" + str(volume_id) + ".mp3"
+    bgm_file_path = "./assets/bgm/bgm" + str(volume_id) + ".mp3"
     bgm = AudioFileClip(bgm_file_path)
-    bgm = bgm.fx(vfx.audio_loop, duration=clip.duration)
-    bgm = bgm.fx(vfx.volumex, volume_ratio / 100)
+    bgm = afx.audio_loop(bgm, duration=clip.duration)
+    bgm = volumex(bgm, volume_ratio / 100)
+    original_sound = clip.audio
+    composite_audio_clip = CompositeAudioClip([original_sound, bgm])
 
-    return CompositeVideoClip([clip, bgm])
+    return clip.set_audio(composite_audio_clip)
