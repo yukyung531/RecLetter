@@ -9,15 +9,15 @@ from videobackend.letter.controller.letter_video_controller import letter_video_
 
 load_dotenv(dotenv_path="./.env")
 
-thread1 = Thread(target=download_assets)
-thread2 = Thread(target=encode_letter)
-thread3 = Thread(target=upload_letter)
-thread4 = Thread(target=delete_assets)
+download_assets_thread = Thread(target=download_assets)
+encode_letter_thread = Thread(target=encode_letter)
+upload_letter_thread = Thread(target=upload_letter)
+delete_assets_thread = Thread(target=delete_assets)
 
-thread1.start()
-thread2.start()
-thread3.start()
-thread4.start()
+download_assets_thread.start()
+encode_letter_thread.start()
+upload_letter_thread.start()
+delete_assets_thread.start()
 
 app = FastAPI()
 
