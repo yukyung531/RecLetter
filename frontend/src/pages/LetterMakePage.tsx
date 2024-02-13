@@ -1300,28 +1300,41 @@ export default function LetterMakePage() {
                     <div className="flex justify-between">
                         <p>BGM</p>
                         <div>
-                            <button
-                                className="text-[#FF777F] border-2 border-[#FF777F] pl-2 rounded-l-2xl text-sm border-collapse"
-                                onClick={() => {
-                                    if (bgmRef.current) {
-                                        bgmRef.current.play();
-                                    }
-                                }}
-                            >
-                                ▶
-                            </button>
-                            <button
-                                className="text-[#FF777F] border-2 border-[#FF777F] pr-2 rounded-r-2xl text-sm border-collapse"
-                                onClick={() => {
-                                    if (bgmRef.current) {
-                                        //멈추고 처음으로
-                                        bgmRef.current.pause();
-                                        bgmRef.current.currentTime = 0;
-                                    }
-                                }}
-                            >
-                                ■
-                            </button>
+                            {playing ? (
+                                <>
+                                    <button className="text-[#D5D5D5] border-2 border-[#D5D5D5] pl-2 rounded-l-2xl text-sm border-collapse">
+                                        ▶
+                                    </button>
+                                    <button className="text-[#D5D5D5] border-2 border-[#D5D5D5] pr-2 rounded-r-2xl text-sm border-collapse">
+                                        ■
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        className="text-[#FF777F] border-2 border-[#FF777F] pl-2 rounded-l-2xl text-sm border-collapse"
+                                        onClick={() => {
+                                            if (bgmRef.current) {
+                                                bgmRef.current.play();
+                                            }
+                                        }}
+                                    >
+                                        ▶
+                                    </button>
+                                    <button
+                                        className="text-[#FF777F] border-2 border-[#FF777F] pr-2 rounded-r-2xl text-sm border-collapse"
+                                        onClick={() => {
+                                            if (bgmRef.current) {
+                                                //멈추고 처음으로
+                                                bgmRef.current.pause();
+                                                bgmRef.current.currentTime = 0;
+                                            }
+                                        }}
+                                    >
+                                        ■
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
                     <select
