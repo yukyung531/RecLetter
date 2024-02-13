@@ -5,6 +5,4 @@ WORKDIR /videobackend
 
 RUN pip install --no-cache-dir -r ./requirements.txt
 
-ENV PORT_NUMBER=8000
-
 CMD ["uvicorn", "main:app",  "--port", "$PORT_NUMBER"]
