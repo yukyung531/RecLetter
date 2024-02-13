@@ -833,11 +833,15 @@ export default function ClipRecordPage() {
                                             <ScriptTemplateCard
                                                 key={script.scriptId}
                                                 props={script}
-                                                onClick={() =>
+                                                onClick={() => {
                                                     setSelectedScript(
                                                         script.scriptContent
-                                                    )
-                                                }
+                                                    );
+                                                    if (scriptRef.current) {
+                                                        scriptRef.current.value =
+                                                            script.scriptContent;
+                                                    }
+                                                }}
                                             />
                                         );
                                     })}
