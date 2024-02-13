@@ -3,7 +3,7 @@ import shutil
 import time
 
 import boto3
-from dotenv import load_dotenv
+from dotenv.main import load_dotenv
 from kafka import KafkaConsumer, KafkaProducer
 from json import loads, dumps
 
@@ -85,7 +85,7 @@ def download_assets():
                 shutil.rmtree(os.environ.get("DOWNLOAD_PATH", "./download") + "/" + make_letter_req.studio_id)
 
     consumer.commit()
-        print("영상 다운로드 commit")
+    print("영상 다운로드 commit")
 
 
 # @shared_task

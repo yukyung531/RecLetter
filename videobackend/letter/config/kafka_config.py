@@ -1,6 +1,6 @@
 import os
 
-from dotenv import load_dotenv
+from dotenv.main import load_dotenv
 
 load_dotenv()
 KAFKA_BOOTSTRAP_SERVERS = os.environ.get("KAFKA_BOOTSTRAP_SERVERS")

@@ -1,6 +1,6 @@
 from threading import Thread
 
-from dotenv import load_dotenv
+from dotenv.main import load_dotenv
 from fastapi import FastAPI
 
 from videobackend.letter.thread.tasks import download_assets, encode_letter, \
