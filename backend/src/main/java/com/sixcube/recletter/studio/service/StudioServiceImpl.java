@@ -12,9 +12,7 @@ import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.dto.req.UpdateStudioReq;
 import com.sixcube.recletter.studio.exception.*;
 import com.sixcube.recletter.studio.repository.StudioRepository;
-import com.sixcube.recletter.template.service.TemplateService;
 import com.sixcube.recletter.user.dto.User;
-import com.sixcube.recletter.user.service.UserService;
 import jakarta.transaction.Transactional;
 
 import java.io.IOException;
@@ -38,10 +36,6 @@ public class StudioServiceImpl implements StudioService {
   private final StudioRepository studioRepository;
 
   private final StudioParticipantService studioParticipantService;
-
-  private final TemplateService templateService;
-
-  private final UserService userService;
 
   private final ClipService clipService;
 

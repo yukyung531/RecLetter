@@ -1,14 +1,11 @@
 package com.sixcube.recletter.studio.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sixcube.recletter.studio.dto.*;
 import com.sixcube.recletter.studio.dto.req.CompleteLetterReq;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.dto.req.LetterVideoReq;
 import com.sixcube.recletter.studio.dto.req.UpdateStudioReq;
-import com.sixcube.recletter.studio.dto.res.SearchActiveUserRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioDetailRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioListRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioThumbnailRes;
@@ -17,15 +14,11 @@ import com.sixcube.recletter.studio.service.StudioService;
 import com.sixcube.recletter.user.dto.User;
 import jakarta.validation.Valid;
 
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClient;
 
 import static java.time.LocalDate.now;
-import static org.apache.logging.log4j.message.MapMessage.MapFormat.JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @RestController
@@ -44,8 +36,6 @@ public class StudioController {
 
   private final StudioService studioService;
   private final StudioParticipantService studioParticipantService;
-  @Value("${VIDEO_SERVER_URI}")
-  private String videoServerUri;
 
 
   @GetMapping
@@ -147,13 +137,6 @@ public class StudioController {
     return ResponseEntity.ok().build();
   }
 
-  // TODO - redis 예외처리
-  @GetMapping("/{studioId}/active")
-  public ResponseEntity<SearchActiveUserRes> searchActiveUser(@PathVariable String studioId) {
-    // TODO - 해당 studioId로 활성화된 챗팅방이 있는를 체크해서 반환
-    return ResponseEntity.ok().body(SearchActiveUserRes.builder().isActive(false).build());
-  }
-
   // TODO - JPA 예외처리
   @PutMapping("/{studioId}/title")
   public ResponseEntity<Void> updateStudioTitle(@PathVariable String studioId,
@@ -187,16 +170,15 @@ public class StudioController {
   public ResponseEntity<Void> createLetter(@PathVariable String studioId, @AuthenticationPrincipal User user){
     LetterVideoReq letterVideoReq=studioService.createLetterVideoReq(studioId,user);
     log.debug(letterVideoReq.toString());
-    log.debug(videoServerUri + "/video/letter");
 
     //python server로 인코딩 요청전송
-    RestClient restClient=RestClient.create();
-    ResponseEntity<Void> response = restClient.post()
-            .uri(videoServerUri + "/video/letter")
-            .contentType(APPLICATION_JSON)
-            .body(letterVideoReq)
-            .retrieve()
-            .toBodilessEntity();
+//    RestClient restClient=RestClient.create();
+//    ResponseEntity<Void> response = restClient.post()
+//            .uri(videoServerUri + "/video/letter")
+//            .contentType(APPLICATION_JSON)
+//            .body(letterVideoReq)
+//            .retrieve()
+//            .toBodilessEntity();
 
     studioService.updateStudioStatus(studioId, StudioStatus.ENCODING);
     return ResponseEntity.ok().build();
