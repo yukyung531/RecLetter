@@ -71,7 +71,8 @@ export default function StudioListPage() {
                             (studio: StudioInfo, studiokey: number) => {
                                 if (
                                     studio.studioStatus === 'COMPLETE' ||
-                                    studio.studioStatus === 'FAIL'
+                                    studio.studioStatus === 'FAIL' ||
+                                    studio.studioStatus === 'ENCODING'
                                 ) {
                                     setFinishStudioList((prev) => [
                                         ...prev,
