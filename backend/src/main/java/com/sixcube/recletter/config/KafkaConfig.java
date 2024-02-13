@@ -1,6 +1,5 @@
 package com.sixcube.recletter.config;
 
-import com.sixcube.recletter.kafka.KafkaMessageDeserializer;
 import com.sixcube.recletter.studio.dto.req.LetterVideoReq;
 import com.sixcube.recletter.studio.dto.res.LetterVideoRes;
 import java.util.HashMap;
