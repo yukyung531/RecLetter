@@ -25,6 +25,3 @@ delete_assets_thread.start()
 app = FastAPI()
 
 app.include_router(letter_video_router, prefix="/video")
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=int(PORT_NUMBER))
