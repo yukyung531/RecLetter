@@ -87,12 +87,8 @@ export default function LoginPage() {
                 }
             })
             .catch((error) => {
-                console.log(error);
-                alert(error);
                 if (axios.isAxiosError(error)) {
-                    if (
-                        error.response?.status === httpStatusCode.UNAUTHORIZED
-                    ) {
+                    if (error.response?.status === httpStatusCode.BADREQUEST) {
                         setIsErrorModalActive(true);
                     }
                 }

@@ -26,7 +26,11 @@ export default function OpenViduVideoCard({ streamManager }: props) {
             <video
                 ref={videoRef}
                 autoPlay={true}
-                style={{ width: '100%', borderRadius: '10px', border: 'white' }}
+                style={{
+                    width: '100%',
+                    borderRadius: '10px',
+                    border: '#FFF593 5px solid',
+                }}
             ></video>
         </div>
     );

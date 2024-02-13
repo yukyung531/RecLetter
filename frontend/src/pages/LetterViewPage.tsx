@@ -191,12 +191,12 @@ export default function LetterViewPage() {
                         <></>
                     )}
                 </div>
-                <div id="button" className="w-1/5">
+                <div id="button" className="w-[200px] m-5">
                     <button
-                        className="w-full h-[10%] rounded text-3xl bg-[#FF777F] text-white"
+                        className="w-[200px] h-[56px] rounded text-xl bg-[#FF4954] text-white"
                         onClick={endScreenShare}
                     >
-                        회의나가기
+                        회의 나가기
                     </button>
                 </div>
             </div>

@@ -31,7 +31,7 @@ export default function VideoCard({
 
     const metadataLoad = () => {
         if (videoRef.current) {
-            setDuration(Math.round(videoRef.current.duration));
+            setDuration(Math.floor(videoRef.current.duration));
         }
     };
 

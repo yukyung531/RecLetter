@@ -17,6 +17,7 @@ import {
 } from '../util/counter-slice';
 import { getUser } from '../api/user';
 import { enterStudio, studioDetail } from '../api/studio';
+import LoadingModal from '../components/LoadingModal';
 
 export default function ClipEditPage() {
     /** 리덕스 설정 */
@@ -45,6 +46,9 @@ export default function ClipEditPage() {
 
     const [endMaxtime, setEndMaxTime] = useState<number>(59);
 
+    //로딩중
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
     //텍스트 연동 설정
     const [inputText, setInputText] = useState<string>('');
 
@@ -70,11 +74,11 @@ export default function ClipEditPage() {
      * @returns
      */
     const formatTime = (time: number) => {
-        const min = Math.round(time / 60);
+        const min = Math.floor(time / 60);
         const sec =
-            Math.round(time % 60) < 10
-                ? '0' + Math.round(time % 60)
-                : '' + Math.round(time % 60);
+            Math.floor(time % 60) < 10
+                ? '0' + Math.floor(time % 60)
+                : '' + Math.floor(time % 60);
         return `${min}:${sec}`;
     };
 
@@ -270,6 +274,7 @@ export default function ClipEditPage() {
      *  설정된 시간대로 잘라서 서버로 전송한다.
      */
     const makeFinalVideo = async () => {
+        setIsLoading(true);
         const ffmpeg = ffmpegRef.current;
         if (videoRef.current) {
             const prevURL = videoRef.current.src;
@@ -322,6 +327,9 @@ export default function ClipEditPage() {
                     .then((response) => {
                         if (response && response.status === httpStatusCode.OK) {
                             console.log('영상이 성공적으로 전달되었습니다.');
+                            //revokeURL
+                            URL.revokeObjectURL(prevURL);
+                            setIsLoading(false);
                             navigate(`/studiomain/${studioId}`);
                         } else {
                             console.log('영상 전송에 실패하였습니다.');
@@ -410,49 +418,7 @@ export default function ClipEditPage() {
 
     return (
         <section className="relative section-top pt-14">
-            {/* 원래 상단바/ 현재 안쓰임 */}
-            {/* <div className="h-20 w-full px-12 color-text-black flex justify-between items-center">
-                <div className="flex items-center">
-                    <span className="material-symbols-outlined">
-                        arrow_back_ios
-                    </span>
-                    {isEditingName ? (
-                        // 수정전
-                        <>
-                            <input
-                                className="text-2xl border-2 pl-2"
-                                type="text"
-                                value={name}
-                                onChange={(event: BaseSyntheticEvent) => {
-                                    setName(event.target.value);
-                                }}
-                            />
-                            <div className="ml-20" />
-                            <span
-                                className="material-symbols-outlined mx-2 text-3xl"
-                                onClick={() => setIsEditingName(false)}
-                            >
-                                check_box
-                            </span>
-                        </>
-                    ) : (
-                        // 수정중
-                        <>
-                            <div className="text-2xl border-2 pl-2">{name}</div>
-                            <div className="ml-20" />
-                            <span
-                                className="material-symbols-outlined mx-2 text-3xl"
-                                onClick={() => setIsEditingName(true)}
-                            >
-                                edit
-                            </span>
-                        </>
-                    )}
-                    <span className="material-symbols-outlined mx-2 text-3xl">
-                        group_add
-                    </span>
-                </div>
-            </div> */}
+            {isLoading ? <LoadingModal /> : <></>}
 
             {/* 중앙 섹션 */}
             <div className="flex w-full">

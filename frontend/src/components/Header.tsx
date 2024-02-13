@@ -32,10 +32,14 @@ export default function Header() {
     const logoutAPI = async () => {
         await logout()
             .then(() => {
+                deleteStorageData();
+                // dispatch(loginState(false));
                 //모달 활성화
                 setIsModalActive(true);
             })
             .catch((e: Error) => {
+                deleteStorageData();
+                // dispatch(loginState(false));
                 console.log(e);
             });
     };
@@ -43,7 +47,6 @@ export default function Header() {
     /**모달 클릭 */
     const clickModal = () => {
         setIsModalActive(false);
-        deleteStorageData();
         dispatch(loginState(false));
         navigator('/');
     };

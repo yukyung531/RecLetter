@@ -352,19 +352,19 @@ export default function LetterMakePage() {
                         }
 
                         //studioBGM
-                        // console.log(res.data);
-                        if (res.data.studioBGMId) {
-                            setSelectedBGM(res.data.studioBGMId);
-                            selectBGMUrl(res.data.studioBGMId);
+                        console.log(res.data);
+                        if (res.data.studioBgmId) {
+                            setSelectedBGM(res.data.studioBgmId);
+                            selectBGMUrl(res.data.studioBgmId);
                         }
 
                         //studioBGMVolume
-                        if (res.data.studioVolume) {
+                        if (res.data.studioBgmVolume) {
                             if (bgmRef.current) {
                                 bgmRef.current.volume =
-                                    +res.data.studioVolume / 100;
+                                    +res.data.studioBgmVolume / 100;
                             }
-                            setStudioBGMVolume(res.data.studioVolume);
+                            setStudioBGMVolume(res.data.studioBgmVolume);
                         }
                     } else {
                         console.log('Network Error');
@@ -471,7 +471,7 @@ export default function LetterMakePage() {
         }
         // openvidu 화면 공유 시작
         //현재 주석 처리. 주석 풀것!!! (주석해제위치)
-        // startScreenShare();
+        startScreenShare();
 
         /** 페이지 새로고침 전에 실행 할 함수 */
         const reloadingStudioId = getlastPath();
@@ -811,7 +811,7 @@ export default function LetterMakePage() {
     const selectBGMUrl = (bgmId: number) => {
         for (let i = 0; i < bgmList.length; i++) {
             if (bgmList[i].bgmId === bgmId) {
-                setSelectedBGMUrl(bgmList[i].bgmUrl);
+                setSelectedBGMUrl(bgmList[i].bgmUrl + '.mp3');
                 return;
             }
         }
@@ -846,7 +846,7 @@ export default function LetterMakePage() {
         setPercent(0);
         setPlaying(true);
         //video play && bgm play
-        if (videoRef.current && bgmRef.current) {
+        if (videoRef.current) {
             //idx 범위 내부면 비디오 재생 및 다음으로 넘기는 함수
             if (
                 playingIdx.current >= 0 &&
@@ -855,22 +855,25 @@ export default function LetterMakePage() {
                 //범위 안이면 실행, 목록, 볼륨 조절
                 setNowPlayingVideo(usedClipList[playingIdx.current]);
                 videoRef.current.src = usedClipList[playingIdx.current].clipUrl;
+
                 videoRef.current.volume =
-                    usedClipList[playingIdx.current].clipVolume / 100;
+                    usedClipList[playingIdx.current].clipVolume / 200;
                 videoRef.current.play();
 
                 //bgm실행
-                bgmRef.current.volume = studioBGMVolume / 100;
-                bgmRef.current.currentTime =
-                    cumulTime[playingIdx.current] % bgmRef.current.duration;
-                bgmRef.current.play();
+                if (bgmRef.current) {
+                    bgmRef.current.volume = studioBGMVolume / 100;
+                    bgmRef.current.currentTime =
+                        cumulTime[playingIdx.current] % bgmRef.current.duration;
+                    bgmRef.current.play();
+                }
             } else {
                 //범위 밖이면 맨 처음 영상으로 돌아간 후 정지
                 playingIdx.current = 0;
                 setNowPlayingVideo(usedClipList[playingIdx.current]);
                 videoRef.current.src = usedClipList[playingIdx.current].clipUrl;
                 videoRef.current.volume =
-                    usedClipList[playingIdx.current].clipVolume / 100;
+                    usedClipList[playingIdx.current].clipVolume / 200;
                 stopVideo();
             }
         }
@@ -881,11 +884,13 @@ export default function LetterMakePage() {
      */
     const stopVideo = () => {
         setPlaying(false);
-        if (videoRef.current && bgmRef.current) {
+        if (videoRef.current) {
             videoRef.current.currentTime = 0;
-            bgmRef.current.currentTime = 0;
             videoRef.current.pause();
-            bgmRef.current.pause();
+            if (bgmRef.current) {
+                bgmRef.current.currentTime = 0;
+                bgmRef.current.pause();
+            }
         }
     };
 
@@ -1295,26 +1300,41 @@ export default function LetterMakePage() {
                     <div className="flex justify-between">
                         <p>BGM</p>
                         <div>
-                            <button
-                                onClick={() => {
-                                    if (bgmRef.current) {
-                                        bgmRef.current.play();
-                                    }
-                                }}
-                            >
-                                ▶
-                            </button>
-                            <button
-                                onClick={() => {
-                                    if (bgmRef.current) {
-                                        //멈추고 처음으로
-                                        bgmRef.current.pause();
-                                        bgmRef.current.currentTime = 0;
-                                    }
-                                }}
-                            >
-                                ■
-                            </button>
+                            {playing ? (
+                                <>
+                                    <button className="text-[#D5D5D5] border-2 border-[#D5D5D5] pl-2 rounded-l-2xl text-sm border-collapse">
+                                        ▶
+                                    </button>
+                                    <button className="text-[#D5D5D5] border-2 border-[#D5D5D5] pr-2 rounded-r-2xl text-sm border-collapse">
+                                        ■
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        className="text-[#FF777F] border-2 border-[#FF777F] pl-2 rounded-l-2xl text-sm border-collapse"
+                                        onClick={() => {
+                                            if (bgmRef.current) {
+                                                bgmRef.current.play();
+                                            }
+                                        }}
+                                    >
+                                        ▶
+                                    </button>
+                                    <button
+                                        className="text-[#FF777F] border-2 border-[#FF777F] pr-2 rounded-r-2xl text-sm border-collapse"
+                                        onClick={() => {
+                                            if (bgmRef.current) {
+                                                //멈추고 처음으로
+                                                bgmRef.current.pause();
+                                                bgmRef.current.currentTime = 0;
+                                            }
+                                        }}
+                                    >
+                                        ■
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
                     <select
@@ -1352,7 +1372,7 @@ export default function LetterMakePage() {
                     <input
                         className="w-full"
                         type="range"
-                        min={1}
+                        min={0}
                         max={100}
                         value={studioBGMVolume}
                         defaultValue={50}
@@ -1367,7 +1387,7 @@ export default function LetterMakePage() {
                     <p>전체 영상 볼륨 조절</p>
                     <div className="w-full flex">
                         <button
-                            className="border-2 border-black flex-grow"
+                            className="border-2 border-[#FF777F] text-[#FF777F] m-1 rounded hover:bg-[#FF777F] hover:text-white flex-grow"
                             onClick={() => {
                                 usedClipList.map((clip) => {
                                     clip.clipVolume = +clip.clipVolume - 5;
@@ -1381,7 +1401,7 @@ export default function LetterMakePage() {
                             -5
                         </button>
                         <button
-                            className="border-2 border-black flex-grow"
+                            className="border-2 border-[#FF777F] text-[#FF777F] m-1 rounded hover:bg-[#FF777F] hover:text-white flex-grow"
                             onClick={() => {
                                 usedClipList.map((clip) => {
                                     clip.clipVolume = +clip.clipVolume - 1;
@@ -1395,12 +1415,12 @@ export default function LetterMakePage() {
                             -1
                         </button>
                         <button
-                            className="border-2 border-black flex-grow"
+                            className="border-2 border-[#FF777F] text-[#FF777F] m-1 rounded hover:bg-[#FF777F] hover:text-white flex-grow"
                             onClick={() => {
                                 usedClipList.map((clip) => {
                                     clip.clipVolume = +clip.clipVolume + 1;
-                                    if (clip.clipVolume > 100) {
-                                        clip.clipVolume = 100;
+                                    if (clip.clipVolume > 200) {
+                                        clip.clipVolume = 200;
                                     }
                                 });
                                 setUsedClipList([...usedClipList]);
@@ -1409,12 +1429,12 @@ export default function LetterMakePage() {
                             +1
                         </button>
                         <button
-                            className="border-2 border-black flex-grow"
+                            className="border-2 border-[#FF777F] text-[#FF777F] m-1 rounded hover:bg-[#FF777F] hover:text-white flex-grow"
                             onClick={() => {
                                 usedClipList.map((clip) => {
                                     clip.clipVolume = +clip.clipVolume + 5;
-                                    if (clip.clipVolume > 100) {
-                                        clip.clipVolume = 100;
+                                    if (clip.clipVolume > 200) {
+                                        clip.clipVolume = 200;
                                     }
                                 });
                                 setUsedClipList([...usedClipList]);
@@ -1835,9 +1855,9 @@ export default function LetterMakePage() {
             });
             formData.append('studioFrameId', String(selectedFrame));
             // formData.append('studioBgmId', String(selectedBGM));
-            formData.append('studioBgmId', String(1));
+            formData.append('studioBgmId', String(selectedBGM));
             // formData.append('studioVolume', String(studioBGMVolume));
-            formData.append('studioBgmVolume', String(100));
+            formData.append('studioBgmVolume', String(studioBGMVolume));
             formData.append('studioSticker', blob, 'sticker.png');
 
             type ObjectType = {
@@ -2127,7 +2147,7 @@ export default function LetterMakePage() {
                 {/* 상단 */}
                 <div className="w-3/4 h-full editor-height bg-gray-50 flex flex-col justify-between">
                     <div className="w-full h-3/4 px-4 py-4 flex flex-col justify-center items-center">
-                        <div className="movie-width flex justify-start items-center mt-0">
+                        <div className="flex justify-start items-start w-full mt-1 ml-[85px]">
                             <p className="text-2xl">
                                 {nowPlayingVideo.clipTitle}
                             </p>
