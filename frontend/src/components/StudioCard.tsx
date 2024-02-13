@@ -14,6 +14,9 @@ export default function StudioCard({
     onClick,
     editMode,
 }: StudioCardProp) {
+    const regex =
+        /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(:[0-9]+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
+
     //참여 여부
     let isUploadUi = (
         <p className="px-3 color-bg-blue3 text-center text-sm rounded-xl text-white">
@@ -30,6 +33,7 @@ export default function StudioCard({
 
     const [selected, setSelected] = useState<boolean>(false);
     const [peopleNum, setPeopleNum] = useState<number>(0);
+    const [videoCount, setVideoCount] = useState<number>(0);
     const studioId: string = props.studioId + '';
 
     const expireDate: Date = new Date(props.expireDate);
@@ -51,9 +55,10 @@ export default function StudioCard({
             setSelected(false);
         }
     }, [editMode]);
+
     return (
         <div
-            className="relative w-1/5 p-3 bg-white border rounded-lg flex flex-col mx-2 my-2 justify-start items-center cursor-pointer"
+            className="relative w-[23%] p-3 bg-white border rounded-lg flex flex-col mx-2 my-2 justify-start items-center cursor-pointer"
             id={studioId}
             onClick={(e) => {
                 onClick(e);
@@ -72,13 +77,31 @@ export default function StudioCard({
             />
             {/*"https://d3kbsbmyfcnq5r.cloudfront.net/favicon.png" */}
             <div
-                className="absolute w-full top-0 z-10"
+                className="absolute w-full top-0 z-10 p-3"
                 style={{
                     aspectRatio: 16 / 9,
                 }}
             >
-                {stickerUrl !== '' ? <img src={stickerUrl} alt="" /> : <></>}
+                {stickerUrl !== '' ? (
+                    <img src={stickerUrl} alt="" />
+                ) : (
+                    <img src="/src/assets/images/nothumb.png" alt="" />
+                )}
             </div>
+            {props.studioStickerUrl.match(regex) ? (
+                <img
+                    src={props.studioStickerUrl}
+                    className="absolute top-0 lef-0 z-20"
+                    crossOrigin="anonymous"
+                    style={{
+                        width: '100%',
+                        aspectRatio: 16 / 9,
+                    }}
+                    alt=""
+                />
+            ) : (
+                <></>
+            )}
 
             <div
                 className="absolute p-3 w-full top-0 z-10"

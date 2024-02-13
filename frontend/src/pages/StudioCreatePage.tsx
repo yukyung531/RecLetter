@@ -44,12 +44,21 @@ export default function StudioCreatePage() {
                 .add(createDate - 1, 'days')
                 .format()
                 .substring(0, 19);
-            const studioParameter: StudioMake = {
-                studioTitle: studioTitle,
-                expireDate: time,
-                studioFrameId: frame,
-            };
-            loadMakeStudioAPI(studioParameter);
+            if (studioTitle === '') {
+                const studioParameter: StudioMake = {
+                    studioTitle: '제목없음',
+                    expireDate: time,
+                    studioFrameId: frame,
+                };
+                loadMakeStudioAPI(studioParameter);
+            } else {
+                const studioParameter: StudioMake = {
+                    studioTitle: studioTitle,
+                    expireDate: time,
+                    studioFrameId: frame,
+                };
+                loadMakeStudioAPI(studioParameter);
+            }
         }
     };
 

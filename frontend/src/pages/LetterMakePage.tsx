@@ -76,6 +76,7 @@ export default function LetterMakePage() {
         studioBGMId: 1,
         studioStickerUrl: '',
         studioBGMVolume: 100,
+        expireDate: new Date(),
     });
 
     //나중 결과물 산출용 상태 관리
@@ -170,6 +171,43 @@ export default function LetterMakePage() {
         'sticker4',
         'sticker5',
         'sticker6',
+        'sticker7',
+        'sticker8',
+        'sticker9',
+        'sticker10',
+        'sticker11',
+        'sticker12',
+        'sticker13',
+        'sticker14',
+        'sticker15',
+        'sticker16',
+        'sticker17',
+        'sticker18',
+        'sticker19',
+        'sticker20',
+        'sticker21',
+        'sticker22',
+        'sticker23',
+        'sticker24',
+        'sticker25',
+        'sticker26',
+        'sticker27',
+        'sticker28',
+        'sticker29',
+        'sticker30',
+        'sticker31',
+        'sticker32',
+        'sticker33',
+        'sticker34',
+        'sticker35',
+        'sticker36',
+        'sticker37',
+        'sticker38',
+        'sticker39',
+        'sticker40',
+        'sticker41',
+        'sticker42',
+        'sticker43',
     ]);
     const [fontStickerList, setFontStickerList] = useState<string[]>([
         'fontsticker1',
@@ -341,6 +379,7 @@ export default function LetterMakePage() {
                         setSelectImgUrl(
                             `/src/assets/frames/frame${res.data.studioFrameId}.png`
                         );
+                        setSelectedFrame(res.data.studioFrameId);
 
                         //스티커 기본 정보 초기화
                         /* 스티커 */
@@ -962,7 +1001,7 @@ export default function LetterMakePage() {
             return (
                 <div className="w-full flex flex-col justify-start text-xl">
                     <p>스티커</p>
-                    <div className="flex flex-wrap m-2">
+                    <div className="flex flex-wrap m-2 h-40 overflow-y-scroll">
                         {stickerList.map((item, index) => {
                             const imgUrl = `/src/assets/sticker/${item}.png`;
                             return (
@@ -1430,8 +1469,10 @@ export default function LetterMakePage() {
             sideBar = (
                 <div className="w-full flex flex-col justify-start text-xl">
                     <div className="w-full h-full px-4 py-2 text-xl border rounded-2xl flex flex-wrap items-center justify-center">
-                        <p className="w-full text-left mb-2">크기 회전 조작</p>
-                        <div className="relative">
+                        <p className="relative w-full text-left mb-2">
+                            크기 회전 조작
+                        </p>
+                        <div className="relative w-1/3 flex justify-end">
                             {keyState === ('q' || 'ㅂ') ? (
                                 <img
                                     className="absolute w-8 h-8 -top-6 -right-5 z-20"
@@ -1442,6 +1483,7 @@ export default function LetterMakePage() {
                                 <></>
                             )}
                             <img
+                                className=""
                                 src="/src/assets/images/keyQ.png"
                                 style={
                                     keyState === ('q' || 'ㅂ')
@@ -1451,7 +1493,7 @@ export default function LetterMakePage() {
                                 alt=""
                             />
                         </div>
-                        <div className="relative">
+                        <div className="relative w-1/3 flex justify-center">
                             {keyState === ('w' || 'ㅈ') ? (
                                 <img
                                     className="absolute w-8 h-8 -top-6 -right-5 z-20"
@@ -1471,7 +1513,7 @@ export default function LetterMakePage() {
                                 alt=""
                             />
                         </div>
-                        <div className="relative">
+                        <div className="relative w-1/3 flex justify-start">
                             {keyState === ('e' || 'ㄷ') ? (
                                 <img
                                     className="absolute w-8 h-8 -top-6 -right-5 z-20"
@@ -1491,7 +1533,8 @@ export default function LetterMakePage() {
                                 alt=""
                             />
                         </div>
-                        <div className="relative">
+                        <div className="relative w-1/3"></div>
+                        <div className="relative w-1/3 flex justify-center">
                             {keyState === ('s' || 'ㄴ') ? (
                                 <img
                                     className="absolute w-8 h-8 -top-6 -right-5 z-20"
@@ -1511,7 +1554,7 @@ export default function LetterMakePage() {
                                 alt=""
                             />
                         </div>
-                        <div className="relative">
+                        <div className="relative w-1/3">
                             {keyState === 'Escape' ? (
                                 <img
                                     className="absolute w-8 h-8 -top-6 -right-5 z-20"
@@ -1522,7 +1565,8 @@ export default function LetterMakePage() {
                                 <></>
                             )}
                             <img
-                                src="/src/assets/images/keyS.png"
+                                className="relative -bottom-1 -right-2"
+                                src="/src/assets/images/keyESC.png"
                                 style={
                                     keyState === 'Escape'
                                         ? { scale: '1.2' }
@@ -1542,6 +1586,12 @@ export default function LetterMakePage() {
                                 <div className="flex flex-col justify-center items-center">
                                     <p>크기 조작</p>
                                     <p>W, S</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-center text-lg">
+                                <div className="flex flex-col justify-center items-center">
+                                    <p>선택 해제</p>
+                                    <p>ESC</p>
                                 </div>
                             </div>
                         </div>
@@ -1883,7 +1933,7 @@ export default function LetterMakePage() {
     ///////////////////////////////////////////////렌더링///////////////////////////////////////////////////////////
     return (
         <section
-            className="relative section-top pt-14"
+            className="relative section-top h-screen pt-14"
             onMouseMove={(e) => {
                 if (selectedObj !== '') {
                     setMousePosition({

@@ -48,6 +48,8 @@ export default function ChattingBox() {
     const [chatFlag, setChatFlag] = useState<boolean>(false);
     const [peopleFlag, setPeopleFlag] = useState<boolean>(false);
     const [studioCurrentId, setStudioCurrentId] = useState<string>('');
+    const [viewChatFlag, setViewChatFlag] = useState<boolean>(true);
+
     //스크롤 탐지용
     const messageEndRef = useRef<HTMLDivElement>(null);
 
@@ -125,6 +127,10 @@ export default function ChattingBox() {
         if (messageEndRef.current) {
             messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
+        console.log('채팅리스트 숫자' + chattingList.length);
+        if (!chatToggle) {
+            setViewChatFlag(false);
+        }
     }, [chattingList]);
 
     useEffect(() => {
@@ -195,6 +201,9 @@ export default function ChattingBox() {
     // 채팅 토글 바꾸기
     const changeChatToggle = (toggle: boolean) => {
         setChatToggle(toggle);
+        if (chatToggle) {
+            setViewChatFlag(true);
+        }
     };
 
     // 채팅 입력시 입력창 변화
@@ -292,7 +301,6 @@ export default function ChattingBox() {
             messageEndRef.current.scrollIntoView({ behavior: 'auto' });
         }
     }, [chatToggle]);
-    
 
     // 채팅 리스트 표시
     const chatting = () => {
@@ -428,20 +436,7 @@ export default function ChattingBox() {
                             </p>
                         </div>
                         <div className="relative flex justify-between">
-                            <div
-                                className="relative -left-2 flex items-center cursor-pointer rounded-full px-2 hover:font-bold hover:bg-gray-300"
-                                onClick={() => {
-                                    setPeopleFlag(true);
-                                }}
-                                style={{
-                                    color: `${themeObj[chatTheme].chatColor}`,
-                                }}
-                            >
-                                <span className="material-symbols-outlined text-lg">
-                                    group
-                                </span>
-                                <p className="mx-1">{currentPeople.length}</p>
-                            </div>
+                            <div></div>
                             <div className="flex justify-center items-center">
                                 <div
                                     className={`w-4 h-4 rounded-full color-bg-darkgray mx-1 border-2 border-white cursor-pointer ${
@@ -543,14 +538,21 @@ export default function ChattingBox() {
 
             if (chatTheme === 0 && !chatToggle)
                 return (
-                    <img
-                        src="/src/assets/icons/chatlogo1.png"
-                        className="w-16 h-16 fixed flex justify-center items-center bottom-8 right-8 rounded-full cursor-pointer z-30"
-                        alt=""
-                        onClick={() => {
-                            changeChatToggle(!chatToggle);
-                        }}
-                    />
+                    <div className="relative">
+                        <img
+                            src="/src/assets/icons/chatlogo1.png"
+                            className="w-16 h-16 fixed flex justify-center items-center bottom-8 right-8 rounded-full cursor-pointer z-30"
+                            alt=""
+                            onClick={() => {
+                                changeChatToggle(!chatToggle);
+                            }}
+                        />
+                        {!viewChatFlag ? (
+                            <div className="fixed w-4 h-4 bottom-[70px] right-9 border-2 border-white color-bg-subbold rounded-full z-40"></div>
+                        ) : (
+                            <></>
+                        )}
+                    </div>
                 );
             else if (!chatToggle) {
                 return (

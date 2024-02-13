@@ -196,11 +196,15 @@ export default function ClipRecordPage() {
         studioBGMId: -1,
         studioStickerUrl: '',
         studioBGMVolume: 100,
+        expireDate: new Date(),
     });
 
     //studioId
     const splitUrl = document.location.href.split('/');
     const studioId = splitUrl[splitUrl.length - 1];
+
+    const regex =
+        /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(:[0-9]+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
 
     /**useEffect를 이용한 촬영 준비 설정
      * 오디오, 비디오 권한을 받아, 허가를 얻으면 mediaStream을 얻는다.
@@ -890,6 +894,21 @@ export default function ClipRecordPage() {
                                 }}
                                 alt=""
                             />
+                            {/* 스티커 */}
+                            {studioDetailInfo.studioStickerUrl.match(regex) ? (
+                                <img
+                                    src={studioDetailInfo.studioStickerUrl}
+                                    className="absolute top-0 lef-0"
+                                    crossOrigin="anonymous"
+                                    style={{
+                                        width: '800px',
+                                        aspectRatio: 16 / 9,
+                                    }}
+                                    alt=""
+                                />
+                            ) : (
+                                <></>
+                            )}
                         </div>
                     </div>
                     <div className="w-1/5 flex flex-col justify-around items-center">
