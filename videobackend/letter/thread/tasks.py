@@ -82,8 +82,9 @@ def download_assets():
                         "studioId": make_letter_req.studio_id
                     }
                 )
+                shutil.rmtree(os.environ.get("DOWNLOAD_PATH", "./download") + "/" + make_letter_req.studio_id)
 
-        consumer.commit()
+    consumer.commit()
         print("영상 다운로드 commit")
 
 
