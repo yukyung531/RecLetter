@@ -12,9 +12,7 @@ import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.dto.req.UpdateStudioReq;
 import com.sixcube.recletter.studio.exception.*;
 import com.sixcube.recletter.studio.repository.StudioRepository;
-import com.sixcube.recletter.template.service.TemplateService;
 import com.sixcube.recletter.user.dto.User;
-import com.sixcube.recletter.user.service.UserService;
 import jakarta.transaction.Transactional;
 
 import java.io.IOException;
@@ -23,7 +21,6 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,10 +36,6 @@ public class StudioServiceImpl implements StudioService {
   private final StudioRepository studioRepository;
 
   private final StudioParticipantService studioParticipantService;
-
-  private final TemplateService templateService;
-
-  private final UserService userService;
 
   private final ClipService clipService;
 
@@ -107,9 +100,9 @@ public class StudioServiceImpl implements StudioService {
       throws StudioNotFoundException, UnauthorizedToDeleteStudioException, StudioDeleteFailureException {
 
     StringTokenizer st = new StringTokenizer(concatenatedStudioId, ",");
-    if (st.countTokens() > 3) {
-      throw new UnauthorizedToDeleteStudioException();
-    }
+//    if (st.countTokens() > 3) {
+//      throw new UnauthorizedToDeleteStudioException();
+//    }
 
     while (st.hasMoreTokens()) {
       String studioId = st.nextToken();
@@ -118,13 +111,14 @@ public class StudioServiceImpl implements StudioService {
 
       if (user.getUserId().equals(result.getStudioOwner())) {
         try {
-          studioParticipantService.deleteStudioParticipant(studioId);
+          studioParticipantService.deleteAllStudioParticipant(studioId);
           studioRepository.deleteById(studioId);
         } catch (Exception e) {
           throw new StudioDeleteFailureException(e);
         }
       } else {
-        throw new UnauthorizedToDeleteStudioException();
+        studioParticipantService.deleteStudioParticipant(studioId,user.getUserId());
+//        throw new UnauthorizedToDeleteStudioException();
       }
     }
   }
@@ -154,6 +148,11 @@ public class StudioServiceImpl implements StudioService {
   public Boolean hasMyClip(String studioId, String userId) {
     List<ClipInfo> clipInfoList = clipService.searchClipInfoList(studioId);
     return clipInfoList.stream().anyMatch(clipInfo -> userId.equals(clipInfo.getClipOwner()));
+  }
+
+  @Override
+  public Integer attendMember(String studioId){
+    return studioParticipantService.searchStudioParticipantByStudioId(studioId).size();
   }
 
   @Override

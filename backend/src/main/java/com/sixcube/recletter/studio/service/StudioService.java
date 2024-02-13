@@ -36,6 +36,8 @@ public interface StudioService {
 
   Boolean hasMyClip(String studioId, String userId);
 
+  Integer attendMember(String studioId);
+
   List<ClipInfo> searchStudioClipInfoList(String studioId);
 
   void updateStudio(UpdateStudioReq updateStudioReq,User user);
@@ -43,7 +45,6 @@ public interface StudioService {
   String searchStudioStickerUrl(String studioId);
 
   public LetterVideoReq createLetterVideoReq(String studioId, User user);
-
 
   void updateStudioStatus(String studioId, StudioStatus studioStatus);
 

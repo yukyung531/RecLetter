@@ -10,11 +10,15 @@ public interface StudioParticipantService {
 
   List<StudioParticipant> searchStudioParticipantByUser(User user);
 
+  List<StudioParticipant> searchStudioParticipantByStudioId(String studioId);
+
   void createStudioParticipant(String studioId, User user)
       throws StudioParticipantCreateFailureException, AlreadyJoinedStudioException;
 
   StudioParticipant searchStudioParticipantByUserIdAndStudioId(String studioId, String userId);
 
-  void deleteStudioParticipant(String studioId);
+  void deleteAllStudioParticipant(String studioId);
+
+  void deleteStudioParticipant(String studioId, String userId);
 
 }

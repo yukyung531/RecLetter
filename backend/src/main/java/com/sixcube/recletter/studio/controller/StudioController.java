@@ -1,15 +1,12 @@
 package com.sixcube.recletter.studio.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sixcube.recletter.studio.dto.*;
 import com.sixcube.recletter.studio.dto.req.CompleteLetterReq;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.dto.req.LetterVideoReq;
 import com.sixcube.recletter.studio.dto.req.UpdateStudioReq;
 import com.sixcube.recletter.studio.dto.res.LetterVideoRes;
-import com.sixcube.recletter.studio.dto.res.SearchActiveUserRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioDetailRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioListRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioThumbnailRes;
@@ -18,15 +15,11 @@ import com.sixcube.recletter.studio.service.StudioService;
 import com.sixcube.recletter.user.dto.User;
 import jakarta.validation.Valid;
 
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -37,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClient;
 
 import static java.time.LocalDate.now;
-import static org.apache.logging.log4j.message.MapMessage.MapFormat.JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @RestController
@@ -48,8 +40,6 @@ public class StudioController {
 
   private final StudioService studioService;
   private final StudioParticipantService studioParticipantService;
-  @Value("${VIDEO_SERVER_URI}")
-  private String videoServerUri;
   private final KafkaTemplate<String, LetterVideoReq> kafkaProducerTemplate;
   @Value("${KAFKA_LETTER_REQUEST_TOPIC}")
   private String KAFKA_LETTER_REQUEST_TOPIC;
@@ -74,11 +64,12 @@ public class StudioController {
             .studioId(studio.getStudioId())
             .studioTitle(studio.getStudioTitle())
             .isStudioOwner(user.getUserId().equals(studio.getStudioOwner()))
-//            .isCompleted(studio.getIsCompleted())
             .studioStatus(studio.getStudioStatus())
             .thumbnailUrl(studioService.searchMainClipInfo(studio.getStudioId()).getClipUrl())
             .expireDate(studio.getExpireDate())
             .hasMyClip(studioService.hasMyClip(studio.getStudioId(), user.getUserId()))
+            .attendMember(studioService.attendMember(studio.getStudioId()))
+            .videoCount(studioService.searchStudioClipInfoList(studio.getStudioId()).size())
             .studioFrameId(studio.getStudioFrameId())
             .studioStickerUrl(studioService.searchStudioStickerUrl(studio.getStudioId()))
             .build()
@@ -95,15 +86,15 @@ public class StudioController {
       @AuthenticationPrincipal User user) {
     // 찾을 수 없을 경우 StudioNotFoundException 발생
     // 자신이 참여하지 않은 Studio를 검색할 경우 UnauthorizedToSearchStudioException 발생
-    // TODO- studioSticker
+    // studioSticker는 없으면 빈 값
     Studio studio = studioService.searchStudioByStudioId(studioId, user);
 
     SearchStudioDetailRes result = SearchStudioDetailRes.builder()
         .studioId(studio.getStudioId())
         .studioTitle(studio.getStudioTitle())
-//        .isCompleted(studio.getIsCompleted())
         .studioStatus(studio.getStudioStatus())
         .studioOwner(studio.getStudioOwner())
+        .expireDate(studio.getExpireDate())
         .clipInfoList(studioService.searchStudioClipInfoList(studioId))
         .studioFrameId(studio.getStudioFrameId())
         .studioBgmId(studio.getStudioBgmId())
@@ -154,13 +145,6 @@ public class StudioController {
     return ResponseEntity.ok().build();
   }
 
-  // TODO - redis 예외처리
-  @GetMapping("/{studioId}/active")
-  public ResponseEntity<SearchActiveUserRes> searchActiveUser(@PathVariable String studioId) {
-    // TODO - 해당 studioId로 활성화된 챗팅방이 있는를 체크해서 반환
-    return ResponseEntity.ok().body(SearchActiveUserRes.builder().isActive(false).build());
-  }
-
   // TODO - JPA 예외처리
   @PutMapping("/{studioId}/title")
   public ResponseEntity<Void> updateStudioTitle(@PathVariable String studioId,
@@ -194,7 +178,6 @@ public class StudioController {
   public ResponseEntity<Void> createLetter(@PathVariable String studioId, @AuthenticationPrincipal User user){
     LetterVideoReq letterVideoReq=studioService.createLetterVideoReq(studioId,user);
     log.debug(letterVideoReq.toString());
-    log.debug(videoServerUri + "/video/letter");
 
     //python server로 인코딩 요청전송
 //    RestClient restClient=RestClient.create();
