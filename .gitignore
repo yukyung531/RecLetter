@@ -5,7 +5,7 @@
 package-lock.json
 
 *.mp4
-videobackend/**/*.mp3
+videobackend/*.mp3
 # token key
 access-refresh-token-keys
 .env
