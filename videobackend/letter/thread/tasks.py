@@ -140,13 +140,6 @@ def encode_letter():
                 )
                 del concatenated_letter
 
-                # 스티커 인코딩
-                # sticker_added_letter = encode_sticker(
-                #     frame_added_letter,
-                #     make_letter_req.get_sticker_file_path()
-                # )
-                # del frame_added_letter
-
                 # 전체 영상 볼륨 조절
                 # volume_tuned_letter = tune_volume(frame_added_letter,
                 #                                   make_letter_req.studio_volume)

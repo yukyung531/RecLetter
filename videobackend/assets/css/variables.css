@@ -1,0 +1,185 @@
+:root {
+    --color-black: #363636;
+    --color-lightgray1: #f5f5f5;
+    --color-lightgray2: #e9e9e9;
+    --color-gray: #d5d5d5;
+    --color-darkgray: #626262;
+    --color-main: #ff777f;
+    --color-sublight: #ffa9a9;
+    --color-subbold: #ff4954;
+    --color-blue1: #9ccaff;
+    --color-blue2: #65a6f2;
+    --color-blue3: #2c75e2;
+    --color-yellow1: #fffacf;
+    --color-yellow2: #fff593;
+    --color-yellow3: #ffc165;
+    --color-yellow4: #f0df86;
+    --color-yellowbg: #fffacf;
+    --color-ivory: #fafaf0;
+    --color-strawberry: #fff5f5;
+}
+.color-bg-black {
+    background-color: var(--color-black);
+}
+.color-text-black {
+    color: var(--color-black);
+}
+.color-bg-main {
+    background-color: var(--color-main);
+}
+.hover\:color-bg-main:hover {
+    --tw-text-opacity: 1;
+    background-color: var(--color-main);
+}
+.color-text-main {
+    color: var(--color-main);
+}
+.hover\:color-text-main:hover {
+    --tw-text-opacity: 1;
+    color: var(--color-main);
+}
+.color-border-main {
+    border-color: var(--color-main);
+}
+.hover\:color-border-main:hover {
+    --tw-text-opacity: 1;
+    border-color: var(--color-main);
+}
+
+.color-bg-sublight {
+    background-color: var(--color-sublight);
+}
+.hover\:color-bg-sublight:hover {
+    --tw-text-opacity: 1;
+    background-color: var(--color-sublight);
+}
+.color-text-sublight {
+    color: var(--color-sublight);
+}
+.hover\:color-text-subbold:hover {
+    --tw-text-opacity: 1;
+    color: var(--color-subbold);
+}
+.color-border-sublight {
+    border-color: var(--color-sublight);
+}
+.hover\:color-border-sublight:hover {
+    --tw-text-opacity: 1;
+    border-color: var(--color-sublight);
+}
+.color-bg-subbold {
+    background-color: var(--color-subbold);
+}
+.hover\:color-bg-subbold:hover {
+    --tw-text-opacity: 1;
+    background-color: var(--color-subbold);
+}
+.hover\:color-bg-yellow3:hover {
+    background-color: var(--color-yellow3);
+}
+.color-text-subbold {
+    color: var(--color-subbold);
+}
+.color-border-subbold {
+    border-color: var(--color-subbold);
+}
+.color-bg-yellow1 {
+    background-color: var(--color-yellow1);
+}
+.color-text-yellow1 {
+    color: var(--color-yellow1);
+}
+.color-bg-yellow2 {
+    background-color: var(--color-yellow2);
+}
+.color-text-yellow2 {
+    color: var(--color-yellow2);
+}
+.color-bg-yellow3 {
+    background-color: var(--color-yellow3);
+}
+.color-text-yellow3 {
+    color: var(--color-yellow3);
+}
+.color-bg-yellowbg {
+    background-color: var(--color-yellowbg);
+}
+.color-border-yellow2 {
+    border-color: var(--color-yellow2);
+}
+.color-border-yellow3 {
+    border-color: var(--color-yellow3);
+}
+.color-border-yellow4 {
+    border-color: var(--color-yellow4);
+}
+.color-bg-blue1 {
+    background-color: var(--color-blue1);
+}
+.color-text-blue1 {
+    color: var(--color-blue1);
+}
+.color-border-blue1 {
+    border-color: var(--color-blue1);
+}
+.color-bg-blue2 {
+    background-color: var(--color-blue2);
+}
+.color-text-blue2 {
+    color: var(--color-blue2);
+}
+.color-border-blue2 {
+    border-color: var(--color-blue2);
+}
+.color-bg-blue3 {
+    background-color: var(--color-blue3);
+}
+.color-text-blue3 {
+    color: var(--color-blue3);
+}
+.color-border-blue3 {
+    border-color: var(--color-blue3);
+}
+
+.color-bg-ivory {
+    background-color: var(--color-ivory);
+}
+.color-text-ivory {
+    color: var(--color-ivory);
+}
+.color-border-ivory {
+    border-color: var(--color-ivory);
+}
+.color-bg-darkgray {
+    background-color: var(--color-darkgray);
+}
+.color-text-darkgray {
+    color: var(--color-darkgray);
+}
+.color-border-darkgray {
+    border-color: var(--color-darkgray);
+}
+.color-bg-lightgray1 {
+    background-color: var(--color-lightgray1);
+}
+.color-text-lightgray1 {
+    color: var(--color-lightgray1);
+}
+.color-bg-gray {
+    background-color: var(--color-gray);
+}
+.color-text-gray {
+    color: var(--color-gray);
+}
+.color-border-gray {
+    border-color: var(--color-gray);
+}
+.color-bg-strawberry {
+    background-color: var(--color-strawberry);
+}
+.color-text-strawberry {
+    color: var(--color-strawberry);
+}
+.color-border-strawberry {
+    border-color: var(--color-strawberry);
+}

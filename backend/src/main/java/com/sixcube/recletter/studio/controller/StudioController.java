@@ -8,6 +8,7 @@ import com.sixcube.recletter.studio.dto.req.CompleteLetterReq;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.dto.req.LetterVideoReq;
 import com.sixcube.recletter.studio.dto.req.UpdateStudioReq;
+import com.sixcube.recletter.studio.dto.res.LetterVideoRes;
 import com.sixcube.recletter.studio.dto.res.SearchActiveUserRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioDetailRes;
 import com.sixcube.recletter.studio.dto.res.SearchStudioListRes;
@@ -28,6 +29,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClient;
@@ -46,6 +50,9 @@ public class StudioController {
   private final StudioParticipantService studioParticipantService;
   @Value("${VIDEO_SERVER_URI}")
   private String videoServerUri;
+  private final KafkaTemplate<String, LetterVideoReq> kafkaProducerTemplate;
+  @Value("${KAFKA_LETTER_REQUEST_TOPIC}")
+  private String KAFKA_LETTER_REQUEST_TOPIC;
 
 
   @GetMapping
@@ -190,16 +197,28 @@ public class StudioController {
     log.debug(videoServerUri + "/video/letter");
 
     //python server로 인코딩 요청전송
-    RestClient restClient=RestClient.create();
-    ResponseEntity<Void> response = restClient.post()
-            .uri(videoServerUri + "/video/letter")
-            .contentType(APPLICATION_JSON)
-            .body(letterVideoReq)
-            .retrieve()
-            .toBodilessEntity();
+//    RestClient restClient=RestClient.create();
+//    ResponseEntity<Void> response = restClient.post()
+//            .uri(videoServerUri + "/video/letter")
+//            .contentType(APPLICATION_JSON)
+//            .body(letterVideoReq)
+//            .retrieve()
+//            .toBodilessEntity();
+
+    kafkaProducerTemplate.send(KAFKA_LETTER_REQUEST_TOPIC, letterVideoReq);
 
     studioService.updateStudioStatus(studioId, StudioStatus.ENCODING);
     return ResponseEntity.ok().build();
+  }
+
+  @KafkaListener(topics = "${KAFKA_LETTER_RESULTINFO_TOPIC}", containerFactory = "kafkaListenerContainerFactory")
+  public void receiveLetterResult(@Payload LetterVideoRes letterVideoRes) {
+    String studioId = letterVideoRes.getStudioId();
+    if("success".equals(letterVideoRes.getResult())) {
+      studioService.updateStudioStatus(studioId, StudioStatus.COMPLETE);
+    } else if("fail".equals(letterVideoRes.getResult())) {
+      studioService.updateStudioStatus(studioId, StudioStatus.FAIL);
+    }
   }
 
   //TODO- python 요청 시 security 생각!

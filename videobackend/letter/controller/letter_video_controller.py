@@ -41,13 +41,13 @@ async def test() -> None:
 
     value = {
         "studioId": "9ab5bc8c-1f13-45c5-9c7c-01ef4f54dd3c",
-        "studioFrameId": 1,
-        "studioSticker": "9ab5bc8c-1f13-45c5-9c7c-01ef4f54dd3c/1707758060518.png",
+        "studioFrameId": 7,
+        "studioSticker": "9ab5bc8c-1f13-45c5-9c7c-01ef4f54dd3c/1707787584517.png",
         "studioBgmId": 1,
         "studioBgmVolume": 100,
         "clipInfoList": [
             {
-                "clipId": 1,
+                "clipId": 4,
                 "clipTitle": "김연수 1",
                 "clipVolume": 100
             }

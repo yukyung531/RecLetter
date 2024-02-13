@@ -1,8 +1,8 @@
 package com.sixcube.recletter.config;
 
-
-import com.fasterxml.jackson.databind.JsonSerializer;
+import com.sixcube.recletter.kafka.KafkaMessageDeserializer;
 import com.sixcube.recletter.studio.dto.req.LetterVideoReq;
+import com.sixcube.recletter.studio.dto.res.LetterVideoRes;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +21,8 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 
 @Configuration
 @Slf4j
@@ -28,41 +30,45 @@ import org.springframework.kafka.core.ProducerFactory;
 @EnableKafka
 public class KafkaConfig {
 
-    @Value("${KAFKA_BOOTSTRAP_SERVERS}")
-    private String KAFKA_BOOTSTRAP_SERVERS;
+  @Value("${KAFKA_BOOTSTRAP_SERVERS}")
+  private String KAFKA_BOOTSTRAP_SERVERS;
 
-    @Bean
-    public ProducerFactory<String, LetterVideoReq> factory() {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BOOTSTRAP_SERVERS);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+  @Value("${KAFKA_LETTER_RESULTINFO_CONSUMER_GROUP_ID}")
+  private String KAFKA_LETTER_RESULTINFO_CONSUMER_GROUP_ID;
 
-        return new DefaultKafkaProducerFactory<>(props);
-    }
+  @Bean
+  public ProducerFactory<String, LetterVideoReq> producerFactory() {
+    Map<String, Object> props = new HashMap<>();
+    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BOOTSTRAP_SERVERS);
+    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
-    @Bean
-    public KafkaTemplate<String, LetterVideoReq> kafkaTemplate(){
-        return new KafkaTemplate<>(factory());
-    }
+    return new DefaultKafkaProducerFactory<>(props);
+  }
 
-    @Bean
-    public ConsumerFactory<String, Object> consumerFactory() {
-        Map<String, Object> config = new HashMap<>();
-        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, "group_1");
-        config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+  @Bean
+  public KafkaTemplate<String, LetterVideoReq> kafkaTemplate() {
+    return new KafkaTemplate<>(producerFactory());
+  }
 
-        return new DefaultKafkaConsumerFactory<>(config);
-    }
+  @Bean
+  public ConsumerFactory<String, LetterVideoRes> consumerFactory() {
+    Map<String, Object> config = new HashMap<>();
+    config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BOOTSTRAP_SERVERS);
+    config.put(ConsumerConfig.GROUP_ID_CONFIG, KAFKA_LETTER_RESULTINFO_CONSUMER_GROUP_ID);
+    config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
 
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
+    return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(),
+        new JsonDeserializer<>(LetterVideoRes.class));
+  }
 
-        return factory;
-    }
+  @Bean
+  public ConcurrentKafkaListenerContainerFactory<String, LetterVideoRes> kafkaListenerContainerFactory() {
+    ConcurrentKafkaListenerContainerFactory<String, LetterVideoRes> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    factory.setConsumerFactory(consumerFactory());
+
+    return factory;
+  }
 
 }
