@@ -27,13 +27,13 @@ export default function DeleteCheckWindow({
                     </p>
                     <div className="mt-[36px] flex w-full h-[10%] justify-around">
                         <button
-                            className="h-full w-1/4 text-xl text-[#FF777F] border-2 border-[#FF777F] rounded-lg shadow-lg hover:text-white hover:bg-[#FF4954]"
+                            className="h-full w-1/4 text-xl text-[#FF777F] border-2 border-[#FF777F] rounded-lg hover:text-white hover:bg-[#FF4954]"
                             onClick={onClickCancel}
                         >
                             아니오
                         </button>
                         <button
-                            className="h-full w-1/4 text-xl text-white bg-[#FF777F] border-2 border-[#FF777F] rounded-lg shadow-lg hover:text-white hover:bg-[#FF4954]"
+                            className="h-full w-1/4 text-xl text-white bg-[#FF777F] border-2 border-[#FF777F] rounded-lg hover:text-white hover:bg-[#FF4954]"
                             onClick={onClickOK}
                         >
                             네

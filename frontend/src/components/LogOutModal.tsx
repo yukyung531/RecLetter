@@ -25,7 +25,7 @@ export default function LogOutModal({ onClick }: PropType) {
                         로그아웃 되었습니다.
                     </p>
                     <button
-                        className="mt-[36px] h-[10%] w-1/4 text-xl text-[#65A6F2] border-2 border-[#65A6F2] rounded-lg shadow-lg hover:text-white hover:bg-[#65A6F2]"
+                        className="mt-[36px] h-[10%] w-1/4 text-xl text-[#65A6F2] border-2 border-[#65A6F2] rounded-lg hover:text-white hover:bg-[#65A6F2]"
                         onClick={onClick}
                     >
                         확인
