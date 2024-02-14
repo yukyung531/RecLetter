@@ -598,12 +598,12 @@ export default function ClipEditPage() {
                         {loaded ? (
                             <div
                                 onClick={makeFinalVideo}
-                                className="w-full py-3 rounded-lg text-center color-bg-main text-white mb-3"
+                                className="w-full py-3 rounded-lg text-center color-bg-main text-white text-xl mb-3"
                             >
                                 저장하기
                             </div>
                         ) : (
-                            <div className="w-full py-3 rounded-lg text-center bg-[#F5F5F5] text-white mb-3">
+                            <div className="w-full py-3 rounded-lg text-center bg-[#F5F5F5] text-white text-xl mb-3">
                                 저장하기
                             </div>
                         )}
