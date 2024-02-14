@@ -411,7 +411,7 @@ export default function ChattingBox() {
         if (chatToggle) {
             return (
                 <div
-                    className=" w-88 h-5/6 rounded-ss-lg rounded-se-lg rounded-es-lg fixed flex bottom-16 flex-col justify-between items-center right-8 px-5 py-3 z-20 border-2 border-white me-2 mb-1"
+                    className=" w-88 h-4/5 rounded-ss-lg rounded-se-lg rounded-es-lg fixed flex bottom-16 flex-col justify-between items-center right-8 px-5 py-3 z-20 border-2 border-white me-2 mb-1"
                     style={{
                         backgroundColor: `${themeObj[chatTheme].bgColor}`,
                     }}
