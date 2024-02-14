@@ -421,7 +421,9 @@ export default function LetterMakePage() {
                         console.log(res.data);
                         if (res.data.studioBgmId) {
                             setSelectedBGM(res.data.studioBgmId);
-                            selectBGMUrl(res.data.studioBgmId);
+                            setSelectedBGMUrl(
+                                `/src/assets/bgm/bgm${res.data.studioBgmId}.mp3`
+                            );
                         }
 
                         //studioBGMVolume
@@ -1447,7 +1449,7 @@ export default function LetterMakePage() {
                         })}
                     </select>
 
-                    <p className='mt-4'>배경 음악 볼륨</p>
+                    <p className="mt-4">배경 음악 볼륨</p>
                     <input
                         className="w-full mt-1"
                         type="range"
@@ -1473,7 +1475,7 @@ export default function LetterMakePage() {
                         }}
                     />
 
-                    <p className='mt-6'>전체 영상 볼륨 조절</p>
+                    <p className="mt-6">전체 영상 볼륨 조절</p>
                     <div className="w-full flex">
                         <button
                             className="border-2 border-[#FF777F] text-[#FF777F] m-1 rounded hover:bg-[#FF777F] hover:text-white flex-grow"
@@ -1909,7 +1911,7 @@ export default function LetterMakePage() {
     const scrollRef = useRef(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
-    
+
     function checkScrollable() {
         if (scrollRef.current) {
             const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
@@ -1917,7 +1919,7 @@ export default function LetterMakePage() {
             setCanScrollRight(scrollLeft < scrollWidth - clientWidth);
         }
     }
-    
+
     function scrollRight() {
         if (scrollRef.current) {
             // scrollRef.current.scrollBy({ left: 200, behavior: 'smooth' });
@@ -1930,15 +1932,14 @@ export default function LetterMakePage() {
             setTimeout(checkScrollable, 100); // 스크롤 이동이 완료된 후에 checkScrollable을 호출합니다.
         }
     }
-    
+
     useEffect(() => {
         checkScrollable();
         window.addEventListener('resize', checkScrollable);
         return () => {
             window.removeEventListener('resize', checkScrollable);
-        }
+        };
     }, [usedClipList]);
-    
 
     /** 영상 보내는 API */
     const uploadLetterAPI = async (imageDataURL: string) => {
@@ -2550,16 +2551,21 @@ export default function LetterMakePage() {
                                 style={{
                                     fontSize: '2em',
                                     margin: '0 0.6em',
-                                    color: canScrollLeft ? 'black' : 'lightgray',
+                                    color: canScrollLeft
+                                        ? 'black'
+                                        : 'lightgray',
                                     position: 'relative', // 위치를 상대적으로 설정
-                                    top: '-30px'  // 상단으로 50px 이동
+                                    top: '-30px', // 상단으로 50px 이동
                                 }}
                                 onClick={scrollLeft}
                                 disabled={!canScrollLeft}
                             >
                                 &lt;
                             </button>
-                            <div className="w-11/12 flex items-center overflow-x-scroll py-2" ref={scrollRef}>
+                            <div
+                                className="w-11/12 flex items-center overflow-x-scroll py-2"
+                                ref={scrollRef}
+                            >
                                 {usedClipList.map((clip, index) => {
                                     return (
                                         <SelectedVideoCard
@@ -2577,14 +2583,16 @@ export default function LetterMakePage() {
                                         />
                                     );
                                 })}
-                            </div>  
+                            </div>
                             <button
                                 style={{
                                     fontSize: '2em',
                                     margin: '0 0.6em',
-                                    color: canScrollRight ? 'black' : 'lightgray',
+                                    color: canScrollRight
+                                        ? 'black'
+                                        : 'lightgray',
                                     position: 'relative', // 위치를 상대적으로 설정
-                                    top: '-30px'  // 상단으로 50px 이동
+                                    top: '-30px', // 상단으로 50px 이동
                                 }}
                                 onClick={scrollRight}
                                 disabled={!canScrollRight}
