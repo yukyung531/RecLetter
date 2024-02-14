@@ -74,6 +74,8 @@ export default function StudioMainPage() {
         clipContent: '',
     });
 
+    const [finishAuth, setFinishAuth] = useState<boolean>(false);
+
     //프레임 설정
     // 선택한 프레임
     const [selectImgUrl, setSelectImgUrl] = useState<string>('');
@@ -129,6 +131,7 @@ export default function StudioMainPage() {
 
                             dispatch(studioNameState(res.data.studioTitle));
                             setStudioDetailInfo(res.data);
+
                             //프레임
                             setSelectImgUrl(
                                 `/src/assets/frames/frame${res.data.studioFrameId}.png`
@@ -215,6 +218,18 @@ export default function StudioMainPage() {
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
     }, []);
+
+    useEffect(() => {
+        const expireDate: Date = new Date(studioDetailInfo.expireDate);
+        if (
+            Math.floor(
+                (expireDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+            ) < 2 &&
+            studioDetailInfo.studioOwner === userInfo.userId
+        ) {
+            setFinishAuth(true);
+        }
+    }, [studioDetailInfo]);
 
     //편집창으로 이동
     const onClickEdit = (clipId: number) => {
@@ -580,7 +595,7 @@ export default function StudioMainPage() {
                             <p>선택된 영상</p>
                         </div>
 
-                        {usedVideoList ? (
+                        {usedVideoList.length !== 0 ? (
                             usedVideoList.map((clip) => {
                                 return (
                                     <VideoCard
@@ -601,7 +616,15 @@ export default function StudioMainPage() {
                                 );
                             })
                         ) : (
-                            <></>
+                            <div className="flex flex-col items-center justify-center">
+                                <img
+                                    src="/src/assets/icons/empty-face.png"
+                                    alt=""
+                                />
+                                <p>아직 선택된 영상이 없어요</p>
+                                <p>전체 편지는 선택된 영상으로만 제작됩니다.</p>
+                                <p>편집에서 원하는 영상을 선택해주세요!</p>
+                            </div>
                         )}
                         <div className="w-full flex justify-start text-xl ">
                             <p>선택되지 않은 영상</p>
@@ -818,8 +841,20 @@ export default function StudioMainPage() {
                     <div className="w-1/4 p-2 border border-l-2 overflow-y-scroll">
                         <div className="w-full px-2 flex flex-col justify-center items-center">
                             <a
-                                className="flex items-center gap-3 w-52 text-center my-2 p-1 rounded-lg text-xl color-bg-yellow2 shadow-darkShadow color-text-main cursor-pointer transform hover:scale-105"
+                                className={`flex items-center gap-3 w-52 text-center my-2 p-1 rounded-lg text-xl shadow-darkShadow cursor-pointer transform ${
+                                    finishAuth
+                                        ? 'hover:scale-105 color-bg-yellow2 color-text-main'
+                                        : 'color-text-darkgray cursor-not-allowed'
+                                }`}
                                 onClick={onClickCompletePage}
+                                style={
+                                    !finishAuth
+                                        ? {
+                                              backgroundColor:
+                                                  'rgb(204,204,204)',
+                                          }
+                                        : {}
+                                }
                             >
                                 <img
                                     className="w-9 h-9 ml-2.5"
