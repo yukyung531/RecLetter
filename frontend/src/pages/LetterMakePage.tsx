@@ -596,11 +596,17 @@ export default function LetterMakePage() {
     useEffect(() => {
         if (canvasDownloadNum !== 0) {
             const target = canvasRef2.current;
+            // 캡처 전에 비디오를 좌우 반전
+            const video = videoRef.current;
+            if (video) {
+                video.style.transform = 'scaleX(-1)';
+            }
             const onCapture = () => {
                 console.log('onCapture');
                 if (!target) {
-                    return alert('결과 저장에 실패했습니다');
+                    return;
                 }
+
                 html2canvas(target, { scale: 2, backgroundColor: null }).then(
                     (canvas) => {
                         const imageDataURL = canvas.toDataURL('image/png');
@@ -620,6 +626,9 @@ export default function LetterMakePage() {
                 link.download = filename;
                 link.click();
                 document.body.removeChild(link);
+                if (video) {
+                    video.style.transform = 'scaleX(1)';
+                }
             };
             onCapture();
             setCavnasDownloadNum(0);
@@ -633,7 +642,7 @@ export default function LetterMakePage() {
             const onCapture = () => {
                 console.log('onCapture');
                 if (!target) {
-                    return alert('결과 저장에 실패했습니다');
+                    return;
                 }
                 html2canvas(target, { scale: 2, backgroundColor: null }).then(
                     (canvas) => {

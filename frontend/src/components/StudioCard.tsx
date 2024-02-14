@@ -116,6 +116,7 @@ export default function StudioCard({
             >
                 {stickerFrame ? (
                     <img
+                        className="z-0"
                         src={'/src/assets/frames/frame' + stickerFrame + '.png'}
                         alt=""
                     />

@@ -26,8 +26,8 @@ export default function Mainpage() {
     /** 리덕스 설정 */
 
     return (
-        <div className="relative h-screen color-bg-strawberry z-10 overflow-y-hidden overflow-x-hidden flex flex-col items-center justify-center">
-            <div className="color-bg-black h-12 absolute top-0 w-full z-30 flex justify-around items-center text-white">
+        <div className="relative h-screen color-bg-strawberry z-40 overflow-y-hidden overflow-x-hidden flex flex-col items-center justify-center">
+            <div className="color-bg-black h-12 absolute top-0 w-full z-40 flex justify-around items-center text-white">
                 <p className="text-2xl">RECLETTER</p>
                 <p className="text-2xl">RECLETTER</p>
                 <p className="text-2xl">RECLETTER</p>
@@ -127,7 +127,7 @@ export default function Mainpage() {
                 </div>
             </section>
 
-            <div className="color-bg-black h-12 absolute bottom-0 w-full z-30 flex justify-around items-center text-white">
+            <div className="color-bg-black h-12 absolute bottom-0 w-full z-40 flex justify-around items-center text-white">
                 <p className="text-2xl">RECLETTER</p>
                 <p className="text-2xl">RECLETTER</p>
                 <p className="text-2xl">RECLETTER</p>

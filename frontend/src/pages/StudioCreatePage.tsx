@@ -14,12 +14,23 @@ export default function StudioCreatePage() {
     const [framelist, setFrameList] = useState<FrameType[]>([]);
     const [frame, setFrame] = useState<number>(1);
     const [createDate, setCreateDate] = useState<number>(14);
+    const [time, setTime] = useState<string>('');
     // const [startDate, setStartDate] = useState<Date | null>(new Date());
     const navigate = useNavigate();
 
     useEffect(() => {
         loadFrameTemplateAPI();
     }, []);
+
+    useEffect(() => {
+        moment().format('YYYY-MM-DDTHH:mm:ss');
+        setTime(
+            moment()
+                .add(createDate - 1, 'days')
+                .format()
+                .substring(0, 19)
+        );
+    }, [createDate]);
 
     const onPressAddMember = () => {
         setIsInviteActive(true);
@@ -32,6 +43,7 @@ export default function StudioCreatePage() {
     const changeTitle = (e: BaseSyntheticEvent) => {
         setStudioTitle(e.target.value);
     };
+
     const changeDate = (e: BaseSyntheticEvent) => {
         setCreateDate(e.target.value);
     };
@@ -39,11 +51,6 @@ export default function StudioCreatePage() {
         if (createDate > 14 || createDate <= 0) {
             alert('기간을 확인해주세요');
         } else {
-            moment().format('YYYY-MM-DDTHH:mm:ss');
-            let time = moment()
-                .add(createDate - 1, 'days')
-                .format()
-                .substring(0, 19);
             if (studioTitle === '') {
                 const studioParameter: StudioMake = {
                     studioTitle: '제목없음',
@@ -112,9 +119,13 @@ export default function StudioCreatePage() {
                         />
                     </div>
                     <div>
-                        <h5 className="text-2xl font-bold">
-                            마감일자 (최대 14일 뒤)
-                        </h5>
+                        <div className="flex items-center">
+                            <h5 className="text-2xl font-bold">
+                                제작기간 (최대 14일)
+                            </h5>
+                            <p className="text-lg mx-2">{time.slice(0, 10)}</p>
+                        </div>
+
                         <input
                             className="w-105 py-2 px-3 my-4 border-2 rounded-xl text-xl"
                             type="number"

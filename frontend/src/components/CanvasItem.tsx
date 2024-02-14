@@ -249,7 +249,7 @@ export default function CanvasItem(props: canvasType) {
         const onCapture = () => {
             console.log('onCapture');
             if (!target) {
-                return alert('결과 저장에 실패했습니다');
+                return;
             }
             html2canvas(target, { scale: 2, backgroundColor: null }).then(
                 (canvas) => {
