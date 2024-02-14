@@ -17,6 +17,7 @@ import jakarta.transaction.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.List;
@@ -77,12 +78,22 @@ public class StudioServiceImpl implements StudioService {
     }
 
     LocalDateTime limitDate = LocalDateTime.now().plusDays(14);
+    LocalTime customTime = LocalTime.of(23, 59, 59); // 원하는 시간 설정
+    // 날짜와 시간을 결합하여 LocalDateTime 객체 생성
+    LocalDateTime customDateTime;
+
+    if(createStudioReq.getExpireDate().isBefore(limitDate)){
+      LocalDate date = createStudioReq.getExpireDate().toLocalDate();
+      customDateTime = LocalDateTime.of(date, customTime);
+    }else{
+      customDateTime = LocalDateTime.of(limitDate.toLocalDate(), customTime);
+    }
+
+
     Studio studio = Studio.builder()
         .studioOwner(user.getUserId())
         .studioTitle(createStudioReq.getStudioTitle())
-        .expireDate(
-            createStudioReq.getExpireDate().isBefore(limitDate) ? createStudioReq.getExpireDate()
-                : limitDate)
+        .expireDate(customDateTime)
         .studioFrameId(createStudioReq.getStudioFrameId())
         .build();
 
