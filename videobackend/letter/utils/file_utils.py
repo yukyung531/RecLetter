@@ -1,6 +1,8 @@
 import os.path
+from typing import List
 
 from botocore.client import BaseClient
+from moviepy.video.io.VideoFileClip import VideoFileClip
 
 from videobackend.letter.dto.req import MakeLetterReq
 
@@ -39,3 +41,8 @@ def asset_download(make_letter_req: MakeLetterReq, bucket: str,
 def letter_upload(file_name: str, key: str, bucket: str,
     client: BaseClient) -> None:
     client.upload_file(file_name, bucket, key)
+
+
+def close_clip(clip_list: List[VideoFileClip]) -> None:
+    for clip in clip_list:
+        clip.close()

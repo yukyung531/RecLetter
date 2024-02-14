@@ -8,7 +8,8 @@ from kafka import KafkaConsumer, KafkaProducer
 from json import loads, dumps
 
 from videobackend.letter.dto.req import MakeLetterReq
-from videobackend.letter.utils.file_utils import asset_download, letter_upload
+from videobackend.letter.utils.file_utils import asset_download, letter_upload, \
+    close_clip
 from videobackend.letter.config.kafka_config import *
 from videobackend.letter.utils.video_edit_utils import *
 
@@ -123,7 +124,6 @@ def encode_letter():
                 # 각 클립 화면 반전
                 print("화면 반전")
                 mirrored_clip = list(map(lambda x: mirror_clip(x), clip_list))
-                del clip_list
 
                 # 각 클립의 볼륨 조절
                 print("볼륨 조절")
@@ -169,11 +169,11 @@ def encode_letter():
                     codec='libx264',
                     audio_codec='aac',
                     remove_temp=True,
-                    verbose=False
                 )
                 print("인코딩 완료")
 
                 bgm_inserted_letter.close()
+                close_clip(clip_list)
 
                 # produce
                 print("create_letter: success")
