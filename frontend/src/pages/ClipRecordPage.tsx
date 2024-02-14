@@ -828,7 +828,7 @@ export default function ClipRecordPage() {
                             </div>
                         ) : (
                             <div className="w-4/5 flex flex-col items-center p-6">
-                                <div className="w-full my-2 flex justify-start text-xl ">
+                                <div className="w-full mb-2 flex justify-start text-xl ">
                                     <p>스크립트</p>
                                 </div>
                                 <textarea
@@ -867,7 +867,7 @@ export default function ClipRecordPage() {
                 </div>
                 {/* 우측부분 */}
                 <div className="w-3/4  editor-height bg-gray-50 flex justify-between">
-                    <div className="w-4/5 px-4 py-4 flex flex-col justify-center items-center">
+                    <div className="w-4/5 px-4 py-4 flex flex-col items-center">
                         <div className="box-border my-3 py-3 min-h-[80px] h-[80px] rounded-full border-2 border-black movie-width text-xl whitespace-pre-wrap flex align-middle justify-between text-center">
                             <button className="pl-4" onClick={goUp}>
                                 &#60;

@@ -160,10 +160,8 @@ export default function StudioCard({
 
                     <p className="w-[40px] text-2xl">
                         D-
-                        {Math.floor(
-                            (expireDate.getTime() - Date.now()) /
-                                (1000 * 60 * 60 * 24)
-                        )}
+                        {Math.floor((expireDate.getTime() - Date.now()) /
+                            (1000 * 60 * 60 * 24))}
                     </p>
                 </div>
             </div>

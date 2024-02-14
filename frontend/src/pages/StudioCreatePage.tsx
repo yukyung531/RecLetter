@@ -1,7 +1,7 @@
 import { BaseSyntheticEvent, useEffect, useState } from 'react';
 import AddMemberWindow from '../components/AddMemberWindow';
 import { FrameType, StudioMake } from '../types/type';
-import moment from 'moment';
+import moment from 'moment-timezone'
 import { makeStudio } from '../api/studio';
 import { httpStatusCode } from '../util/http-status';
 import { useNavigate } from 'react-router-dom';
@@ -21,7 +21,6 @@ export default function StudioCreatePage() {
 
     //모달
     const [isModalActive, setIsModalActive] = useState<boolean>(false);
-
     const closeModal = () => {
         setIsModalActive(false);
     };
@@ -31,10 +30,10 @@ export default function StudioCreatePage() {
     }, []);
 
     useEffect(() => {
-        moment().format('YYYY-MM-DDTHH:mm:ss');
+        moment().tz('Asia/Seoul').format('YYYY-MM-DDTHH:mm:ss');
         setTime(
             moment()
-                .add(createDate - 1, 'days')
+                .add(createDate, 'days')
                 .format()
                 .substring(0, 19)
         );
@@ -150,7 +149,7 @@ export default function StudioCreatePage() {
                             min={1}
                             value={createDate}
                             onChange={changeDate}
-                            placeholder="Placeholder"
+                            placeholder="최대 14일"
                         />
                         {/* <p
                             className="btn-cover color-bg-yellow2"

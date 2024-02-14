@@ -636,7 +636,7 @@ export default function StudioMainPage() {
                     <div className="w-3/4">
                         <div className="h-16 w-full px-6  color-bg-sublight text-black flex justify-between items-center">
                             <div className="w-full flex justify-between items-center">
-                                <div className="flex w-fit">
+                                <div className="flex w-1/3">
                                     {/* <span
                                         className="flex items-center text-2xl material-symbols-outlined cursor-pointer"
                                         onClick={moveStudioList}
@@ -655,14 +655,14 @@ export default function StudioMainPage() {
                                                 event.key === 'Enter' &&
                                                 isEditingName &&
                                                 studioDetailInfo.studioOwner ===
-                                                    userInfo.userId
+                                                userInfo.userId
                                             ) {
                                                 handleStudioName();
                                             }
                                         }}
                                     />
                                     {studioDetailInfo.studioOwner ===
-                                        userInfo.userId && isEditingName ? (
+                                    userInfo.userId && isEditingName ? (
                                         <span
                                             className="material-symbols-outlined mx-2 text-2xl text-white cursor-pointer"
                                             onClick={handleStudioName}
@@ -673,9 +673,9 @@ export default function StudioMainPage() {
                                         <></>
                                     )}
                                     {studioDetailInfo.studioOwner ===
-                                        userInfo.userId && !isEditingName ? (
+                                    userInfo.userId && !isEditingName ? (
                                         <span
-                                            className="material-symbols-outlined mx-2 text-2xl text-white cursor-pointer"
+                                            className="material-symbols-outlined mx-2 text-xl text-white cursor-pointer"
                                             onClick={handleStudioName}
                                         >
                                             edit
@@ -683,27 +683,33 @@ export default function StudioMainPage() {
                                     ) : (
                                         <></>
                                     )}
-                                    <span
-                                        className="material-symbols-outlined text-2xl text-white cursor-pointer"
-                                        onClick={handleClipBoard}
-                                    >
-                                        inventory
-                                    </span>
                                 </div>
 
                                 <div
-                                    className="relative right-24 px-6 my-2 flex items-center justify-center bg-white border-2 rounded-md color-text-main color-border-main cursor-pointer hover:color-bg-sublight hover:text-white hover:border-white"
+                                    className=" w-1/3 flex relative mx-8 justify-center items-center bg-white border-2 rounded-md color-text-main color-border-main cursor-pointer hover:color-bg-sublight hover:text-white hover:border-white"
                                     onClick={startPlayList}
                                 >
                                     <span className="material-symbols-outlined text-4xl">
                                         arrow_right
                                     </span>
-                                    <p className="text-xl font-bold">
+                                    <p className="text-xl font-bold pr-4">
                                         전체 편지 자동 재생
                                     </p>
                                 </div>
-                                <div></div>
+                                <div className="flex w-1/3 justify-end">
+                                    <p className="text-xl text-white mr-2">
+                                        초대링크 복사하기
+                                    </p>
+                                    <span
+                                    className="material-symbols-outlined text-xl text-white cursor-pointer"
+                                    onClick={handleClipBoard}
+                                    >
+                                        inventory
+                                    </span>
+
+                                </div>
                             </div>
+
                         </div>
                         <div className=" flex flex-col justify-center items-center">
                             <div className="w-full  flex justify-start items-center">
