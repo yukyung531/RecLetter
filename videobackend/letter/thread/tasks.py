@@ -161,7 +161,8 @@ def encode_letter():
                     fps=30,
                     codec='libx264',
                     audio_codec='aac',
-                    remove_temp=True
+                    remove_temp=True,
+                    verbose=False
                 )
 
                 bgm_inserted_letter.close()
