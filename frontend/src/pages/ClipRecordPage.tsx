@@ -26,6 +26,7 @@ import {
 import { enterStudio, studioDetail } from '../api/studio';
 import ErrorModal from '../components/ErrorModal';
 import { transform } from 'html2canvas/dist/types/css/property-descriptors/transform';
+import GuideModal from '../components/GuideModal';
 
 interface Const {
     audio: boolean;
@@ -727,7 +728,7 @@ export default function ClipRecordPage() {
             )}
             {isRecordLimitModalActive ? (
                 <>
-                    <ErrorModal
+                    <GuideModal
                         onClick={closeWarning}
                         message="영상은 최대 59초까지 촬영 가능합니다."
                     />
@@ -743,7 +744,7 @@ export default function ClipRecordPage() {
                             id="warning"
                         />
                         <label htmlFor="warning">
-                            더 이상 경고문을 보지 않습니다.
+                            더 이상 안내문을 보지 않습니다.
                         </label>
                     </div>
                 </>
