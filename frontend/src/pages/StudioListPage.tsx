@@ -223,7 +223,7 @@ export default function StudioListPage() {
     //스튜디오 정보 불러오기
 
     return (
-        <section className="relative w-full base-height items-center flex flex-col mt-14 ml-8">
+        <section className="relative w-full base-height items-center flex flex-col mt-14">
             {isModalActive ? (
                 <SuccessModal onClick={closeModal} message="삭제되었습니다." />
             ) : (
