@@ -91,6 +91,20 @@ export default function ClipEditPage() {
             Math.floor(time % 60) < 10
                 ? '0' + Math.floor(time % 60)
                 : '' + Math.floor(time % 60);
+        return `${min}: ${sec}`;
+    };
+
+    /** korFormatTime(time: number)
+     *  초를 입력하면 0분 00초 형식으로 변경
+     * @param time
+     * @returns
+     */
+    const korFormatTime = (time: number) => {
+        const min = Math.floor(time / 60);
+        const sec =
+            Math.floor(time % 60) < 10
+                ? '0' + Math.floor(time % 60)
+                : '' + Math.floor(time % 60);
         return `${min}분 ${sec}초`;
     };
 
@@ -598,12 +612,12 @@ export default function ClipEditPage() {
                         {loaded ? (
                             <div
                                 onClick={makeFinalVideo}
-                                className="w-full py-3 rounded-lg text-center color-bg-main text-white text-xl mb-3"
+                                className="w-full py-3 rounded-lg text-center color-bg-main text-white text-xl mb-3 cursor-pointer"
                             >
                                 저장하기
                             </div>
                         ) : (
-                            <div className="w-full py-3 rounded-lg text-center bg-[#F5F5F5] text-white text-xl mb-3">
+                            <div className="w-full py-3 rounded-lg text-center bg-[#F5F5F5] text-white text-xl mb-3 cursor-pointer">
                                 저장하기
                             </div>
                         )}
@@ -614,7 +628,7 @@ export default function ClipEditPage() {
                             <div className="w-full h-full rounded-b-lg text-lg p-2 border-2 border-[#FFA9A9] bg-white whitespace-normal">
                                 <p>제목: </p>
                                 <p className="min-h-[28px]">{clipName}</p>
-                                <p>길이: {formatTime(wholeDuration)}</p>
+                                <p>길이: {korFormatTime(wholeDuration)}</p>
                             </div>
                         </div>
                     </div>

@@ -2,7 +2,7 @@ import studio from '../dummy-datas/studioList.json';
 import StudioCard from '../components/StudioCard';
 import { useState, useEffect } from 'react';
 import { StudioInfo } from '../types/type';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { deleteStudio, getStudio, studioDetail } from '../api/studio';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -32,6 +32,15 @@ export default function StudioListPage() {
     const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    //영상 완성 요청 후였을 시, 완성 탭으로
+    const { state } = useLocation();
+
+    useEffect(() => {
+        if (state === 'letterCreated') {
+            setListTab(1);
+        }
+    }, []);
 
     useEffect(() => {
         if (isLogin) {

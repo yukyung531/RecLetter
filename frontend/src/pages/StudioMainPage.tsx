@@ -19,6 +19,7 @@ import { getlastPath } from '../util/get-func';
 import ChattingBox from '../components/ChattingBox';
 import { encodingLetter } from '../api/letter.ts';
 import ErrorModal from '../components/ErrorModal.tsx';
+import SuccessModal from '../components/SuccessModal.tsx';
 
 export default function StudioMainPage() {
     //영상 편집 여부
@@ -37,6 +38,27 @@ export default function StudioMainPage() {
      */
     const closeModal = () => {
         setIsModalActive(false);
+    };
+
+    //복사 성공 모달
+    const [isAddressCopied, setIsAddressCopied] = useState<boolean>(false);
+
+    /** closeAddressModal()
+     *  주소 복사 완료창 닫기
+     */
+    const closeAddressModal = () => {
+        setIsAddressCopied(false);
+    };
+
+    //영상완성버튼
+    const [isLetterMade, setIsLetterMade] = useState<boolean>(false);
+
+    /** closeLetterMadeModal()
+     *  영상 인코딩 중 모달 띄운 후 종료
+     */
+    const closeLetterMadeModal = () => {
+        setIsLetterMade(false);
+        navigate(`/studiolist`, { state: 'letterCreated' });
     };
 
     //영상 정보 불러오기
@@ -418,13 +440,14 @@ export default function StudioMainPage() {
     const handleClipBoard = () => {
         const currentUrl = document.location.href;
         navigator.clipboard.writeText(currentUrl).then(() => {
-            alert('링크가 복사되었습니다.');
+            setIsAddressCopied(true);
         });
     };
     const handleStudioName = () => {
         //DB에 변경 요청
         if (studioDetailInfo.studioTitle === '') {
-            alert('제목은 비워둘 수 없습니다.');
+            setErrorMessage('스튜디오 이름은 최소 1자 이상이어야 합니다.');
+            setIsModalActive(true);
         } else {
             if (isEditingName) {
                 putStudiotitleAPI();
@@ -479,18 +502,27 @@ export default function StudioMainPage() {
 
     //선택된 영상이 있는지 여부를 반환
     const isSelectedClipList = () => {
-        let selectedClipListLength = 0;
-        if (studioDetailInfo.clipInfoList) {
-            studioDetailInfo.clipInfoList.map((clip) => {
-                if (clip.clipOrder != -1) {
-                    selectedClipListLength += 1;
-                }
-            });
-        }
-        return selectedClipListLength > 0;
+        // let selectedClipListLength = 0;
+        // if (studioDetailInfo.clipInfoList) {
+        //     studioDetailInfo.clipInfoList.map((clip) => {
+        //         if (clip.clipOrder != -1) {
+        //             selectedClipListLength += 1;
+        //         }
+        //     });
+        // }
+        // return selectedClipListLength > 0;
+        return usedVideoList.length > 0;
     };
 
     const onClickCompletePage = async () => {
+        if (!isSelectedClipList()) {
+            setErrorMessage(
+                '하나 이상의 영상을 선택해야 영상 편지 완성이 가능합니다'
+            );
+            setIsModalActive(true);
+            return;
+        }
+
         const expireDate: Date = new Date(studioDetailInfo.expireDate);
         if (
             Math.floor(
@@ -499,28 +531,20 @@ export default function StudioMainPage() {
         ) {
             await encodingLetter(studioDetailInfo.studioId).then((res) => {
                 console.log(res);
-                moveStudioList();
+                setIsLetterMade(true);
             });
         } else if (studioDetailInfo.studioOwner === userInfo.userId) {
             await encodingLetter(studioDetailInfo.studioId).then((res) => {
                 console.log(res);
-                moveStudioList();
+                setIsLetterMade(true);
             });
-        }
-
-        if (!isSelectedClipList()) {
-            setErrorMessage(
-                '하나 이상의 영상을 선택해야 영상 편지 완성이 가능합니다'
-            );
-            setIsModalActive(true);
-            return;
         }
     };
 
     /** 리스트로 이동 */
-    const moveStudioList = () => {
-        navigate(`/studiolist`);
-    };
+    // const moveStudioList = () => {
+    //     navigate(`/studiolist`);
+    // };
 
     //////////////////////////////////전체편지 자동재생////////////////////////////////////////////////////////
     const playAllSelectedVideoRef = useRef<boolean>(false);
@@ -565,6 +589,22 @@ export default function StudioMainPage() {
             )}
             {isModalActive ? (
                 <ErrorModal onClick={closeModal} message={errorMessage} />
+            ) : (
+                <></>
+            )}
+            {isAddressCopied ? (
+                <SuccessModal
+                    onClick={closeAddressModal}
+                    message="링크가 복사되었습니다."
+                />
+            ) : (
+                <></>
+            )}
+            {isLetterMade ? (
+                <SuccessModal
+                    onClick={closeLetterMadeModal}
+                    message="영상 완성 요청이 전송되었습니다."
+                />
             ) : (
                 <></>
             )}
@@ -862,7 +902,7 @@ export default function StudioMainPage() {
                                     alt=""
                                 />
                                 영상편지 완성하기
-                            </a>
+                            </div>
                             <div
                                 className="w-full h-24 mx-4 my-2 color-bg-main text-white text-xl flex flex-col justify-center items-center border rounded-md cursor-pointer hover:color-bg-subbold"
                                 onClick={onClickRecordPage}
