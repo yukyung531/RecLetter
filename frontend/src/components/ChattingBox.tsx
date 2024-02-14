@@ -399,11 +399,19 @@ export default function ChattingBox() {
         }
     };
 
-    const [selectedTheme, setSelectedTheme] = useState(0);
+
+    // 로컬 스토리지에서 테마 불러오기. 없으면 기본값 0 사용
+    const initialTheme = Number(localStorage.getItem('selectedTheme')) || 0;
+
+    const [selectedTheme, setSelectedTheme] = useState(initialTheme);
+
     const handleThemeChange = (theme: number) => {
         setSelectedTheme(theme);
+        // 테마 변경 시 로컬 스토리지에 테마 저장
+        localStorage.setItem('selectedTheme', theme.toString());
         dispatch(themeState(theme));
     };
+
 
     const showChattingRoom = () => {
         const openLogoSrc =
