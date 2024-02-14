@@ -1369,7 +1369,7 @@ export default function LetterMakePage() {
         case 2:
             sideBar = (
                 <div className="w-full flex flex-col justify-start text-xl ">
-                    <div className="flex justify-between">
+                    <div className="flex justify-between -mb-1">
                         <p>BGM</p>
                         <div>
                             {playing ? (
@@ -1433,7 +1433,7 @@ export default function LetterMakePage() {
                             selectBGM(+event.target.value);
                             selectBGMUrl(+event.target.value);
                         }}
-                        className="border-2 h-7 pl-0.5 pr-0.3 color-border-darkgray rounded my-2"
+                        className="border h-8 pl-1 pr-0.5 color-border-darkgray rounded my-2"
                     >
                         {bgmList.map((bgm) => {
                             return (
@@ -1447,9 +1447,9 @@ export default function LetterMakePage() {
                         })}
                     </select>
 
-                    <p>배경 음악 볼륨</p>
+                    <p className='mt-4'>배경 음악 볼륨</p>
                     <input
-                        className="w-full"
+                        className="w-full mt-1"
                         type="range"
                         min={0}
                         max={200}
@@ -1473,7 +1473,7 @@ export default function LetterMakePage() {
                         }}
                     />
 
-                    <p>전체 영상 볼륨 조절</p>
+                    <p className='mt-6'>전체 영상 볼륨 조절</p>
                     <div className="w-full flex">
                         <button
                             className="border-2 border-[#FF777F] text-[#FF777F] m-1 rounded hover:bg-[#FF777F] hover:text-white flex-grow"
