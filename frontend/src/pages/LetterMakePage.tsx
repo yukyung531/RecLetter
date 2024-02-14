@@ -599,7 +599,7 @@ export default function LetterMakePage() {
             // 캡처 전에 비디오를 좌우 반전
             const video = videoRef.current;
             if (video) {
-                video.style.transform = 'scaleX(-1)';
+                video.style.transform = 'scaleX(1)';
             }
             const onCapture = () => {
                 console.log('onCapture');
@@ -627,7 +627,7 @@ export default function LetterMakePage() {
                 link.click();
                 document.body.removeChild(link);
                 if (video) {
-                    video.style.transform = 'scaleX(1)';
+                    video.style.transform = 'scaleX(-1)';
                 }
             };
             onCapture();
@@ -2214,7 +2214,6 @@ export default function LetterMakePage() {
                                         style={{
                                             width: '800px',
                                             aspectRatio: 16 / 9,
-                                            // transform: `rotateY(180deg)`,
                                         }}
                                         ref={videoRef}
                                         onEnded={() => {
