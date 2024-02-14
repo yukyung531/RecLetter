@@ -54,6 +54,12 @@ export default function ClipRecordPage() {
         startRecord();
     };
 
+    // 영상없이 다음 단계로 이동하려할 때 모달
+    const [isRecordModalActive, setIsRecordModalActive] = useState<boolean>(false);
+    const closeRecordModal = () => {
+        setIsRecordModalActive(false);
+    }
+
     //모드 0:영상, 1:스크립트
     const [mode, setMode] = useState<number>(0);
 
@@ -668,6 +674,7 @@ export default function ClipRecordPage() {
                 //navigate 직전에 blob url 정리할 것
             } else {
                 //에러창 출력
+                setIsRecordModalActive(true);                
                 console.log('선택된 영상이 없습니다. 영상을 선택해 주세요.');
             }
         }
@@ -710,6 +717,11 @@ export default function ClipRecordPage() {
         <section className="relative section-top pt-14 ">
             {isModalActive ? (
                 <ErrorModal onClick={closeModal} message="오류가 났습니다" />
+            ) : (
+                <></>
+            )}
+            {isRecordModalActive ? (
+                    <ErrorModal onClick={closeRecordModal} message="촬영된 영상이 없습니다. 영상을 촬영해 주세요." />
             ) : (
                 <></>
             )}
