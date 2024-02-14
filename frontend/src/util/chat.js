@@ -101,9 +101,12 @@ export function subscribe(
                 firstEnter = true;
             }
             currentRoom.push(stuId);
-        } else if (!setConnect) {
-            unSubscribe();
+        }  else if (!setConnect) {
+            unSubscribe(stuId);
             client.deactivate();
+        } else {
+            unSubscribe(stuId);
+            reSubscribe(stuId);
         }
     }
 }
