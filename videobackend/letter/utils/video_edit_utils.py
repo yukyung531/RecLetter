@@ -6,7 +6,11 @@ from videobackend.letter.dto.dto import ClipInfo
 
 
 def load_clip(clip_info: ClipInfo, studio_id: str) -> VideoFileClip:
-    return VideoFileClip(filename=clip_info.get_clip_file_path(studio_id))
+    result = VideoFileClip(filename=clip_info.get_clip_file_path(studio_id))
+    if result.h != 720:
+        return result.fx(vfx.resize, h=720).on_color((1280, 720), color=(0, 0, 0))
+    else:
+        return result
 
 
 def concat_clip(clip_list: List[VideoClip]) -> VideoClip:
@@ -21,10 +25,6 @@ def cross_fade(clip: VideoClip) -> VideoClip:
 
 def mirror_clip(clip: VideoClip) -> VideoClip:
     return clip.fx(vfx.mirror_x)
-
-
-def resize_clip(clip: VideoClip) -> VideoClip:
-    return clip.fx(vfx.resize, (1280, 720))
 
 
 def encode_frame(clip: VideoClip, frame_id: int, sticker_file_path: str) -> VideoClip:
