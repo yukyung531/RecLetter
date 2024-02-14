@@ -1433,7 +1433,7 @@ export default function LetterMakePage() {
                             selectBGM(+event.target.value);
                             selectBGMUrl(+event.target.value);
                         }}
-                        className="border-2 border-black rounded my-2"
+                        className="border-2 h-7 pl-0.5 pr-0.3 color-border-darkgray rounded my-2"
                     >
                         {bgmList.map((bgm) => {
                             return (
