@@ -470,6 +470,9 @@ export default function LetterMakePage() {
         };
         initSetting();
 
+        //OpenVidu 모드 비활성화
+        // OpenVidu.enableProdMode();
+
         const token = localStorage.getItem('access-token');
         if (isLogin) {
             //API 불러오는 함수로 clipInfo를 받아옴
@@ -1744,12 +1747,14 @@ export default function LetterMakePage() {
      */
     const startScreenShare = useCallback(async () => {
         const newSession = OV.current.initSession();
+        //로그 비활성화
+        OV.current.enableProdMode();
 
         //동영상이 들어오고 있다.
         newSession.on('streamCreated', (event) => {
             //DOM 추가 없으니 두번째 인자는 undefined
             const subscriber = newSession.subscribe(event.stream, undefined);
-            console.log('subcriber - ', subscriber);
+            // console.log('subcriber - ', subscriber);
             //subscribers 리스트에 추가
             setSubscribers((prevSubscribers) => [
                 ...prevSubscribers,
@@ -1759,7 +1764,7 @@ export default function LetterMakePage() {
 
         //화면 공유 종료 시
         newSession.on('streamDestroyed', (event: any) => {
-            console.log(event);
+            // console.log(event);
             deleteSubscriber(event.streamManager);
         });
 
@@ -1780,14 +1785,14 @@ export default function LetterMakePage() {
         newSession
             .connect(token, { clientData: user.userNickname })
             .then(async () => {
-                console.log('Connected');
+                // console.log('Connected');
                 //publisher 초기화(videoSource = screen)
                 const publisher = await OV.current.initPublisherAsync(
                     undefined,
                     {
                         audioSource: undefined,
                         videoSource: 'screen',
-                        publishAudio: true,
+                        publishAudio: false,
                         publishVideo: true,
                         resolution: '640x480',
                         frameRate: 30,
@@ -1797,18 +1802,18 @@ export default function LetterMakePage() {
                 );
                 //퍼블리시
                 newSession.publish(publisher);
-                console.log(publisher);
+                // console.log(publisher);
                 //메인 화면, publisher에 현재 publisher 선정
                 setMainStreamManager(publisher);
                 setPublisher(publisher);
             })
             .catch((error) => {
                 //connect에 에러
-                console.log(
-                    'There was an error connecting to the session:',
-                    error.code,
-                    error.message
-                );
+                // console.log(
+                //     'There was an error connecting to the session:',
+                //     error.code,
+                //     error.message
+                // );
             });
 
         //세션 설정
@@ -1868,7 +1873,7 @@ export default function LetterMakePage() {
     /**createSession(sessionId), 세션 정보를 받아오거나 생성한다. */
     const createSession = async (studioId: string) => {
         const response = await createSessionAPI(studioId);
-        console.log('session -', response);
+        // console.log('session -', response);
         return response.data.sessionId; // The session
     };
 

@@ -19,7 +19,7 @@ export default function OpenViduVideoCard({ streamManager }: props) {
     }, [streamManager]);
 
     return (
-        <div id={userNickname} className="m-2">
+        <div id={userNickname} className="m-2 max-h-full">
             <p className="text-2xl text-center text-white">
                 {userNickname}님의 편집화면을 보는 중입니다.
             </p>
