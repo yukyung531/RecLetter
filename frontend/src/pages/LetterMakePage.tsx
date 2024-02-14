@@ -1439,16 +1439,6 @@ export default function LetterMakePage() {
                         })}
                     </select>
 
-                    <audio
-                        src={selectedBGMUrl}
-                        crossOrigin="anonymous"
-                        controls
-                        ref={bgmRef}
-                        style={{ display: 'none' }}
-                        loop
-                    >
-                        오디오
-                    </audio>
                     <p>배경 음악 볼륨</p>
                     <input
                         className="w-full"
@@ -1788,7 +1778,7 @@ export default function LetterMakePage() {
                 const publisher = await OV.current.initPublisherAsync(
                     undefined,
                     {
-                        audioSource: undefined,
+                        audioSource: false,
                         videoSource: 'screen',
                         publishAudio: false,
                         publishVideo: true,
@@ -2554,6 +2544,17 @@ export default function LetterMakePage() {
                     ></video>
                 );
             })}
+            {/* bgm재생 */}
+            <audio
+                src={selectedBGMUrl}
+                crossOrigin="anonymous"
+                controls
+                ref={bgmRef}
+                style={{ display: 'none' }}
+                loop
+            >
+                오디오
+            </audio>
         </section>
     );
 }
