@@ -39,8 +39,9 @@ export default function Header() {
             })
             .catch((e: Error) => {
                 deleteStorageData();
-                // dispatch(loginState(false));
+                dispatch(loginState(false));
                 console.log(e);
+                navigator('/');
             });
     };
 
