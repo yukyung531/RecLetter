@@ -78,7 +78,7 @@ export default function StudioMainPage() {
         (state: any) => state.loginFlag.studioId
     );
     const dispatch = useDispatch();
-    const navigator = useNavigate();
+    const navigate = useNavigate();
 
     //사용한 비디오, 사용하지 않은 비디오
     const [usedVideoList, setUsedVideoList] = useState<ClipInfo[]>([]);
@@ -186,7 +186,7 @@ export default function StudioMainPage() {
             getUserInfo();
         }
         if (!token) {
-            navigator(`/login`);
+            navigate(`/login`);
         }
 
         /** 페이지 새로고침 전에 실행 할 함수 */
@@ -206,7 +206,7 @@ export default function StudioMainPage() {
 
     //편집창으로 이동
     const onClickEdit = (clipId: number) => {
-        navigator(`/clipedit?id=${clipId}`);
+        navigate(`/clipedit?id=${clipId}`);
     };
 
     //요소 삭제
@@ -387,13 +387,24 @@ export default function StudioMainPage() {
         setIsEditingName(true);
     };
 
+    // 클립보드에 주소 복사
+    const handleClipBoard = () => {
+        const currentUrl = document.location.href;
+        navigator.clipboard.writeText(currentUrl).then(() => {
+            alert('링크가 복사되었습니다.');
+        });
+    };
     const handleStudioName = () => {
         //DB에 변경 요청
-        if (isEditingName) {
-            putStudiotitleAPI();
-            setIsEditingName(false);
+        if (studioDetailInfo.studioTitle === '') {
+            alert('제목은 비워둘 수 없습니다.');
         } else {
-            setIsEditingName(true);
+            if (isEditingName) {
+                putStudiotitleAPI();
+                setIsEditingName(false);
+            } else {
+                setIsEditingName(true);
+            }
         }
     };
 
@@ -427,7 +438,7 @@ export default function StudioMainPage() {
      * useNavigate를 이용하여 영상 녹화 화면으로 이동
      */
     const onClickRecordPage = () => {
-        navigator(`/cliprecord/${studioDetailInfo.studioId}`);
+        navigate(`/cliprecord/${studioDetailInfo.studioId}`);
     };
 
     //선택된 영상이 있는지 여부를 반환
@@ -469,7 +480,7 @@ export default function StudioMainPage() {
 
     /** 리스트로 이동 */
     const moveStudioList = () => {
-        navigator(`/studiolist`);
+        navigate(`/studiolist`);
     };
 
     //////////////////////////////////전체편지 자동재생////////////////////////////////////////////////////////
@@ -643,6 +654,12 @@ export default function StudioMainPage() {
                                     ) : (
                                         <></>
                                     )}
+                                    <span
+                                        className="material-symbols-outlined text-2xl text-white cursor-pointer"
+                                        onClick={handleClipBoard}
+                                    >
+                                        inventory
+                                    </span>
                                 </div>
 
                                 <div

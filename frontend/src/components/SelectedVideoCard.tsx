@@ -70,6 +70,11 @@ export default function SelectedVideoCard({
                         defaultValue={clip.clipVolume}
                         value={clip.clipVolume}
                         onChange={changeVolume}
+                        style={{
+                            background: clip.clipVolume
+                                ? `linear-gradient(to right,#ff4954 ${clip.clipVolume}%, rgba(229,231,235,0.8) ${clip.clipVolume}% 100%)`
+                                : '#E5E7EB',
+                        }}
                     />
                 </div>
             </div>

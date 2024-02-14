@@ -90,6 +90,7 @@ export default function LetterMakePage() {
     const [eraserFlag, setEraserFlag] = useState<boolean>(false);
     const [clearCanvas, setClearCanvas] = useState<boolean>(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const canvasRef2 = useRef<HTMLCanvasElement>(null);
     const [stickerScale, setStickerScale] = useState<number>(160);
     const [stickerRotate, setStickerRotate] = useState<number>(0);
     const [keyState, setKeyState] = useState<string>('');
@@ -594,7 +595,7 @@ export default function LetterMakePage() {
 
     useEffect(() => {
         if (canvasDownloadNum !== 0) {
-            const target = canvasRef.current;
+            const target = canvasRef2.current;
             const onCapture = () => {
                 console.log('onCapture');
                 if (!target) {
@@ -1038,35 +1039,17 @@ export default function LetterMakePage() {
             return (
                 <div className="w-full flex flex-col justify-start text-xl pb-10">
                     <p>텍스트 스티커</p>
-                    <div className="flex flex-wrap m-2">
-                        {fontStickerList.map((item) => {
-                            const imgUrl = `/src/assets/sticker/${item}.png`;
-                            return (
-                                <div
-                                    className="relative w-16 h-12 m-1 flex items-center justify-center border cursor-pointer rounded-lg hover:bg-gray-100 hover:border hover:color-border-main"
-                                    onClick={(e) => {
-                                        handleSelectedObj(item);
-                                        handleMousePositionInSideBar({
-                                            positionX: e.clientX,
-                                            positionY: e.clientY,
-                                        });
-                                    }}
-                                >
-                                    <img src={imgUrl} alt="" />
-                                    {canvasTextSticker.fontContent === '' ? (
-                                        <p className="absolute top-0 bottom-0 px-2 color-text-gray flex justify-center items-center text-xs text-center">
-                                            텍스트 입력 후 눌러주세요!
-                                        </p>
-                                    ) : (
-                                        <p className="absolute top-0 bottom-0 px-2 color-text-gray flex justify-center items-center text-xs text-center">
-                                            크기/회전 조작 후 붙여주세요
-                                        </p>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                    <div className="border rounded-lg color-border-darkgray text-center py-6">
+
+                    <div
+                        className="border rounded-lg color-border-darkgray text-center py-6 cursor-pointer hover:bg-gray-100"
+                        onClick={(e) => {
+                            handleSelectedObj('fontsticker1');
+                            handleMousePositionInSideBar({
+                                positionX: e.clientX,
+                                positionY: e.clientY,
+                            });
+                        }}
+                    >
                         <p
                             style={{
                                 color: canvasTextSticker.fontColor,
@@ -1422,7 +1405,13 @@ export default function LetterMakePage() {
                                     +event.target.value / 100;
                             }
                         }}
+                        style={{
+                            background: studioBGMVolume
+                                ? `linear-gradient(to right,#ff4954 ${studioBGMVolume}%, rgba(229,231,235,0.8) ${studioBGMVolume}% 100%)`
+                                : '#E5E7EB',
+                        }}
                     />
+
                     <p>전체 영상 볼륨 조절</p>
                     <div className="w-full flex">
                         <button
@@ -1615,7 +1604,7 @@ export default function LetterMakePage() {
                                 </div>
                             </div>
                         </div>
-                        <div className="w-full flex justify-around mt-4 color-text-darkgray">
+                        <div className="w-full flex justify-around mt-4 color-text-darkgray  hover:text-white">
                             <div
                                 className="flex flex-col items-center text-lg border px-2 py-1 rounded-lg cursor-pointer hover:color-bg-sublight btn-animation"
                                 onClick={() => setEraserFlag(!eraserFlag)}
@@ -2204,89 +2193,102 @@ export default function LetterMakePage() {
                         </div>
                         <div className="flex w-full">
                             {/* 영상 표시 부분 */}
-                            <div className="relative w-4/5 h-full flex flex-col items-center">
-                                {/* 영상 */}
-                                <video
-                                    className="bg-black border"
-                                    style={{
-                                        width: '800px',
-                                        aspectRatio: 16 / 9,
-                                        transform: `rotateY(180deg)`,
-                                    }}
-                                    ref={videoRef}
-                                    onEnded={() => {
-                                        playingIdx.current =
-                                            playingIdx.current + 1;
-                                        playVideo();
-                                    }}
-                                    onTimeUpdate={(
-                                        event: BaseSyntheticEvent
-                                    ) => {
-                                        setPercent(
-                                            event.target.currentTime /
-                                                event.target.duration
-                                        );
-                                        setNowPlayingTime(
-                                            event.target.currentTime
-                                        );
-                                    }}
-                                    crossOrigin="anonymous"
-                                />
-                                {/* 프레임 */}
-                                <img
-                                    src={selectImgUrl}
-                                    className="absolute top-0 lef-0"
-                                    style={{
-                                        width: '800px',
-                                        aspectRatio: 16 / 9,
-                                    }}
-                                    alt=""
-                                />
-                                {stickerLayoutList.map((item, index) => {
-                                    return (
-                                        <img
-                                            key={'show Layout : ' + index}
-                                            src={item}
-                                            className="absolute top-0 lef-0"
-                                            style={{
-                                                width: '800px',
-                                                aspectRatio: 16 / 9,
-                                            }}
-                                            alt=""
-                                        />
-                                    );
-                                })}
 
-                                <main className="absolute" ref={canvasRef}>
-                                    <CanvasItem
-                                        canvasWidth={800}
-                                        canvasHeight={450}
-                                        sticker={selectedObj}
-                                        stickerText={canvasTextSticker}
-                                        setSticker={setSelectedObj}
-                                        eraser={eraserFlag}
-                                        stickerFlag={stickerFlag}
-                                        setStickerFlag={setStickerFlag}
-                                        mousePosition={mousePosition}
-                                        scale={stickerScale}
-                                        rotate={stickerRotate}
-                                        mode={stickerMode}
-                                        stickerLayout={stickerLayoutList}
-                                        setStickerLayout={setStickerLayoutList}
-                                        saveFlag={canvasFlag}
-                                        setSaveFlag={setCanvasFlag}
-                                        setCanvasDownload={setCavnasDownloadNum}
-                                        setCanvasSave={setCanvasSaveNum}
-                                        clearCanvas={clearCanvas}
-                                        customSticker={customSticker}
-                                        setCustomSticker={setCustomSticker}
-                                        setCustomStickerFlag={
-                                            setCustomStickerFlag
-                                        }
-                                        customStickerFlag={customStickerFlag}
-                                    ></CanvasItem>
+                            <div className="relative w-4/5 h-full flex flex-col items-center">
+                                <main
+                                    className="relative w-full flex"
+                                    ref={canvasRef2}
+                                >
+                                    {/* 영상 */}
+                                    <video
+                                        className="bg-black border flipped"
+                                        style={{
+                                            width: '800px',
+                                            aspectRatio: 16 / 9,
+                                            // transform: `rotateY(180deg)`,
+                                        }}
+                                        ref={videoRef}
+                                        onEnded={() => {
+                                            playingIdx.current =
+                                                playingIdx.current + 1;
+                                            playVideo();
+                                        }}
+                                        onTimeUpdate={(
+                                            event: BaseSyntheticEvent
+                                        ) => {
+                                            setPercent(
+                                                event.target.currentTime /
+                                                    event.target.duration
+                                            );
+                                            setNowPlayingTime(
+                                                event.target.currentTime
+                                            );
+                                        }}
+                                        crossOrigin="anonymous"
+                                    />
+                                    {/* 프레임 */}
+                                    <img
+                                        src={selectImgUrl}
+                                        className="absolute top-0 lef-0"
+                                        style={{
+                                            width: '800px',
+                                            aspectRatio: 16 / 9,
+                                        }}
+                                        alt=""
+                                    />
+                                    {stickerLayoutList.map((item, index) => {
+                                        return (
+                                            <img
+                                                key={'show Layout : ' + index}
+                                                src={item}
+                                                className="absolute top-0 lef-0"
+                                                style={{
+                                                    width: '800px',
+                                                    aspectRatio: 16 / 9,
+                                                }}
+                                                alt=""
+                                            />
+                                        );
+                                    })}
+
+                                    <main className="absolute" ref={canvasRef}>
+                                        <CanvasItem
+                                            canvasWidth={800}
+                                            canvasHeight={450}
+                                            sticker={selectedObj}
+                                            stickerText={canvasTextSticker}
+                                            setSticker={setSelectedObj}
+                                            eraser={eraserFlag}
+                                            stickerFlag={stickerFlag}
+                                            setStickerFlag={setStickerFlag}
+                                            mousePosition={mousePosition}
+                                            scale={stickerScale}
+                                            rotate={stickerRotate}
+                                            mode={stickerMode}
+                                            stickerLayout={stickerLayoutList}
+                                            setStickerLayout={
+                                                setStickerLayoutList
+                                            }
+                                            saveFlag={canvasFlag}
+                                            setSaveFlag={setCanvasFlag}
+                                            setCanvasDownload={
+                                                setCavnasDownloadNum
+                                            }
+                                            setCanvasSave={setCanvasSaveNum}
+                                            clearCanvas={clearCanvas}
+                                            customSticker={customSticker}
+                                            setCustomSticker={setCustomSticker}
+                                            setCustomStickerFlag={
+                                                setCustomStickerFlag
+                                            }
+                                            customStickerFlag={
+                                                customStickerFlag
+                                            }
+                                        ></CanvasItem>
+                                    </main>
                                 </main>
                             </div>
+
                             {/* 저장 및 현재 편지 정보 */}
                             <div className="relative w-1/5 h-full flex flex-col justify-center items-center">
                                 <button

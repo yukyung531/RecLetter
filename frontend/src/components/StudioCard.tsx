@@ -84,15 +84,19 @@ export default function StudioCard({
                 }}
             >
                 {stickerUrl !== '' ? (
-                    <img src={stickerUrl} alt="" />
+                    <img className="w-full" src={stickerUrl} alt="" />
                 ) : (
-                    <img src="/src/assets/images/nothumb.png" alt="" />
+                    <img
+                        className="w-full"
+                        src="/src/assets/images/nothumb.png"
+                        alt=""
+                    />
                 )}
             </div>
             {props.studioStickerUrl.match(regex) ? (
                 <img
                     src={props.studioStickerUrl}
-                    className="absolute top-0 lef-0 z-20"
+                    className="absolute top-0 lef-0 z-20 p-3"
                     crossOrigin="anonymous"
                     style={{
                         width: '100%',
@@ -155,11 +159,11 @@ export default function StudioCard({
                 <div className="flex">
                     <div className="flex items-center">
                         <img
-                            className="w-3 h-3"
+                            className="w-[15px] h-3"
                             src="/src/assets/icons/group.png"
                             alt=""
                         />
-                        <p className="mx-1">{peopleNum}</p>
+                        <p className="mx-1">{props.attendMember}</p>
                     </div>
                     <div className="mx-2 flex items-center">
                         <img
@@ -167,7 +171,7 @@ export default function StudioCard({
                             src="/src/assets/icons/message.png"
                             alt=""
                         />
-                        <p className="mx-1">{peopleNum}</p>
+                        <p className="mx-1">{props.videoCount}</p>
                     </div>
                 </div>
                 <div>{isUploadUi}</div>

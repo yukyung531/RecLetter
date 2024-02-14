@@ -16,6 +16,7 @@ input[type='range'] {
     height: 8px;
     border-radius: 6px;
     cursor: pointer;
+    outline: none;
 }
 input[type='range']::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -142,6 +143,9 @@ body {
 }
 .top-30per {
     top: 30%;
+}
+.flipped {
+    transform: scaleX(-1);
 }
 input[type='number']::-webkit-inner-spin-button {
     -webkit-appearance: none;
