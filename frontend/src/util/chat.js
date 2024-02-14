@@ -44,6 +44,7 @@ export function connect(
                 chatList = setChattingList;
                 setCurrentPeople = currentPeopleFunc;
 
+                console.log(stuId, uuid, username, chatList, setCurrentPeople)
                 subscribe(stuId, uuid, username, chatList, setCurrentPeople);
                 console.log(setConnect);
             },
