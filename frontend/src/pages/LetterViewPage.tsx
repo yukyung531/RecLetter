@@ -81,12 +81,13 @@ export default function LetterViewPage() {
      */
     const startSession = useCallback(async () => {
         const newSession = OV.current.initSession();
+        OV.current.enableProdMode();
 
         //동영상이 들어오고 있다.
         newSession.on('streamCreated', (event) => {
             //DOM 추가 없으니 두번째 인자는 undefined
             const subscriber = newSession.subscribe(event.stream, undefined);
-            console.log('subcriber - ', subscriber);
+            // console.log('subcriber - ', subscriber);
             //subscribers 리스트에 추가
             setSubscribers((prevSubscribers) => [
                 ...prevSubscribers,
@@ -96,7 +97,7 @@ export default function LetterViewPage() {
 
         //화면 공유 종료 시
         newSession.on('streamDestroyed', (event: any) => {
-            console.log('stream Destoryed - ', event);
+            // console.log('stream Destoryed - ', event);
             deleteSubscriber(event.streamManager);
         });
 
@@ -116,15 +117,15 @@ export default function LetterViewPage() {
         newSession
             .connect(token, { clientData: userInfo.userNickname })
             .then(async () => {
-                console.log('Connected to Session');
+                // console.log('Connected to Session');
             })
             .catch((error) => {
                 //connect에 에러
-                console.log(
-                    'There was an error connecting to the session:',
-                    error.code,
-                    error.message
-                );
+                // console.log(
+                //     'There was an error connecting to the session:',
+                //     error.code,
+                //     error.message
+                // );
             });
 
         //세션 설정
@@ -150,7 +151,7 @@ export default function LetterViewPage() {
      */
     const createToken = async (sessionId: string) => {
         const response = await connectSessionAPI(sessionId);
-        console.log(response);
+        // console.log(response);
         return response.data.token; // The token
     };
 
@@ -167,6 +168,7 @@ export default function LetterViewPage() {
     //초기세팅
     useEffect(() => {
         const initSetting = async () => {
+            // OpenVidu.enableProdMode();
             await getUserInfo();
             await startSession();
         };
@@ -193,10 +195,10 @@ export default function LetterViewPage() {
                 <></>
             )}
             <div className="flex">
-                <div id="video-container">
+                <div id="video-container" className="max-h-full">
                     {subscribers.length >= 1 ? (
                         subscribers.map((subscriber) => {
-                            console.log(subscriber);
+                            // console.log(subscriber);
                             return (
                                 <>
                                     <OpenViduVideoCard
