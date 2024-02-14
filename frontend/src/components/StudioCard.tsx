@@ -158,7 +158,7 @@ export default function StudioCard({
                         <p>{props.studioTitle}</p>
                     </div>
 
-                    <p className="w-[40px] text-2xl">
+                    <p className="w-fit text-2xl">
                         D-
                         {Math.floor((expireDate.getTime() - Date.now()) /
                             (1000 * 60 * 60 * 24))}
