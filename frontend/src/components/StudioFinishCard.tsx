@@ -22,6 +22,9 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
     }
     const studioId: string = props.studioId + '';
 
+    const regex =
+        /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(:[0-9]+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
+
     const expireDate: Date = new Date(props.expireDate);
 
     const stickerUrl: string = props.thumbnailUrl;
@@ -31,21 +34,17 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
         if (props.studioStatus === 'ENCODING') {
             return (
                 <div
-                    className="relative w-1/4 flex flex-col mx-2 my-2 justify-start items-center cursor-pointer"
+                    className="relative w-1/4 flex flex-col mx-2 mt-4 justify-start items-center cursor-pointer"
                     id={studioId}
+                    style={{ aspectRatio: 1 / 1 }}
                 >
-                    <div
-                        className="relative flex w-full h-full flex-col justify-end pb-2 px-2"
-                        style={{
-                            aspectRatio: 16 / 9,
-                            backgroundImage:
-                                'url(/src/assets/images/encoding-video.png)',
-                            backgroundRepeat: 'no-repeat',
-                            backgroundSize: 'contain',
-                            backgroundPosition: 'center',
-                        }}
-                    >
-                        <div className="flex flex-col justify-between w-full z-30 p-2">
+                    <img
+                        className="absolute w-full bottom-0 -z-20"
+                        src="/src/assets/images/encoding-video.png"
+                        alt=""
+                    />
+                    <div className="relative flex w-full h-full flex-col justify-end pb-8 px-2">
+                        <div className="relative flex flex-col justify-between w-full z-20 p-2 mt-16">
                             <div className="text-2xl flex items-center -ms-3 mb-1 text-center justify-center">
                                 {props.isStudioOwner ? (
                                     <img
@@ -58,8 +57,7 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
                                 <p>{props.studioTitle}</p>
                             </div>
 
-                            <div className="w-full flex justify-between -ms-2">
-                                <p></p>
+                            <div className="absolute bottom-0 right-4">
                                 <p className="text-xl color-text-darkgray">
                                     ~
                                     {Math.floor(
@@ -75,18 +73,19 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
         } else if (props.studioStatus === 'COMPLETE') {
             return (
                 <div
-                    className="relative w-1/5 p-3 flex flex-col mx-2 my-2 justify-start items-center cursor-pointer mt-28"
+                    className="relative w-1/5 p-3 flex flex-col mx-2 my-2 justify-start items-center cursor-pointer mt-4"
                     id={studioId}
                     onClick={onClick}
+                    style={{ aspectRatio: 1 / 1 }}
                 >
                     <img
-                        className="absolute bottom-0 -z-20"
+                        className="absolute w-full bottom-0 -z-20"
                         src="/src/assets/images/finish-video-back.png"
                         alt=""
                     />
-                    <div className="relative z-10 bottom-1/2 border rounded-xl hover:letter-animation">
+                    <div className="relative w-full top-1/3 z-10 border rounded-xl hover:letter-animation">
                         <img
-                            className="w-full  rounded-lg "
+                            className="w-full rounded-lg "
                             style={{
                                 aspectRatio: 16 / 9,
                             }}
@@ -98,8 +97,17 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
                                 aspectRatio: 16 / 9,
                             }}
                         >
-                            {stickerUrl !== '' ? (
-                                <img src={stickerUrl} alt="" />
+                            {props.studioStickerUrl.match(regex) ? (
+                                <img
+                                    src={props.studioStickerUrl}
+                                    className="absolute top-0 lef-0 z-20"
+                                    crossOrigin="anonymous"
+                                    style={{
+                                        width: '100%',
+                                        aspectRatio: 16 / 9,
+                                    }}
+                                    alt=""
+                                />
                             ) : (
                                 <></>
                             )}
@@ -126,11 +134,11 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
                     </div>
 
                     <div
-                        className="absolute flex w-full h-full flex-col justify-center"
+                        className="absolute flex w-full h-full flex-col justify-end"
                         style={{}}
                     >
                         <img
-                            className="absolute bottom-0 z-10"
+                            className="absolute w-full bottom-0 z-10"
                             src="/src/assets/images/finish-video-front.png"
                             alt=""
                         />
@@ -188,7 +196,7 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
                                 ) : (
                                     <></>
                                 )}
-                                <p>인코딩에 실패하였습니다</p>
+                                <p>{props.studioTitle} 인코딩 실패</p>
                             </div>
 
                             <div className="w-full flex justify-between -ms-2">

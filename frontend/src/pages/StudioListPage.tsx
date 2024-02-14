@@ -134,6 +134,9 @@ export default function StudioListPage() {
             navigate(`/studiomain/${studioId}`);
         }
     };
+    const onMoveFinish = (studioId: string) => {
+        navigate(`/letterfinish/${studioId}`);
+    };
     const changeListTab = (num: number) => {
         setListTab(num);
     };
@@ -299,7 +302,7 @@ export default function StudioListPage() {
                                             key={studio.studioId}
                                             props={studio}
                                             onClick={() =>
-                                                onClickSCard(studio.studioId)
+                                                onMoveFinish(studio.studioId)
                                             }
                                         />
                                     );

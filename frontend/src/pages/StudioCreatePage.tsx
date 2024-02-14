@@ -155,7 +155,7 @@ export default function StudioCreatePage() {
                                     }}
                                 >
                                     <img
-                                        className="image-select-size rounded-lg"
+                                        className="image-select-size rounded-lg color-bg-gray"
                                         src={frameSrc}
                                     />
                                     <p>{item.frameTitle}</p>
