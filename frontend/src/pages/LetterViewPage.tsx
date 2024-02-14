@@ -114,7 +114,6 @@ export default function LetterViewPage() {
 
         //화면 공유 종료 시
         newSession.on('streamDestroyed', (event: any) => {
-            // console.log('stream Destoryed - ', event);
             deleteSubscriber(event.streamManager);
         });
 
@@ -270,7 +269,7 @@ export default function LetterViewPage() {
             ) : (
                 <></>
             )}
-            <div className="flex">
+            <div className="flex bg-black">
                 <div id="video-container" className="max-h-full">
                     {subscribers.length >= 1 ? (
                         subscribers.map((subscriber) => {

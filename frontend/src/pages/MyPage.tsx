@@ -9,6 +9,8 @@ import {
 import { deleteUser, getUser, modifyPass, modifyUser } from '../api/user';
 import { httpStatusCode } from '../util/http-status';
 import { deleteStorageData } from '../util/initialLocalStorage';
+import ErrorModal from '../components/ErrorModal';
+import SuccessModal from '../components/SuccessModal';
 
 export default function MyPage() {
     const [userNickname, setUserNickname] = useState<string>('');
@@ -23,6 +25,41 @@ export default function MyPage() {
     const [flagPassword, setFlagPassword] = useState<boolean>(false);
 
     const [isDisabled, setIsDisabled] = useState(false);
+
+    // 에러 모달
+    const [isErrorModalActive, setIsErrorModalActive] =
+        useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+
+    const closeErrorModal = () => {
+        setIsErrorModalActive(false);
+    };
+
+    //유저 정보 수정 완료 시 모달
+    const [isSaveUserSuccess, setIsSaveUserSuccess] = useState<boolean>(false);
+
+    const closeSaveUserModal = () => {
+        setIsSaveUserSuccess(false);
+        navigate('/login');
+    };
+
+    //회원 탈퇴 시 모달
+    const [isUserDeleted, setIsUserDeleted] = useState<boolean>(false);
+
+    const closeUserDeleteModal = () => {
+        setIsUserDeleted(false);
+        deleteStorageData();
+        navigate('/');
+    };
+
+    //비밀번호 수정 시 모달
+    const [isPWModified, setIsPWModified] = useState<boolean>(false);
+
+    const closePwModifyModal = () => {
+        setIsPWModified(false);
+        deleteStorageData();
+        navigate('/login');
+    };
 
     // 비활성화 상태일 때의 inline 스타일
     const disabledStyle: React.CSSProperties = {
@@ -65,8 +102,7 @@ export default function MyPage() {
             userNickname: userNickname,
         }).then((res) => {
             if (res.status === httpStatusCode.OK) {
-                alert('정보가 수정되었습니다');
-                navigate('/login');
+                setIsSaveUserSuccess(true);
             }
         });
     };
@@ -87,9 +123,7 @@ export default function MyPage() {
     const deleteUserAPI = async () => {
         await deleteUser().then((res) => {
             if (res.status === httpStatusCode.OK) {
-                alert('회원 정보가 삭제되었습니다.');
-                navigate('/');
-                deleteStorageData();
+                setIsUserDeleted(true);
             }
         });
     };
@@ -115,15 +149,18 @@ export default function MyPage() {
     /** 변경사항 저장 함수 */
     const saveUser = () => {
         if (userNickname.length < 2 || userNickname.length > 16) {
-            alert('닉네임은 2~16자 사이로 사용 가능합니다');
+            setErrorMessage('닉네임은 2~16자 사이로 사용 가능합니다');
+            setIsErrorModalActive(true);
         } else saveUserAPI();
     };
     /** 비밀번호 변경 함수 */
     const modifyPassword = () => {
         if (newPassword !== newPasswordConfirm) {
-            alert('새 비밀번호를 확인해주세요');
+            setErrorMessage('새 비밀번호를 확인해주세요');
+            setIsErrorModalActive(true);
         } else if (newPassword.length < 8 || newPassword.length > 16) {
-            alert('비밀번호는 8~16자 사이로 사용 가능합니다.');
+            setErrorMessage('비밀번호는 8~16자 사이로 사용 가능합니다.');
+            setIsErrorModalActive(true);
         } else {
             modifyPass({
                 originalPassword: oldPassword,
@@ -131,13 +168,12 @@ export default function MyPage() {
             })
                 .then((res) => {
                     if (res.status === httpStatusCode.OK) {
-                        alert('비밀번호가 수정되었습니다.');
-                        deleteStorageData();
-                        navigate('/login');
+                        setIsPWModified(true);
                     }
                 })
                 .catch(() => {
-                    alert('비밀번호를 확인해주세요.');
+                    setErrorMessage('비밀번호를 확인해주세요.');
+                    setIsErrorModalActive(true);
                 });
         }
     };
@@ -156,6 +192,38 @@ export default function MyPage() {
         if (!flagPassword) {
             return (
                 <div className="flex flex-col items-center">
+                    {isErrorModalActive ? (
+                        <ErrorModal
+                            onClick={closeErrorModal}
+                            message={errorMessage}
+                        />
+                    ) : (
+                        <></>
+                    )}
+                    {isSaveUserSuccess ? (
+                        <SuccessModal
+                            onClick={closeSaveUserModal}
+                            message="정보가 수정되었습니다"
+                        />
+                    ) : (
+                        <></>
+                    )}
+                    {isUserDeleted ? (
+                        <SuccessModal
+                            onClick={closeUserDeleteModal}
+                            message="회원 정보가 삭제되었습니다."
+                        />
+                    ) : (
+                        <></>
+                    )}
+                    {isPWModified ? (
+                        <SuccessModal
+                            onClick={closePwModifyModal}
+                            message="비밀번호가 수정되었습니다."
+                        />
+                    ) : (
+                        <></>
+                    )}
                     <p className="text-3xl mx-4 my-2">마이페이지</p>
                     <p className="mx-4 mb-4">
                         내 개인 정보를 수정할 수 있습니다.
@@ -217,6 +285,38 @@ export default function MyPage() {
         } else {
             return (
                 <div className="flex flex-col items-center">
+                    {isErrorModalActive ? (
+                        <ErrorModal
+                            onClick={closeErrorModal}
+                            message={errorMessage}
+                        />
+                    ) : (
+                        <></>
+                    )}
+                    {isSaveUserSuccess ? (
+                        <SuccessModal
+                            onClick={closeSaveUserModal}
+                            message="정보가 수정되었습니다"
+                        />
+                    ) : (
+                        <></>
+                    )}
+                    {isUserDeleted ? (
+                        <SuccessModal
+                            onClick={closeUserDeleteModal}
+                            message="회원 정보가 삭제되었습니다."
+                        />
+                    ) : (
+                        <></>
+                    )}
+                    {isPWModified ? (
+                        <SuccessModal
+                            onClick={closePwModifyModal}
+                            message="비밀번호가 수정되었습니다."
+                        />
+                    ) : (
+                        <></>
+                    )}
                     <p className="text-3xl mx-4 my-2">비밀번호 변경</p>
                     <p className="mx-4 mb-4">새로운 비밀번호로 변경합니다</p>
                     <div className="my-8">
