@@ -11,11 +11,12 @@ import {
 } from '../util/counter-slice';
 import axios from 'axios';
 import Image from '../assets/icons/google_icon.svg';
-import LoginErrorModal from '../components/LoginErrorModal';
+import ErrorModal from '../components/ErrorModal';
 
 export default function LoginPage() {
     const [inputEmail, setInputEmail] = useState<string>('');
     const [inputPw, setInputPw] = useState<string>('');
+    const [errorMessage, setErrorMessage] = useState<string>('');
 
     /** 리덕스 설정 */
     const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
@@ -53,7 +54,8 @@ export default function LoginPage() {
     const onClickLogin = async () => {
         //api로 로그인
         if (inputEmail === '' || inputPw === '') {
-            alert('정보를 정확히 입력해주세요.');
+            setErrorMessage('정보를 정확히 입력해 주세요.');
+            setIsErrorModalActive(true);
         } else {
             const user: User = {
                 userEmail: inputEmail,
@@ -83,12 +85,16 @@ export default function LoginPage() {
                 } else if (res.status === httpStatusCode.BADREQUEST) {
                     console.log('bad request');
                 } else if (res.status === httpStatusCode.UNAUTHORIZED) {
-                    alert('정보가 잘못되었습니다.');
+                    setErrorMessage('정보가 잘못되었습니다.');
+                    setIsErrorModalActive(true);
                 }
             })
             .catch((error) => {
                 if (axios.isAxiosError(error)) {
                     if (error.response?.status === httpStatusCode.BADREQUEST) {
+                        setErrorMessage(
+                            '아이디 또는 비밀번호를 잘못 입력하였습니다.'
+                        );
                         setIsErrorModalActive(true);
                     }
                 }
@@ -105,7 +111,7 @@ export default function LoginPage() {
     return (
         <section className="section-center">
             {isErrorModalActive ? (
-                <LoginErrorModal onClick={closeModal} />
+                <ErrorModal onClick={closeModal} message={errorMessage} />
             ) : (
                 <></>
             )}

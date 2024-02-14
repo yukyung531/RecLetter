@@ -25,7 +25,6 @@ import { store, persistor } from './util/store.ts';
 import ChattingBox from './components/ChattingBox.tsx';
 import { PersistGate } from 'redux-persist/integration/react';
 import SocialPage from './pages/SocialPage.tsx';
-import DesignTest from './pages/DesignTest.tsx';
 import ErrorPage from './pages/ErrorPage.tsx';
 
 const queryClient = new QueryClient();
@@ -91,10 +90,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                         <Route
                             path="/login/oauth2/code/google"
                             element={<SocialPage />}
-                        ></Route>
-                        <Route
-                            path="/designtests"
-                            element={<DesignTest />}
                         ></Route>
                     </Routes>
                     <ChattingBox />

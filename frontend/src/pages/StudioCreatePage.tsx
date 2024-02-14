@@ -7,6 +7,7 @@ import { httpStatusCode } from '../util/http-status';
 import { useNavigate } from 'react-router-dom';
 import { getTemplate } from '../api/template';
 import ReactDatePicker from 'react-datepicker';
+import ErrorModal from '../components/ErrorModal';
 
 export default function StudioCreatePage() {
     const [isInviteActive, setIsInviteActive] = useState<boolean>(false);
@@ -16,6 +17,13 @@ export default function StudioCreatePage() {
     const [createDate, setCreateDate] = useState<number>(14);
     // const [startDate, setStartDate] = useState<Date | null>(new Date());
     const navigate = useNavigate();
+
+    //모달
+    const [isModalActive, setIsModalActive] = useState<boolean>(false);
+
+    const closeModal = () => {
+        setIsModalActive(false);
+    };
 
     useEffect(() => {
         loadFrameTemplateAPI();
@@ -37,7 +45,7 @@ export default function StudioCreatePage() {
     };
     const makeOnClick = () => {
         if (createDate > 14 || createDate <= 0) {
-            alert('기간을 확인해주세요');
+            setIsModalActive(true);
         } else {
             moment().format('YYYY-MM-DDTHH:mm:ss');
             let time = moment()
@@ -94,6 +102,15 @@ export default function StudioCreatePage() {
 
     return (
         <section className="relative w-full flex flex-col justify-center items-center pt-12 mt-12">
+            {isModalActive ? (
+                <ErrorModal
+                    onClick={closeModal}
+                    message="기간을 확인해주세요"
+                />
+            ) : (
+                <></>
+            )}
+
             {isInviteActive ? (
                 <AddMemberWindow onClose={onPressCloseWindow} />
             ) : (

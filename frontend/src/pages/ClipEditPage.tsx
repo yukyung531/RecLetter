@@ -18,6 +18,7 @@ import {
 import { getUser } from '../api/user';
 import { enterStudio, studioDetail } from '../api/studio';
 import LoadingModal from '../components/LoadingModal';
+import ErrorModal from '../components/ErrorModal';
 
 export default function ClipEditPage() {
     /** 리덕스 설정 */
@@ -27,6 +28,16 @@ export default function ClipEditPage() {
     const chatStudioList: string[] = useSelector(
         (state: any) => state.loginFlag.studioId
     );
+
+    //에러모달
+    const [isModalActive, setIsModalActive] = useState<boolean>(false);
+
+    /** closeModal()
+     *  모달창 종료
+     */
+    const closeModal = () => {
+        setIsModalActive(false);
+    };
 
     ///////////////////////////////영상 정보 불러오기///////////////////////////////////////////////////////////
     const location = useLocation();
@@ -80,7 +91,7 @@ export default function ClipEditPage() {
             Math.floor(time % 60) < 10
                 ? '0' + Math.floor(time % 60)
                 : '' + Math.floor(time % 60);
-        return `${min}:${sec}`;
+        return `${min}분 ${sec}초`;
     };
 
     const [videoNowPosition, setVideoNowPosition] = useState<number>(0);
@@ -229,7 +240,7 @@ export default function ClipEditPage() {
             }
         }
         if (!token || !isLogin) {
-            alert('오류가 났습니다');
+            setIsModalActive(true);
         }
 
         /** 페이지 새로고침 전에 실행 할 함수 */
@@ -420,6 +431,11 @@ export default function ClipEditPage() {
     return (
         <section className="relative section-top pt-14">
             {isLoading ? <LoadingModal /> : <></>}
+            {isModalActive ? (
+                <ErrorModal onClick={closeModal} message="오류가 났습니다" />
+            ) : (
+                <></>
+            )}
 
             {/* 중앙 섹션 */}
             <div className="flex w-full">
@@ -485,8 +501,8 @@ export default function ClipEditPage() {
                     )}
                 </div>
                 {/* 우측부분 */}
-                <div className="w-4/5 editor-height bg-gray-50 flex justify-between">
-                    <div className="w-full px-4 py-4 flex flex-col justify-center items-center">
+                <div className="w-full editor-height bg-gray-50 flex justify-between">
+                    <div className="w-4/5 py-4 flex flex-col justify-center items-center">
                         {/* 입력 텍스트 */}
                         <input
                             type="text"
@@ -578,19 +594,26 @@ export default function ClipEditPage() {
                             </div>
                         </div>
                     </div>
-                    <div className="w-1/5 flex flex-col justify-around items-center">
-                        <div
-                            onClick={makeFinalVideo}
-                            className="btn-cover color-bg-main text-white"
-                        >
-                            저장하기
-                        </div>
-                        <div className="w-full p-2">
-                            <div className="w-full rounded-t-lg text-lg pl-2 bg-[#FF777F]">
+                    <div className="w-1/5 flex flex-col justify-start items-center pr-12 pt-[100px]">
+                        {loaded ? (
+                            <div
+                                onClick={makeFinalVideo}
+                                className="w-full py-3 rounded-lg text-center color-bg-main text-white mb-3"
+                            >
+                                저장하기
+                            </div>
+                        ) : (
+                            <div className="w-full py-3 rounded-lg text-center bg-[#F5F5F5] text-white mb-3">
+                                저장하기
+                            </div>
+                        )}
+                        <div className="w-full break-all">
+                            <div className="w-full rounded-t-lg text-lg pl-2 bg-[#FFA9A9] text-white">
                                 영상 정보
                             </div>
-                            <div className="w-full h-full rounded-b-lg text-lg p-2 border-2 border-[#FF777F] bg-white whitespace-normal">
-                                <p>제목: {clipName}</p>
+                            <div className="w-full h-full rounded-b-lg text-lg p-2 border-2 border-[#FFA9A9] bg-white whitespace-normal">
+                                <p>제목: </p>
+                                <p className="min-h-[28px]">{clipName}</p>
                                 <p>길이: {formatTime(wholeDuration)}</p>
                             </div>
                         </div>

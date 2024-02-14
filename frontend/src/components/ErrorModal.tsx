@@ -1,8 +1,9 @@
 interface PropType {
     onClick: React.MouseEventHandler<HTMLButtonElement>;
+    message: string;
 }
 
-export default function LoginErrorModal({ onClick }: PropType) {
+export default function ErrorModal({ onClick, message }: PropType) {
     return (
         <>
             <div className="w-full h-full bg-[#626262] fixed top-0 left-0 z-10 opacity-30"></div>
@@ -17,9 +18,7 @@ export default function LoginErrorModal({ onClick }: PropType) {
                         src="/src/assets/icons/error_message.png"
                         alt="로그아웃 확인"
                     />
-                    <p className="mt-4 text-xl text-black">
-                        아이디 또는 비밀번호를 잘못 입력하였습니다.
-                    </p>
+                    <p className="mt-4 text-xl text-black">{message}</p>
                     <button
                         className="mt-[36px] h-[10%] w-1/4 text-xl text-[#FF777F] border-2 border-[#FF777F] rounded-lg hover:text-white hover:bg-[#FF4954]"
                         onClick={onClick}

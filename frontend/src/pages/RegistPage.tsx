@@ -1,11 +1,13 @@
-import {BaseSyntheticEvent, useEffect, useState} from 'react';
-import {requestEmail, verifyEmail} from '../api/auth';
-import {getUser, registUser} from '../api/user';
-import {httpStatusCode} from '../util/http-status';
-import {useNavigate} from 'react-router-dom';
-import {useDispatch} from 'react-redux';
-import {studioNameState, studioState} from '../util/counter-slice';
-import axios, {AxiosError} from 'axios';
+import { BaseSyntheticEvent, useEffect, useState } from 'react';
+import { requestEmail, verifyEmail } from '../api/auth';
+import { getUser, registUser } from '../api/user';
+import { httpStatusCode } from '../util/http-status';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { studioNameState, studioState } from '../util/counter-slice';
+import axios, { AxiosError } from 'axios';
+import SuccessModal from '../components/SuccessModal';
+import ErrorModal from '../components/ErrorModal';
 
 export default function RegistPage() {
     const [inputEmail, setInputEmail] = useState<string>('');
@@ -22,6 +24,20 @@ export default function RegistPage() {
     const [isCounting, setIsCounting] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
     const navigate = useNavigate();
+
+    //회원가입 모달
+    const [isModalActive, setIsModalActive] = useState<boolean>(false);
+
+    //에러 모달
+    const [isErrorModalActive, setIsErroModalActive] = useState<boolean>(false);
+    const [modalErrorMessage, setModalErrorMessage] = useState<string>('');
+
+    /** closeErrorModal()
+     *  에러모달창 닫기
+     */
+    const closeErrorModal = () => {
+        setIsErroModalActive(false);
+    };
 
     const dispatch = useDispatch();
     useEffect(() => {
@@ -69,7 +85,7 @@ export default function RegistPage() {
     /** 이메일 체크 함수 */
     const checkEmailAPI = async () => {
         setEmailFlag(1);
-        await requestEmail({userEmail: inputEmail})
+        await requestEmail({ userEmail: inputEmail })
             .then((res) => {
                 if (res.status === httpStatusCode.OK) {
                     console.log('이메일을 보냈습니다.');
@@ -97,7 +113,7 @@ export default function RegistPage() {
     };
     /** 코드 체크 함수 */
     const checkCodeAPI = async () => {
-        await verifyEmail({userEmail: inputEmail, code: inputCode})
+        await verifyEmail({ userEmail: inputEmail, code: inputCode })
             .then(async (res) => {
                 if (
                     res.status === httpStatusCode.OK &&
@@ -163,8 +179,7 @@ export default function RegistPage() {
                 </div>
             );
         }
-    }
-
+    };
 
     /** Email 컴포넌트 */
     const checkEmailElement = () => {
@@ -221,10 +236,12 @@ export default function RegistPage() {
         }
         if (emailFlag === 0) {
             return <></>;
-        } else if ((emailFlag === 2 || emailFlag === 3) && emailCheck && codeCheck) {
-
+        } else if (
+            (emailFlag === 2 || emailFlag === 3) &&
+            emailCheck &&
+            codeCheck
+        ) {
             return <></>;
-
         } else if (emailCheck && (emailFlag === 2 || emailFlag === 3)) {
             return (
                 <li className="flex mt-4">
@@ -332,15 +349,20 @@ export default function RegistPage() {
     };
     const registAccount = async () => {
         if (inputNickname.length < 2 || inputNickname.length > 16) {
-            alert('이름의 길이를 맞춰주세요');
+            setModalErrorMessage('이름의 길이를 맞춰주세요');
+            setIsErroModalActive(true);
         } else if (!emailCheck) {
-            alert('이메일 인증을 진행해주세요');
+            setModalErrorMessage('이메일 인증을 진행해주세요');
+            setIsErroModalActive(true);
         } else if (!codeCheck) {
-            alert('코드를 다시 확인해주세요');
+            setModalErrorMessage('코드를 다시 확인해주세요');
+            setIsErroModalActive(true);
         } else if (inputPassword.length < 8 || inputPassword.length > 16) {
-            alert('비밀번호를 맞춰주세요');
+            setModalErrorMessage('비밀번호를 맞춰주세요');
+            setIsErroModalActive(true);
         } else if (inputPassword !== inputPasswordConfirm) {
-            alert('비밀번호가 다릅니다');
+            setModalErrorMessage('비밀번호가 다릅니다');
+            setIsErroModalActive(true);
         } else {
             await registUser({
                 userNickname: inputNickname,
@@ -348,14 +370,38 @@ export default function RegistPage() {
                 userEmail: inputEmail,
             }).then((res) => {
                 if (res.status === httpStatusCode.OK) {
-                    alert('회원가입이 완료되었습니다');
-                    navigate('/login');
+                    setIsModalActive(true);
                 }
             });
         }
     };
+
+    /** closeModal()
+     *  모달창 닫기
+     */
+    const closeModal = () => {
+        setIsModalActive(false);
+        navigate('/login');
+    };
+
     return (
         <section className="section-center">
+            {isModalActive ? (
+                <SuccessModal
+                    onClick={closeModal}
+                    message="회원가입이 완료되었습니다."
+                />
+            ) : (
+                <></>
+            )}
+            {isErrorModalActive ? (
+                <ErrorModal
+                    onClick={closeErrorModal}
+                    message={modalErrorMessage}
+                />
+            ) : (
+                <></>
+            )}
             <ul className=" flex flex-col justify-center items-center">
                 <h5 className=" text-3xl mt-4 mb-12">회원가입</h5>
 

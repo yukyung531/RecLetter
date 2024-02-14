@@ -18,6 +18,7 @@ import { httpStatusCode } from '../util/http-status';
 import { getlastPath } from '../util/get-func';
 import ChattingBox from '../components/ChattingBox';
 import { encodingLetter } from '../api/letter.ts';
+import ErrorModal from '../components/ErrorModal.tsx';
 
 export default function StudioMainPage() {
     //영상 편집 여부
@@ -26,6 +27,17 @@ export default function StudioMainPage() {
     //영상 삭제 여부
     const [isDeleting, setIsDeleting] = useState<boolean>(false);
     const [deleteStateId, setDeleteStateId] = useState<number>(-1);
+
+    //에러모달
+    const [isModalActive, setIsModalActive] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+
+    /** closeModal()
+     *  모달창 닫기
+     */
+    const closeModal = () => {
+        setIsModalActive(false);
+    };
 
     //영상 정보 불러오기
     // const [clipInfoList, setClipInfoList] = useState<ClipInfo[]>([]);
@@ -409,9 +421,18 @@ export default function StudioMainPage() {
     };
 
     const updateStudioName = (event: BaseSyntheticEvent) => {
+        if (event.target.value === '') {
+            setErrorMessage('스튜디오 이름은 최소 1자 이상이어야 합니다.');
+            setIsModalActive(true);
+            return;
+        }
+
         //스튜디오 주인만 수정 가능하도록
         if (userInfo.userId !== studioDetailInfo.studioOwner) {
-            alert('스튜디오 이름 변경은 스튜디오 주인장만 가능합니다.');
+            setErrorMessage(
+                '스튜디오 이름 변경은 스튜디오 주인장만 가능합니다.'
+            );
+            setIsModalActive(true);
             return;
         } else {
             setIsEditingName(true);
@@ -473,7 +494,10 @@ export default function StudioMainPage() {
         }
 
         if (!isSelectedClipList()) {
-            alert('하나 이상의 영상을 선택해야 영상 편지 완성이 가능합니다');
+            setErrorMessage(
+                '하나 이상의 영상을 선택해야 영상 편지 완성이 가능합니다'
+            );
+            setIsModalActive(true);
             return;
         }
     };
@@ -521,6 +545,11 @@ export default function StudioMainPage() {
                     onClickOK={chooseDelete}
                     onClickCancel={chooseNotDelete}
                 />
+            ) : (
+                <></>
+            )}
+            {isModalActive ? (
+                <ErrorModal onClick={closeModal} message={errorMessage} />
             ) : (
                 <></>
             )}

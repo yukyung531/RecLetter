@@ -1,8 +1,9 @@
 interface PropType {
     onClick: React.MouseEventHandler<HTMLButtonElement>;
+    message: string;
 }
 
-export default function LogOutModal({ onClick }: PropType) {
+export default function SuccessModal({ onClick, message }: PropType) {
     return (
         <>
             <div className="w-screen h-screen bg-[#626262] fixed top-0 left-0 z-10 opacity-30"></div>
@@ -21,9 +22,7 @@ export default function LogOutModal({ onClick }: PropType) {
                         src="/src/assets/icons/logout_confirm.png"
                         alt="로그아웃 확인"
                     />
-                    <p className="mt-5 text-xl text-black">
-                        로그아웃 되었습니다.
-                    </p>
+                    <p className="mt-5 text-xl text-black">{message}</p>
                     <button
                         className="mt-[36px] h-[10%] w-1/4 text-xl text-[#65A6F2] border-2 border-[#65A6F2] rounded-lg hover:text-white hover:bg-[#65A6F2]"
                         onClick={onClick}
