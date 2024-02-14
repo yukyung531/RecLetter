@@ -48,6 +48,8 @@ public interface StudioService {
 
   void updateStudioStatus(String studioId, StudioStatus studioStatus);
 
+  void completeStudio(String studioId);
+
   String downloadLetter(String studioId);
 
 }

@@ -1,6 +1,8 @@
 package com.sixcube.recletter.studio.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sixcube.recletter.redis.RedisPrefix;
+import com.sixcube.recletter.redis.RedisService;
 import com.sixcube.recletter.studio.dto.*;
 import com.sixcube.recletter.studio.dto.req.CompleteLetterReq;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
@@ -15,6 +17,7 @@ import com.sixcube.recletter.studio.service.StudioService;
 import com.sixcube.recletter.user.dto.User;
 import jakarta.validation.Valid;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +41,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @Slf4j
 public class StudioController {
 
+  private final RedisService redisService;
   private final StudioService studioService;
   private final StudioParticipantService studioParticipantService;
   private final KafkaTemplate<String, LetterVideoReq> kafkaProducerTemplate;
@@ -57,10 +61,10 @@ public class StudioController {
     List<Studio> studioList = studioService.searchAllStudioByStudioIdList(participantStudioIdList);
 
     SearchStudioListRes result = new SearchStudioListRes();
-
     // 불러온 Studio들을 통해 StudioInfo List 생성후 할당.
     result.setStudioInfoList(
-        studioList.stream().map(studio -> StudioInfo.builder()
+        studioList.stream().map(studio -> {
+          StudioInfo studioInfo=StudioInfo.builder()
             .studioId(studio.getStudioId())
             .studioTitle(studio.getStudioTitle())
             .isStudioOwner(user.getUserId().equals(studio.getStudioOwner()))
@@ -72,7 +76,15 @@ public class StudioController {
             .videoCount(studioService.searchStudioClipInfoList(studio.getStudioId()).size())
             .studioFrameId(studio.getStudioFrameId())
             .studioStickerUrl(studioService.searchStudioStickerUrl(studio.getStudioId()))
-            .build()
+            .build();
+
+          //redis에 encoding없는데, studioStatus ENCODING인 경우 비정상 종료이므로 FAIL로 상태 변경
+          if(studio.getStudioStatus().equals(StudioStatus.ENCODING) && !redisService.hasKey(RedisPrefix.ENCODING.prefix() + studio.getStudioId())){
+            studioService.updateStudioStatus(studio.getStudioId(),StudioStatus.FAIL);
+            studioInfo.setStudioStatus(StudioStatus.FAIL);
+          }
+          return studioInfo;
+        }
         ).toList()
     );
 
@@ -179,40 +191,30 @@ public class StudioController {
     LetterVideoReq letterVideoReq=studioService.createLetterVideoReq(studioId,user);
     log.debug(letterVideoReq.toString());
 
-    //python server로 인코딩 요청전송
-//    RestClient restClient=RestClient.create();
-//    ResponseEntity<Void> response = restClient.post()
-//            .uri(videoServerUri + "/video/letter")
-//            .contentType(APPLICATION_JSON)
-//            .body(letterVideoReq)
-//            .retrieve()
-//            .toBodilessEntity();
-
-    kafkaProducerTemplate.send(KAFKA_LETTER_REQUEST_TOPIC, letterVideoReq);
-
-    studioService.updateStudioStatus(studioId, StudioStatus.ENCODING);
+    String key = RedisPrefix.ENCODING.prefix() + studioId;
+    if(!redisService.hasKey(key)){
+      kafkaProducerTemplate.send(KAFKA_LETTER_REQUEST_TOPIC, letterVideoReq);
+      studioService.updateStudioStatus(studioId, StudioStatus.ENCODING);
+      //인코딩 중 상태 레디스에 표시
+      redisService.setValues(key,user.getUserId(), Duration.ofHours(6));
+    }
     return ResponseEntity.ok().build();
   }
 
   @KafkaListener(topics = "${KAFKA_LETTER_RESULTINFO_TOPIC}", containerFactory = "kafkaListenerContainerFactory")
   public void receiveLetterResult(@Payload LetterVideoRes letterVideoRes) {
     String studioId = letterVideoRes.getStudioId();
+
     if("success".equals(letterVideoRes.getResult())) {
-      studioService.updateStudioStatus(studioId, StudioStatus.COMPLETE);
+      studioService.completeStudio(studioId);
     } else if("fail".equals(letterVideoRes.getResult())) {
       studioService.updateStudioStatus(studioId, StudioStatus.FAIL);
     }
-  }
-
-  //TODO- python 요청 시 security 생각!
-  @PostMapping("/{studioId}/letter")
-  public ResponseEntity<Void> completeLetter(@PathVariable String studioId, @RequestBody CompleteLetterReq completeLetterReq){
-    if(completeLetterReq.getIsCompleted()){
-      studioService.updateStudioStatus(studioId,StudioStatus.COMPLETE);
-    } else{
-      studioService.updateStudioStatus(studioId,StudioStatus.FAIL);
+    //redis에서 인코딩 중 상태 삭제
+    String key = RedisPrefix.ENCODING.prefix() + studioId;
+    if(!redisService.hasKey(key)) {
+      redisService.deleteValues(key);
     }
-    return ResponseEntity.ok().build();
   }
 
   //url + 누구나 접근 가능해야 함!!!!!!

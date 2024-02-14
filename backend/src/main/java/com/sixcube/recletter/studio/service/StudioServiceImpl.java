@@ -47,7 +47,6 @@ public class StudioServiceImpl implements StudioService {
 
   @Override
   public Studio searchStudioByStudioId(String studioId, User user) throws StudioNotFoundException {
-
     if (studioUtil.isStudioParticipant(studioId, user.getUserId())) { //스튜디오 참가자 여부 확인
       return studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
     } else {
@@ -241,6 +240,17 @@ public class StudioServiceImpl implements StudioService {
     Studio studio=studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
     studio.setStudioStatus(studioStatus);
     studioRepository.save(studio);
+  }
+
+  @Override
+  public void completeStudio(String studioId){
+    Studio studio=studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
+    StudioStatus currentStatus=studio.getStudioStatus();
+    if(currentStatus.equals(StudioStatus.ENCODING)) {
+      studio.setStudioStatus(StudioStatus.COMPLETE);
+      studio.setExpireDate(LocalDateTime.now().plusDays(7));
+      studioRepository.save(studio);
+    }
   }
 
   @Override
