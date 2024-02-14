@@ -1920,13 +1920,13 @@ export default function LetterMakePage() {
     
     function scrollRight() {
         if (scrollRef.current) {
-            scrollRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+            // scrollRef.current.scrollBy({ left: 200, behavior: 'smooth' });
             setTimeout(checkScrollable, 100); // 스크롤 이동이 완료된 후에 checkScrollable을 호출합니다.
         }
     }
     function scrollLeft() {
         if (scrollRef.current) {
-            scrollRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+            // scrollRef.current.scrollBy({ left: -200, behavior: 'smooth' });
             setTimeout(checkScrollable, 100); // 스크롤 이동이 완료된 후에 checkScrollable을 호출합니다.
         }
     }
