@@ -116,24 +116,29 @@ def encode_letter():
                 studio_id = make_letter_req.studio_id
                 clip_info_list = make_letter_req.clip_info_list
                 # 클립 로딩
+                print("클립 로딩")
                 clip_list = list(
                     map(lambda x: load_clip(x, studio_id=studio_id), clip_info_list))
 
                 # 각 클립 화면 반전
+                print("화면 반전")
                 mirrored_clip = list(map(lambda x: mirror_clip(x), clip_list))
                 del clip_list
 
                 # 각 클립의 볼륨 조절
+                print("볼륨 조절")
                 volume_tuned_clip = list(
                     map(lambda x: tune_volume(x[1], clip_info_list[x[0]].clip_volume),
                         enumerate(mirrored_clip)))
                 del mirrored_clip
 
                 # 각 클립 연결
+                print("클립 연결")
                 concatenated_letter = concat_clip(volume_tuned_clip)
                 del volume_tuned_clip
 
                 # 연결된 영상에 프레임 인코딩
+                print("프레임 삽입")
                 frame_added_letter = encode_frame(
                     concatenated_letter,
                     make_letter_req.studio_frame_id,
@@ -142,6 +147,7 @@ def encode_letter():
                 del concatenated_letter
 
                 # bgm 삽입
+                print("bgm 삽입")
                 bgm_inserted_letter = insert_bgm(
                     frame_added_letter,
                     make_letter_req.studio_bgm_id,
@@ -150,6 +156,7 @@ def encode_letter():
                 del frame_added_letter
 
                 # letter 완성 후 저장
+                print("저장 시작")
                 directory = make_letter_req.get_assets_directory()
                 key = make_letter_req.studio_id + ".mp4"
                 complete_file_name = directory + "/" + key
@@ -164,6 +171,7 @@ def encode_letter():
                     remove_temp=True,
                     verbose=False
                 )
+                print("인코딩 완료")
 
                 bgm_inserted_letter.close()
 
