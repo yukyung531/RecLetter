@@ -880,7 +880,7 @@ export default function StudioMainPage() {
                     {/* (영상 리스트, 참가자 관리) */}
                     <div className="w-1/4 p-2 border border-l-2 overflow-y-scroll">
                         <div className="w-full px-2 flex flex-col justify-center items-center">
-                            <a
+                            <div
                                 className={`flex items-center gap-3 w-52 text-center my-2 p-1 rounded-lg text-xl shadow-darkShadow cursor-pointer transform ${
                                     finishAuth
                                         ? 'hover:scale-105 color-bg-yellow2 color-text-main'
