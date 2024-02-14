@@ -169,50 +169,6 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
                     </div>
                 </div>
             );
-        } else {
-            return (
-                <div
-                    className="relative w-1/4 flex flex-col mx-2 my-2 justify-start items-center cursor-pointer"
-                    id={studioId}
-                >
-                    <div
-                        className="relative flex w-full h-full flex-col justify-end pb-2 px-2"
-                        style={{
-                            aspectRatio: 16 / 9,
-                            backgroundImage:
-                                'url(/src/assets/images/encoding-video.png)',
-                            backgroundRepeat: 'no-repeat',
-                            backgroundSize: 'contain',
-                            backgroundPosition: 'center',
-                        }}
-                    >
-                        <div className="flex flex-col justify-between w-full z-30 p-2">
-                            <div className="text-2xl flex items-center -ms-3 mb-1 text-center justify-center">
-                                {props.isStudioOwner ? (
-                                    <img
-                                        className="w-4 h-4 me-2"
-                                        src="/src/assets/icons/owner-crown.png"
-                                    />
-                                ) : (
-                                    <></>
-                                )}
-                                <p>{props.studioTitle} 인코딩 실패</p>
-                            </div>
-
-                            <div className="w-full flex justify-between -ms-2">
-                                <p></p>
-                                <p className="text-xl color-text-darkgray">
-                                    ~
-                                    {Math.floor(
-                                        (expireDate.getTime() - Date.now()) /
-                                            (1000 * 60 * 60 * 24)
-                                    )}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
         }
     };
     return <>{encodingElement()}</>;

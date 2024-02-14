@@ -75,7 +75,6 @@ export default function StudioListPage() {
                             (studio: StudioInfo, studiokey: number) => {
                                 if (
                                     studio.studioStatus === 'COMPLETE' ||
-                                    studio.studioStatus === 'FAIL' ||
                                     studio.studioStatus === 'ENCODING'
                                 ) {
                                     setFinishStudioList((prev) => [
@@ -88,7 +87,10 @@ export default function StudioListPage() {
                                         studio,
                                     ]);
                                 }
-                                if (studio.studioStatus === 'INCOMPLETE') {
+                                if (
+                                    studio.studioStatus === 'INCOMPLETE' ||
+                                    studio.studioStatus === 'FAIL'
+                                ) {
                                     setAttendStudioList((prev) => [
                                         ...prev,
                                         studio,
@@ -223,7 +225,7 @@ export default function StudioListPage() {
     //스튜디오 정보 불러오기
 
     return (
-        <section className="relative w-full base-height items-center flex flex-col mt-14 ml-8">
+        <section className="relative w-full base-height items-center flex flex-col mt-14">
             {isModalActive ? (
                 <SuccessModal onClick={closeModal} message="삭제되었습니다." />
             ) : (

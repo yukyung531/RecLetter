@@ -228,6 +228,14 @@ export default function LetterMakePage() {
         'sticker41',
         'sticker42',
         'sticker43',
+        'sticker44',
+        'sticker45',
+        'sticker46',
+        'sticker47',
+        'sticker48',
+        'sticker49',
+        'sticker50',
+        'sticker51',
     ]);
     const [fontStickerList, setFontStickerList] = useState<string[]>([
         'fontsticker1',
@@ -420,7 +428,7 @@ export default function LetterMakePage() {
                         if (res.data.studioBgmVolume) {
                             if (bgmRef.current) {
                                 bgmRef.current.volume =
-                                    +res.data.studioBgmVolume / 100;
+                                    +res.data.studioBgmVolume / 200;
                             }
                             setStudioBGMVolume(res.data.studioBgmVolume);
                         }
@@ -629,7 +637,7 @@ export default function LetterMakePage() {
                     return setIsModalActive(true);
                 }
 
-                html2canvas(target, { scale: 2, backgroundColor: null }).then(
+                html2canvas(target, { scale: 1.6, backgroundColor: null }).then(
                     (canvas) => {
                         const imageDataURL = canvas.toDataURL('image/png');
                         console.log(imageDataURL);
@@ -667,7 +675,7 @@ export default function LetterMakePage() {
                     setErrorMessage('결과 저장에 실패했습니다');
                     return setIsModalActive(true);
                 }
-                html2canvas(target, { scale: 2, backgroundColor: null }).then(
+                html2canvas(target, { scale: 1.6, backgroundColor: null }).then(
                     (canvas) => {
                         const imageDataURL = canvas.toDataURL('image/png');
                         uploadLetterAPI(imageDataURL);
@@ -944,7 +952,7 @@ export default function LetterMakePage() {
 
                 //bgm실행
                 if (bgmRef.current) {
-                    bgmRef.current.volume = studioBGMVolume / 100;
+                    bgmRef.current.volume = studioBGMVolume / 200;
                     bgmRef.current.currentTime =
                         cumulTime[playingIdx.current] % bgmRef.current.duration;
                     bgmRef.current.play();
@@ -1454,19 +1462,23 @@ export default function LetterMakePage() {
                         className="w-full"
                         type="range"
                         min={0}
-                        max={100}
+                        max={200}
                         value={studioBGMVolume}
-                        defaultValue={50}
+                        defaultValue={100}
                         onChange={(event) => {
                             setStudioBGMVolume(+event.target.value);
                             if (bgmRef.current) {
                                 bgmRef.current.volume =
-                                    +event.target.value / 100;
+                                    +event.target.value / 200;
                             }
                         }}
                         style={{
                             background: studioBGMVolume
-                                ? `linear-gradient(to right,#ff4954 ${studioBGMVolume}%, rgba(229,231,235,0.8) ${studioBGMVolume}% 100%)`
+                                ? `linear-gradient(to right,#ff4954 ${
+                                      studioBGMVolume / 2
+                                  }%, rgba(229,231,235,0.8) ${
+                                      studioBGMVolume / 2
+                                  }% 100%)`
                                 : '#E5E7EB',
                         }}
                     />
@@ -2271,7 +2283,7 @@ export default function LetterMakePage() {
 
                             <div className="relative w-4/5 h-full flex flex-col items-center">
                                 <main
-                                    className="relative w-full flex"
+                                    className="relative flex"
                                     ref={canvasRef2}
                                 >
                                     {/* 영상 */}
