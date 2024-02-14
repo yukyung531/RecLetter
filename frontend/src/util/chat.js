@@ -28,9 +28,7 @@ export function connect(
     currentPeopleFunc
 ) {
     const token = localStorage.getItem('access-token');
-    console.log("if client === null 위")
     if (client === null) {
-        console.log("if client === null 안")
         client = new StompJs.Client({
             brokerURL: websocketUrl,
             connectHeaders: {
@@ -97,7 +95,11 @@ export function subscribe(
             client.deactivate();
         } else {
             unSubscribe(stuId);
-            reSubscribe(stuId);
+            console.log("재구독 직전")
+            client.subscribe(topic + `/${stuId}`, (payload) => {
+                onMeesageReceived(payload)
+                console.log("재구독 콜백 함수")
+            });
         }
     }
 }
