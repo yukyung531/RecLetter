@@ -1787,6 +1787,14 @@ export default function LetterMakePage() {
         newSession
             .connect(token, { clientData: user.userNickname })
             .then(async () => {
+                // const constraints = { video: true, audio: true };
+
+                // const stream = await navigator.mediaDevices.getDisplayMedia(
+                //     constraints
+                // );
+
+                // console.log(stream);
+
                 // console.log('Connected');
                 //publisher 초기화(videoSource = screen)
                 const publisher = await OV.current.initPublisherAsync(
