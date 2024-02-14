@@ -126,6 +126,8 @@ public class StudioServiceImpl implements StudioService {
   public void updateStudioTitle(String studioId, String studioTitle, User user)
       throws StudioNotFoundException {
     Studio studio = studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
+    checkStudioAccessByStudioStatus(studio.getStudioStatus()); //studioStatus가 스튜디오 입장 가능한 상태인지 확인
+
     if (studio.getStudioOwner().equals(user.getUserId())) {
       studio.setStudioTitle(studioTitle);
     } else {
@@ -169,6 +171,8 @@ public class StudioServiceImpl implements StudioService {
 
     //받아온 정보를 바탕으로 스튜디오 객체 업데이트
     Studio studio=studioRepository.findById(updateStudioReq.getStudioId()).orElseThrow(StudioNotFoundException::new);
+    checkStudioAccessByStudioStatus(studio.getStudioStatus()); //studioStatus가 스튜디오 입장 가능한 상태인지 확인
+
     studio.setStudioBgmId(updateStudioReq.getStudioBgmId());
     studio.setStudioFrameId(updateStudioReq.getStudioFrameId());
     studio.setStudioBgmVolume(updateStudioReq.getStudioBgmVolume());
@@ -193,7 +197,6 @@ public class StudioServiceImpl implements StudioService {
       throw new InvalidStudioStickerFormatException();
     }
 
-//    studioRepository.save(studio);
     int order=1;
     for(UsedClipInfo clipInfo:updateStudioReq.getUsedClipList()){
       clipService.updateUsedClip(studio.getStudioId(), clipInfo.getClipId(), order++, clipInfo.getClipVolume());
@@ -215,6 +218,8 @@ public class StudioServiceImpl implements StudioService {
   @Override
   public LetterVideoReq createLetterVideoReq(String studioId, User user){
     Studio studio=searchStudioByStudioId(studioId, user);
+    checkStudioAccessByStudioStatus(studio.getStudioStatus()); //studioStatus가 스튜디오 입장 가능한 상태인지 확인
+
     int leftDays= Period.between(now(), LocalDate.from(studio.getExpireDate())).getDays();
     //- 기본적으로는 방장만 완료 가능.
     //- 만료 기한 이틀 전에는 모든 사용자들에게 완료(인코딩) 권한이 주어짐
@@ -232,6 +237,12 @@ public class StudioServiceImpl implements StudioService {
               .build();
     } else{
       throw new UnauthorizedToCompleteStudioException(); //완성요청 접근 권한 없음
+    }
+  }
+
+  private void checkStudioAccessByStudioStatus(StudioStatus studioStatus){
+    if(studioStatus.equals(StudioStatus.COMPLETE) || studioStatus.equals(StudioStatus.ENCODING)){
+      throw new AlreadyCompletingStudioStatusException();
     }
   }
 

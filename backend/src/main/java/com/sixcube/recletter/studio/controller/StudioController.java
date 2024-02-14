@@ -193,7 +193,7 @@ public class StudioController {
 
     String key = RedisPrefix.ENCODING.prefix() + studioId;
     if(!redisService.hasKey(key)){
-      kafkaProducerTemplate.send(KAFKA_LETTER_REQUEST_TOPIC, letterVideoReq);
+      kafkaProducerTemplate.send(KAFKA_LETTER_REQUEST_TOPIC,studioId,letterVideoReq);
       studioService.updateStudioStatus(studioId, StudioStatus.ENCODING);
       //인코딩 중 상태 레디스에 표시
       redisService.setValues(key,user.getUserId(), Duration.ofHours(6));
