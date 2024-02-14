@@ -399,11 +399,19 @@ export default function ChattingBox() {
         }
     };
 
-    const [selectedTheme, setSelectedTheme] = useState(0);
+
+    // 로컬 스토리지에서 테마 불러오기. 없으면 기본값 0 사용
+    const initialTheme = Number(localStorage.getItem('selectedTheme')) || 0;
+
+    const [selectedTheme, setSelectedTheme] = useState(initialTheme);
+
     const handleThemeChange = (theme: number) => {
         setSelectedTheme(theme);
+        // 테마 변경 시 로컬 스토리지에 테마 저장
+        localStorage.setItem('selectedTheme', theme.toString());
         dispatch(themeState(theme));
     };
+
 
     const showChattingRoom = () => {
         const openLogoSrc =
@@ -411,7 +419,7 @@ export default function ChattingBox() {
         if (chatToggle) {
             return (
                 <div
-                    className=" w-88 h-5/6 rounded-ss-lg rounded-se-lg rounded-es-lg fixed flex bottom-16 flex-col justify-between items-center right-8 px-5 py-3 z-20 border-2 border-white me-2 mb-1"
+                    className=" w-80 h-4/5 rounded-ss-lg rounded-se-lg rounded-es-lg fixed flex bottom-16 flex-col justify-between items-center right-8 px-5 py-3 z-20 border-2 border-white me-2 mb-1"
                     style={{
                         backgroundColor: `${themeObj[chatTheme].bgColor}`,
                     }}

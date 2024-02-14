@@ -251,7 +251,7 @@ export default function CanvasItem(props: canvasType) {
             if (!target) {
                 return;
             }
-            html2canvas(target, { scale: 2, backgroundColor: null }).then(
+            html2canvas(target, { scale: 1.6, backgroundColor: null }).then(
                 (canvas) => {
                     const imageDataURL = canvas.toDataURL('image/png');
                     props.setStickerLayout((prev) => [...prev, imageDataURL]);

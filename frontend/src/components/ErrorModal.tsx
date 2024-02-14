@@ -8,19 +8,19 @@ export default function ErrorModal({ onClick, message }: PropType) {
         <>
             <div className="w-full h-full bg-[#626262] fixed top-0 left-0 z-10 opacity-30"></div>
             <div
-                className="w-[440px] h-[290px] z-20 fixed top-1/2 left-1/2 shadow-lg"
-                style={{ transform: 'translate(-50%, -50%)' }}
+                className="w-[400px] h-[290px] z-20 fixed top-1/2 left-1/2 shadow-lg"
+                style={{ transform: 'translate(-50%, -70%)' }}
             >
                 <div className="rounded-t-xl bg-[#FF777F] w-full h-[20px]"></div>
-                <div className="rounded-b-xl bg-[#FFFFF9] w-full h-[330px] flex flex-col items-center justify-center">
+                <div className="rounded-b-xl bg-[#FFFFF9] w-full h-[290px] flex flex-col items-center justify-center">
                     <img
                         className="w-1/5"
                         src="/src/assets/icons/error_message.png"
                         alt="로그아웃 확인"
                     />
-                    <p className="mt-4 text-xl text-black">{message}</p>
+                    <p className="mt-5 text-xl text-black">{message}</p>
                     <button
-                        className="mt-[36px] h-[10%] w-1/4 text-xl text-[#FF777F] border-2 border-[#FF777F] rounded-lg hover:text-white hover:bg-[#FF4954]"
+                        className="mt-[30px] h-[12%] w-1/4 text-xl text-[#FF777F] border-2 border-[#FF777F] rounded-lg hover:text-white hover:bg-[#FF4954]"
                         onClick={onClick}
                     >
                         확인

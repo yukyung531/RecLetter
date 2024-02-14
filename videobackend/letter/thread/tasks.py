@@ -8,7 +8,8 @@ from kafka import KafkaConsumer, KafkaProducer
 from json import loads, dumps
 
 from videobackend.letter.dto.req import MakeLetterReq
-from videobackend.letter.utils.file_utils import asset_download, letter_upload
+from videobackend.letter.utils.file_utils import asset_download, letter_upload, \
+    close_clip
 from videobackend.letter.config.kafka_config import *
 from videobackend.letter.utils.video_edit_utils import *
 
@@ -116,24 +117,28 @@ def encode_letter():
                 studio_id = make_letter_req.studio_id
                 clip_info_list = make_letter_req.clip_info_list
                 # 클립 로딩
+                print("클립 로딩")
                 clip_list = list(
                     map(lambda x: load_clip(x, studio_id=studio_id), clip_info_list))
 
                 # 각 클립 화면 반전
+                print("화면 반전")
                 mirrored_clip = list(map(lambda x: mirror_clip(x), clip_list))
-                del clip_list
 
                 # 각 클립의 볼륨 조절
+                print("볼륨 조절")
                 volume_tuned_clip = list(
                     map(lambda x: tune_volume(x[1], clip_info_list[x[0]].clip_volume),
                         enumerate(mirrored_clip)))
                 del mirrored_clip
 
                 # 각 클립 연결
+                print("클립 연결")
                 concatenated_letter = concat_clip(volume_tuned_clip)
                 del volume_tuned_clip
 
                 # 연결된 영상에 프레임 인코딩
+                print("프레임 삽입")
                 frame_added_letter = encode_frame(
                     concatenated_letter,
                     make_letter_req.studio_frame_id,
@@ -142,6 +147,7 @@ def encode_letter():
                 del concatenated_letter
 
                 # bgm 삽입
+                print("bgm 삽입")
                 bgm_inserted_letter = insert_bgm(
                     frame_added_letter,
                     make_letter_req.studio_bgm_id,
@@ -150,6 +156,7 @@ def encode_letter():
                 del frame_added_letter
 
                 # letter 완성 후 저장
+                print("저장 시작")
                 directory = make_letter_req.get_assets_directory()
                 key = make_letter_req.studio_id + ".mp4"
                 complete_file_name = directory + "/" + key
@@ -161,10 +168,12 @@ def encode_letter():
                     fps=30,
                     codec='libx264',
                     audio_codec='aac',
-                    remove_temp=True
+                    remove_temp=True,
                 )
+                print("인코딩 완료")
 
                 bgm_inserted_letter.close()
+                close_clip(clip_list)
 
                 # produce
                 print("create_letter: success")
