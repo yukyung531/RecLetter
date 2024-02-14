@@ -11,6 +11,7 @@ import { httpStatusCode } from '../util/http-status';
 import { deleteStorageData } from '../util/initialLocalStorage';
 import ErrorModal from '../components/ErrorModal';
 import SuccessModal from '../components/SuccessModal';
+import WithdrawModal from '../components/WithdrawModal';
 
 export default function MyPage() {
     const [userNickname, setUserNickname] = useState<string>('');
@@ -61,6 +62,18 @@ export default function MyPage() {
         navigate('/login');
     };
 
+    //회원 탈퇴 모달
+    const [isTryToWithdraw, setIsTryToWithdraw] = useState<boolean>(false);
+
+    const confirmWithdraw = () => {
+        deleteUserState();
+        setIsTryToWithdraw(false);
+    };
+
+    const cancelWithdraw = () => {
+        setIsTryToWithdraw(false);
+    };
+
     // 비활성화 상태일 때의 inline 스타일
     const disabledStyle: React.CSSProperties = {
         borderColor: '#ccc', // 테두리 색상
@@ -109,14 +122,15 @@ export default function MyPage() {
 
     /** 회원탈퇴 확인 알림창 */
     const handleWithdrawal = () => {
-        const confirmed = window.confirm('정말 탈퇴하시겠습니까?');
-        if (confirmed) {
-            // 탈퇴 로직을 실행합니다.
-            deleteUserState();
-            console.log('사용자가 탈퇴했습니다.');
-        } else {
-            console.log('사용자가 탈퇴를 취소했습니다.');
-        }
+        setIsTryToWithdraw(true);
+        // const confirmed = window.confirm('정말 탈퇴하시겠습니까?');
+        // if (confirmed) {
+        //     // 탈퇴 로직을 실행합니다.
+        //     deleteUserState();
+        //     console.log('사용자가 탈퇴했습니다.');
+        // } else {
+        //     console.log('사용자가 탈퇴를 취소했습니다.');
+        // }
     };
 
     /** 유저 삭제 API */
@@ -220,6 +234,14 @@ export default function MyPage() {
                         <SuccessModal
                             onClick={closePwModifyModal}
                             message="비밀번호가 수정되었습니다."
+                        />
+                    ) : (
+                        <></>
+                    )}
+                    {isTryToWithdraw ? (
+                        <WithdrawModal
+                            onClickOK={confirmWithdraw}
+                            onClickCancel={cancelWithdraw}
                         />
                     ) : (
                         <></>

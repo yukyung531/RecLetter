@@ -25,6 +25,7 @@ import {
 } from '../util/counter-slice';
 import { enterStudio, studioDetail } from '../api/studio';
 import ErrorModal from '../components/ErrorModal';
+import { transform } from 'html2canvas/dist/types/css/property-descriptors/transform';
 
 interface Const {
     audio: boolean;
@@ -40,6 +41,17 @@ export default function ClipRecordPage() {
      */
     const closeModal = () => {
         setIsModalActive(false);
+    };
+
+    //영상 길이 경고
+    const [isRecordLimitModalActive, setIsRecordingLimitModalActive] =
+        useState<boolean>(false);
+    const watchWarningRef = useRef<boolean>(true);
+
+    /** closeWarning() 경고창 종료 */
+    const closeWarning = () => {
+        setIsRecordingLimitModalActive(false);
+        startRecord();
     };
 
     //모드 0:영상, 1:스크립트
@@ -237,6 +249,7 @@ export default function ClipRecordPage() {
                 //촬영되는 화면 미리보기 코드끝
                 setMS(mediaStream);
             }
+            setMS(mediaStream);
         });
 
         /**loadScript()
@@ -349,6 +362,17 @@ export default function ClipRecordPage() {
         };
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => {
+            //url 초기화(자원관리)
+            myClipList.map((clip) => {
+                URL.revokeObjectURL(clip.clipUrl);
+            });
+            //mediaStream 소멸
+            const trackList: MediaStreamTrack[] = mS.getTracks();
+            for (let i = 0; i < trackList.length; i++) {
+                trackList[i].stop();
+                mS.removeTrack(trackList[i]);
+            }
+
             console.log('사라지기전 ' + reloadingStudioId + '입니다');
             dispatch(studioDeleteState(reloadingStudioId));
             disconnect(reloadingStudioId);
@@ -689,6 +713,31 @@ export default function ClipRecordPage() {
             ) : (
                 <></>
             )}
+            {isRecordLimitModalActive ? (
+                <>
+                    <ErrorModal
+                        onClick={closeWarning}
+                        message="영상은 최대 59초까지 촬영 가능합니다."
+                    />
+                    <div
+                        className="z-20 fixed top-2/3 left-1/2 shadow-lg text-white"
+                        style={{ transform: 'translate(-50%, 0%)' }}
+                    >
+                        <input
+                            type="checkbox"
+                            onChange={(event) => {
+                                watchWarningRef.current = !event.target.checked;
+                            }}
+                            id="warning"
+                        />
+                        <label htmlFor="warning">
+                            더 이상 경고문을 보지 않습니다.
+                        </label>
+                    </div>
+                </>
+            ) : (
+                <></>
+            )}
 
             {/* 중앙 섹션 */}
             <div className="flex w-full editor-height">
@@ -852,9 +901,16 @@ export default function ClipRecordPage() {
                                                     setSelectedScript(
                                                         script.scriptContent
                                                     );
+                                                    //스크립트 연동
                                                     if (scriptRef.current) {
                                                         scriptRef.current.value =
                                                             script.scriptContent;
+                                                    }
+                                                    //맨 첫번째 구문으로
+                                                    if (
+                                                        selectedScriptRef.current
+                                                    ) {
+                                                        selectedScriptRef.current.scrollTop = 0;
                                                     }
                                                 }}
                                             />
@@ -948,7 +1004,17 @@ export default function ClipRecordPage() {
                                 {!isRecording ? (
                                     <div
                                         className="w-32 p-1 flex items-center justify-center border border-gray-100 rounded-lg shadow-md cursor-pointer"
-                                        onClick={startRecord}
+                                        onClick={() => {
+                                            if (watchWarningRef.current) {
+                                                //경고문 보는 상태면 경고창 출력
+                                                setIsRecordingLimitModalActive(
+                                                    true
+                                                );
+                                            } else {
+                                                //아니면 바로 녹화 시작
+                                                startRecord();
+                                            }
+                                        }}
                                     >
                                         <span className="mx-1 material-symbols-outlined text-2xl text-[#626262]">
                                             radio_button_checked

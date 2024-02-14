@@ -2131,7 +2131,7 @@ export default function LetterMakePage() {
                 <></>
             )} */}
             {/* 중앙 섹션 */}
-            <div className="flex w-full editor-height overflow-y-hidden">
+            <div className="flex w-full editor-height">
                 {/* 좌측부분 */}
                 <div className="w-1/4 editor-height flex flex-col border-r">
                     <div className="flex items-center pl-12 py-2 border-b-2 color-border-sublight">
@@ -2146,7 +2146,7 @@ export default function LetterMakePage() {
                         </p>
                     </div>
                     {/* 카테고리 */}
-                    <div className="flex h-full">
+                    <div className="flex h-full overflow-y-scroll">
                         <div className="relative w-16 h-full color-text-darkgray color-bg-lightgray1">
                             <div
                                 className={`w-full h-16 flex flex-col justify-center items-center cursor-pointer`}
