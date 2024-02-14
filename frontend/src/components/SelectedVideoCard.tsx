@@ -35,7 +35,7 @@ export default function SelectedVideoCard({
         <>
             <div className={`relative w-28 flex flex-col justify-center mx-2`}>
                 <button
-                    className="absolute w-6 h-6 -right-2 -top-2 color-bg-main rounded-full z-10 flex justify-center items-center text-white"
+                    className="absolute w-6 h-6 -right-2 top-2 color-bg-main rounded-full z-10 flex justify-center items-center text-white"
                     onClick={unselectClip}
                 >
                     -
@@ -59,9 +59,10 @@ export default function SelectedVideoCard({
                         preload="metadata"
                         ref={videoRef}
                         onLoadedData={metadataLoad}
-                        className=""
+                        className="mt-4"
                     />
-                    <p className="min-h-[48px]">{clip.clipTitle}</p>
+                    <p className="mt-1 min-h-[28px] overflow-ellipsis overflow-hidden whitespace-nowrap">{clip.clipTitle}</p>
+
                     <input
                         className="w-28"
                         type="range"
