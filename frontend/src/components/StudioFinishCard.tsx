@@ -34,7 +34,7 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
         if (props.studioStatus === 'ENCODING') {
             return (
                 <div
-                    className="relative w-1/4 flex flex-col mx-2 mt-4 justify-start items-center cursor-pointer"
+                    className="relative w-1/5 flex flex-col mx-2 mt-4 justify-start items-center cursor-pointer"
                     id={studioId}
                     style={{ aspectRatio: 1 / 1 }}
                 >

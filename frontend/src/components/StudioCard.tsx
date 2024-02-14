@@ -107,7 +107,7 @@ export default function StudioCard({
             ) : (
                 <></>
             )}
-            <div className="absolute w-full h-full flex items-center justify-center">
+            <div className="absolute w-full h-full flex items-center justify-center z-20">
                 {props.studioStatus === 'FAIL' ? (
                     <img
                         className=" opacity-95"

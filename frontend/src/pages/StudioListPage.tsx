@@ -147,8 +147,8 @@ export default function StudioListPage() {
             navigate(`/studiomain/${studioId}`);
         }
     };
-    const onMoveFinish = (studioId: string, studioTitle:string) => {
-        navigate(`/letterfinish/${studioId}`, { state: studioTitle});
+    const onMoveFinish = (studioId: string, studioTitle: string) => {
+        navigate(`/letterfinish/${studioId}`, { state: studioTitle });
     };
     const changeListTab = (num: number) => {
         setListTab(num);
@@ -313,14 +313,17 @@ export default function StudioListPage() {
                 {listTab === 1 ? (
                     <ul className="w-full h-full flex flex-col items-center ">
                         <li className=" w-full ">
-                            <div className="flex flex-wrap">
+                            <div className="flex flex-wrap justify-center">
                                 {finishStudioList.map((studio) => {
                                     return (
                                         <StudioFinishCard
                                             key={studio.studioId}
                                             props={studio}
                                             onClick={() =>
-                                                onMoveFinish(studio.studioId, studio.studioTitle)
+                                                onMoveFinish(
+                                                    studio.studioId,
+                                                    studio.studioTitle
+                                                )
                                             }
                                         />
                                     );
