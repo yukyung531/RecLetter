@@ -155,6 +155,10 @@ def encode_letter():
                 )
                 del frame_added_letter
 
+                # 전체 영상 fade in/out
+                complete_letter = cross_fade(bgm_inserted_letter)
+                del bgm_inserted_letter
+
                 # letter 완성 후 저장
                 print("저장 시작")
                 directory = make_letter_req.get_assets_directory()
@@ -163,7 +167,7 @@ def encode_letter():
                 if not os.path.exists(directory):
                     os.makedirs(directory)
 
-                bgm_inserted_letter.write_videofile(
+                complete_letter.write_videofile(
                     complete_file_name,
                     fps=30,
                     codec='libx264',
@@ -172,7 +176,7 @@ def encode_letter():
                 )
                 print("인코딩 완료")
 
-                bgm_inserted_letter.close()
+                complete_letter.close()
                 close_clip(clip_list)
 
                 # produce

@@ -15,6 +15,10 @@ def concat_clip(clip_list: List[VideoClip]) -> VideoClip:
     return concatenate_videoclips(fadein_clip_list, method="compose")
 
 
+def cross_fade(clip: VideoClip) -> VideoClip:
+    return clip.crossfadeout(0.3).crossfadein(0.3)
+
+
 def mirror_clip(clip: VideoClip) -> VideoClip:
     return clip.fx(vfx.mirror_x)
 
