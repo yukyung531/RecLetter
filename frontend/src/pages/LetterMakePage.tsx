@@ -1906,6 +1906,40 @@ export default function LetterMakePage() {
         // uploadLetterAPI()
     };
 
+    const scrollRef = useRef(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
+    
+    function checkScrollable() {
+        if (scrollRef.current) {
+            const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+            setCanScrollLeft(scrollLeft > 0);
+            setCanScrollRight(scrollLeft < scrollWidth - clientWidth);
+        }
+    }
+    
+    function scrollRight() {
+        if (scrollRef.current) {
+            scrollRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+            setTimeout(checkScrollable, 100); // 스크롤 이동이 완료된 후에 checkScrollable을 호출합니다.
+        }
+    }
+    function scrollLeft() {
+        if (scrollRef.current) {
+            scrollRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+            setTimeout(checkScrollable, 100); // 스크롤 이동이 완료된 후에 checkScrollable을 호출합니다.
+        }
+    }
+    
+    useEffect(() => {
+        checkScrollable();
+        window.addEventListener('resize', checkScrollable);
+        return () => {
+            window.removeEventListener('resize', checkScrollable);
+        }
+    }, [usedClipList]);
+    
+
     /** 영상 보내는 API */
     const uploadLetterAPI = async (imageDataURL: string) => {
         try {
@@ -2465,7 +2499,7 @@ export default function LetterMakePage() {
                         </div>
                     </div>
                     {/* 하단바 */}
-                    <div className="w-full h-1/4 bg-white border-2 flex justify-center items-center">
+                    <div className="w-full h-1/4 bg-white border-2 border-l-0 flex justify-center items-center">
                         <div className="w-full flex items-center my-4">
                             <div className=" w-1/12 flex justify-center items-center">
                                 {/* 재생버튼 */}
@@ -2512,7 +2546,20 @@ export default function LetterMakePage() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="w-11/12 flex items-center overflow-x-scroll py-2">
+                            <button
+                                style={{
+                                    fontSize: '2em',
+                                    margin: '0 0.6em',
+                                    color: canScrollLeft ? 'black' : 'lightgray',
+                                    position: 'relative', // 위치를 상대적으로 설정
+                                    top: '-30px'  // 상단으로 50px 이동
+                                }}
+                                onClick={scrollLeft}
+                                disabled={!canScrollLeft}
+                            >
+                                &lt;
+                            </button>
+                            <div className="w-11/12 flex items-center overflow-x-scroll py-2" ref={scrollRef}>
                                 {usedClipList.map((clip, index) => {
                                     return (
                                         <SelectedVideoCard
@@ -2530,7 +2577,20 @@ export default function LetterMakePage() {
                                         />
                                     );
                                 })}
-                            </div>
+                            </div>  
+                            <button
+                                style={{
+                                    fontSize: '2em',
+                                    margin: '0 0.6em',
+                                    color: canScrollRight ? 'black' : 'lightgray',
+                                    position: 'relative', // 위치를 상대적으로 설정
+                                    top: '-30px'  // 상단으로 50px 이동
+                                }}
+                                onClick={scrollRight}
+                                disabled={!canScrollRight}
+                            >
+                                &gt;
+                            </button>
                         </div>
                     </div>
                 </div>
