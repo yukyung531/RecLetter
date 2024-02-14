@@ -28,7 +28,9 @@ export function connect(
     currentPeopleFunc
 ) {
     const token = localStorage.getItem('access-token');
+    console.log("if client === null 위")
     if (client === null) {
+        console.log("if client === null 안")
         client = new StompJs.Client({
             brokerURL: websocketUrl,
             connectHeaders: {
@@ -52,16 +54,6 @@ export function connect(
         client.activate();
     }
 }
-
-/** 인원 구하는 API */
-const findPeopleAPI = async () => {
-    await enterChatting(stuId)
-        .then((res) => {
-            // console.log('현재인원 : ' + res.data);
-            setCurrentPeople(res.data);
-        })
-        .catch((error) => {});
-};
 
 export function firstChatJoin(stuId) {
     client.publish({
@@ -90,7 +82,6 @@ export function subscribe(
         connect(stuId, uuid, username, chatList, setCurrentPeople);
     } else if (client.connected) {
         console.log('이미 연결된 상태입니다,');
-        //findPeopleAPI();
         if (setConnect && !currentRoom.includes(stuId)) {
             client.subscribe(topic + `/${stuId}`, (payload) => {
                 onMeesageReceived(payload);
@@ -113,7 +104,6 @@ export function subscribe(
 export function reSubscribe(reSubStudioParam) {
     // console.log('재구독 작동합니다');
     stuId = reSubStudioParam;
-    findPeopleAPI();
     setConnect = true;
     subscribe(stuId, uuid, username, chatList, setCurrentPeople);
     client.publish({
@@ -183,21 +173,8 @@ function onMeesageReceived(payload) {
     console.log('닉네임입니다' + username);
     console.log(message);
 
-    if (message.type === 'JOIN' && message.uuid === uuid) {
-        // findPeopleAPI();
-        // console.log('유저가 같아서 표시되지 않습니다.');
-    }
     //이름이 같지 않을 때
-    else if (message.type === 'JOIN' || message.type === 'LEAVE') {
-        // findPeopleAPI();
-        // showMessage(
-        //     message.sender,
-        //     message.uuid,
-        //     message.time,
-        //     message.content,
-        //     'alarm'
-        // );
-    } else {
+    if (message.type === 'CHAT') {
         showMessage(
             message.sender,
             message.uuid,
