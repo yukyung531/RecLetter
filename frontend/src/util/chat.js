@@ -35,7 +35,7 @@ export function connect(
                 Authorization: `Bearer ${token}`, // JWT 토큰을 헤더에 추가
             },
             onConnect: () => {
-                console.log('success');
+                // console.log('success');
                 setConnect = true;
 
                 stuId = studioParam;
@@ -44,9 +44,9 @@ export function connect(
                 chatList = setChattingList;
                 setCurrentPeople = currentPeopleFunc;
 
-                console.log(stuId, uuid, username, chatList, setCurrentPeople)
+                // console.log(stuId, uuid, username, chatList, setCurrentPeople)
                 subscribe(stuId, uuid, username, chatList, setCurrentPeople);
-                console.log(setConnect);
+                // console.log(setConnect);
             },
         });
         client.activate();
@@ -76,14 +76,13 @@ export function subscribe(
     chatList = setChattingList;
     setCurrentPeople = currentPeopleFunc;
     if (client === null) {
-        console.log('현재 연결 상태: 재연결합니다');
+        // console.log('현재 연결 상태: 재연결합니다');
         connect(stuId, uuid, username, chatList, setCurrentPeople);
     } else if (client.connected) {
-        console.log('이미 연결된 상태입니다,');
+        // console.log('이미 연결된 상태입니다,');
         if (setConnect && !currentRoom.includes(stuId)) {
             client.subscribe(topic + `/${stuId}`, (payload) => {
                 onMeesageReceived(payload);
-                console.log('채팅을 보냈습니다');
             });
             if (!firstEnter) {
                 firstChatJoin(stuId);
@@ -95,10 +94,8 @@ export function subscribe(
             client.deactivate();
         } else {
             unSubscribe(stuId);
-            console.log("재구독 직전")
             client.subscribe(topic + `/${stuId}`, (payload) => {
                 onMeesageReceived(payload)
-                console.log("재구독 콜백 함수")
             });
         }
     }
@@ -117,7 +114,7 @@ export function reSubscribe(reSubStudioParam) {
     });
 }
 export function unSubscribe(studioId) {
-    console.log('unScribe하겠습니다' + studioId);
+    // console.log('unScribe하겠습니다' + studioId);
     client.subscribe(topic + `/${studioId}`, (payload) => {}).unsubscribe();
     if (currentRoom.includes(studioId)) {
         currentRoom.filter((prevTopics) => prevTopics !== studioId);
@@ -125,14 +122,9 @@ export function unSubscribe(studioId) {
 }
 
 export function disconnect(studioId) {
-    // if (client === null) {
-    //     console.log('ㅅㄹㅈㄷ');
-
-    //     return;
-    // }
-    console.log('tfwe');
-    console.log(stuId);
-    console.log(studioId);
+    // console.log('tfwe');
+    // console.log(stuId);
+    // console.log(studioId);
     if (stuId === studioId) {
         client.publish({
             destination: app + `/${studioId}/leave`,
@@ -170,10 +162,10 @@ function showMessage(userName, uuid, time, content, type) {
 
 function onMeesageReceived(payload) {
     let message = JSON.parse(payload.body); // 메시지 객체를 파싱
-    console.log('합합 메시지리븟 입니다!');
-    console.log('uuid 입니다' + uuid);
-    console.log('닉네임입니다' + username);
-    console.log(message);
+    // console.log('합합 메시지리븟 입니다!');
+    // console.log('uuid 입니다' + uuid);
+    // console.log('닉네임입니다' + username);
+    // console.log(message);
 
     //이름이 같지 않을 때
     if (message.type === 'CHAT') {
@@ -192,7 +184,7 @@ function onMeesageReceived(payload) {
 }
 
 export function sendMessage(userName, content, sid) {
-    console.log(sid);
+    // console.log(sid);
     stuId = sid;
     client.publish({
         destination: app + `/${stuId}/sendMessage`,
