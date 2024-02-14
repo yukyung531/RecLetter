@@ -90,7 +90,7 @@ export function subscribe(
         connect(stuId, uuid, username, chatList, setCurrentPeople);
     } else if (client.connected) {
         console.log('이미 연결된 상태입니다,');
-        findPeopleAPI();
+        //findPeopleAPI();
         if (setConnect && !currentRoom.includes(stuId)) {
             client.subscribe(topic + `/${stuId}`, (payload) => {
                 onMeesageReceived(payload);
