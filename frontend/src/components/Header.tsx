@@ -143,7 +143,7 @@ export default function Header() {
     };
 
     return (
-        <div className="header w-full flex h-header items-center justify-between px-8 z-10 color-bg-main">
+        <div className="header w-full flex h-header items-center justify-between px-8 z-30 color-bg-main">
             <div className=" w-72 text cursor-pointer">{moveMainElement()}</div>
             {loginStateElement()}
         </div>
