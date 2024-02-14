@@ -440,6 +440,7 @@ input[type='number']::-webkit-inner-spin-button {
 /* 스크롤 */
 *::-webkit-scrollbar {
     width: 8px; /* 스크롤바 너비를 지정합니다. */
+    height: 8px;
 }
 
 *::-webkit-scrollbar-button {
