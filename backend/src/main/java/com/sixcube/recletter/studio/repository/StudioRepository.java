@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StudioRepository extends JpaRepository<Studio, String> {
 
+  Studio findStudioByStudioIdAndStudioStatus(String studioId, StudioStatus status);
   List<Studio> findByStudioIdIn(List<String> studioIdList);
 
   List<Studio> findAllByStudioOwner(String userId);

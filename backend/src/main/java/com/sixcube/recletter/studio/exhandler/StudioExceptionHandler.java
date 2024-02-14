@@ -130,7 +130,7 @@ public class StudioExceptionHandler {
   @ExceptionHandler(ExpiredStudioException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   protected ResponseEntity<String> expiredStudioExceptionHandler(
-          AlreadyJoinedStudioException e) {
+          ExpiredStudioException e) {
 
     StringBuilder errorMessage = new StringBuilder();
 
@@ -155,7 +155,7 @@ public class StudioExceptionHandler {
 
   @ExceptionHandler(StudioParticipantCreateFailureException.class)
   protected ResponseEntity<String> studioParticipantCreateFailureExceptionHandler(
-          StudioParticipantNotFound e) {
+          StudioParticipantCreateFailureException e) {
 
     StringBuilder errorMessage = new StringBuilder();
 
@@ -168,7 +168,7 @@ public class StudioExceptionHandler {
   @ExceptionHandler(UnauthorizedToCompleteStudioException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   protected ResponseEntity<String> unauthorizedToCompleteStudioExceptionHandler(
-          UnauthorizedToUpdateStudioException e) {
+          UnauthorizedToCompleteStudioException e) {
 
     StringBuilder errorMessage = new StringBuilder();
 
@@ -180,13 +180,25 @@ public class StudioExceptionHandler {
 
   @ExceptionHandler(InvalidStudioStickerFormatException.class)
   protected ResponseEntity<String> invalidStudioStickerFormatExceptionHandler(
-          UnauthorizedToUpdateStudioException e) {
+          InvalidStudioStickerFormatException e) {
 
     StringBuilder errorMessage = new StringBuilder();
 
     makeErrorMessage(errorMessage, e);
 
     errorMessage.append("올바르지 않은 형식의 파일입니다.");
+    return ResponseEntity.badRequest().body(errorMessage.toString());
+  }
+
+  @ExceptionHandler(AlreadyCompletingStudioStatusException.class)
+  protected ResponseEntity<String> alreadyCompletingStudioStatusExceptionHandler(
+          AlreadyCompletingStudioStatusException e) {
+
+    StringBuilder errorMessage = new StringBuilder();
+
+    makeErrorMessage(errorMessage, e);
+
+    errorMessage.append("이미 완성 요청된 스튜디오입니다.");
     return ResponseEntity.badRequest().body(errorMessage.toString());
   }
 
