@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { getlastPath } from '../util/get-func';
 import { downloadLetter } from '../api/letter';
 import { QRCodeCanvas } from 'qrcode.react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function LetterFinishPage() {
-    const [qrcode, setQrCode] = useState<string>('');
+    const [qrcode, setQrCode] = useState<string>('ExampleURL.com');
     const navigate = useNavigate();
+    const {state} =useLocation();
 
     useEffect(() => {
         const studioId = getlastPath();
@@ -37,7 +38,7 @@ export default function LetterFinishPage() {
     return (
         <section className="section-center">
             <div className="pt-16"></div>
-            <p className="text-2xl my-2">서울 0반 송년회</p>
+            <p className="text-2xl my-2">{state}</p>
             <div className="w-64 h-48 my-8 bg-gray-300 flex justify-center items-center" />
             <div className="w-1/3">
                 <div className="py-2 text-lg rounded-lg my-4 color-bg-main text-white flex justify-center items-center btn-animation">
@@ -50,7 +51,7 @@ export default function LetterFinishPage() {
             <div className="w-1/3 flex">
                 <div className="w-32 h-32 my-8 bg-gray-300 flex justify-center items-center">
                     {qrcode !== '' ? (
-                        <QRCodeCanvas value="ExampleURL.com" />
+                        <QRCodeCanvas value={qrcode} />
                     ) : (
                         <p className="w-32 h-32 flex justify-center items-center">
                             QR
