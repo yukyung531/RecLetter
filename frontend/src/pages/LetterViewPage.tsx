@@ -180,54 +180,52 @@ export default function LetterViewPage() {
             initSetting();
             /** 페이지 새로고침 전에 실행 할 함수 */
             const token = localStorage.getItem('access-token');
-            if (isLogin) {
-                //API 불러오는 함수로 clipInfo를 받아옴
-                //우선 url query String으로부터 스튜디오 상세 정보 받아오기
+            //API 불러오는 함수로 clipInfo를 받아옴
+            //우선 url query String으로부터 스튜디오 상세 정보 받아오기
 
-                const studioId = getlastPath();
-                if (studioId !== '') {
-                    const getDetail = async (studioId: string) => {
-                        await studioDetail(studioId).then((res) => {
-                            if (res.status === httpStatusCode.OK) {
-                                // 채팅방 불러오기 설정
-                                if (chatStudioList.length === 0) {
-                                    dispatch(studioAddState(studioId));
-                                } else {
-                                    let chatListFlag = false;
-                                    chatStudioList.map(
-                                        (item: string, index: number) => {
-                                            if (!chatListFlag) {
-                                                if (item === studioId)
-                                                    chatListFlag = true;
-                                            }
+            const studioId = getlastPath();
+            if (studioId !== '') {
+                const getDetail = async (studioId: string) => {
+                    await studioDetail(studioId).then((res) => {
+                        if (res.status === httpStatusCode.OK) {
+                            // 채팅방 불러오기 설정
+                            if (chatStudioList.length === 0) {
+                                dispatch(studioAddState(studioId));
+                            } else {
+                                let chatListFlag = false;
+                                chatStudioList.map(
+                                    (item: string, index: number) => {
+                                        if (!chatListFlag) {
+                                            if (item === studioId)
+                                                chatListFlag = true;
                                         }
-                                    );
-                                    if (!chatListFlag) {
-                                        dispatch(studioAddState(studioId));
                                     }
+                                );
+                                if (!chatListFlag) {
+                                    dispatch(studioAddState(studioId));
                                 }
-                                // 채팅방 불러오기 설정
-                                dispatch(studioNameState(res.data.studioTitle));
                             }
-                        });
-                        return;
-                    };
+                            // 채팅방 불러오기 설정
+                            dispatch(studioNameState(res.data.studioTitle));
+                        }
+                    });
+                    return;
+                };
 
-                    const enterStudioAPI = async (studioId: string) => {
-                        await enterStudio(studioId)
-                            .then((res) => {
-                                console.log(res);
-                                getDetail(studioId);
-                            })
-                            .catch(() => {
-                                console.log('오류떠서 재실행');
-                                getDetail(studioId);
-                            });
-                    };
-                    enterStudioAPI(studioId);
-                }
+                const enterStudioAPI = async (studioId: string) => {
+                    await enterStudio(studioId)
+                        .then((res) => {
+                            console.log(res);
+                            getDetail(studioId);
+                        })
+                        .catch(() => {
+                            console.log('오류떠서 재실행');
+                            getDetail(studioId);
+                        });
+                };
+                enterStudioAPI(studioId);
             }
-            if (!token || !isLogin) {
+            if (!token) {
                 alert('오류가 났습니다');
             }
 
@@ -244,6 +242,9 @@ export default function LetterViewPage() {
                 disconnect(reloadingStudioId);
                 window.removeEventListener('beforeunload', handleBeforeUnload);
             };
+        } else {
+            alert('로그인을 진행해주세요');
+            navigate('/login');
         }
     }, []);
 
