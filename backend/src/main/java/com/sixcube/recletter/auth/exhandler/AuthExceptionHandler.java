@@ -71,7 +71,7 @@ public class AuthExceptionHandler {
 
     @ExceptionHandler(InvalidTokenException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    protected ResponseEntity<String> emailSendExceptionHandler(InvalidTokenException e) {
+    protected ResponseEntity<String> invalidTokenExceptionHandler(InvalidTokenException e) {
         StringBuilder errorMessage = new StringBuilder();
 
         makeErrorMessage(errorMessage, e);
