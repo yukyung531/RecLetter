@@ -59,13 +59,7 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
                             <div className="flex justify-between w-full ps-2 px-4">
                                 <p className="text-base">인코딩 중입니다...</p>
 
-                                <p className="text-xl color-text-darkgray">
-                                    ~
-                                    {Math.floor(
-                                        (expireDate.getTime() - Date.now()) /
-                                            (1000 * 60 * 60 * 24)
-                                    )}
-                                </p>
+                                <p className="text-xl color-text-darkgray"></p>
                             </div>
                         </div>
                     </div>
