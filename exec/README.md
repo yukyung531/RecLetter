@@ -483,13 +483,272 @@ pipeline {
 
 ---
 
-## openvidu
-### on-premise CE 버전 설치
-### 기본 app 제거
-### RecLetter front/backend 설정
-#### docker-compose.override.yml
+## 실행
+### openvidu
+- [공식문서](https://docs.openvidu.io/en/stable/deployment/ce/on-premises/)
+#### openvidu on-premise CE 버전 설치
+```
+sudo su
+```
+
+```
+cd /opt
+```
+
+```
+curl https://s3-eu-west-1.amazonaws.com/aws.openvidu.io/install_openvidu_latest.sh | bash
+```
+
+- 기존의 .env를 위에서 작성한 .env로 변경
+- 해당 경로에 private_cloudfront_key.pem 파일 복사
+
+```
+./openvidu start
+```
+
+- 실행 완료시 `ctrl + c` 로 백그라운드 앱으로 전환 후 종료
+```
+./openvidu stop
+```
+### docker network 생성
+```
+sudo docker network create RecLetterNetwork
+```
+
 ### DB, Kafka 설정
 #### docker-compose-db.yml
+```
+version: '3'
+
+services:
+  RecLetterRedis:
+    image: redis:7.2.3
+    container_name: RecLetterRedis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    networks:
+      - RecLetterNetwork
+
+  RecLetterMariaDB:
+    image: mariadb:10.4
+    container_name: RecLetterMariaDB
+    restart: unless-stopped
+    volumes:
+      - mariadb-data:/lib/var/mysql
+      - ./initdb.d:/docker-entrypoint-initdb.d
+    networks:
+      - RecLetterNetwork
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${USER_NAME}
+      MARIADB_PASSWORD: ${USER_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    env_file:
+      - .env
+
+  zookeeper:
+    image: bitnami/zookeeper:3.8.3
+    container_name: RecLetterZookeeper
+    restart: unless-stopped
+    ports:
+      - '2181:2181'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    volumes:
+      - zookeeper-data:/bitnami/zookeeper
+    networks:
+      - RecLetterNetwork
+
+  kafka:
+    image: bitnami/kafka:3.6
+    container_name: RecLetterKafka
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    expose:
+      - "9093"
+    environment:
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CREATE_TOPICS="kafka_capstone_event_bus:1:1"
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9092,EXTERNAL://RecLetterKafka:9093
+      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
+    networks:
+      - RecLetterNetwork
+    volumes:
+      - kafka-data:/bitnami/kafka
+volumes:
+  redis-data:
+  mariadb-data:
+  zookeeper-data:
+  kafka-data:
+
+networks:
+  RecLetterNetwork:
+    external: true
+
+
+```
+
+- docker-conmpose-db.yml 파일 작성 후 컨테이너 생성
+```
+sudo docker-compose -f docerk-compose-db.yml up -d
+```
+
+### 기본 app 제거
+- 해당 디렉토리의 docker-compose.override.yml을 아래의 코드로 변경
+#### docker-compose.override.yml
+
+```
+version: '3.1'
+
+services:
+  RecLetterBackend:
+    image: ssuyas/recletter_backend
+    container_name: RecLetterBackend
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    networks:
+      - RecLetterNetwork
+    volumes:
+      - ./private_cloudfront_key.pem:/private_cloudfront_key.pem
+    environment:
+      DB_URL: ${DB_URL}
+      USER_NAME: ${USER_NAME}
+      USER_PASSWORD: ${USER_PASSWORD}
+      MAIL_ID: ${MAIL_ID}
+      MAIL_SECRET: ${MAIL_SECRET}
+      AWS_ACCESS: ${AWS_ACCESS}
+      AWS_SECRET: ${AWS_SECRET}
+      AWS_REGION: ${AWS_REGION}
+      AWS_BUCKET: ${AWS_BUCKET}
+      AWS_FRONT: ${AWS_FRONT}
+      AWS_CLOUDFRONT_DOMAIN: ${AWS_CLOUDFRONT_DOMAIN}
+      AWS_CLOUDFRONT_KEY: ${AWS_CLOUDFRONT_KEY}
+      AWS_CLOUDFRONT_KEY_ID: ${AWS_CLOUDFRONT_KEY_ID}
+      JWT_KEY: ${JWT_KEY}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      OPENVIDU_URL: ${OPENVIDU_URL}
+      OPENVIDU_SECRET: ${OPENVIDU_SECRET}
+    env_file:
+      - .env
+
+  video1:
+    image: ssuyas/recletter_video
+    container_name: RecLetterVideo_1
+    restart: unless-stopped
+    networks:
+      - RecLetterNetwork
+    ports:
+      - ${RECLETTER_VIDEO_PORT_1}:${RECLETTER_VIDEO_PORT_1}
+    environment:
+      PORT_NUMBER: ${RECLETTER_VIDEO_PORT_1}
+      AWS_ACCESS: ${AWS_ACCESS}
+      AWS_SECRET: ${AWS_SECRET}
+      AWS_REGION: ${AWS_REGION}
+      AWS_BUCKET: ${AWS_BUCKET}
+      PYTHONPATH: /
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_LETTER_REQUEST_TOPIC: ${KAFKA_LETTER_REQUEST_TOPIC}
+      KAFKA_ASSET_DOWNLOADINFO_TOPIC: ${KAFKA_ASSET_DOWNLOADINFO_TOPIC}
+      KAFKA_LETTER_ENCODINGINFO_TOPIC: ${KAFKA_LETTER_ENCODINGINFO_TOPIC}
+      KAFKA_LETTER_RESULTINFO_TOPIC: ${KAFKA_LETTER_RESULTINFO_TOPIC}
+      KAFKA_LETTER_REQUEST_CONSUMER_GROUP_ID: ${KAFKA_LETTER_REQUEST_CONSUMER_GROUP_ID}
+      KAFKA_ASSET_DOWNLOADINFO_CONSUMER_GROUP_ID: ${KAFKA_ASSET_DOWNLOADINFO_CONSUMER_GROUP_ID}
+      KAFKA_LETTER_ENCODINGINFO_CONSUMER_GROUP_ID: ${KAFKA_LETTER_ENCODINGINFO_CONSUMER_GROUP_ID}
+      KAFKA_LETTER_RESULTINFO_CONSUMER_GROUP_ID: ${KAFKA_LETTER_RESULTINFO_CONSUMER_GROUP_ID}
+      KAFKA_LETTER_RESULTINFO_DELETE_CONSUMER_GROUP_ID: ${KAFKA_LETTER_RESULTINFO_DELETE_CONSUMER_GROUP_ID}
+    volumes:
+      - video-data:/videobackend/${DOWNLOAD_PATH:-download}
+
+  video2:
+    image: ssuyas/recletter_video
+    container_name: RecLetterVideo_2
+    restart: unless-stopped
+    networks:
+      - RecLetterNetwork
+    ports:
+      - ${RECLETTER_VIDEO_PORT_2}:${RECLETTER_VIDEO_PORT_2}
+    environment:
+      PORT_NUMBER: ${RECLETTER_VIDEO_PORT_2}
+      AWS_ACCESS: ${AWS_ACCESS}
+      AWS_SECRET: ${AWS_SECRET}
+      AWS_REGION: ${AWS_REGION}
+      AWS_BUCKET: ${AWS_BUCKET}
+      PYTHONPATH: /
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_LETTER_REQUEST_TOPIC: ${KAFKA_LETTER_REQUEST_TOPIC}
+      KAFKA_ASSET_DOWNLOADINFO_TOPIC: ${KAFKA_ASSET_DOWNLOADINFO_TOPIC}
+      KAFKA_LETTER_ENCODINGINFO_TOPIC: ${KAFKA_LETTER_ENCODINGINFO_TOPIC}
+      KAFKA_LETTER_RESULTINFO_TOPIC: ${KAFKA_LETTER_RESULTINFO_TOPIC}
+      KAFKA_LETTER_REQUEST_CONSUMER_GROUP_ID: ${KAFKA_LETTER_REQUEST_CONSUMER_GROUP_ID}
+      KAFKA_ASSET_DOWNLOADINFO_CONSUMER_GROUP_ID: ${KAFKA_ASSET_DOWNLOADINFO_CONSUMER_GROUP_ID}
+      KAFKA_LETTER_ENCODINGINFO_CONSUMER_GROUP_ID: ${KAFKA_LETTER_ENCODINGINFO_CONSUMER_GROUP_ID}
+      KAFKA_LETTER_RESULTINFO_CONSUMER_GROUP_ID: ${KAFKA_LETTER_RESULTINFO_CONSUMER_GROUP_ID}
+      KAFKA_LETTER_RESULTINFO_DELETE_CONSUMER_GROUP_ID: ${KAFKA_LETTER_RESULTINFO_DELETE_CONSUMER_GROUP_ID}
+    volumes:
+      - video-data:/videobackend/${DOWNLOAD_PATH:-download}
+
+  video3:
+    image: ssuyas/recletter_video
+    container_name: RecLetterVideo_3
+    restart: unless-stopped
+    networks:
+      - RecLetterNetwork
+    ports:
+      - ${RECLETTER_VIDEO_PORT_3}:${RECLETTER_VIDEO_PORT_3}
+    environment:
+      PORT_NUMBER: ${RECLETTER_VIDEO_PORT_3}
+      AWS_ACCESS: ${AWS_ACCESS}
+      AWS_SECRET: ${AWS_SECRET}
+      AWS_REGION: ${AWS_REGION}
+      AWS_BUCKET: ${AWS_BUCKET}
+      PYTHONPATH: /
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_LETTER_REQUEST_TOPIC: ${KAFKA_LETTER_REQUEST_TOPIC}
+      KAFKA_ASSET_DOWNLOADINFO_TOPIC: ${KAFKA_ASSET_DOWNLOADINFO_TOPIC}
+      KAFKA_LETTER_ENCODINGINFO_TOPIC: ${KAFKA_LETTER_ENCODINGINFO_TOPIC}
+      KAFKA_LETTER_RESULTINFO_TOPIC: ${KAFKA_LETTER_RESULTINFO_TOPIC}
+      KAFKA_LETTER_REQUEST_CONSUMER_GROUP_ID: ${KAFKA_LETTER_REQUEST_CONSUMER_GROUP_ID}
+      KAFKA_ASSET_DOWNLOADINFO_CONSUMER_GROUP_ID: ${KAFKA_ASSET_DOWNLOADINFO_CONSUMER_GROUP_ID}
+      KAFKA_LETTER_ENCODINGINFO_CONSUMER_GROUP_ID: ${KAFKA_LETTER_ENCODINGINFO_CONSUMER_GROUP_ID}
+      KAFKA_LETTER_RESULTINFO_CONSUMER_GROUP_ID: ${KAFKA_LETTER_RESULTINFO_CONSUMER_GROUP_ID}
+      KAFKA_LETTER_RESULTINFO_DELETE_CONSUMER_GROUP_ID: ${KAFKA_LETTER_RESULTINFO_DELETE_CONSUMER_GROUP_ID}
+    volumes:
+      - video-data:/videobackend/${DOWNLOAD_PATH:-download}
+
+  app:
+    image: ssuyas/recletter_frontend
+    container_name: RecLetterFrontend
+    restart: unless-stopped
+    network_mode: host
+    depends_on:
+      - RecLetterBackend
+    volumes:
+      - ./.env:/usr/share/nginx/html/.env
+
+networks:
+  RecLetterNetwork:
+    external: true
+
+volumes:
+  video-data:
+
+```
+
 
 ---
 
