@@ -89,7 +89,14 @@ sudo chmod +x /usr/local/bin/docker-compose
 ---
 
 ## Jenkins
-### Jenkins 컨테이너 실행
+### Jenkins 컨테이너 생성
+```
+docker pull jenkins/jenkins:jdk17
+```
+
+```
+docker run -d --restart always --env JENKINS_OPTS=--httpPort=8080 -v /etc/localtime:/etc/localtime:ro -e TZ=Asia/Seoul -p 8080:8080 -v /jenkins:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock -v /usr/local/bin/docker-compose:/usr/local/bin/docker-compose --name jenkins -u root jenkins/jenkins:jdk17
+```
 ### Jenkins 환경 설정
 ### Jenkins 플러그인 설치
 ### 관리자 계정 설정
