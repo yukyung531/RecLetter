@@ -562,14 +562,21 @@ export default function ChattingBox() {
                 );
             else if (!chatToggle) {
                 return (
-                    <img
-                        src={closeLogoSrc}
-                        className="w-16 h-16 fixed flex justify-center items-center bottom-8 right-8  cursor-pointer z-30"
-                        alt=""
-                        onClick={() => {
-                            changeChatToggle(!chatToggle);
-                        }}
-                    />
+                    <div className="relative">
+                        <img
+                            src={closeLogoSrc}
+                            className="w-16 h-16 fixed flex justify-center items-center bottom-8 right-8  cursor-pointer z-30"
+                            alt=""
+                            onClick={() => {
+                                changeChatToggle(!chatToggle);
+                            }}
+                        />
+                        {!viewChatFlag ? (
+                            <div className="fixed w-4 h-4 bottom-[70px] right-9 border-2 border-white color-bg-subbold rounded-full z-40"></div>
+                        ) : (
+                            <></>
+                        )}
+                    </div>
                 );
             }
         }
