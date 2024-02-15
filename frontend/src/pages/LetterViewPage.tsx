@@ -199,6 +199,10 @@ export default function LetterViewPage() {
                 const getDetail = async (studioId: string) => {
                     await studioDetail(studioId).then((res) => {
                         if (res.status === httpStatusCode.OK) {
+                            if (res.data.studioStatus === 'COMPLETE') {
+                                alert('완성된 비디오입니다.');
+                                navigate('/studiolist');
+                            }
                             // 채팅방 불러오기 설정
                             if (chatStudioList.length === 0) {
                                 dispatch(studioAddState(studioId));
@@ -269,7 +273,7 @@ export default function LetterViewPage() {
             ) : (
                 <></>
             )}
-            <div className="flex bg-black">
+            <div className="flex bg-black justify-center items-center">
                 <div id="video-container" className="max-h-full">
                     {subscribers.length >= 1 ? (
                         subscribers.map((subscriber) => {
@@ -287,7 +291,7 @@ export default function LetterViewPage() {
                         <></>
                     )}
                 </div>
-                <div id="button" className="w-[200px] m-5">
+                <div id="button" className="absolute w-[200px] m-5 right-8">
                     <button
                         className="w-[200px] h-[56px] rounded text-xl bg-[#FF4954] text-white"
                         onClick={endScreenShare}

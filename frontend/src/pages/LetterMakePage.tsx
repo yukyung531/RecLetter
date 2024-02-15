@@ -493,6 +493,10 @@ export default function LetterMakePage() {
                     await studioDetail(studioId).then((res) => {
                         if (res.status === httpStatusCode.OK) {
                             // 채팅방 불러오기 설정
+                            if (res.data.studioStatus === 'COMPLETE') {
+                                alert('완성된 비디오입니다.');
+                                navigate('/studiolist');
+                            }
                             if (chatStudioList.length === 0) {
                                 dispatch(studioAddState(studioId));
                             } else {
@@ -1013,13 +1017,7 @@ export default function LetterMakePage() {
 
     const costomElement = () => {
         return (
-            <div className="my-4">
-                <label
-                    className="input-file-button border flex flex-col items-center justify-center cursor-pointer"
-                    htmlFor="customstickerfile"
-                >
-                    <p className="button-upload">이미지 업로드</p>
-                </label>
+            <div className="">
                 <img
                     src={
                         customSticker === ''
@@ -1056,7 +1054,6 @@ export default function LetterMakePage() {
         if (stickerMode === 0) {
             return (
                 <div className="w-full flex flex-col justify-start text-xl">
-                    <p>스티커</p>
                     <div className="flex flex-wrap m-2 h-40 overflow-y-scroll">
                         {stickerList.map((item, index) => {
                             const imgUrl = `/src/assets/sticker/${item}.png`;
@@ -1081,8 +1078,25 @@ export default function LetterMakePage() {
                         })}
                     </div>
 
-                    <p>커스텀 스티커</p>
-                    <div className="flex flex-wrap m-2">{costomElement()}</div>
+                    <div className="p-2 border rounded-xl color-border-main justify-center ">
+                        <div className="flex justify-between">
+                            <p className="color-text-sublight">커스텀 스티커</p>
+                            <label
+                                className="input-file-button flex px-1 color-bg-sublight items-center justify-center rounded-lg cursor-pointer"
+                                htmlFor="customstickerfile"
+                            >
+                                <div className="w-4 h-4 mx-1 flex justify-center items-center text-center bg-white rounded-full border color-border-main color-text-main">
+                                    +
+                                </div>
+                                <p className="button-upload text-white">
+                                    이미지 업로드
+                                </p>
+                            </label>
+                        </div>
+                        <div className="flex flex-wrap items-center justify-center py-3">
+                            {costomElement()}
+                        </div>
+                    </div>
                 </div>
             );
         } else if (stickerMode === 1) {
@@ -1447,7 +1461,7 @@ export default function LetterMakePage() {
                         })}
                     </select>
 
-                    <p className='mt-4'>배경 음악 볼륨</p>
+                    <p className="mt-4">배경 음악 볼륨</p>
                     <input
                         className="w-full mt-1"
                         type="range"
@@ -1473,7 +1487,7 @@ export default function LetterMakePage() {
                         }}
                     />
 
-                    <p className='mt-6'>전체 영상 볼륨 조절</p>
+                    <p className="mt-6">전체 영상 볼륨 조절</p>
                     <div className="w-full flex">
                         <button
                             className="border-2 border-[#FF777F] text-[#FF777F] m-1 rounded hover:bg-[#FF777F] hover:text-white flex-grow"
@@ -1676,9 +1690,9 @@ export default function LetterMakePage() {
                             </div>
                         </div>
                     </div>
-                    <button onClick={onHtmlToPng}>다운로드</button>
+                    {/* <button onClick={onHtmlToPng}>다운로드</button> */}
 
-                    <ul className="flex justify-around">
+                    <ul className="flex justify-around my-4">
                         <li
                             className="cursor-pointer hover:font-bold"
                             onClick={() => {
@@ -1909,7 +1923,7 @@ export default function LetterMakePage() {
     const scrollRef = useRef(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
-    
+
     function checkScrollable() {
         if (scrollRef.current) {
             const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
@@ -1917,7 +1931,7 @@ export default function LetterMakePage() {
             setCanScrollRight(scrollLeft < scrollWidth - clientWidth);
         }
     }
-    
+
     function scrollRight() {
         if (scrollRef.current) {
             // scrollRef.current.scrollBy({ left: 200, behavior: 'smooth' });
@@ -1930,15 +1944,14 @@ export default function LetterMakePage() {
             setTimeout(checkScrollable, 100); // 스크롤 이동이 완료된 후에 checkScrollable을 호출합니다.
         }
     }
-    
+
     useEffect(() => {
         checkScrollable();
         window.addEventListener('resize', checkScrollable);
         return () => {
             window.removeEventListener('resize', checkScrollable);
-        }
+        };
     }, [usedClipList]);
-    
 
     /** 영상 보내는 API */
     const uploadLetterAPI = async (imageDataURL: string) => {
@@ -2550,16 +2563,21 @@ export default function LetterMakePage() {
                                 style={{
                                     fontSize: '2em',
                                     margin: '0 0.6em',
-                                    color: canScrollLeft ? 'black' : 'lightgray',
+                                    color: canScrollLeft
+                                        ? 'black'
+                                        : 'lightgray',
                                     position: 'relative', // 위치를 상대적으로 설정
-                                    top: '-30px'  // 상단으로 50px 이동
+                                    top: '-30px', // 상단으로 50px 이동
                                 }}
                                 onClick={scrollLeft}
                                 disabled={!canScrollLeft}
                             >
                                 &lt;
                             </button>
-                            <div className="w-11/12 flex items-center overflow-x-scroll py-2" ref={scrollRef}>
+                            <div
+                                className="w-11/12 flex items-center overflow-x-scroll py-2"
+                                ref={scrollRef}
+                            >
                                 {usedClipList.map((clip, index) => {
                                     return (
                                         <SelectedVideoCard
@@ -2577,14 +2595,16 @@ export default function LetterMakePage() {
                                         />
                                     );
                                 })}
-                            </div>  
+                            </div>
                             <button
                                 style={{
                                     fontSize: '2em',
                                     margin: '0 0.6em',
-                                    color: canScrollRight ? 'black' : 'lightgray',
+                                    color: canScrollRight
+                                        ? 'black'
+                                        : 'lightgray',
                                     position: 'relative', // 위치를 상대적으로 설정
-                                    top: '-30px'  // 상단으로 50px 이동
+                                    top: '-30px', // 상단으로 50px 이동
                                 }}
                                 onClick={scrollRight}
                                 disabled={!canScrollRight}

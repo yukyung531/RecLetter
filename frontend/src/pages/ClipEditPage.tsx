@@ -244,6 +244,10 @@ export default function ClipEditPage() {
                         .then((res) => {
                             console.log(res);
                             getDetail(studioId);
+                            if (res.data.studioStatus === 'COMPLETE') {
+                                alert('완성된 비디오입니다.');
+                                navigate('/studiolist');
+                            }
                         })
                         .catch(() => {
                             console.log('오류떠서 재실행');

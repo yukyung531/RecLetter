@@ -286,6 +286,10 @@ export default function ClipRecordPage() {
                             setSelectImgUrl(
                                 `/src/assets/frames/frame${res.data.studioFrameId}.png`
                             );
+                            if (res.data.studioStatus === 'COMPLETE') {
+                                alert('완성된 비디오입니다.');
+                                navigate('/studiolist');
+                            }
                             // 채팅방 불러오기 설정
                             if (chatStudioList.length === 0) {
                                 dispatch(studioAddState(studioId));
