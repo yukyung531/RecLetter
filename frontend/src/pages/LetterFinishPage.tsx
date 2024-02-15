@@ -3,12 +3,32 @@ import { getlastPath } from '../util/get-func';
 import { downloadLetter } from '../api/letter';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import ShareModal from '../components/ShareModal';
+import ErrorModal from '../components/ErrorModal';
 
 export default function LetterFinishPage() {
     const [qrcode, setQrCode] = useState<string>('ExampleURL.com');
     const navigate = useNavigate();
     const [title, setTitle] = useState<string>('');
     const [currentUrl, setCurrentUrl] = useState<string>('');
+
+    //공유 모달 불러오기
+    const [isModalActive, setIsModalActive] = useState<boolean>(false);
+
+    /**closeModal()
+     * 모달창 닫기
+     */
+    const closeModal = () => {
+        setIsModalActive(false);
+    };
+
+    //에러모달
+    const [isErrorModal, setIsErrorModal] = useState<boolean>(false);
+
+    const closeError = () => {
+        setIsErrorModal(false);
+        navigate(-1);
+    };
 
     useEffect(() => {
         const studioId = getlastPath();
@@ -25,22 +45,24 @@ export default function LetterFinishPage() {
                 setQrCode(res.data.letterUrl);
                 setTitle(res.data.studioTitle);
                 if (res.data.letterUrl === '') {
-                    alert('영상을 다운로드 할 수 없습니다');
-                    navigate(-1);
+                    setIsErrorModal(true);
+                    // alert('영상을 다운로드 할 수 없습니다');
+                    // navigate(-1);
                 }
             })
             .catch((error: Error) => {
-                alert('영상을 다운로드 할 수 없습니다');
-                navigate(-1);
+                setIsErrorModal(true);
+                // alert('영상을 다운로드 할 수 없습니다');
+                // navigate(-1);
             });
     };
 
-    const handleClipBoard = () => {
-        const currentUrl = document.location.href;
-        navigator.clipboard.writeText(currentUrl).then(() => {
-            alert('링크가 복사되었습니다.');
-        });
-    };
+    // const handleClipBoard = () => {
+    //     const currentUrl = document.location.href;
+    //     navigator.clipboard.writeText(currentUrl).then(() => {
+    //         alert('링크가 복사되었습니다.');
+    //     });
+    // };
     /** 영상 다운로드 */
     const handleDownload = () => {
         window.location.href = qrcode;
@@ -50,10 +72,27 @@ export default function LetterFinishPage() {
     };
     return (
         <section className="section-center">
+            {isModalActive ? (
+                <ShareModal onClick={closeModal} currentUrl={currentUrl} />
+            ) : (
+                <></>
+            )}
+            {isErrorModal ? (
+                <ErrorModal
+                    onClick={closeError}
+                    message="영상을 다운로드할 수 없습니다."
+                />
+            ) : (
+                <></>
+            )}
             <div className="pt-24 mt-64"></div>
             <p className="text-2xl mb-8">{title}</p>
-            <video className="w-[800px] h-[450px] my-8 bg-gray-300"  src={qrcode} crossOrigin="anonymous" controls>
-            </video>
+            <video
+                className="w-[800px] h-[450px] my-8 bg-gray-300"
+                src={qrcode}
+                crossOrigin="anonymous"
+                controls
+            ></video>
             <div className="w-1/3">
                 <div
                     className="py-2 text-lg rounded-lg my-4 color-bg-main text-white flex justify-center items-center btn-animation cursor-pointer"
@@ -61,14 +100,17 @@ export default function LetterFinishPage() {
                 >
                     동영상 다운로드
                 </div>
-            </div>
-            <div className="w-1/3 flex items-center justify-center">
-                <p className="w-[30%] border h-[1px] border-gray-500"></p>
-                <p className="mx-6">공유하기</p>
-                <p className="w-[30%] border h-[1px] border-gray-500"></p>
+                <div
+                    className="py-2 text-lg rounded-lg my-4 text-[#FF777F] border-2 border-[#FF777F] hover:color-bg-main hover:text-white flex justify-center items-center btn-animation cursor-pointer"
+                    onClick={() => {
+                        setIsModalActive(true);
+                    }}
+                >
+                    공유하기
+                </div>
             </div>
 
-            <div className="w-1/3 flex flex-col items-center">
+            {/* <div className="w-1/3 flex flex-col items-center">
                 <div className="w-32 h-32 mt-8 mb-4 bg-gray-300 flex justify-center items-center">
                     {qrcode !== '' ? (
                         <QRCodeCanvas value={currentUrl} />
@@ -89,7 +131,7 @@ export default function LetterFinishPage() {
                         </span>
                     </div>
                 </div>
-            </div>
+            </div> */}
             <div className="w-1/4">
                 <div
                     className="py-2 text-lg rounded-lg my-4 bg-white border color-border-main color-text-main flex justify-center items-center cursor-pointer btn-animation"
