@@ -12,7 +12,7 @@ export default function WithdrawModal({
             {/* new delete modal */}
             <div className="w-full h-full bg-[#626262] fixed top-0 left-0 z-10 opacity-30"></div>
             <div
-                className="w-[400px] h-[290px] z-20 fixed top-1/2 left-1/2 shadow-lg"
+                className="w-[400px] h-[290px] z-50 fixed top-1/2 left-1/2 shadow-lg"
                 style={{ transform: 'translate(-50%, -70%)' }}
             >
                 <div className="rounded-t-xl bg-[#FF777F] w-full h-[20px]"></div>

@@ -156,8 +156,18 @@ export default function StudioListPage() {
             navigate(`/studiomain/${studioId}`);
         }
     };
-    const onMoveFinish = (studioId: string, studioTitle: string) => {
-        navigate(`/letterfinish/${studioId}`, { state: studioTitle });
+    const onMoveFinish = (
+        studioId: string,
+        studioTitle: string,
+        studioState: string
+    ) => {
+        if (studioState === 'COMPLETE') {
+            navigate(`/letterfinish/${studioId}`);
+        } else if (studioState === 'ENCODING') {
+            alert('인코딩이 진행되고있습니다. 잠시 후 다시 시작해주세요');
+        } else {
+            alert('오류가 발생하였습니다. 잠시 후 다시 시도해주세요');
+        }
     };
     const changeListTab = (num: number) => {
         setListTab(num);
@@ -184,7 +194,7 @@ export default function StudioListPage() {
     };
     /** 편집 Element */
     const editElement = () => {
-        if (editMode) {
+        if (editMode && listTab === 0) {
             return (
                 <div className="flex items-center">
                     {deleteList.length > 0 && (
@@ -211,7 +221,7 @@ export default function StudioListPage() {
                     </p>
                 </div>
             );
-        } else {
+        } else if (listTab === 0) {
             return (
                 <div className="flex items-center">
                     {createStudioList.length > 0 ? (
@@ -273,7 +283,19 @@ export default function StudioListPage() {
                         <div className="absolute w-full border bottom-2 -z-10"></div>
                     </div>
 
-                    <div>{createElement()}</div>
+                    <div className="flex items-center justify-center text-center">
+                        <div
+                            className="relative flex items-center justify-center w-8 h-8 rounded-full color-bg-main mb-4 mx-4 cursor-pointer btn-animation"
+                            onClick={() => {
+                                makeStudioListAPI();
+                            }}
+                        >
+                            <span className="material-symbols-outlined text-white text-xl">
+                                cycle
+                            </span>
+                        </div>
+                        {createElement()}
+                    </div>
                 </div>
 
                 {/* 영상 스튜디오 */}
@@ -331,7 +353,8 @@ export default function StudioListPage() {
                                             onClick={() =>
                                                 onMoveFinish(
                                                     studio.studioId,
-                                                    studio.studioTitle
+                                                    studio.studioTitle,
+                                                    studio.studioStatus
                                                 )
                                             }
                                         />

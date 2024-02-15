@@ -44,7 +44,7 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
                         alt=""
                     />
                     <div className="relative flex w-full h-full flex-col justify-end pb-8 px-2">
-                        <div className="relative flex flex-col justify-between w-full z-20 p-2 mt-16">
+                        <div className="absolute bottom-0 flex flex-col justify-between w-full z-20 p-2">
                             <div className="text-2xl flex items-center -ms-3 mb-1 text-center justify-center">
                                 {props.isStudioOwner ? (
                                     <img
@@ -56,8 +56,9 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
                                 )}
                                 <p>{props.studioTitle}</p>
                             </div>
+                            <div className="flex justify-between w-full ps-2 px-4">
+                                <p className="text-base">인코딩 중입니다...</p>
 
-                            <div className="absolute bottom-0 right-4">
                                 <p className="text-xl color-text-darkgray">
                                     ~
                                     {Math.floor(
@@ -84,12 +85,15 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
                         alt=""
                     />
                     <div className="relative w-full top-1/3 z-10 border rounded-xl hover:letter-animation">
-                        <img
-                            className="w-full rounded-lg "
+                        <video
+                            className="w-full bg-black rounded-lg"
                             style={{
                                 aspectRatio: 16 / 9,
+                                transform: `rotateY(180deg)`,
                             }}
-                            src="/src/assets/images/nothumb.png"
+                            src={props.thumbnailUrl}
+                            crossOrigin="anonymous"
+                            controlsList="nodownload"
                         />
                         <div
                             className="absolute w-full top-0"
@@ -157,13 +161,23 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
 
                             <div className="w-full flex justify-between">
                                 <p></p>
-                                <p className="text-xl color-text-darkgray">
-                                    ~
-                                    {Math.floor(
-                                        (expireDate.getTime() - Date.now()) /
-                                            (1000 * 60 * 60 * 24)
-                                    )}
-                                </p>
+                                {Math.floor(
+                                    (expireDate.getTime() - Date.now()) /
+                                        (1000 * 60 * 60 * 24)
+                                ) > 0 ? (
+                                    <p className="text-xl color-text-darkgray">
+                                        보관 기한 D -
+                                        {Math.floor(
+                                            (expireDate.getTime() -
+                                                Date.now()) /
+                                                (1000 * 60 * 60 * 24)
+                                        )}
+                                    </p>
+                                ) : (
+                                    <p className="text-xl color-text-darkgray">
+                                        보관 기한 만료
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>

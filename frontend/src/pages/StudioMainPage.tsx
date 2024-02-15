@@ -153,6 +153,10 @@ export default function StudioMainPage() {
 
                             dispatch(studioNameState(res.data.studioTitle));
                             setStudioDetailInfo(res.data);
+                            if (res.data.studioStatus === 'COMPLETE') {
+                                alert('완성된 비디오입니다.');
+                                navigate('/studiolist');
+                            }
 
                             //프레임
                             setSelectImgUrl(
@@ -658,12 +662,19 @@ export default function StudioMainPage() {
                         ) : (
                             <div className="flex flex-col items-center justify-center">
                                 <img
+                                    className="w-20 my-6"
                                     src="/src/assets/icons/empty-face.png"
                                     alt=""
                                 />
-                                <p>아직 선택된 영상이 없어요</p>
-                                <p>전체 편지는 선택된 영상으로만 제작됩니다.</p>
-                                <p>편집에서 원하는 영상을 선택해주세요!</p>
+                                <p className="text-sm color-text-darkgray mb-6 text-center">
+                                    아직 선택된 영상이 없어요
+                                </p>
+                                <p className="text-sm color-text-darkgray text-center">
+                                    전체 편지는 선택된 영상으로만 제작됩니다.
+                                </p>
+                                <p className="text-sm color-text-darkgray mb-20 text-center">
+                                    편집에서 원하는 영상을 선택해주세요!
+                                </p>
                             </div>
                         )}
                         <div className="w-full flex justify-start text-xl ">
@@ -718,14 +729,14 @@ export default function StudioMainPage() {
                                                 event.key === 'Enter' &&
                                                 isEditingName &&
                                                 studioDetailInfo.studioOwner ===
-                                                userInfo.userId
+                                                    userInfo.userId
                                             ) {
                                                 handleStudioName();
                                             }
                                         }}
                                     />
                                     {studioDetailInfo.studioOwner ===
-                                    userInfo.userId && isEditingName ? (
+                                        userInfo.userId && isEditingName ? (
                                         <span
                                             className="material-symbols-outlined mx-2 text-2xl text-white cursor-pointer"
                                             onClick={handleStudioName}
@@ -736,7 +747,7 @@ export default function StudioMainPage() {
                                         <></>
                                     )}
                                     {studioDetailInfo.studioOwner ===
-                                    userInfo.userId && !isEditingName ? (
+                                        userInfo.userId && !isEditingName ? (
                                         <span
                                             className="material-symbols-outlined mx-2 text-xl text-white cursor-pointer"
                                             onClick={handleStudioName}
@@ -764,15 +775,13 @@ export default function StudioMainPage() {
                                         초대링크 복사하기
                                     </p>
                                     <span
-                                    className="material-symbols-outlined text-xl text-white cursor-pointer"
-                                    onClick={handleClipBoard}
+                                        className="material-symbols-outlined text-xl text-white cursor-pointer"
+                                        onClick={handleClipBoard}
                                     >
                                         inventory
                                     </span>
-
                                 </div>
                             </div>
-
                         </div>
                         <div className=" flex flex-col justify-center items-center">
                             <div className="w-full  flex justify-start items-center">

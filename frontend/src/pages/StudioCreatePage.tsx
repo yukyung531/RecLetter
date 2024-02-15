@@ -1,7 +1,7 @@
 import { BaseSyntheticEvent, useEffect, useState } from 'react';
 import AddMemberWindow from '../components/AddMemberWindow';
 import { FrameType, StudioMake } from '../types/type';
-import moment from 'moment-timezone'
+import moment from 'moment-timezone';
 import { makeStudio } from '../api/studio';
 import { httpStatusCode } from '../util/http-status';
 import { useNavigate } from 'react-router-dom';
@@ -31,12 +31,7 @@ export default function StudioCreatePage() {
 
     useEffect(() => {
         moment().tz('Asia/Seoul').format('YYYY-MM-DDTHH:mm:ss');
-        setTime(
-            moment()
-                .add(createDate, 'days')
-                .format()
-                .substring(0, 19)
-        );
+        setTime(moment().add(createDate, 'days').format().substring(0, 19));
     }, [createDate]);
 
     const onPressAddMember = () => {
@@ -137,20 +132,24 @@ export default function StudioCreatePage() {
                     <div>
                         <div className="flex items-center">
                             <h5 className="text-2xl font-bold">
-                                제작기간 (최대 14일)
+                                편집기간 (최대 14일)
                             </h5>
-                            <p className="text-lg mx-2">{time.slice(0, 10)}</p>
+                        </div>
+                        <div className="flex w-105 items-center">
+                            <input
+                                className="w-20 py-2 px-3 my-4 border-2 rounded-xl text-xl text-center"
+                                type="number"
+                                max={14}
+                                min={1}
+                                value={createDate}
+                                onChange={changeDate}
+                                placeholder="최대 14일"
+                            />
+                            <p className="text-xl mx-2">
+                                {time.slice(0, 10)} 까지 편집 가능합니다.
+                            </p>
                         </div>
 
-                        <input
-                            className="w-105 py-2 px-3 my-4 border-2 rounded-xl text-xl"
-                            type="number"
-                            max={14}
-                            min={1}
-                            value={createDate}
-                            onChange={changeDate}
-                            placeholder="최대 14일"
-                        />
                         {/* <p
                             className="btn-cover color-bg-yellow2"
                             onClick={onPressAddMember}

@@ -8,7 +8,7 @@ export default function SuccessModal({ onClick, message }: PropType) {
         <>
             <div className="w-screen h-screen bg-[#626262] fixed top-0 left-0 z-10 opacity-30"></div>
             <div
-                className="w-[400px] h-[290px] z-20 fixed shadow-lg"
+                className="w-[400px] h-[290px] z-50 fixed shadow-lg"
                 style={{
                     transform: 'translate(-50%, -70%)',
                     top: '50vh',
