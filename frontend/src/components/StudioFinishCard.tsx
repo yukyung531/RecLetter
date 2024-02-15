@@ -160,7 +160,7 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
                                         (1000 * 60 * 60 * 24)
                                 ) > 0 ? (
                                     <p className="text-xl color-text-darkgray">
-                                        보관 기한 D -
+                                        보관 기한 D-
                                         {Math.floor(
                                             (expireDate.getTime() -
                                                 Date.now()) /
