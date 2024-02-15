@@ -444,17 +444,17 @@ export default function StudioMainPage() {
         }
 
         //만약 전체 영상 재생 중이었다면?
-        if (playAllSelectedVideoRef.current) {
-            playingIdxRef.current += 1;
-            //범위 내에 있는 비디오면?
-            if (playingIdxRef.current < usedVideoList.length) {
-                selectVideo(usedVideoList[playingIdxRef.current].clipId);
-            } else {
-                //다 봤으면 재생 종료
-                playAllSelectedVideoRef.current = false;
-                playingIdxRef.current = 0;
-            }
-        }
+        // if (playAllSelectedVideoRef.current) {
+        //     playingIdxRef.current += 1;
+        //     //범위 내에 있는 비디오면?
+        //     if (playingIdxRef.current < usedVideoList.length) {
+        //         selectVideo(usedVideoList[playingIdxRef.current].clipId);
+        //     } else {
+        //         //다 봤으면 재생 종료
+        //         playAllSelectedVideoRef.current = false;
+        //         playingIdxRef.current = 0;
+        //     }
+        // }
     };
 
     /** formatTime(time: number)
@@ -597,9 +597,9 @@ export default function StudioMainPage() {
      * 비디오 플레이어 일시 정지 버튼이 눌렸을 때 수행할 함수
      */
     const stopButtonPressed = () => {
-        //자동 재생 중이었다면 초기화
-        playAllSelectedVideoRef.current = false;
-        playingIdxRef.current = 0;
+        // //자동 재생 중이었다면 초기화
+        // playAllSelectedVideoRef.current = false;
+        // playingIdxRef.current = 0;
         //영상 정지
         stopVideo();
     };
@@ -695,6 +695,22 @@ export default function StudioMainPage() {
                                             onClickEdit(clip.clipId);
                                         }}
                                         selectVideo={() => {
+                                            //전체 재생 중이었다면 종료
+                                            if (
+                                                playAllSelectedVideoRef.current
+                                            ) {
+                                                if (videoRef.current) {
+                                                    videoRef.current.pause();
+                                                    videoRef.current.currentTime = 0;
+                                                }
+                                                if (bgmRef.current) {
+                                                    bgmRef.current.pause();
+                                                    bgmRef.current.currentTime = 0;
+                                                }
+                                                playAllSelectedVideoRef.current =
+                                                    false;
+                                                playingIdxRef.current = 0;
+                                            }
                                             selectVideo(clip.clipId);
                                         }}
                                         props={clip}
@@ -739,6 +755,22 @@ export default function StudioMainPage() {
                                             onClickEdit(clip.clipId);
                                         }}
                                         selectVideo={() => {
+                                            //전체 재생 중이었다면 종료
+                                            if (
+                                                playAllSelectedVideoRef.current
+                                            ) {
+                                                if (videoRef.current) {
+                                                    videoRef.current.pause();
+                                                    videoRef.current.currentTime = 0;
+                                                }
+                                                if (bgmRef.current) {
+                                                    bgmRef.current.pause();
+                                                    bgmRef.current.currentTime = 0;
+                                                }
+                                                playAllSelectedVideoRef.current =
+                                                    false;
+                                                playingIdxRef.current = 0;
+                                            }
                                             selectVideo(clip.clipId);
                                         }}
                                         props={clip}
@@ -868,6 +900,25 @@ export default function StudioMainPage() {
                                     }}
                                     onEnded={() => {
                                         stopVideo();
+                                        if (playAllSelectedVideoRef.current) {
+                                            playingIdxRef.current += 1;
+                                            //범위 내에 있는 비디오면?
+                                            if (
+                                                playingIdxRef.current <
+                                                usedVideoList.length
+                                            ) {
+                                                selectVideo(
+                                                    usedVideoList[
+                                                        playingIdxRef.current
+                                                    ].clipId
+                                                );
+                                            } else {
+                                                //다 봤으면 재생 종료
+                                                playAllSelectedVideoRef.current =
+                                                    false;
+                                                playingIdxRef.current = 0;
+                                            }
+                                        }
                                     }}
                                 />
                                 {/* 프레임 */}
