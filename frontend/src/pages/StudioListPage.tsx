@@ -363,7 +363,7 @@ export default function StudioListPage() {
                             </div>
                         ) : (
                             <li className=" w-full ">
-                                <div className="flex flex-wrap justify-center">
+                                <div className="flex flex-wrap">
                                     {finishStudioList.map((studio) => {
                                         return (
                                             <StudioFinishCard

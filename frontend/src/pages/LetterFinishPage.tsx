@@ -8,12 +8,14 @@ export default function LetterFinishPage() {
     const [qrcode, setQrCode] = useState<string>('ExampleURL.com');
     const navigate = useNavigate();
     const [title, setTitle] = useState<string>('');
+    const [currentUrl, setCurrentUrl] = useState<string>('');
 
     useEffect(() => {
         const studioId = getlastPath();
         if (studioId !== '') {
             downloadLetterAPI();
         }
+        setCurrentUrl(document.location.href);
     }, []);
     const downloadLetterAPI = async () => {
         const studioId = getlastPath();
@@ -28,9 +30,11 @@ export default function LetterFinishPage() {
                 }
             })
             .catch((error: Error) => {
-                console.log(error);
+                alert('영상을 다운로드 할 수 없습니다');
+                navigate(-1);
             });
     };
+
     const handleClipBoard = () => {
         const currentUrl = document.location.href;
         navigator.clipboard.writeText(currentUrl).then(() => {
@@ -47,7 +51,7 @@ export default function LetterFinishPage() {
     return (
         <section className="section-center">
             <div className="pt-24 mt-64"></div>
-            <p className="text-2xl mb-8">{title}</p>
+            <p className="text-2xl mb-4">{title}</p>
             <video className="w-[800px] h-[450px] my-8 bg-gray-300" controls>
                 <source src={qrcode} type="video/mp4" />
                 Your browser does not support the video tag.
@@ -69,7 +73,7 @@ export default function LetterFinishPage() {
             <div className="w-1/3 flex flex-col items-center">
                 <div className="w-32 h-32 mt-8 mb-4 bg-gray-300 flex justify-center items-center">
                     {qrcode !== '' ? (
-                        <QRCodeCanvas value={qrcode} />
+                        <QRCodeCanvas value={currentUrl} />
                     ) : (
                         <p className="w-32 h-32 flex justify-center items-center">
                             QR
@@ -78,7 +82,7 @@ export default function LetterFinishPage() {
                 </div>
                 <div className="w-full ms-5 py-2 text-lg rounded-lg flex flex-col justify-center items-center">
                     <div className="flex">
-                        <p>공유 url</p>
+                        <p>링크 복사하기</p>
                         <span
                             className="material-symbols-outlined mx-2 text-xl cursor-pointer"
                             onClick={handleClipBoard}
@@ -86,7 +90,6 @@ export default function LetterFinishPage() {
                             add_link
                         </span>
                     </div>
-                    <p>{qrcode}</p>
                 </div>
             </div>
             <div className="w-1/4">
