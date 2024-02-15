@@ -8,7 +8,7 @@ from videobackend.letter.dto.dto import ClipInfo
 def load_clip(clip_info: ClipInfo, studio_id: str) -> VideoFileClip:
     result = VideoFileClip(filename=clip_info.get_clip_file_path(studio_id))
     if result.h != 720:
-        return result.fx(vfx.resize, h=720).on_color((1280, 720), color=(0, 0, 0))
+        return result.fx(vfx.resize, height=720).on_color((1280, 720), color=(0, 0, 0))
     else:
         return result
 

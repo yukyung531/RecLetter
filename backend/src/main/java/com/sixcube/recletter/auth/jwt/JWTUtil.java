@@ -1,6 +1,7 @@
 package com.sixcube.recletter.auth.jwt;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -29,21 +30,32 @@ public class JWTUtil {
 
     //username 검증
     public String getUserId(String token) {
-
         //sigingkey 부분이 유효성 검증하는 부분
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().get("userId", String.class);
     }
 
     //role 검증
     public String getRole(String token) {
-
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().get("role", String.class);
     }
 
     //만료 일자 검증
     public Boolean isExpired(String token) {
+        boolean expired;
+        try {
+            expired = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getExpiration().before(new Date(System.currentTimeMillis()));
+        } catch (ExpiredJwtException e) {
+            expired = true;
+        }
+        return expired;
+    }
 
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getExpiration().before(new Date(System.currentTimeMillis()));
+    //유효여부 확인
+    public void checkValid(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        } catch (ExpiredJwtException e) {
+        }
     }
 
 
