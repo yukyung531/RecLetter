@@ -105,15 +105,15 @@ export function reSubscribe(reSubStudioParam) {
     // console.log('재구독 작동합니다');
     stuId = reSubStudioParam;
     setConnect = true;
-    // client.subscribe(topic + `/${studioId}`, (payload) => {}).unsubscribe();
-    // subscribe(stuId, uuid, username, chatList, setCurrentPeople);
-    // client.publish({
-    //     destination: app + `/${stuId}/join`,
-    //     body: JSON.stringify({
-    //         type: 'JOIN',
-    //         studioId: reSubStudioParam,
-    //     }),
-    // });
+    client.subscribe(topic + `/${studioId}`, (payload) => {}).unsubscribe();
+    subscribe(stuId, uuid, username, chatList, setCurrentPeople);
+    client.publish({
+        destination: app + `/${stuId}/join`,
+        body: JSON.stringify({
+            type: 'JOIN',
+            studioId: reSubStudioParam,
+        }),
+    });
 }
 export function unSubscribe(studioId) {
     // console.log('unScribe하겠습니다' + studioId);
