@@ -269,10 +269,12 @@ export default function ClipEditPage() {
         };
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => {
-            console.log('사라지기전 ' + reloadingStudioId + '입니다');
-            dispatch(studioDeleteState(reloadingStudioId));
-            disconnect(reloadingStudioId);
-            window.removeEventListener('beforeunload', handleBeforeUnload);
+            // console.log('사라지기전 ' + reloadingStudioId + '입니다');
+            if (reloadingStudioId) {
+                dispatch(studioDeleteState(reloadingStudioId));
+                disconnect(reloadingStudioId);
+                window.removeEventListener('beforeunload', handleBeforeUnload);
+            }
         };
     }, []);
 

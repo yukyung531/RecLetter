@@ -281,14 +281,12 @@ export default function StudioListPage() {
                         </p>
 
                         <div
-                            className="relative flex items-center justify-center w-8 h-8 rounded-full color-bg-main mb-4 mx-2 cursor-pointer btn-animation -bottom-2"
+                            className="relative flex items-center justify-center w-8 h-8 rounded-full border-2 mb-4 me-2 cursor-pointer btn-animation -bottom-2"
                             onClick={() => {
                                 makeStudioListAPI();
                             }}
                         >
-                            <span className="material-symbols-outlined text-white text-xl">
-                                cycle
-                            </span>
+                            <img src="/src/assets/icons/reload.png" alt="" />
                         </div>
                         {editElement()}
                         <div className="absolute w-full border bottom-2 -z-10"></div>

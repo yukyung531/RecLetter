@@ -567,9 +567,11 @@ export default function LetterMakePage() {
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => {
             console.log('사라지기전 ' + reloadingStudioId + '입니다');
-            dispatch(studioDeleteState(reloadingStudioId));
-            disconnect(reloadingStudioId);
-            window.removeEventListener('beforeunload', handleBeforeUnload);
+            if (reloadingStudioId) {
+                dispatch(studioDeleteState(reloadingStudioId));
+                disconnect(reloadingStudioId);
+                window.removeEventListener('beforeunload', handleBeforeUnload);
+            }
             window.removeEventListener('scroll', handleScroll);
         };
     }, []);
@@ -2261,9 +2263,20 @@ export default function LetterMakePage() {
                                             : ''
                                     }`}
                                 ></div>
-                                <span className="material-symbols-outlined text-3xl">
-                                    movie_edit
-                                </span>
+                                {mode === 0 ? (
+                                    <img
+                                        className="w-6 h-6 my-1"
+                                        src="/src/assets/icons/sidebar-clip-pink.png"
+                                        alt=""
+                                    />
+                                ) : (
+                                    <img
+                                        className="w-6 h-6 my-1"
+                                        src="/src/assets/icons/sidebar-clip.png"
+                                        alt=""
+                                    />
+                                )}
+
                                 <p className="font-bold">영상</p>
                             </div>
                             <div
@@ -2287,9 +2300,19 @@ export default function LetterMakePage() {
                                             : ''
                                     }`}
                                 ></div>
-                                <span className="material-symbols-outlined text-3xl">
-                                    image
-                                </span>
+                                {mode === 1 ? (
+                                    <img
+                                        className="w-6 h-6 my-1"
+                                        src="/src/assets/icons/sidebar-frame-pink.png"
+                                        alt=""
+                                    />
+                                ) : (
+                                    <img
+                                        className="w-6 h-6 my-1"
+                                        src="/src/assets/icons/sidebar-frame.png"
+                                        alt=""
+                                    />
+                                )}
                                 <p className="font-bold">프레임</p>
                             </div>
                             <div
@@ -2313,9 +2336,19 @@ export default function LetterMakePage() {
                                             : ''
                                     }`}
                                 ></div>
-                                <span className="material-symbols-outlined text-3xl">
-                                    volume_up
-                                </span>
+                                {mode === 2 ? (
+                                    <img
+                                        className="w-6 h-6 my-1"
+                                        src="/src/assets/icons/sidebar-volume-pink.png"
+                                        alt=""
+                                    />
+                                ) : (
+                                    <img
+                                        className="w-6 h-6 my-1"
+                                        src="/src/assets/icons/sidebar-volume.png"
+                                        alt=""
+                                    />
+                                )}
                                 <p className="font-bold">오디오</p>
                             </div>
                             <div

@@ -69,10 +69,8 @@ export default function Header() {
                         to="/mypage"
                         className="flex mx-2 text-xl justify-center items-center"
                     >
-                        <div className="flex justify-center items-center rounded-full w-6 h-6 mx-2">
-                            <span className="material-symbols-outlined text-2xl">
-                                account_circle
-                            </span>
+                        <div className="flex justify-center items-center rounded-full w-5 h-5 mx-2">
+                            <img src="/src/assets/icons/mypage.png" alt="" />
                         </div>
                         <p>마이페이지</p>
                     </Link>

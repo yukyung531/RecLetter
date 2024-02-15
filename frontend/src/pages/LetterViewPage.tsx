@@ -291,7 +291,10 @@ export default function LetterViewPage() {
                         <></>
                     )}
                 </div>
-                <div id="button" className="absolute w-[200px] m-5 right-8">
+                <div
+                    id="button"
+                    className="absolute w-[200px] m-5 right-8 top-4"
+                >
                     <button
                         className="w-[200px] h-[56px] rounded text-xl bg-[#FF4954] text-white"
                         onClick={endScreenShare}
