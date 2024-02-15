@@ -111,11 +111,11 @@ export default function localAxios() {
                                 if (count < 3) {
                                     return instance(originalRequest);
                                 } else {
-                                    // alert(
-                                    //     '오류가 발생하여 로그인 페이지로 돌아갑니다.'
-                                    // );
-                                    // deleteStorageData();
-                                    // window.location.href = '/login';
+                                    alert(
+                                        '오류가 발생하여 로그인 페이지로 돌아갑니다.'
+                                    );
+                                    deleteStorageData();
+                                    window.location.href = '/login';
                                 }
                             })
                             .catch((e) => {
