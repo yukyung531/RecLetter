@@ -45,11 +45,8 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         //DB에서 조회
         User user = userRepository.findByUserEmailAndDeletedAtIsNull(userEmail).orElseThrow(() -> new UserNotExistException());
 
-        System.out.println("userEmail-------- = " + user.getUserEmail());
-
         return user;
     }
-
 
     public User createUser(CreateUserReq createUserReq) {
         String userEmail = createUserReq.getUserEmail();
@@ -109,7 +106,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         //소셜인 경우에는 구글 서버로 탈퇴 요청도 같이 해야 함
         if (user.getUserRole().equals("ROLE_SOCIAL") || user.getUserRole().equals("ROLE_BOTH")) {
             Optional<OAuth2AuthorizedClientEntity> entity = googleRepository.findById(new GoogleRepoId("google", user.getUserNickname()));
-            if(entity.isPresent()){
+            if (entity.isPresent()) {
                 String token = entity.get().getAccessTokenValue();
                 googleRepository.delete(entity.get()); //테이블에서 제거
                 googleRevokeService.revokeGoogleAccessToken(token);
