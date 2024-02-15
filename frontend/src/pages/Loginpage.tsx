@@ -146,9 +146,6 @@ export default function LoginPage() {
                 >
                     로그인
                 </div>
-                <p className="mb-2 text-2xl color-text-darkgray">
-                    ------------------------- 또는 -------------------------
-                </p>
                 <a
                     href={VITE_REACT_GOOGLE_LOGIN_URL}
                     className="py-4 btn-animation"
