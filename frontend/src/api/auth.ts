@@ -1,3 +1,4 @@
+import axios from 'axios';
 import {
     EmailRequest,
     EmailSend,
@@ -12,7 +13,7 @@ const local = localAxios();
 
 /** POST 로그인 */
 export async function login(user: User) {
-    return await local.post(`/api/auth/login`, user, {});
+    return await axios.post(`/api/auth/login`, user, {});
 }
 
 /** POST 이메일 인증코드 요청 */
