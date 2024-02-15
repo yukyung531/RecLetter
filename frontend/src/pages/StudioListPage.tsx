@@ -279,13 +279,9 @@ export default function StudioListPage() {
                         >
                             완성된 비디오
                         </p>
-                        {editElement()}
-                        <div className="absolute w-full border bottom-2 -z-10"></div>
-                    </div>
 
-                    <div className="flex items-center justify-center text-center">
                         <div
-                            className="relative flex items-center justify-center w-8 h-8 rounded-full color-bg-main mb-4 mx-4 cursor-pointer btn-animation"
+                            className="relative flex items-center justify-center w-8 h-8 rounded-full color-bg-main mb-4 mx-2 cursor-pointer btn-animation -bottom-2"
                             onClick={() => {
                                 makeStudioListAPI();
                             }}
@@ -294,6 +290,11 @@ export default function StudioListPage() {
                                 cycle
                             </span>
                         </div>
+                        {editElement()}
+                        <div className="absolute w-full border bottom-2 -z-10"></div>
+                    </div>
+
+                    <div className="flex items-center justify-center text-center">
                         {createElement()}
                     </div>
                 </div>

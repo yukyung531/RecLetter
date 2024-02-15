@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { ClipModify, ClipUpload, Letter } from '../types/type';
 import localAxios from '../util/http-commons';
 
@@ -9,5 +10,5 @@ export async function encodingLetter(studioId: string) {
 }
 /**  영상 다운로드 */
 export async function downloadLetter(studioId: string) {
-    return await local.get(`/api/studio/${studioId}/download`);
+    return await axios.get(`/api/studio/${studioId}/download`);
 }
