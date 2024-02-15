@@ -726,14 +726,11 @@ export default function StudioMainPage() {
                                     src="/src/assets/icons/empty-face.png"
                                     alt=""
                                 />
-                                <p className="text-lg color-text-darkgray mb-3 text-center">
+                                <p className="text-lg color-text-darkgray mb-1 text-center">
                                     아직 선택된 영상이 없어요
                                 </p>
-                                <p className="text-lg color-text-darkgray text-center">
-                                    전체 편지는 선택된 영상으로
-                                </p>
-                                <p className="text-lg color-text-darkgray text-center">
-                                    제작됩니다.
+                                <p className="text-lg color-text-darkgray mb-1  text-center">
+                                    편지는 선택된 영상으로 제작됩니다.
                                 </p>
                                 <p className="text-lg color-text-darkgray mb-20 text-center">
                                     편집에서 원하는 영상을 선택해주세요!

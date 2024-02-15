@@ -171,10 +171,10 @@ export default function ChattingBox() {
                     setChatToggle(false);
                     setChatFlag(true);
                     resetChattingList();
+                    const studioPath = getlastPath();
+                    reSubscribe(studioPath);
                 }
             });
-            const studioPath = getlastPath();
-            reSubscribe(studioPath);
         }
     };
     const subscribeFunc = async () => {

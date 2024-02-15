@@ -39,7 +39,7 @@ export default function LoginPage() {
 
     useEffect(() => {
         if (isLogin) {
-            navigate(`/studiolist`);
+            navigate(-1);
         }
     }, [isLogin]);
     /** 리덕스 설정 */
