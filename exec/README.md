@@ -484,6 +484,11 @@ pipeline {
 ---
 
 ## 실행
+
+### SMTP용 계정 설정
+
+### Google OAuth2 사용을 위한 설정
+
 ### openvidu
 - [공식문서](https://docs.openvidu.io/en/stable/deployment/ce/on-premises/)
 #### openvidu on-premise CE 버전 설치
@@ -748,15 +753,6 @@ volumes:
   video-data:
 
 ```
-
-
----
-
-## SMTP용 계정 설정
-
----
-
-## GOOGLE OAUTH2 사용을 위한 설정
 
 ---
 
