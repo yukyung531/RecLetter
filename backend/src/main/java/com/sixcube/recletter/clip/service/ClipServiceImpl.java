@@ -30,16 +30,15 @@ public class ClipServiceImpl implements ClipService {
 
     @Override
     public void createClip(Clip clip, MultipartFile file) {
-        if (file==null || !"video/mp4".equals(file.getContentType())) {
+        if (file == null || !"video/mp4".equals(file.getContentType())) {
             throw new InvalidClipFormatException();
         }
-        if (!studioUtil.isStudioParticipant(clip.getStudioId(),clip.getClipOwner())){
+        if (!studioUtil.isStudioParticipant(clip.getStudioId(), clip.getClipOwner())) {
             throw new WeirdClipUserException();
         }
 
         try {
             clipRepository.save(clip);
-            System.out.println(clip);
 
             saveS3Object(clip, file);
         } catch (AmazonS3Exception | IOException e) {
@@ -52,7 +51,6 @@ public class ClipServiceImpl implements ClipService {
     @Override
     public void updateClip(Clip clip, String prevTitle, MultipartFile file) {
         try {
-            System.out.println(clip);
             saveS3Object(clip, file);
 
             String prevKey = getFileKey(clip.getStudioId(), clip.getClipId(), prevTitle);
@@ -75,14 +73,15 @@ public class ClipServiceImpl implements ClipService {
             e.printStackTrace();
         }
     }
+
     @Override
     public Clip searchClip(int clipId) {
         return clipRepository.findClipByClipId(clipId).orElseThrow(NoSuchClipException::new);
     }
 
     @Override
-    public String searchClipUrl(int clipId){
-        Clip clip=searchClip(clipId);
+    public String searchClipUrl(int clipId) {
+        Clip clip = searchClip(clipId);
         return createSignedClipUrl(getFileKey(clip));
     }
 
@@ -105,19 +104,18 @@ public class ClipServiceImpl implements ClipService {
         return stringBuilder.toString();
     }
 
-    public void saveS3Object(Clip clip, MultipartFile file) throws IOException,AmazonS3Exception {
-        String fileKey= getFileKey(clip);
-        System.out.println(fileKey);
-        s3Util.saveObject(fileKey,file);
+    public void saveS3Object(Clip clip, MultipartFile file) throws IOException, AmazonS3Exception {
+        String fileKey = getFileKey(clip);
+        s3Util.saveObject(fileKey, file);
     }
 
     @Override
-    public Clip searchMyClip(String userId, int clipId) throws NotClipOwnerException{
-        Clip clip=searchClip(clipId);
-        if(userId.equals(clip.getClipOwner())){
+    public Clip searchMyClip(String userId, int clipId) throws NotClipOwnerException {
+        Clip clip = searchClip(clipId);
+        if (userId.equals(clip.getClipOwner())) {
             return clip;
-        } else{
-          throw new NotClipOwnerException();
+        } else {
+            throw new NotClipOwnerException();
         }
     }
 
@@ -140,11 +138,10 @@ public class ClipServiceImpl implements ClipService {
         return clipInfoList;
     }
 
-    public String createSignedClipUrl(String fileName){
+    public String createSignedClipUrl(String fileName) {
         try {
             return s3Util.getSignedUrl(fileName);
         } catch (Exception e) {
-            System.out.println("TT...");
             e.printStackTrace();
             throw new AwsAuthorizationException();
         }
@@ -155,8 +152,8 @@ public class ClipServiceImpl implements ClipService {
 
     @Override
     public void updateUsedClip(String studioId, int clipId, int clipOrder, int clipVolume) {
-        Clip clip=searchClip(clipId);
-        if(!clip.getStudioId().equals(studioId)){
+        Clip clip = searchClip(clipId);
+        if (!clip.getStudioId().equals(studioId)) {
             throw new ClipNotCorrespondingStudioException();
         }
         clip.setClipOrder(clipOrder);
@@ -166,8 +163,8 @@ public class ClipServiceImpl implements ClipService {
 
     @Override
     public void updateUnusedClip(String studioId, int clipId) {
-        Clip clip=searchClip(clipId);
-        if(!clip.getStudioId().equals(studioId)){
+        Clip clip = searchClip(clipId);
+        if (!clip.getStudioId().equals(studioId)) {
             throw new ClipNotCorrespondingStudioException();
         }
         clip.setClipOrder(-1);
@@ -179,7 +176,7 @@ public class ClipServiceImpl implements ClipService {
         List<Clip> clipList = clipRepository.findClipsByStudioIdOrderByClipOrder(studioId);
         List<LetterClipInfo> clipInfoList = new ArrayList<>();
         for (Clip clip : clipList) {
-            if(clip.getClipOrder()<0){
+            if (clip.getClipOrder() < 0) {
                 continue;
             }
             LetterClipInfo clipInfo = LetterClipInfo.builder()

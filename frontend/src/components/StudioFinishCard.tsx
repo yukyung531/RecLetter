@@ -1,5 +1,6 @@
 import { backgroundImage } from 'html2canvas/dist/types/css/property-descriptors/background-image';
 import { StudioInfo } from '../types/type';
+import { useState } from 'react';
 
 interface StudioCardProp {
     props: StudioInfo;
@@ -30,11 +31,13 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
     const stickerUrl: string = props.thumbnailUrl;
     const stickerFrame: number = props.studioFrameId;
 
+    const [isHovered, setHovered] = useState(false);
+
     const encodingElement = () => {
         if (props.studioStatus === 'ENCODING') {
             return (
                 <div
-                    className="relative w-1/5 flex flex-col mx-2 mt-4 justify-start items-center cursor-pointer"
+                    className="relative w-[23%] box-border flex flex-col mx-2 mt-4 justify-start items-center cursor-pointer"
                     id={studioId}
                     style={{ aspectRatio: 1 / 1 }}
                 >
@@ -68,17 +71,26 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
         } else if (props.studioStatus === 'COMPLETE') {
             return (
                 <div
-                    className="relative w-1/5 p-3 flex flex-col mx-2 my-2 justify-start items-center cursor-pointer mt-4"
+                    className="relative w-[23%] box-border p-3 flex flex-col mx-2 my-2 justify-start items-center cursor-pointer mt-4"
                     id={studioId}
                     onClick={onClick}
                     style={{ aspectRatio: 1 / 1 }}
+                    onMouseEnter={() => {
+                        setHovered(true);
+                    }}
+                    onMouseLeave={() => setHovered(false)}
                 >
                     <img
                         className="absolute w-full bottom-0 -z-20"
                         src="/src/assets/images/finish-video-back.png"
                         alt=""
                     />
-                    <div className="relative w-full top-1/3 z-10 border rounded-xl hover:letter-animation">
+
+                    <div
+                        className={`relative w-full top-1/3 z-10 border rounded-xl ${
+                            isHovered === true ? 'letter-animation' : ''
+                        }`}
+                    >
                         <video
                             className="w-full bg-black rounded-lg"
                             style={{
@@ -160,7 +172,7 @@ export default function StudioFinishCard({ props, onClick }: StudioCardProp) {
                                         (1000 * 60 * 60 * 24)
                                 ) > 0 ? (
                                     <p className="text-xl color-text-darkgray">
-                                        보관 기한 D -
+                                        보관 기한 D-
                                         {Math.floor(
                                             (expireDate.getTime() -
                                                 Date.now()) /

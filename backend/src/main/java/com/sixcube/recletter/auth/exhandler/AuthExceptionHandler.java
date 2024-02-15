@@ -68,16 +68,4 @@ public class AuthExceptionHandler {
         errorMessage.append("이메일이 정상적으로 발송되지 않았습니다.");
         return ResponseEntity.internalServerError().body(errorMessage.toString());
     }
-
-    @ExceptionHandler(InvalidTokenException.class)
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    protected ResponseEntity<String> emailSendExceptionHandler(InvalidTokenException e) {
-        StringBuilder errorMessage = new StringBuilder();
-
-        makeErrorMessage(errorMessage, e);
-
-        errorMessage.append("잘못된 토큰입니다.");
-        return ResponseEntity.unprocessableEntity().body(errorMessage.toString());
-    }
-
 }

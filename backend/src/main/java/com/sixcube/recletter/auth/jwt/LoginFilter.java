@@ -12,6 +12,7 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
 
+@Slf4j
 @RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -48,10 +50,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         }
         String userEmail = loginReq.getUserEmail();
         String userPassword = loginReq.getUserPassword();
-
-        System.out.println("userEmail = " + userEmail);
-        System.out.println("userPassword = " + userPassword);
-
 
         //스프링 시큐리티에서 username과 password를 검증하기 위해서는 token에 담아야 함
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userEmail, userPassword, null);
@@ -101,19 +99,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         response.getWriter().write(result);
 
-        System.out.println("LoginFilter: login success");
-
-        // 슈퍼 클래스의 successfulAuthentication 메서드를 호출하지 않음
-
+        log.debug("LoginFilter: login success");
     }
 
     //로그인 실패시 실행하는 메소드
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws ServletException, IOException {
         response.setStatus(400);
-        System.out.println("LoginFilter: login fail");
-
-        // 슈퍼 클래스의 unsuccessfulAuthentication 메서드를 호출하지 않음
-
+        log.debug("LoginFilter: login fail");
     }
 }

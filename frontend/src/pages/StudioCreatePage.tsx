@@ -161,33 +161,36 @@ export default function StudioCreatePage() {
                 <div>
                     <h5 className="text-2xl font-bold mt-8">영상 프레임</h5>
                     <div className="flex flex-wrap h-96 overflow-y-scroll">
-                        {framelist.map((item, index) => {
-                            const frameSrc =
-                                '/src/assets/frames/frame' +
-                                item.frameId +
-                                '.png';
-                            return (
-                                <div
-                                    key={'frameId :' + item.frameId}
-                                    className="flex flex-col justify-center items-center py-1 rounded-lg"
-                                    onClick={() => {
-                                        selectFrame(item.frameId);
-                                    }}
-                                    style={{
-                                        border:
-                                            item.frameId === frame
-                                                ? '2px solid #ff777f'
-                                                : '2px solid white',
-                                    }}
-                                >
-                                    <img
-                                        className="image-select-size rounded-lg color-bg-gray"
-                                        src={frameSrc}
-                                    />
-                                    <p>{item.frameTitle}</p>
-                                </div>
-                            );
-                        })}
+                        {framelist
+                            .sort((a, b) => a.frameId - b.frameId)
+                            .map((item, index) => {
+                                console.log(item);
+                                const frameSrc =
+                                    '/src/assets/frames/frame' +
+                                    item.frameId +
+                                    '.png';
+                                return (
+                                    <div
+                                        key={'frameId :' + item.frameId}
+                                        className="flex flex-col justify-center items-center py-1 rounded-lg"
+                                        onClick={() => {
+                                            selectFrame(item.frameId);
+                                        }}
+                                        style={{
+                                            border:
+                                                item.frameId === frame
+                                                    ? '2px solid #ff777f'
+                                                    : '2px solid white',
+                                        }}
+                                    >
+                                        <img
+                                            className="image-select-size rounded-lg color-bg-gray"
+                                            src={frameSrc}
+                                        />
+                                        <p>{item.frameTitle}</p>
+                                    </div>
+                                );
+                            })}
                     </div>
                 </div>
                 <div

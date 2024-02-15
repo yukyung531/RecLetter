@@ -140,10 +140,6 @@ public class ChatServiceImpl implements ChatService {
                 throw new NoSuchElementException("The userNickname does not exist in the list");
             }
 
-//            for(int i = 0; i<(redisListService.getList(key)).size(); i++){
-//                System.out.println(redisListService.getList(key).get(i));
-//            }
-
             return chatMessage;
         } catch (Exception e) {
             throw new ChatLeaveFailureException(e);

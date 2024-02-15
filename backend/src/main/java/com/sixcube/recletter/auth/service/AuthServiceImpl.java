@@ -110,7 +110,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginRes socialLogin(String userEmail) {
-        System.out.println("서비스까지 잘 왔니 ? "+userEmail);
         User user = userRepository.findByUserEmailAndDeletedAtIsNull(userEmail).get();
 
         //accessToken 생성

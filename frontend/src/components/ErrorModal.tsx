@@ -18,7 +18,9 @@ export default function ErrorModal({ onClick, message }: PropType) {
                         src="/src/assets/icons/error_message.png"
                         alt="로그아웃 확인"
                     />
-                    <p className="mt-5 text-xl text-black">{message}</p>
+                    <p className=" w-[84%] text-center mt-5 text-lg text-black">
+                        {message}
+                    </p>
                     <button
                         className="mt-[30px] h-[12%] w-1/4 text-xl text-[#FF777F] border-2 border-[#FF777F] rounded-lg hover:text-white hover:bg-[#FF4954]"
                         onClick={onClick}

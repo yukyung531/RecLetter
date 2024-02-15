@@ -281,10 +281,10 @@ export default function MyPage() {
                     </div>
 
                     <div
-                        className={`w-128 rounded-md py-2 text-2xl my-2 border-2 text-center mx-2 cursor-pointer ${
+                        className={`w-128 rounded-md py-2 text-2xl my-2 border-2 text-center mx-2 ${
                             isDisabled
-                                ? ''
-                                : 'hover:color-bg-main hover:text-white hover:transition-all'
+                                ? 'cursor-not-allowed'
+                                : 'hover:color-bg-main hover:text-white hover:transition-all cursor-pointer'
                         }`}
                         style={isDisabled ? disabledStyle : {}}
                         // 버튼이 비활성화된 경우 disabled 속성을 추가
