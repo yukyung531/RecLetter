@@ -259,9 +259,8 @@ export default function StudioMainPage() {
         };
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => {
-            console.log('사라지기전 ' + reloadingStudioId + '입니다');
+            // console.log('사라지기전 ' + reloadingStudioId + '입니다');
             if (reloadingStudioId) {
-                console.log('자자 드가자');
                 dispatch(studioDeleteState(reloadingStudioId));
                 disconnect(reloadingStudioId);
                 window.removeEventListener('beforeunload', handleBeforeUnload);
@@ -727,10 +726,10 @@ export default function StudioMainPage() {
                                     src="/src/assets/icons/empty-face.png"
                                     alt=""
                                 />
-                                <p className="text-lg color-text-darkgray mb-3 text-center">
+                                <p className="text-lg color-text-darkgray mb-1 text-center">
                                     아직 선택된 영상이 없어요
                                 </p>
-                                <p className="text-lg color-text-darkgray text-center">
+                                <p className="text-lg color-text-darkgray mb-1  text-center">
                                     편지는 선택된 영상으로 제작됩니다.
                                 </p>
                                 <p className="text-lg color-text-darkgray mb-20 text-center">
