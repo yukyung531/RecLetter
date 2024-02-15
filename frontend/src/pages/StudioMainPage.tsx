@@ -259,8 +259,9 @@ export default function StudioMainPage() {
         };
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => {
-            // console.log('사라지기전 ' + reloadingStudioId + '입니다');
+            console.log('사라지기전 ' + reloadingStudioId + '입니다');
             if (reloadingStudioId) {
+                console.log('자자 드가자');
                 dispatch(studioDeleteState(reloadingStudioId));
                 disconnect(reloadingStudioId);
                 window.removeEventListener('beforeunload', handleBeforeUnload);
@@ -714,10 +715,7 @@ export default function StudioMainPage() {
                                     아직 선택된 영상이 없어요
                                 </p>
                                 <p className="text-lg color-text-darkgray text-center">
-                                    전체 편지는 선택된 영상으로
-                                </p>
-                                <p className="text-lg color-text-darkgray text-center">
-                                    제작됩니다.
+                                    편지는 선택된 영상으로 제작됩니다.
                                 </p>
                                 <p className="text-lg color-text-darkgray mb-20 text-center">
                                     편집에서 원하는 영상을 선택해주세요!

@@ -80,6 +80,7 @@ export function subscribe(
         connect(stuId, uuid, username, chatList, setCurrentPeople);
     } else if (client.connected) {
         // console.log('이미 연결된 상태입니다,');
+        connect(studioParam, uid, nickname, setChattingList, currentPeopleFunc);
         if (setConnect && !currentRoom.includes(stuId)) {
             client.subscribe(topic + `/${stuId}`, (payload) => {
                 onMeesageReceived(payload);
@@ -89,13 +90,13 @@ export function subscribe(
                 firstEnter = true;
             }
             currentRoom.push(stuId);
-        }  else if (!setConnect) {
+        } else if (!setConnect) {
             unSubscribe(stuId);
             client.deactivate();
         } else {
             unSubscribe(stuId);
             client.subscribe(topic + `/${stuId}`, (payload) => {
-                onMeesageReceived(payload)
+                onMeesageReceived(payload);
             });
         }
     }
@@ -104,14 +105,15 @@ export function reSubscribe(reSubStudioParam) {
     // console.log('재구독 작동합니다');
     stuId = reSubStudioParam;
     setConnect = true;
-    subscribe(stuId, uuid, username, chatList, setCurrentPeople);
-    client.publish({
-        destination: app + `/${stuId}/join`,
-        body: JSON.stringify({
-            type: 'JOIN',
-            studioId: reSubStudioParam,
-        }),
-    });
+    // client.subscribe(topic + `/${studioId}`, (payload) => {}).unsubscribe();
+    // subscribe(stuId, uuid, username, chatList, setCurrentPeople);
+    // client.publish({
+    //     destination: app + `/${stuId}/join`,
+    //     body: JSON.stringify({
+    //         type: 'JOIN',
+    //         studioId: reSubStudioParam,
+    //     }),
+    // });
 }
 export function unSubscribe(studioId) {
     // console.log('unScribe하겠습니다' + studioId);

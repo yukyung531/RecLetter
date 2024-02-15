@@ -111,26 +111,24 @@ export default function localAxios() {
                                 if (count < 3) {
                                     return instance(originalRequest);
                                 } else {
-                                    // alert(
-                                    //     '오류가 발생하여 로그인 페이지로 돌아갑니다.'
-                                    // );
-                                    // deleteStorageData();
-                                    // window.location.href = '/login';
+                                    alert(
+                                        '이전 정보가 없어 로그인 페이지로 돌아갑니다.'
+                                    );
+                                    deleteStorageData();
+                                    window.location.href = '/login';
                                 }
                             })
                             .catch((e) => {
                                 console.log(e);
                             });
                     }
-                }
-                // else if (status === httpStatusCode.NOTPROCESS) {
-                //     deleteStorageData();
-                //     window.location.href = '/login';
-                // } else if (status == httpStatusCode.FORBIDDEN) {
-                //     alert('접근이 올바르지 않습니다.');
-                //     window.location.href = '/login';
-                // }
-                else {
+                } else if (status === httpStatusCode.NOTPROCESS) {
+                    deleteStorageData();
+                    window.location.href = '/login';
+                } else if (status == httpStatusCode.FORBIDDEN) {
+                    alert('접근이 올바르지 않습니다.');
+                    window.location.href = '/login';
+                } else {
                     console.log('오류떠쎠');
                 }
             } else {
