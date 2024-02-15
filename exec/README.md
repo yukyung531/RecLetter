@@ -206,7 +206,17 @@ Gradle
   - GitLab host URL: 사용하는 repo의 host URL. SSAFY 기준 https://lab.ssafy.com
   - Credentials: 위에서 설정한 GitLab API Token ID
   - Test Connetion을 통해 확인후 저장
-- 
+- 사용할 Pipeline 생성 후 build trigger 설정
+  - pipeline > configure > General > Build Triggers
+  - Build when a change is pushed to Gitlab 체크
+  - Push Events 체크
+  - Opened Merge Request Events 체크
+  - Approved Merge Request (EE-only) 체크
+  - Comments 체크
+  - 하단 고급 > Secret token Generate 후 복사
+- Gitlab repo > Settings > Webhooks > Add new webhook
+  - URL: http://(젠킨스주소)/project/(pipeline 이름)
+  - Secret Token: 위에서 저장한 secret token
 #### Docker Hub Token
 #### Docker Hub Repository 생성
 #### Ubuntu Credential 추가
