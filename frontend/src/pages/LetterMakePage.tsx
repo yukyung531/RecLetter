@@ -410,7 +410,7 @@ export default function LetterMakePage() {
 
                         //스티커 기본 정보 초기화
                         /* 스티커 */
-                        console.log('스티커 관련');
+                        // console.log('스티커 관련');
                         if (res.data.studioStickerUrl.match(regex)) {
                             setCustomSticker(res.data.studioStickerUrl);
                             setCustomStickerFlag(true);
@@ -418,7 +418,7 @@ export default function LetterMakePage() {
                         }
 
                         //studioBGM
-                        console.log(res.data);
+                        // console.log(res.data);
                         if (res.data.studioBgmId) {
                             setSelectedBGM(res.data.studioBgmId);
                             //선택된 bgm 불러오기
@@ -536,7 +536,7 @@ export default function LetterMakePage() {
                 const enterStudioAPI = async (studioId: string) => {
                     await enterStudio(studioId)
                         .then((res) => {
-                            console.log(res);
+                            // console.log(res);
                             getDetail(studioId);
                         })
                         .catch(() => {
@@ -566,7 +566,7 @@ export default function LetterMakePage() {
         window.addEventListener('scroll', handleScroll);
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => {
-            console.log('사라지기전 ' + reloadingStudioId + '입니다');
+            // console.log('사라지기전 ' + reloadingStudioId + '입니다');
             if (reloadingStudioId) {
                 dispatch(studioDeleteState(reloadingStudioId));
                 disconnect(reloadingStudioId);
@@ -645,7 +645,7 @@ export default function LetterMakePage() {
                 video.style.transform = 'scaleX(1)';
             }
             const onCapture = () => {
-                console.log('onCapture');
+                // console.log('onCapture');
                 if (!target) {
                     setErrorMessage('결과 저장에 실패했습니다');
                     return setIsModalActive(true);
@@ -654,7 +654,7 @@ export default function LetterMakePage() {
                 html2canvas(target, { scale: 1.6, backgroundColor: null }).then(
                     (canvas) => {
                         const imageDataURL = canvas.toDataURL('image/png');
-                        console.log(imageDataURL);
+                        // console.log(imageDataURL);
                         onSaveAs(
                             canvas.toDataURL('image/png'),
                             'image-download.png'
@@ -684,7 +684,7 @@ export default function LetterMakePage() {
         if (canvasSaveNum !== 0) {
             const target = canvasRef.current;
             const onCapture = () => {
-                console.log('onCapture');
+                // console.log('onCapture');
                 if (!target) {
                     setErrorMessage('결과 저장에 실패했습니다');
                     return setIsModalActive(true);
@@ -871,11 +871,11 @@ export default function LetterMakePage() {
         //usedClip, notUsedClip을 기준으로 돌아가니, 이쪽의 정보 업데이트
         for (let i = 0; i < usedClipList.length; i++) {
             if (usedClipList[i].clipId === clipId) {
-                console.log(
-                    'duration calculated',
-                    clipId,
-                    event.target.duration
-                );
+                // console.log(
+                //     'duration calculated',
+                //     clipId,
+                //     event.target.duration
+                // );
                 usedClipList[i].clipLength = event.target.duration;
                 //누적합 갱신
                 updateWhole(usedClipList);
@@ -1003,7 +1003,7 @@ export default function LetterMakePage() {
      * @param index
      */
     const selectIdx = (index: number) => {
-        console.log(index);
+        // console.log(index);
         stopVideo();
         playingIdx.current = index;
         playVideo();
@@ -2065,20 +2065,20 @@ export default function LetterMakePage() {
             };
             //formdata to json
             const object: ObjectType = {};
-            console.log('FormData에 넣은 데이터ㅡㅡㅡㅡㅡㅡㅡㅡㅡ');
+            // console.log('FormData에 넣은 데이터ㅡㅡㅡㅡㅡㅡㅡㅡㅡ');
             formData.forEach((value, key) => {
-                console.log('key / Value | ' + key + ' / ' + value);
+                // console.log('key / Value | ' + key + ' / ' + value);
                 object[key.toString()] = value;
             });
-            console.log('ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ');
-            console.log(object);
+            // console.log('ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ');
+            // console.log(object);
             //전송
             await modifyStudioInfo(object)
                 .then((res) => {
-                    console.log(res);
+                    // console.log(res);
                 })
                 .catch((err) => {
-                    console.log(err);
+                    // console.log(err);
                 });
 
             //세션 종료 후 뒤로 가기
@@ -2112,7 +2112,7 @@ export default function LetterMakePage() {
                         positionX: e.clientX,
                         positionY: e.clientY,
                     });
-                    console.log(mousePosition.positionX);
+                    // console.log(mousePosition.positionX);
                 }
             }}
         >

@@ -230,11 +230,11 @@ export default function LetterViewPage() {
                 const enterStudioAPI = async (studioId: string) => {
                     await enterStudio(studioId)
                         .then((res) => {
-                            console.log(res);
+                            // console.log(res);
                             getDetail(studioId);
                         })
                         .catch(() => {
-                            console.log('오류떠서 재실행');
+                            console.log('오류발생');
                             getDetail(studioId);
                         });
                 };
@@ -252,7 +252,7 @@ export default function LetterViewPage() {
             };
             window.addEventListener('beforeunload', handleBeforeUnload);
             return () => {
-                console.log('사라지기전 ' + reloadingStudioId + '입니다');
+                // console.log('사라지기전 ' + reloadingStudioId + '입니다');
                 dispatch(studioDeleteState(reloadingStudioId));
                 disconnect(reloadingStudioId);
                 window.removeEventListener('beforeunload', handleBeforeUnload);
@@ -293,7 +293,7 @@ export default function LetterViewPage() {
                 </div>
                 <div
                     id="button"
-                    className="absolute w-[200px] m-5 right-8 top-4"
+                    className="absolute w-[200px] m-5 right-8 top-12"
                 >
                     <button
                         className="w-[200px] h-[56px] rounded text-xl bg-[#FF4954] text-white"

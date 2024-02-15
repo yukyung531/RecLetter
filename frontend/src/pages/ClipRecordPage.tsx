@@ -270,11 +270,11 @@ export default function ClipRecordPage() {
                         const arr = [...res.data.scriptTemplate];
                         setScriptList(arr);
                     } else {
-                        console.log('네트워크는 올바르나 응답이 문제');
+                        // console.log('네트워크는 올바르나 응답이 문제');
                     }
                 })
                 .catch((err) => {
-                    console.log('네트워크 에러');
+                    // console.log('네트워크 에러');
                     console.log(err);
                 });
         };
@@ -326,7 +326,7 @@ export default function ClipRecordPage() {
                 const enterStudioAPI = async (studioId: string) => {
                     await enterStudio(studioId)
                         .then((res) => {
-                            console.log(res);
+                            // console.log(res);
                             getDetail(studioId);
                         })
                         .catch(() => {
@@ -385,7 +385,7 @@ export default function ClipRecordPage() {
                 mS.removeTrack(trackList[i]);
             }
 
-            console.log('사라지기전 ' + reloadingStudioId + '입니다');
+            // console.log('사라지기전 ' + reloadingStudioId + '입니다');
             if (reloadingStudioId) {
                 dispatch(studioDeleteState(reloadingStudioId));
                 disconnect(reloadingStudioId);
@@ -683,7 +683,7 @@ export default function ClipRecordPage() {
             } else {
                 //에러창 출력
                 setIsRecordModalActive(true);
-                console.log('선택된 영상이 없습니다. 영상을 선택해 주세요.');
+                // console.log('선택된 영상이 없습니다. 영상을 선택해 주세요.');
             }
         }
     };

@@ -71,7 +71,7 @@ export default function StudioListPage() {
         if (token)
             await getStudio(token)
                 .then((res) => {
-                    console.log(res);
+                    // console.log(res);
                     if (res.status === httpStatusCode.OK) {
                         setStudioList(res.data.studioInfoList);
                         setFinishStudioList([]);
@@ -252,7 +252,7 @@ export default function StudioListPage() {
     //스튜디오 정보 불러오기
 
     return (
-        <section className="relative w-full base-height items-center flex flex-col mt-14">
+        <section className="relative w-full items-center flex flex-col mt-14">
             {isModalActive ? (
                 <SuccessModal onClick={closeModal} message="삭제되었습니다." />
             ) : (
@@ -296,7 +296,7 @@ export default function StudioListPage() {
                                 changeListTab(1);
                             }}
                         >
-                            완성된 비디오
+                            완성된 편지
                         </p>
 
                         <div

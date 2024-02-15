@@ -101,7 +101,7 @@ export default function ChattingBox() {
                 chatStudioList.length === 1 &&
                 chatStudioList[0] === studioPath
             ) {
-                console.log('작동1');
+                // console.log('작동1');
 
                 chatInitialAPI();
             } else if (
@@ -109,10 +109,10 @@ export default function ChattingBox() {
                 (chatStudioList[chatStudioList.length - 1] === studioPath ||
                     chatStudioList[chatStudioList.length - 1] === 'reload')
             ) {
-                console.log('작동2');
+                // console.log('작동2');
                 subscribeFunc();
             } else if (chatStudioList.length === 0) {
-                console.log('작동3');
+                // console.log('작동3');
 
                 changeChatToggle(false);
             }
@@ -127,7 +127,7 @@ export default function ChattingBox() {
         if (messageEndRef.current) {
             messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
-        console.log('채팅리스트 숫자' + chattingList.length);
+        // console.log('채팅리스트 숫자' + chattingList.length);
         if (!chatToggle) {
             setViewChatFlag(false);
         }
@@ -142,7 +142,7 @@ export default function ChattingBox() {
         if (!chatFlag) {
             await getUser().then((res) => {
                 if (res.status === httpStatusCode.OK) {
-                    console.log('유저 정보를 새로이 받아옵니다.');
+                    // console.log('유저 정보를 새로이 받아옵니다.');
                     setUserNickname(res.data.userNickname);
                     setUserId(res.data.userId);
                     setCurrentPeople([]);
@@ -164,7 +164,7 @@ export default function ChattingBox() {
         else {
             await getUser().then((res) => {
                 if (res.status === httpStatusCode.OK) {
-                    console.log('재진입 유저 정보를 새로이 받아옵니다.');
+                    // console.log('재진입 유저 정보를 새로이 받아옵니다.');
                     setUserNickname(res.data.userNickname);
                     setUserId(res.data.userId);
                     setCurrentPeople([]);
@@ -180,7 +180,7 @@ export default function ChattingBox() {
     const subscribeFunc = async () => {
         await getUser().then((res) => {
             if (res.status === httpStatusCode.OK) {
-                console.log('유저 정보를 새로이 받아옵니다.');
+                // console.log('유저 정보를 새로이 받아옵니다.');
                 setUserNickname(res.data.userNickname);
                 setUserId(res.data.userId);
                 setCurrentPeople([]);
@@ -305,10 +305,10 @@ export default function ChattingBox() {
     // 채팅 리스트 표시
     const chatting = () => {
         const studioPath = getlastPath();
-        console.log(chattingList);
+        // console.log(chattingList);
         let index = -1;
         chattingList.map((item, itemIndex) => {
-            console.log('엥');
+            // console.log('엥');
 
             if (item.studioId == studioPath) {
                 index = itemIndex;
@@ -562,14 +562,21 @@ export default function ChattingBox() {
                 );
             else if (!chatToggle) {
                 return (
-                    <img
-                        src={closeLogoSrc}
-                        className="w-16 h-16 fixed flex justify-center items-center bottom-8 right-8  cursor-pointer z-30"
-                        alt=""
-                        onClick={() => {
-                            changeChatToggle(!chatToggle);
-                        }}
-                    />
+                    <div className="relative">
+                        <img
+                            src={closeLogoSrc}
+                            className="w-16 h-16 fixed flex justify-center items-center bottom-8 right-8  cursor-pointer z-30"
+                            alt=""
+                            onClick={() => {
+                                changeChatToggle(!chatToggle);
+                            }}
+                        />
+                        {!viewChatFlag ? (
+                            <div className="fixed w-4 h-4 bottom-[70px] right-9 border-2 border-white color-bg-subbold rounded-full z-40"></div>
+                        ) : (
+                            <></>
+                        )}
+                    </div>
                 );
             }
         }

@@ -41,7 +41,7 @@ export default function LetterFinishPage() {
         const studioId = getlastPath();
         await downloadLetter(studioId)
             .then((res) => {
-                console.log(res);
+                // console.log(res);
                 setQrCode(res.data.letterUrl);
                 setTitle(res.data.studioTitle);
                 if (res.data.letterUrl === '') {

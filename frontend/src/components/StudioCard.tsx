@@ -166,14 +166,8 @@ export default function StudioCard({
                     {Math.floor(
                         (expireDate.getTime() - Date.now()) /
                             (1000 * 60 * 60 * 24)
-                    ) <= 1 ? (
-                        <p className="w-fit text-2xl color-text-main">
-                            D-
-                            {Math.floor(
-                                (expireDate.getTime() - Date.now()) /
-                                    (1000 * 60 * 60 * 24)
-                            )}
-                        </p>
+                    ) < 1 ? (
+                        <p className="w-fit text-2xl color-text-main">D- Day</p>
                     ) : (
                         <p className="w-fit text-2xl">
                             D-

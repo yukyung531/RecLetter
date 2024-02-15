@@ -74,12 +74,12 @@ export default function StudioCreatePage() {
     const loadMakeStudioAPI = async (studioParameter: StudioMake) => {
         await makeStudio(studioParameter)
             .then((res) => {
-                console.log(res);
+                // console.log(res);
                 if (res.status === httpStatusCode.OK) {
-                    console.log('방생성이 성공했습니다.');
+                    // console.log('방생성이 성공했습니다.');
                     navigate('/studiolist');
                 } else if (res.status === httpStatusCode.BADREQUEST) {
-                    console.log('bad request');
+                    // console.log('bad request');
                 }
             })
             .catch((error) => {
@@ -92,13 +92,13 @@ export default function StudioCreatePage() {
         await getTemplate().then((res) => {
             if (res.status === httpStatusCode.OK) {
                 setFrameList(res.data.frameTemplate);
-                console.log(res.data.frameTemplate);
+                // console.log(res.data.frameTemplate);
             }
         });
     };
     const selectFrame = (frameId: number) => {
         setFrame(frameId);
-        console.log(frameId);
+        // console.log(frameId);
     };
 
     return (
@@ -164,7 +164,7 @@ export default function StudioCreatePage() {
                         {framelist
                             .sort((a, b) => a.frameId - b.frameId)
                             .map((item, index) => {
-                                console.log(item);
+                                // console.log(item);
                                 const frameSrc =
                                     '/src/assets/frames/frame' +
                                     item.frameId +

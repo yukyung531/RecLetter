@@ -88,7 +88,7 @@ export default function MyPage() {
 
     useEffect(() => {
         if (isLogin) {
-            console.log(isLogin);
+            // console.log(isLogin);
             getUserInfo();
         }
         if (!isLogin) {
@@ -104,7 +104,7 @@ export default function MyPage() {
                 setUserEmail(res.data.userEmail);
                 if (res.data.userRole === 'ROLE_SOCIAL') {
                     setIsDisabled(true);
-                    console.log('안댕');
+                    // console.log('안댕');
                 }
             }
         });

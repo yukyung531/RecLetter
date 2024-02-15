@@ -116,7 +116,7 @@ export default function CanvasItem(props: canvasType) {
 
                 objImage.onload = () => {
                     // 이미지가 로드된 후에 실행됩니다.
-                    console.log('작동');
+                    // console.log('작동');
                     ctx.save();
                     ctx.drawImage(
                         objImage,
@@ -143,10 +143,10 @@ export default function CanvasItem(props: canvasType) {
             }
             if (ctx && positionX && positionY) {
                 // mouse position
-                console.log(canvas.getBoundingClientRect().left);
-                console.log(props.mousePosition.positionX);
-                console.log(canvas.getBoundingClientRect().top);
-                console.log(props.mousePosition.positionY);
+                // console.log(canvas.getBoundingClientRect().left);
+                // console.log(props.mousePosition.positionX);
+                // console.log(canvas.getBoundingClientRect().top);
+                // console.log(props.mousePosition.positionY);
 
                 const mouseX = positionX - canvas.getBoundingClientRect().left;
                 const mouseY = positionY - canvas.getBoundingClientRect().top;
@@ -166,7 +166,7 @@ export default function CanvasItem(props: canvasType) {
                 const imageSize = scale; // 이미지의 새로운 크기
                 objImage.onload = () => {
                     // 이미지가 로드된 후에 실행됩니다.
-                    console.log('작동');
+                    // console.log('작동');
                     ctx.save();
                     ctx.translate(mouseX, mouseY);
                     ctx.rotate((rotate % 360) * (Math.PI / 180));
@@ -247,7 +247,7 @@ export default function CanvasItem(props: canvasType) {
         /* Canvas 이미지 설정 */
         const target = canvasRef.current;
         const onCapture = () => {
-            console.log('onCapture');
+            // console.log('onCapture');
             if (!target) {
                 return;
             }
@@ -286,7 +286,7 @@ export default function CanvasItem(props: canvasType) {
                         objImage.src = item;
                         objImage.onload = () => {
                             // 이미지가 로드된 후에 실행됩니다.
-                            console.log('작동');
+                            // console.log('작동');
 
                             ctx.drawImage(
                                 objImage,
@@ -299,13 +299,13 @@ export default function CanvasItem(props: canvasType) {
                                 saveFlag === 1 &&
                                 props.stickerLayout.length === index + 1
                             ) {
-                                console.log('다운로드하장');
+                                // console.log('다운로드하장');
                                 props.setCanvasDownload(index + 1);
                             } else if (
                                 saveFlag === 2 &&
                                 props.stickerLayout.length === index + 1
                             ) {
-                                console.log('저장하장');
+                                // console.log('저장하장');
                                 props.setCanvasSave(index + 1);
                             }
                         };

@@ -16,10 +16,10 @@ export default function SocialPage() {
 
     useEffect(() => {
         const currentUri = window.location.href;
-        console.log('변경 전 호스트', currentUri);
+        // console.log('변경 전 호스트', currentUri);
         // 변경할 새로운 호스트
         const newHost = VITE_REACT_GOOGLE_CHANGE_HOST;
-        console.log('뉴호스트', newHost);
+        // console.log('뉴호스트', newHost);
 
         // Axios 요청을 보내기 전에 URI의 호스트를 변경
         let modifiedUri: string = '';
@@ -36,7 +36,7 @@ export default function SocialPage() {
             );
         }
 
-        console.log('최종 경로', modifiedUri);
+        // console.log('최종 경로', modifiedUri);
         fetchData(modifiedUri);
     }, []);
 
@@ -44,9 +44,9 @@ export default function SocialPage() {
         await axios
             .get(modifiedUri)
             .then((res) => {
-                console.log('결과', res);
+                // console.log('결과', res);
                 if (res.status === httpStatusCode.OK) {
-                    console.log('로그인이 성공했습니다.');
+                    // console.log('로그인이 성공했습니다.');
                     localStorage.setItem('access-token', res.data.accessToken);
                     localStorage.setItem(
                         'refresh-token',

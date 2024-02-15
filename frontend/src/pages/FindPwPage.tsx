@@ -101,7 +101,7 @@ export default function FindPwPage() {
         await requestPasswordEmail({ userEmail: inputEmail })
             .then((res) => {
                 if (res.status === httpStatusCode.OK) {
-                    console.log('이메일을 보냈습니다.');
+                    // console.log('이메일을 보냈습니다.');
                     setEmailFlag(2);
                     setEmailCheck(true);
                     setCodeCheck(false);
@@ -134,12 +134,12 @@ export default function FindPwPage() {
                 ) {
                     setEmailFlag(3);
                     setCodeCheck(true);
-                    console.log(res.data);
+                    // console.log(res.data);
                     setCodeFlag(false);
                 } else {
                     setEmailFlag(3);
                     setCodeFlag(true);
-                    console.log('코드확인이 실패하였습니다.');
+                    // console.log('코드확인이 실패하였습니다.');
                 }
             })
             .catch((e: Error) => {
@@ -159,7 +159,7 @@ export default function FindPwPage() {
                     setIsSuccessModalActive(true);
                     deleteStorageData();
                 } else {
-                    console.log('인증코드 관련이 잘못되었습니다');
+                    // console.log('인증코드 관련이 잘못되었습니다');
                 }
             });
         }

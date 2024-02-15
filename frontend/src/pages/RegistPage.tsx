@@ -88,7 +88,7 @@ export default function RegistPage() {
         await requestEmail({ userEmail: inputEmail })
             .then((res) => {
                 if (res.status === httpStatusCode.OK) {
-                    console.log('이메일을 보냈습니다.');
+                    // console.log('이메일을 보냈습니다.');
                     setEmailFlag(2);
                     setEmailCheck(true);
                     setCodeCheck(false);
@@ -108,7 +108,7 @@ export default function RegistPage() {
                 }
                 setEmailFlag(4);
 
-                console.log('오류가 발생했습니다.' + e.message);
+                // console.log('오류가 발생했습니다.' + e.message);
             });
     };
     /** 코드 체크 함수 */
@@ -121,12 +121,12 @@ export default function RegistPage() {
                 ) {
                     setEmailFlag(3);
                     setCodeCheck(true);
-                    console.log(res.data);
+                    // console.log(res.data);
                     setCodeFlag(false);
                 } else {
                     setEmailFlag(3);
                     setCodeFlag(true);
-                    console.log('코드확인이 실패하였습니다.');
+                    // console.log('코드확인이 실패하였습니다.');
                 }
             })
             .catch((e: Error) => {
