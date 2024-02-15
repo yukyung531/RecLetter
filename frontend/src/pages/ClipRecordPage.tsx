@@ -26,6 +26,7 @@ import {
 import { enterStudio, studioDetail } from '../api/studio';
 import ErrorModal from '../components/ErrorModal';
 import { transform } from 'html2canvas/dist/types/css/property-descriptors/transform';
+import GuideModal from '../components/GuideModal';
 
 interface Const {
     audio: boolean;
@@ -53,6 +54,12 @@ export default function ClipRecordPage() {
         setIsRecordingLimitModalActive(false);
         startRecord();
     };
+
+    // 영상없이 다음 단계로 이동하려할 때 모달
+    const [isRecordModalActive, setIsRecordModalActive] = useState<boolean>(false);
+    const closeRecordModal = () => {
+        setIsRecordModalActive(false);
+    }
 
     //모드 0:영상, 1:스크립트
     const [mode, setMode] = useState<number>(0);
@@ -672,6 +679,7 @@ export default function ClipRecordPage() {
                 //navigate 직전에 blob url 정리할 것
             } else {
                 //에러창 출력
+                setIsRecordModalActive(true);                
                 console.log('선택된 영상이 없습니다. 영상을 선택해 주세요.');
             }
         }
@@ -717,9 +725,14 @@ export default function ClipRecordPage() {
             ) : (
                 <></>
             )}
+            {isRecordModalActive ? (
+                    <ErrorModal onClick={closeRecordModal} message="촬영된 영상이 없습니다. 영상을 촬영해 주세요." />
+            ) : (
+                <></>
+            )}
             {isRecordLimitModalActive ? (
                 <>
-                    <ErrorModal
+                    <GuideModal
                         onClick={closeWarning}
                         message="영상은 최대 59초까지 촬영 가능합니다."
                     />
@@ -735,7 +748,7 @@ export default function ClipRecordPage() {
                             id="warning"
                         />
                         <label htmlFor="warning">
-                            더 이상 경고문을 보지 않습니다.
+                            더 이상 안내문을 보지 않습니다.
                         </label>
                     </div>
                 </>
