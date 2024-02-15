@@ -455,7 +455,7 @@ pipeline {
         stage('Service Stop') {
             steps {
                 script {
-                    sshagent(credentials: ['ubuntu_a606']) {
+                    sshagent(credentials: [[ubuntu credential id, ex) 'ubuntu_a606']]) {
                     // sh '''
                     // ssh -o StrictHostKeyChecking=no $releaseServerAccount@$releaseServerUri "cd app; sudo docker-compose down"
                     // ssh -o StrictHostKeyChecking=no $releaseServerAccount@$releaseServerUri "cd app; sudo docker rmi $frontendImageName:latest"
@@ -469,7 +469,7 @@ pipeline {
         stage('Service Start') {
             steps {
                 script {
-                    sshagent(credentials: ['ubuntu_a606']) {
+                    sshagent(credentials: [[ubuntu credential id, ex) 'ubuntu_a606']]) {
                         sh '''
                             ssh -o StrictHostKeyChecking=no $releaseServerAccount@$releaseServerUri "cd /opt/openvidu; sudo docker-compose up -d"
                         '''
