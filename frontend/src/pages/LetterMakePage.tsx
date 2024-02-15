@@ -421,7 +421,15 @@ export default function LetterMakePage() {
                         console.log(res.data);
                         if (res.data.studioBgmId) {
                             setSelectedBGM(res.data.studioBgmId);
-                            selectBGMUrl(res.data.studioBgmId);
+                            //선택된 bgm 불러오기
+                            //2번 bgm부터 bgm1.mp3
+                            if (res.data.studioBgmId > 1) {
+                                setSelectedBGMUrl(
+                                    `/src/assets/bgm/bgm${
+                                        res.data.studioBgmId - 1
+                                    }.mp3`
+                                );
+                            }
                         }
 
                         //studioBGMVolume
@@ -1799,27 +1807,64 @@ export default function LetterMakePage() {
         newSession
             .connect(token, { clientData: user.userNickname })
             .then(async () => {
-                // console.log('Connected');
+                //getDisplayMedia 도전
+                const constraints = {
+                    video: {
+                        width: {
+                            ideal: 1024,
+                        },
+                        height: {
+                            ideal: 1080,
+                        },
+                    },
+                    audio: true,
+                    selfBrowserSurface: 'include',
+                };
+
+                navigator.mediaDevices
+                    .getDisplayMedia(constraints)
+                    .then((stream) => {
+                        OV.current
+                            .initPublisherAsync(undefined, {
+                                audioSource: stream.getAudioTracks()[0],
+                                videoSource: stream.getVideoTracks()[0],
+                                publishAudio: true,
+                                publishVideo: true,
+                                resolution: '1920x1080',
+                                frameRate: 30,
+                                insertMode: 'APPEND',
+                                mirror: false,
+                            })
+                            .then((publisher) => {
+                                newSession.publish(publisher);
+                                // console.log(publisher);
+                                //메인 화면, publisher에 현재 publisher 선정
+                                setMainStreamManager(publisher);
+                                setPublisher(publisher);
+                            });
+                    });
+
                 //publisher 초기화(videoSource = screen)
-                const publisher = await OV.current.initPublisherAsync(
-                    undefined,
-                    {
-                        audioSource: false,
-                        videoSource: 'screen',
-                        publishAudio: false,
-                        publishVideo: true,
-                        resolution: '640x480',
-                        frameRate: 30,
-                        insertMode: 'APPEND',
-                        mirror: false,
-                    }
-                );
+                // const publisher = await OV.current.initPublisherAsync(
+                //     undefined,
+                //     {
+                //         audioSource: 'screen',
+                //         videoSource: 'screen',
+                //         publishAudio: true,
+                //         publishVideo: true,
+                //         resolution: '640x480',
+                //         frameRate: 30,
+                //         insertMode: 'APPEND',
+                //         mirror: false,
+                //     }
+                // );
+
                 //퍼블리시
-                newSession.publish(publisher);
-                // console.log(publisher);
-                //메인 화면, publisher에 현재 publisher 선정
-                setMainStreamManager(publisher);
-                setPublisher(publisher);
+                // newSession.publish(publisher);
+                // // console.log(publisher);
+                // //메인 화면, publisher에 현재 publisher 선정
+                // setMainStreamManager(publisher);
+                // setPublisher(publisher);
             })
             .catch((error) => {
                 //connect에 에러

@@ -96,6 +96,10 @@ export default function StudioMainPage() {
         clipContent: '',
     });
 
+    //선택된 bgm url
+    const [selectedBGMUrl, setSelectedBGMUrl] = useState<string>('');
+    const bgmRef = useRef<HTMLAudioElement>(null);
+
     const [finishAuth, setFinishAuth] = useState<boolean>(false);
 
     //프레임 설정
@@ -162,6 +166,21 @@ export default function StudioMainPage() {
                             setSelectImgUrl(
                                 `/src/assets/frames/frame${res.data.studioFrameId}.png`
                             );
+
+                            //선택된 bgm 불러오기
+                            //2번 bgm부터 bgm1.mp3
+                            if (res.data.studioBgmId > 1) {
+                                setSelectedBGMUrl(
+                                    `/src/assets/bgm/bgm${
+                                        res.data.studioBgmId - 1
+                                    }.mp3`
+                                );
+                            }
+
+                            if (bgmRef.current) {
+                                bgmRef.current.volume =
+                                    res.data.studioBgmVolume / 200;
+                            }
 
                             //순서 불러오기
                             //우선 정렬을 한 후, 사용한 비디오, 아닌 비디오로 분리
@@ -392,6 +411,10 @@ export default function StudioMainPage() {
             if (videoRef.current) {
                 videoRef.current.play();
             }
+            //연속 재생이면 재생
+            if (bgmRef.current && playAllSelectedVideoRef.current) {
+                bgmRef.current.play();
+            }
         }
     };
 
@@ -402,6 +425,11 @@ export default function StudioMainPage() {
         setPlayingVideo(false);
         if (videoRef.current) {
             videoRef.current.pause();
+        }
+
+        //bgm 재생 종료
+        if (bgmRef.current) {
+            bgmRef.current.pause();
         }
 
         //만약 전체 영상 재생 중이었다면?
@@ -576,6 +604,9 @@ export default function StudioMainPage() {
         }
         if (usedVideoList.length > 0) {
             selectVideo(usedVideoList[0].clipId);
+        }
+        if (bgmRef.current) {
+            bgmRef.current.currentTime = 0;
         }
     };
 
@@ -770,7 +801,10 @@ export default function StudioMainPage() {
                                         전체 편지 자동 재생
                                     </p>
                                 </div>
-                                <div className="flex w-1/3 justify-end">
+                                <div
+                                    className="flex w-1/3 justify-end cursor-pointer"
+                                    onClick={handleClipBoard}
+                                >
                                     <p className="text-xl text-white mr-2">
                                         초대링크 복사하기
                                     </p>
@@ -990,6 +1024,17 @@ export default function StudioMainPage() {
                     </div>
                 </div>
             </div>
+            {/* bgm재생 */}
+            <audio
+                src={selectedBGMUrl}
+                crossOrigin="anonymous"
+                controls
+                ref={bgmRef}
+                style={{ display: 'none' }}
+                loop
+            >
+                오디오
+            </audio>
         </section>
     );
 }
