@@ -118,7 +118,7 @@ sudo sed -i 's#https://updates.jenkins.io/update-center.json#https://raw.githubu
 sudo docker restart jenkins
 ```
 
-### 관리자 계정 설정
+### 첫 젠킨스 접근
 ```
 docker exec -it jenkins /bin/bash
 ```
@@ -131,13 +131,82 @@ cd /var/jenkins_home/secrets
 cat initialAdminPassword
 ```
 
-- 위의 명령어를 통해 초기 비밀번호를 확인 후 localhost:8080으로 접속하여 계정 생성
-### Jenkins 플러그인 설치
+- 위의 명령어를 통해 초기 비밀번호를 확인 후 localhost:8080으로 접속하여 사용
+
+### Jenkins 기본 플러그인 설치
+- Install suggested plugins 사용
+- 
+### 관리자 계정 설정
+- 주어진 입력 폼에 맞춰 관리자 계정 생성
+
 ### Jenkins 내부에 Docker, Docker Compose 설치
+```
+docker exec -it jenkins /bin/bash
+```
+
+```
+apt-get update && apt-get -y install apt-transport-https ca-certificates curl gnupg2 software-properties-common && curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg > /tmp/dkey; apt-key add /tmp/dkey && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable" && apt-get update && apt-get -y install docker-ce
+```
+
+```
+groupadd -f docker
+```
+
+```
+usermod -aG docker jenkins
+```
+
+```
+chown root:docker /var/run/docker.sock
+```
+
+```
+curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+```
+
+### 추가 플러그인 설치 목록
+```
+SSH Agent
+
+Docker
+Docker Commons
+Docker Pipeline
+Docker API
+
+Generic Webhook Trigger
+
+GitLab
+GitLab API
+GitLab Authentication
+GitHub Authentication
+
+NodeJS
+Gradle
+```
+
 ### Credential 설정
 #### GitLab Credential
+- 사용할 gitlab에 접근하기 위한 계정 정보
+- Kind : Username with password 선택
+- Username : Gitlab 계정 아이디 입력
+- Password : Gitlab 계정 비밀번호 입력 **(토큰 발행시, API 토큰 입력)**
+- ID : Credential을 구분하기 위한 별칭
+
 #### GitLab API Token
+- GitLab이 제공하는 API를 사용하기 위한 토큰
+- Kind : Gitlab API token 선택
+- API tokens : Gitlab 계정 토큰 입력
+  - 사용하는 gitlab repo > settings > AccessTokens > Add new Tokens 을 통해 생성
+- ID : Credential을 구분하기 위한 별칭
+
 #### Webhook
+- Jenkins에서 Jenkins 관리 > System > GitLab
+  - Enable authentication for '/project' end-point 체크
+  - Name: 해당 연결에 대한 이름 지정
+  - GitLab host URL: 사용하는 repo의 host URL. SSAFY 기준 https://lab.ssafy.com
+  - Credentials: 위에서 설정한 GitLab API Token ID
+  - Test Connetion을 통해 확인후 저장
+- 
 #### Docker Hub Token
 #### Docker Hub Repository 생성
 #### Ubuntu Credential 추가
