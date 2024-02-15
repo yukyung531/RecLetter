@@ -14,6 +14,7 @@ import { httpStatusCode } from '../util/http-status';
 import StudioFinishCard from '../components/StudioFinishCard';
 import { getlastPath } from '../util/get-func';
 import SuccessModal from '../components/SuccessModal';
+import StudioDeleteCheck from '../components/StudioDeleteCheck';
 
 export default function StudioListPage() {
     const [studioList, setStudioList] = useState<StudioInfo[]>([]);
@@ -26,6 +27,13 @@ export default function StudioListPage() {
 
     //모달창 활성화
     const [isModalActive, setIsModalActive] = useState<boolean>(false);
+
+    //삭제확인창 활성화
+    const [isDeleteCheck, setIsDeleteCheck] = useState<boolean>(false);
+
+    const closeDeleteCheckModal = () => {
+        setIsDeleteCheck(false);
+    };
 
     const token = localStorage.getItem('access-token');
     /** 리덕스 설정 */
@@ -200,7 +208,7 @@ export default function StudioListPage() {
                     {deleteList.length > 0 && (
                         <p
                             className="mx-2 color-text-main cursor-pointer"
-                            onClick={deleteStudioList}
+                            onClick={() => setIsDeleteCheck(true)}
                         >
                             삭제
                         </p>
@@ -247,6 +255,17 @@ export default function StudioListPage() {
         <section className="relative w-full base-height items-center flex flex-col mt-14">
             {isModalActive ? (
                 <SuccessModal onClick={closeModal} message="삭제되었습니다." />
+            ) : (
+                <></>
+            )}
+            {isDeleteCheck ? (
+                <StudioDeleteCheck
+                    onClickCancel={closeDeleteCheckModal}
+                    onClickOK={() => {
+                        setIsDeleteCheck(false);
+                        deleteStudioList();
+                    }}
+                />
             ) : (
                 <></>
             )}
