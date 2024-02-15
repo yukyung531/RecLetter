@@ -8,10 +8,7 @@ import com.sixcube.recletter.studio.dto.req.CompleteLetterReq;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.dto.req.LetterVideoReq;
 import com.sixcube.recletter.studio.dto.req.UpdateStudioReq;
-import com.sixcube.recletter.studio.dto.res.LetterVideoRes;
-import com.sixcube.recletter.studio.dto.res.SearchStudioDetailRes;
-import com.sixcube.recletter.studio.dto.res.SearchStudioListRes;
-import com.sixcube.recletter.studio.dto.res.SearchStudioThumbnailRes;
+import com.sixcube.recletter.studio.dto.res.*;
 import com.sixcube.recletter.studio.service.StudioParticipantService;
 import com.sixcube.recletter.studio.service.StudioService;
 import com.sixcube.recletter.user.dto.User;
@@ -219,9 +216,9 @@ public class StudioController {
 
   //url + 누구나 접근 가능해야 함!!!!!!
   @GetMapping("/{studioId}/download")
-  public ResponseEntity<String> downloadLetter(@PathVariable String studioId){
-    String url=studioService.downloadLetter(studioId);
-    log.debug(url); //빈 값이면 객체 없음.
-    return ResponseEntity.ok(url);
+  public ResponseEntity<DownloadLetterRes> downloadLetter(@PathVariable String studioId){
+    DownloadLetterRes downloadLetterRes=studioService.downloadLetter(studioId);
+    log.debug(downloadLetterRes.toString()); //s3에 저장 안 되어있다면 url은 빈 값
+    return ResponseEntity.ok(downloadLetterRes);
   }
 }

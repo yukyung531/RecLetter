@@ -6,6 +6,7 @@ import com.sixcube.recletter.studio.dto.StudioStatus;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.dto.req.LetterVideoReq;
 import com.sixcube.recletter.studio.dto.req.UpdateStudioReq;
+import com.sixcube.recletter.studio.dto.res.DownloadLetterRes;
 import com.sixcube.recletter.studio.exception.MaxStudioOwnCountExceedException;
 import com.sixcube.recletter.studio.exception.StudioCreateFailureException;
 import com.sixcube.recletter.studio.exception.StudioDeleteFailureException;
@@ -50,6 +51,6 @@ public interface StudioService {
 
   void completeStudio(String studioId);
 
-  String downloadLetter(String studioId);
+  DownloadLetterRes downloadLetter(String studioId);
 
 }
