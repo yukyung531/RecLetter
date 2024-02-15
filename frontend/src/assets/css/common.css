@@ -348,6 +348,12 @@ input[type='number']::-webkit-inner-spin-button {
         scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
+.letter-animation {
+    transition: all 0.4s ease;
+    transform-origin: right;
+    transform: rotate(10deg);
+}
+
 .hover\:letter-animation:hover {
     transition: all 0.4s ease;
     transform-origin: right;
@@ -449,6 +455,11 @@ input[type='number']::-webkit-inner-spin-button {
 
 *::-webkit-scrollbar-thumb {
     background-color: #d5d5d5; /* 스크롤바의 색상을 지정합니다. */
+    border-radius: 3px; /* 스크롤바 모서리를 둥글게 만듭니다. */
+}
+
+.scroll-pink::-webkit-scrollbar-thumb {
+    background-color: var(--color-sublight); /* 스크롤바의 색상을 지정합니다. */
     border-radius: 3px; /* 스크롤바 모서리를 둥글게 만듭니다. */
 }
 

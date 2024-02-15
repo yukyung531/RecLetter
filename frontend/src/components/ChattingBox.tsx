@@ -322,7 +322,7 @@ export default function ChattingBox() {
                         if (chat.type === 'alarm') {
                             return (
                                 <div
-                                    className="w-full flex flex-col items-center  my-3"
+                                    className="w-full flex flex-col items-center my-3"
                                     key={'chat' + index}
                                 >
                                     <div className="w-3/4 text-center bg-gray-300 rounded-lg px-2 py-1">
@@ -399,7 +399,6 @@ export default function ChattingBox() {
         }
     };
 
-
     // 로컬 스토리지에서 테마 불러오기. 없으면 기본값 0 사용
     const initialTheme = Number(localStorage.getItem('selectedTheme')) || 0;
 
@@ -412,14 +411,13 @@ export default function ChattingBox() {
         dispatch(themeState(theme));
     };
 
-
     const showChattingRoom = () => {
         const openLogoSrc =
             '/src/assets/icons/' + themeObj[chatTheme].openLogo + '.png';
         if (chatToggle) {
             return (
                 <div
-                    className=" w-80 h-4/5 rounded-ss-lg rounded-se-lg rounded-es-lg fixed flex bottom-16 flex-col justify-between items-center right-8 px-5 py-3 z-20 border-2 border-white me-2 mb-1"
+                    className=" w-80 h-4/5 rounded-ss-lg rounded-se-lg rounded-es-lg fixed flex bottom-16 flex-col justify-between items-center right-8 pe-2 ps-3 py-3 z-20 border-2 border-white me-2 mb-1"
                     style={{
                         backgroundColor: `${themeObj[chatTheme].bgColor}`,
                     }}
@@ -435,7 +433,7 @@ export default function ChattingBox() {
                                 {studioName}
                             </p>
                             <p
-                                className="relative text-center left-3 bottom-3 text-xl cursor-pointer"
+                                className="relative text-center right-2 bottom-2 text-xl cursor-pointer"
                                 onClick={() => {
                                     changeChatToggle(!chatToggle);
                                 }}
@@ -497,7 +495,7 @@ export default function ChattingBox() {
                             </div>
                         </div>
                         {openPeople()}
-                        <div className="w-full horizenbar bg-black my-1"></div>
+                        <div className="w-full horizenbar bg-black my-3"></div>
                     </div>
 
                     <div className="w-full rounded overflow-y-scroll h-full px-2">

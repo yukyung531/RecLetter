@@ -46,14 +46,19 @@ export default function LetterFinishPage() {
         window.location.href = qrcode;
     };
     const moveStudioList = () => {
+        window.scrollTo(0, 0);
         navigate('/studiolist');
     };
     return (
         <section className="section-center">
             <div className="pt-24 mt-64"></div>
             <p className="text-2xl mb-8">{title}</p>
-            <video className="w-[800px] h-[450px] my-8 bg-gray-300"  src={qrcode} crossOrigin="anonymous" controls>
-            </video>
+            <video
+                className="w-[800px] h-[450px] my-8 bg-gray-300"
+                src={qrcode}
+                crossOrigin="anonymous"
+                controls
+            ></video>
             <div className="w-1/3">
                 <div
                     className="py-2 text-lg rounded-lg my-4 color-bg-main text-white flex justify-center items-center btn-animation cursor-pointer"

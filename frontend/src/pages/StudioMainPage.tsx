@@ -560,7 +560,7 @@ export default function StudioMainPage() {
     const onClickCompletePage = async () => {
         if (!isSelectedClipList()) {
             setErrorMessage(
-                '하나 이상의 영상을 선택해야 영상 편지 완성이 가능합니다'
+                `하나 이상의 영상을 선택해야 영상 편지 완성이 가능합니다`
             );
             setIsModalActive(true);
             return;
@@ -710,13 +710,16 @@ export default function StudioMainPage() {
                                     src="/src/assets/icons/empty-face.png"
                                     alt=""
                                 />
-                                <p className="text-sm color-text-darkgray mb-6 text-center">
+                                <p className="text-lg color-text-darkgray mb-3 text-center">
                                     아직 선택된 영상이 없어요
                                 </p>
-                                <p className="text-sm color-text-darkgray text-center">
-                                    전체 편지는 선택된 영상으로만 제작됩니다.
+                                <p className="text-lg color-text-darkgray text-center">
+                                    전체 편지는 선택된 영상으로
                                 </p>
-                                <p className="text-sm color-text-darkgray mb-20 text-center">
+                                <p className="text-lg color-text-darkgray text-center">
+                                    제작됩니다.
+                                </p>
+                                <p className="text-lg color-text-darkgray mb-20 text-center">
                                     편집에서 원하는 영상을 선택해주세요!
                                 </p>
                             </div>
@@ -832,7 +835,7 @@ export default function StudioMainPage() {
                         </div>
                         <div className=" flex flex-col justify-center items-center">
                             <div className="w-full  flex justify-start items-center">
-                                <p className="mt-8 ms-12 mb-4 text-2xl min-h-[32px]">
+                                <p className="mt-2 ms-12 mb-2 text-2xl min-h-[24px]">
                                     {selectedVideo.clipTitle}
                                 </p>
                             </div>

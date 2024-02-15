@@ -250,7 +250,7 @@ export default function StudioListPage() {
             ) : (
                 <></>
             )}
-            <div className="relative w-4/5 h-5/6">
+            <div className="relative w-4/5 h-5/6 flex flex-col justify-center items-center">
                 <div className="relative w-full flex justify-between mt-12">
                     <div className="flex items-center">
                         <p
@@ -299,7 +299,7 @@ export default function StudioListPage() {
 
                 {/* 영상 스튜디오 */}
                 {listTab === 0 ? (
-                    <ul className="w-full h-full flex flex-col items-center ">
+                    <ul className="w-[98%] h-full flex flex-col items-center ">
                         {attendStudioList.length === 0 ? (
                             <div className="my-auto">
                                 <img
@@ -320,8 +320,8 @@ export default function StudioListPage() {
                         ) : (
                             <></>
                         )}
-                        <li className=" w-full ">
-                            <div className="flex my-4 flex-wrap">
+                        <li className=" w-full box-border">
+                            <div className="flex w-full my-4 flex-wrap box-content">
                                 {attendStudioList.map((studio) => {
                                     return (
                                         <StudioCard
