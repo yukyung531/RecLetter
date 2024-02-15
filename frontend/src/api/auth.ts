@@ -18,22 +18,22 @@ export async function login(user: User) {
 
 /** POST 이메일 인증코드 요청 */
 export async function requestEmail(userEmail: EmailSend) {
-    return await local.post(`/api/auth/email`, userEmail, {});
+    return await axios.post(`/api/auth/email`, userEmail, {});
 }
 
 /** POST 이메일 인증코드 검증 */
 export async function verifyEmail(email: EmailRequest) {
-    return await local.post(`/api/auth/email/code`, email, {});
+    return await axios.post(`/api/auth/email/code`, email, {});
 }
 
 /** POST 비밀번호 초기화 이메일 발송 요청 */
 export async function requestPasswordEmail(userEmail: PasswordReset) {
-    return await local.post(`/api/auth/password`, userEmail, {});
+    return await axios.post(`/api/auth/password`, userEmail, {});
 }
 
 /** POST 비밀번호 초기화 인증코드 검증 */
 export async function verifyPassword(password: PasswordCode) {
-    return await local.post(`/api/auth/password/code`, password, {});
+    return await axios.post(`/api/auth/password/code`, password, {});
 }
 
 /** GET 비밀번호 초기화 */

@@ -5,12 +5,13 @@ import {
     UserModify,
 } from '../types/type';
 import localAxios from '../util/http-commons';
+import axios from "axios";
 
 const local = localAxios();
 
 /**  POST 회원가입 */
 export async function registUser(user: RegistUser) {
-    return await local.post(`/api/user`, user, {});
+    return await axios.post(`/api/user`, user, {});
 }
 /**  GET 유저 정보 조회 */
 export async function getUser() {
@@ -19,7 +20,7 @@ export async function getUser() {
 
 /** POST 비밀번호 초기화 후 비밀번호 재설정 */
 export async function settingNewPassword(password: NewPassword) {
-    return await local.post(`/api/user/password`, password, {});
+    return await axios.post(`/api/user/password`, password, {});
 }
 
 /**  PUT 회원 정보 수정 */
