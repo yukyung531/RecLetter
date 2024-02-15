@@ -113,7 +113,6 @@ public class AuthController {
     public ResponseEntity<LoginRes> socialLogin(HttpServletRequest request) {
 
         String userEmail = (String) request.getAttribute("userEmail");
-        System.out.println("잘 왔니?" + userEmail);
         LoginRes loginRes = authService.socialLogin(userEmail);
 
         return ResponseEntity.ok().body(loginRes);

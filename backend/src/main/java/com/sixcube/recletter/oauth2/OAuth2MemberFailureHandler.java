@@ -19,11 +19,8 @@ public class OAuth2MemberFailureHandler extends SimpleUrlAuthenticationFailureHa
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        System.out.println(exception.getMessage());
 
         response.setStatus(401);
-
-        // 예외를 던지지 않도록 주석 처리
     }
 }
 

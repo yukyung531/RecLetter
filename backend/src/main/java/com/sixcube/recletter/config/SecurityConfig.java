@@ -83,7 +83,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()  //회원가입
                         .requestMatchers("/auth/email", "/auth/email/code", "/auth/password", "/auth/password/code").permitAll()  //이메일 인증(회원가입)
                         .requestMatchers("/auth/password", "/auth/password/code", "/user/password").permitAll()  //비밀번호 초기화
-                       .requestMatchers("/studio/*/download").permitAll()  //영상 다운로드
+                        .requestMatchers("/studio/*/download").permitAll()  //영상 다운로드
                         .requestMatchers("/ws/**").permitAll() //웹소켓
                         .anyRequest().authenticated());
         //JWTFilter 등록
