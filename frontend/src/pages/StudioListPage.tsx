@@ -343,25 +343,44 @@ export default function StudioListPage() {
                 )}
                 {listTab === 1 ? (
                     <ul className="w-full h-full flex flex-col items-center ">
-                        <li className=" w-full ">
-                            <div className="flex flex-wrap justify-center">
-                                {finishStudioList.map((studio) => {
-                                    return (
-                                        <StudioFinishCard
-                                            key={studio.studioId}
-                                            props={studio}
-                                            onClick={() =>
-                                                onMoveFinish(
-                                                    studio.studioId,
-                                                    studio.studioTitle,
-                                                    studio.studioStatus
-                                                )
-                                            }
-                                        />
-                                    );
-                                })}
+                        {finishStudioList.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center my-auto">
+                                <img
+                                    className="w-20 my-6"
+                                    src="/src/assets/icons/empty-face.png"
+                                    alt=""
+                                />
+                                <p className="text-center text-2xl text-gray-400">
+                                    아직 완성된 영상이 없어요
+                                </p>
+                                <p className="text-center text-2xl text-gray-400">
+                                    영상을 제작하면 완성된 비디오에 저장이됩니다
+                                </p>
+                                <p className="mb-20 text-center text-2xl text-gray-400">
+                                    스튜디오에 참여하고 영상을 만들어보세요
+                                </p>
                             </div>
-                        </li>
+                        ) : (
+                            <li className=" w-full ">
+                                <div className="flex flex-wrap justify-center">
+                                    {finishStudioList.map((studio) => {
+                                        return (
+                                            <StudioFinishCard
+                                                key={studio.studioId}
+                                                props={studio}
+                                                onClick={() =>
+                                                    onMoveFinish(
+                                                        studio.studioId,
+                                                        studio.studioTitle,
+                                                        studio.studioStatus
+                                                    )
+                                                }
+                                            />
+                                        );
+                                    })}
+                                </div>
+                            </li>
+                        )}
                     </ul>
                 ) : (
                     <></>
