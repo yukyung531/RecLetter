@@ -105,7 +105,6 @@ export function reSubscribe(reSubStudioParam) {
     // console.log('재구독 작동합니다');
     stuId = reSubStudioParam;
     setConnect = true;
-    client.subscribe(topic + `/${studioId}`, (payload) => {}).unsubscribe();
     subscribe(stuId, uuid, username, chatList, setCurrentPeople);
     client.publish({
         destination: app + `/${stuId}/join`,

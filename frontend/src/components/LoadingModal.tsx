@@ -28,11 +28,11 @@ export default function LoadingModal() {
 
     useEffect(() => {
         handleTimerStart();
-        console.log('Timer start');
+        // console.log('Timer start');
 
         return () => {
             handleTimerEnd();
-            console.log('Timer end');
+            // console.log('Timer end');
         };
     }, []);
 

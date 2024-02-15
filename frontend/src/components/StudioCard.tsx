@@ -158,13 +158,25 @@ export default function StudioCard({
                         <p>{props.studioTitle}</p>
                     </div>
 
-                    <p className="w-fit text-2xl">
-                        D-
-                        {Math.floor(
-                            (expireDate.getTime() - Date.now()) /
-                                (1000 * 60 * 60 * 24)
-                        )}
-                    </p>
+                    {/*<p className="w-fit text-2xl">*/}
+                    {/*    D-*/}
+                    {/*    {Math.floor((expireDate.getTime() - Date.now()) /*/}
+                    {/*        (1000 * 60 * 60 * 24))}*/}
+                    {/*</p>*/}
+                    {Math.floor(
+                        (expireDate.getTime() - Date.now()) /
+                            (1000 * 60 * 60 * 24)
+                    ) < 1 ? (
+                        <p className="w-fit text-2xl color-text-main">D- Day</p>
+                    ) : (
+                        <p className="w-fit text-2xl">
+                            D-
+                            {Math.floor(
+                                (expireDate.getTime() - Date.now()) /
+                                    (1000 * 60 * 60 * 24)
+                            )}
+                        </p>
+                    )}
                 </div>
             </div>
             <div className="w-full flex justify-between">

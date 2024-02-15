@@ -41,7 +41,7 @@ export default function LetterFinishPage() {
         const studioId = getlastPath();
         await downloadLetter(studioId)
             .then((res) => {
-                console.log(res);
+                // console.log(res);
                 setQrCode(res.data.letterUrl);
                 setTitle(res.data.studioTitle);
                 if (res.data.letterUrl === '') {
@@ -86,10 +86,10 @@ export default function LetterFinishPage() {
             ) : (
                 <></>
             )}
-            <div className="pt-24 mt-64"></div>
-            <p className="text-2xl mb-8">{title}</p>
+            <div className="pt-1 mt-2"></div>
+            <p className="text-2xl">{title}</p>
             <video
-                className="w-[800px] h-[450px] my-8 bg-gray-300"
+                className="w-[640px] h-[360px] my-4 bg-gray-300"
                 src={qrcode}
                 crossOrigin="anonymous"
                 controls
@@ -135,13 +135,13 @@ export default function LetterFinishPage() {
             </div> */}
             <div className="w-1/4">
                 <div
-                    className="py-2 text-lg rounded-lg my-4 bg-white border color-border-main color-text-main flex justify-center items-center cursor-pointer btn-animation"
+                    className="py-2 text-lg rounded-lg my-4 bg-white color-text-main flex justify-center items-center cursor-pointer btn-animation"
                     onClick={moveStudioList}
                 >
-                    <p>나도 영상편지 만들기</p>
+                    <p className="underline">나도 영상편지 만들기</p>
                     <img
-                        className="w-6 mx-2 color-bg-main"
-                        src="/src/assets/icons/mail.png"
+                        className="w-6 mx-2"
+                        src="/src/assets/icons/finish_letter.png"
                         alt=""
                     />
                 </div>

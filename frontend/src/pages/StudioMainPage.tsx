@@ -223,11 +223,11 @@ export default function StudioMainPage() {
                 const enterStudioAPI = async (studioId: string) => {
                     await enterStudio(studioId)
                         .then((res) => {
-                            console.log(res);
+                            // console.log(res);
                             getDetail(studioId);
                         })
                         .catch(() => {
-                            console.log('오류떠서 재실행');
+                            // console.log('오류떠서 재실행');
                             getDetail(studioId);
                         });
                 };
@@ -248,7 +248,10 @@ export default function StudioMainPage() {
             getUserInfo();
         }
         if (!token || !isLogin) {
-            navigate(`/login`);
+            const studioId = getlastPath();
+            navigate(`/login`, {
+                state: { position: 'main', location: studioId },
+            });
         }
 
         /** 페이지 새로고침 전에 실행 할 함수 */
@@ -259,9 +262,8 @@ export default function StudioMainPage() {
         };
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => {
-            console.log('사라지기전 ' + reloadingStudioId + '입니다');
+            // console.log('사라지기전 ' + reloadingStudioId + '입니다');
             if (reloadingStudioId) {
-                console.log('자자 드가자');
                 dispatch(studioDeleteState(reloadingStudioId));
                 disconnect(reloadingStudioId);
                 window.removeEventListener('beforeunload', handleBeforeUnload);
@@ -277,11 +279,11 @@ export default function StudioMainPage() {
             ) < 2 ||
             studioDetailInfo.studioOwner === userInfo.userId
         ) {
-            console.log(
-                Math.floor(
-                    (expireDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-                )
-            );
+            // console.log(
+            //     Math.floor(
+            //         (expireDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+            //     )
+            // );
             setFinishAuth(true);
         } else {
             setFinishAuth(false);
@@ -331,13 +333,13 @@ export default function StudioMainPage() {
                         deleteClip(prevList[i].clipId)
                             .then((res) => {
                                 if (res.status === httpStatusCode.OK) {
-                                    console.log('삭제 완료');
+                                    // console.log('삭제 완료');
                                 } else {
-                                    console.log('오류');
+                                    // console.log('오류');
                                 }
                             })
                             .catch((err) => {
-                                console.log(err);
+                                // console.log(err);
                             });
                         prevList.splice(i, 1);
                         break;
@@ -532,7 +534,7 @@ export default function StudioMainPage() {
         const title = studioDetailInfo.studioTitle;
         await modifyStudioTitle(id, title).then((res) => {
             if (res.status === httpStatusCode.OK) {
-                console.log('제목이 수정되었습니닷!!!!');
+                // console.log('제목이 수정되었습니닷!!!!');
             }
         });
     };
@@ -574,12 +576,12 @@ export default function StudioMainPage() {
             ) < 2
         ) {
             await encodingLetter(studioDetailInfo.studioId).then((res) => {
-                console.log(res);
+                // console.log(res);
                 setIsLetterMade(true);
             });
         } else if (studioDetailInfo.studioOwner === userInfo.userId) {
             await encodingLetter(studioDetailInfo.studioId).then((res) => {
-                console.log(res);
+                // console.log(res);
                 setIsLetterMade(true);
             });
         }
@@ -727,10 +729,10 @@ export default function StudioMainPage() {
                                     src="/src/assets/icons/empty-face.png"
                                     alt=""
                                 />
-                                <p className="text-lg color-text-darkgray mb-3 text-center">
+                                <p className="text-lg color-text-darkgray mb-1 text-center">
                                     아직 선택된 영상이 없어요
                                 </p>
-                                <p className="text-lg color-text-darkgray text-center">
+                                <p className="text-lg color-text-darkgray mb-1  text-center">
                                     편지는 선택된 영상으로 제작됩니다.
                                 </p>
                                 <p className="text-lg color-text-darkgray mb-20 text-center">

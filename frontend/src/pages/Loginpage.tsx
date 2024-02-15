@@ -1,7 +1,7 @@
 import { BaseSyntheticEvent, useEffect, useState } from 'react';
 import { login } from '../api/auth';
 import { User } from '../types/type';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { httpStatusCode } from '../util/http-status';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -22,6 +22,14 @@ export default function LoginPage() {
     const isLogin = useSelector((state: any) => state.loginFlag.isLogin);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    let location: string = '';
+    let position: string = '';
+    // main에서 온 설정 가지고오기
+    const { state } = useLocation(); // 2번 라인
+    if (state) {
+        location = state.location;
+        position = state.position;
+    }
 
     /** 모달창 */
     const [isErrorModalActive, setIsErrorModalActive] =
@@ -39,7 +47,14 @@ export default function LoginPage() {
 
     useEffect(() => {
         if (isLogin) {
-            navigate('/studiolist');
+            // console.log(position);
+            if (position === 'main') {
+                // console.log('메인으로갑니다');
+                navigate(`/studiomain/${location}`);
+            } else {
+                // console.log('안ㅇ갑니다');
+                navigate('/studiolist');
+            }
         }
     }, [isLogin]);
     /** 리덕스 설정 */
@@ -72,9 +87,9 @@ export default function LoginPage() {
     const loadLoginAPI = async (user: User) => {
         await login(user)
             .then((res) => {
-                console.log('결과', res);
+                // console.log('결과', res);
                 if (res.status === httpStatusCode.OK) {
-                    console.log('로그인이 성공했습니다.');
+                    // console.log('로그인이 성공했습니다.');
                     localStorage.setItem('access-token', res.data.accessToken);
                     localStorage.setItem(
                         'refresh-token',
@@ -83,7 +98,7 @@ export default function LoginPage() {
                     dispatch(loginState(true));
                     navigate(`/studiolist`);
                 } else if (res.status === httpStatusCode.BADREQUEST) {
-                    console.log('bad request');
+                    // console.log('bad request');
                 } else if (res.status === httpStatusCode.UNAUTHORIZED) {
                     setErrorMessage('정보가 잘못되었습니다.');
                     setIsErrorModalActive(true);

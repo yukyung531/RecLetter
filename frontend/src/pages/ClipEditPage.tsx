@@ -129,7 +129,7 @@ export default function ClipEditPage() {
         const ffmpeg = ffmpegRef.current;
 
         ffmpeg.on('log', ({ message }) => {
-            console.log(message);
+            // console.log(message);
         });
 
         // toBlobURL is used to bypass CORS issue, urls with the same
@@ -242,7 +242,7 @@ export default function ClipEditPage() {
                 const enterStudioAPI = async (studioId: string) => {
                     await enterStudio(studioId)
                         .then((res) => {
-                            console.log(res);
+                            // console.log(res);
                             getDetail(studioId);
                             if (res.data.studioStatus === 'COMPLETE') {
                                 alert('완성된 비디오입니다.');
@@ -335,7 +335,7 @@ export default function ClipEditPage() {
             ]);
             const data = await ffmpeg.readFile('final.mp4');
             const newBlob = new Blob([data], { type: 'video/mp4' });
-            console.log(data);
+            // console.log(data);
 
             //axios 전송
             if (studioId) {
@@ -358,7 +358,7 @@ export default function ClipEditPage() {
                 await uploadClip(object)
                     .then((response) => {
                         if (response && response.status === httpStatusCode.OK) {
-                            console.log('영상이 성공적으로 전달되었습니다.');
+                            // console.log('영상이 성공적으로 전달되었습니다.');
                             //revokeURL
                             URL.revokeObjectURL(prevURL);
                             setIsLoading(false);
