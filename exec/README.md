@@ -217,11 +217,112 @@ Gradle
 - Gitlab repo > Settings > Webhooks > Add new webhook
   - URL: http://(젠킨스주소)/project/(pipeline 이름)
   - Secret Token: 위에서 저장한 secret token
+
 #### Docker Hub Token
+- docker hub 계정 생성
+- 우측 상단 계정명 > Account Settings
+- Security > New Access Token
+  - 모든 Access 권한을 지정한 후 Generate후 복사
+- Jenkins 관리 > Credentials
+  - Kind : Username with password
+  - Username : DockerHub에서 사용하는 계정 아이디 입력
+  - Password : 위에서 저장한 Access Token 입력
+  - ID : Credential을 구분하기 위한 별칭
+
 #### Docker Hub Repository 생성
+- frontend, backend, videobackend 를 저장할 public Repository 3개 생성
+
 #### Ubuntu Credential 추가
+- Jenkins 관리 > Credentials
+  - Kind: SSH Username with private key
+  - Username: SSH 원격 서버 호스트에서 사용하는 계정명
+  - ID: Credential을 구분하기 위한 별칭
+  - Enter directly를 체크하고 private key의 값 입력후 create
+
 #### Secret File 추가
+- 아래에 설명할 .env 와 cloudfront key 저장
+- Jenkins 관리 > Credentials
+  - Kind: Secret file
+  - File: 저장할 파일 선택
+
 #### .env
+- 배포용 .env 파일.
+```
+DB_NAME=[DB 이름]
+USER_NAME=[DB 사용자 이름]
+USER_PASSWORD=[DB 비밀번호]
+DB_URL=[DB URL]
+DB_ROOT_PASSWORD=[DB 생성시 사용할 Root 비밀번호]
+
+AWS_ACCESS=[AWS S3 Access Key]
+AWS_SECRET=[AWS S3 Secret Key]
+AWS_REGION=[AWS S3 Region]
+AWS_BUCKET=[AWS S3 Bucket 이름]
+AWS_FRONT=[AWS Cloud Front 주소]https://d3f9xm3snzk3an.cloudfront.net/
+AWS_CLOUDFRONT_DOMAIN=d3kbsbmyfcnq5r.cloudfront.net
+AWS_CLOUDFRONT_KEY=/private_cloudfront_key.pem
+AWS_CLOUDFRONT_KEY_ID=K1AEDSJBCGMMS2
+SPRING_SERVER_URL=http://RecLetterBackend
+
+MAIL_ID=recletter.official@gmail.com
+MAIL_SECRET=leuz rhvx vumw cvdt
+
+JWT_KEY=vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalaaaaabae3yjrdnafdalh2tnjkxzgjsafq
+
+REDIS_HOST=RecLetterRedis
+REDIS_PORT=6379
+
+OPENVIDU_URL=https://recletter.me/openvidu/api/sessions
+OPENVIDU_SECRET=dk34r0gd5id9s92u5udis1dfc
+
+GOOGLE_CLIENT_ID=637985286518-ncq70na9pkq4lela9io03ms46l4no9sq.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
+GOOGLE_REDIRECT_URL=https://recletter.me/login/oauth2/code/google
+
+VITE_REACT_GOOGLE_LOGIN_URL=api/oauth2/authorization/google
+VITE_REACT_GOOGLE_CHANGE_HOST=https://recletter.me/api
+VITE_REACT_GOOGLE_PROTOCOL=https
+VITE_REACT_API_URL=https://recletter.me
+VITE_REACT_WEBSOCKET_URL=wss://recletter.me/ws
+
+DOMAIN_OR_PUBLIC_IP=recletter.me
+CERTIFICATE_TYPE=letsencrypt
+LETSENCRYPT_EMAIL=recletter.official@gmail.com
+
+OPENVIDU_RECORDING=false
+OPENVIDU_RECORDING_DEBUG=false
+OPENVIDU_RECORDING_PATH=/opt/openvidu/recordings
+OPENVIDU_RECORDING_CUSTOM_LAYOUT=/opt/openvidu/custom-layout
+OPENVIDU_RECORDING_PUBLIC_ACCESS=false
+OPENVIDU_RECORDING_NOTIFICATION=publisher_moderator
+OPENVIDU_RECORDING_AUTOSTOP_TIMEOUT=120
+OPENVIDU_STREAMS_VIDEO_MAX_RECV_BANDWIDTH=1000
+OPENVIDU_STREAMS_VIDEO_MIN_RECV_BANDWIDTH=300
+OPENVIDU_STREAMS_VIDEO_MAX_SEND_BANDWIDTH=1000
+OPENVIDU_STREAMS_VIDEO_MIN_SEND_BANDWIDTH=300
+OPENVIDU_WEBHOOK=false
+OPENVIDU_WEBHOOK_EVENTS=[sessionCreated,sessionDestroyed,participantJoined,participantLeft,webrtcConnectionCreated,webrtcConnectionDestroyed,recordingStatusChanged,filterEventDispatched,mediaNodeStatusChanged,nodeCrashed,nodeRecovered,broadcastStarted,broadcastStopped]
+OPENVIDU_SESSIONS_GARBAGE_INTERVAL=900
+OPENVIDU_SESSIONS_GARBAGE_THRESHOLD=3600
+OPENVIDU_CDR=false
+OPENVIDU_CDR_PATH=/opt/openvidu/cdr
+
+KAFKA_BOOTSTRAP_SERVERS=RecLetterKafka:9093
+KAFKA_LETTER_REQUEST_TOPIC=recletterbackend.letter.request
+KAFKA_ASSET_DOWNLOADINFO_TOPIC=reclettervideo.asset.downloadinfo
+KAFKA_LETTER_ENCODINGINFO_TOPIC=reclettervideo.letter.encodinginfo
+KAFKA_LETTER_RESULTINFO_TOPIC=reclettervideo.letter.resultinfo
+
+KAFKA_LETTER_REQUEST_CONSUMER_GROUP_ID=DownlaodAsset
+KAFKA_ASSET_DOWNLOADINFO_CONSUMER_GROUP_ID=EncodeVideo
+KAFKA_LETTER_ENCODINGINFO_CONSUMER_GROUP_ID=UploadVideo
+KAFKA_LETTER_RESULTINFO_CONSUMER_GROUP_ID=UpdateStudioStatus
+KAFKA_LETTER_RESULTINFO_DELETE_CONSUMER_GROUP_ID=DeleteVideo
+RECLETTER_VIDEO_PORT_1=8001
+RECLETTER_VIDEO_PORT_2=8002
+RECLETTER_VIDEO_PORT_3=8003
+
+```
 ### 파이프라인 설정
 
 ---
