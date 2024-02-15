@@ -10,6 +10,7 @@ import com.sixcube.recletter.studio.dto.UsedClipInfo;
 import com.sixcube.recletter.studio.dto.req.LetterVideoReq;
 import com.sixcube.recletter.studio.dto.req.CreateStudioReq;
 import com.sixcube.recletter.studio.dto.req.UpdateStudioReq;
+import com.sixcube.recletter.studio.dto.res.DownloadLetterRes;
 import com.sixcube.recletter.studio.exception.*;
 import com.sixcube.recletter.studio.repository.StudioRepository;
 import com.sixcube.recletter.user.dto.User;
@@ -276,7 +277,7 @@ public class StudioServiceImpl implements StudioService {
   }
 
   @Override
-  public String downloadLetter(String studioId){
+  public DownloadLetterRes downloadLetter(String studioId){
     String url="";
 
     Studio studio=studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
@@ -286,7 +287,10 @@ public class StudioServiceImpl implements StudioService {
         url=s3Util.getSignedUrl(fileName);
       }
     }
-    return url;
+    return DownloadLetterRes.builder()
+            .studioTitle(studio.getStudioTitle())
+            .letterUrl(url)
+            .build();
   }
 
 }
