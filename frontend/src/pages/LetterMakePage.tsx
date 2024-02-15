@@ -421,9 +421,15 @@ export default function LetterMakePage() {
                         console.log(res.data);
                         if (res.data.studioBgmId) {
                             setSelectedBGM(res.data.studioBgmId);
-                            setSelectedBGMUrl(
-                                `/src/assets/bgm/bgm${res.data.studioBgmId}.mp3`
-                            );
+                            //선택된 bgm 불러오기
+                            //2번 bgm부터 bgm1.mp3
+                            if (res.data.studioBgmId > 1) {
+                                setSelectedBGMUrl(
+                                    `/src/assets/bgm/bgm${
+                                        res.data.studioBgmId - 1
+                                    }.mp3`
+                                );
+                            }
                         }
 
                         //studioBGMVolume
@@ -1800,9 +1806,9 @@ export default function LetterMakePage() {
                 const publisher = await OV.current.initPublisherAsync(
                     undefined,
                     {
-                        audioSource: false,
+                        audioSource: 'screen',
                         videoSource: 'screen',
-                        publishAudio: false,
+                        publishAudio: true,
                         publishVideo: true,
                         resolution: '640x480',
                         frameRate: 30,

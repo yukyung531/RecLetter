@@ -164,9 +164,14 @@ export default function StudioMainPage() {
                             );
 
                             //선택된 bgm 불러오기
-                            setSelectedBGMUrl(
-                                `/src/assets/bgm/bgm${res.data.studioBgmId}.mp3`
-                            );
+                            //2번 bgm부터 bgm1.mp3
+                            if (res.data.studioBgmId > 1) {
+                                setSelectedBGMUrl(
+                                    `/src/assets/bgm/bgm${
+                                        res.data.studioBgmId - 1
+                                    }.mp3`
+                                );
+                            }
 
                             if (bgmRef.current) {
                                 bgmRef.current.volume =

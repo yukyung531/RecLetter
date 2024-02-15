@@ -1,7 +1,7 @@
 import { BaseSyntheticEvent, useEffect, useState } from 'react';
 import AddMemberWindow from '../components/AddMemberWindow';
 import { FrameType, StudioMake } from '../types/type';
-import moment from 'moment-timezone'
+import moment from 'moment-timezone';
 import { makeStudio } from '../api/studio';
 import { httpStatusCode } from '../util/http-status';
 import { useNavigate } from 'react-router-dom';
@@ -31,12 +31,7 @@ export default function StudioCreatePage() {
 
     useEffect(() => {
         moment().tz('Asia/Seoul').format('YYYY-MM-DDTHH:mm:ss');
-        setTime(
-            moment()
-                .add(createDate, 'days')
-                .format()
-                .substring(0, 19)
-        );
+        setTime(moment().add(createDate, 'days').format().substring(0, 19));
     }, [createDate]);
 
     const onPressAddMember = () => {
