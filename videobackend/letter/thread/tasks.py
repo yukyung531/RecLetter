@@ -96,7 +96,7 @@ def encode_letter():
         bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS],
         group_id=KAFKA_ASSET_DOWNLOADINFO_CONSUMER_GROUP_ID,
         value_deserializer=lambda x: loads(x.decode('utf-8')),
-        max_poll_interval_ms=5 * 90 * 60 * 1000
+        max_poll_interval_ms= 90 * 60 * 1000
     )
     consumer.subscribe(topics=[KAFKA_ASSET_DOWNLOADINFO_TOPIC])
 
@@ -106,7 +106,7 @@ def encode_letter():
     )
 
     while True:
-        consumer.poll(max_records=5)
+        consumer.poll(max_records=1)
         print("encode_letter poll")
 
         for message in consumer:
