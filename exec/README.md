@@ -97,9 +97,42 @@ docker pull jenkins/jenkins:jdk17
 ```
 docker run -d --restart always --env JENKINS_OPTS=--httpPort=8080 -v /etc/localtime:/etc/localtime:ro -e TZ=Asia/Seoul -p 8080:8080 -v /jenkins:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock -v /usr/local/bin/docker-compose:/usr/local/bin/docker-compose --name jenkins -u root jenkins/jenkins:jdk17
 ```
-### Jenkins 환경 설정
-### Jenkins 플러그인 설치
+### Jenkins 플러그인 미러서버 변경
+```
+sudo docker stop jenkins
+```
+
+```
+sudo mkdir /jenkins/update-center-rootCAs
+```
+
+```
+sudo wget https://cdn.jsdelivr.net/gh/lework/jenkins-update-center/rootCA/update-center.crt -O /jenkins/update-center-rootCAs/update-center.crt
+```
+
+```
+sudo sed -i 's#https://updates.jenkins.io/update-center.json#https://raw.githubusercontent.com/lework/jenkins-update-center/master/updates/tencent/update-center.json#' /jenkins/hudson.model.UpdateCenter.xml
+```
+
+```
+sudo docker restart jenkins
+```
+
 ### 관리자 계정 설정
+```
+docker exec -it jenkins /bin/bash
+```
+
+```
+cd /var/jenkins_home/secrets
+```
+
+```
+cat initialAdminPassword
+```
+
+- 위의 명령어를 통해 초기 비밀번호를 확인 후 localhost:8080으로 접속하여 계정 생성
+### Jenkins 플러그인 설치
 ### Jenkins 내부에 Docker, Docker Compose 설치
 ### Credential 설정
 #### GitLab Credential
