@@ -240,7 +240,7 @@ Gradle
   - Enter directly를 체크하고 private key의 값 입력후 create
 
 #### Secret File 추가
-- 아래에 설명할 .env 와 cloudfront key 저장
+- 아래에 설명할 .env 와 cloud front에서 발급받은 cloudfront key 저장
 - Jenkins 관리 > Credentials
   - Kind: Secret file
   - File: 저장할 파일 선택
@@ -258,37 +258,36 @@ AWS_ACCESS=[AWS S3 Access Key]
 AWS_SECRET=[AWS S3 Secret Key]
 AWS_REGION=[AWS S3 Region]
 AWS_BUCKET=[AWS S3 Bucket 이름]
-AWS_FRONT=[AWS Cloud Front 주소]https://d3f9xm3snzk3an.cloudfront.net/
-AWS_CLOUDFRONT_DOMAIN=d3kbsbmyfcnq5r.cloudfront.net
-AWS_CLOUDFRONT_KEY=/private_cloudfront_key.pem
-AWS_CLOUDFRONT_KEY_ID=K1AEDSJBCGMMS2
-SPRING_SERVER_URL=http://RecLetterBackend
+AWS_CLOUDFRONT_DOMAIN=[AWS Cloud Front 도메인 주소]
+AWS_CLOUDFRONT_KEY=[AWS Cloud Front private key 경로]
+AWS_CLOUDFRONT_KEY_ID=[AWS Cloud Front Key Id]
 
-MAIL_ID=recletter.official@gmail.com
-MAIL_SECRET=leuz rhvx vumw cvdt
+MAIL_ID=[SMTP에 사용할 메일 주소]
+MAIL_SECRET=[SMTP 메일 Secret key]
 
-JWT_KEY=vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalaaaaabae3yjrdnafdalh2tnjkxzgjsafq
+JWT_KEY=[JWT 서명에 사용할 임의의 키]
 
-REDIS_HOST=RecLetterRedis
-REDIS_PORT=6379
+REDIS_HOST=[배포 환경에서의 Redis 주소]
+REDIS_PORT=[배포 환경에서의 Redis 포트번호]
 
-OPENVIDU_URL=https://recletter.me/openvidu/api/sessions
-OPENVIDU_SECRET=dk34r0gd5id9s92u5udis1dfc
+OPENVIDU_URL=[openvidu rest api 요청을 넣을 주소, ex) (도메인주소)/api/sessions]
+OPENVIDU_SECRET=[openvidu secret key]
 
-GOOGLE_CLIENT_ID=637985286518-ncq70na9pkq4lela9io03ms46l4no9sq.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=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
-GOOGLE_REDIRECT_URL=https://recletter.me/login/oauth2/code/google
+GOOGLE_CLIENT_ID=[Google OAuth2 client id]
+GOOGLE_CLIENT_SECRET=[Google OAuth2 client secret]
+GOOGLE_REDIRECT_URL=[Google OAuth2 redirect url, ex) (도메인)/login/oauth2/code/goole]
 
-VITE_REACT_GOOGLE_LOGIN_URL=api/oauth2/authorization/google
-VITE_REACT_GOOGLE_CHANGE_HOST=https://recletter.me/api
-VITE_REACT_GOOGLE_PROTOCOL=https
-VITE_REACT_API_URL=https://recletter.me
-VITE_REACT_WEBSOCKET_URL=wss://recletter.me/ws
+VITE_REACT_GOOGLE_LOGIN_URL=[login axios 요청에 사용할 url, ex) api/oauth2/authorization/google]
+VITE_REACT_GOOGLE_CHANGE_HOST=[google 로그인 서버용 url, ex) https://recletter.me/api]
+VITE_REACT_GOOGLE_PROTOCOL=[요청 프로토콜, ex) https]
+VITE_REACT_API_URL=[backend api 요청 url, ex) https://recletter.me]
+VITE_REACT_WEBSOCKET_URL=[웹소켓 Handshake를 위한 url, ex) wss://recletter.me/ws]
 
-DOMAIN_OR_PUBLIC_IP=recletter.me
-CERTIFICATE_TYPE=letsencrypt
-LETSENCRYPT_EMAIL=recletter.official@gmail.com
+DOMAIN_OR_PUBLIC_IP=[소유한 도메인, ex) recletter.me]
+CERTIFICATE_TYPE=[SSL 인증 방식, ex) letsencrypt]
+LETSENCRYPT_EMAIL=[letsencrypt에 사용할 email 주소, ex) recletter.official@gmail.com]
 
+# openvidu 기본 설정값
 OPENVIDU_RECORDING=false
 OPENVIDU_RECORDING_DEBUG=false
 OPENVIDU_RECORDING_PATH=/opt/openvidu/recordings
@@ -307,23 +306,180 @@ OPENVIDU_SESSIONS_GARBAGE_THRESHOLD=3600
 OPENVIDU_CDR=false
 OPENVIDU_CDR_PATH=/opt/openvidu/cdr
 
-KAFKA_BOOTSTRAP_SERVERS=RecLetterKafka:9093
-KAFKA_LETTER_REQUEST_TOPIC=recletterbackend.letter.request
-KAFKA_ASSET_DOWNLOADINFO_TOPIC=reclettervideo.asset.downloadinfo
-KAFKA_LETTER_ENCODINGINFO_TOPIC=reclettervideo.letter.encodinginfo
-KAFKA_LETTER_RESULTINFO_TOPIC=reclettervideo.letter.resultinfo
+KAFKA_BOOTSTRAP_SERVERS=[Kafka bootstrap url]
+KAFKA_LETTER_REQUEST_TOPIC=[영상 제작 요청 topic 이름, ex) recletterbackend.letter.request]
+KAFKA_ASSET_DOWNLOADINFO_TOPIC=[영상 제작에 필요한 에셋 다운로드 완료 topic, ex) reclettervideo.asset.downloadinfo]
+KAFKA_LETTER_ENCODINGINFO_TOPIC=[인코딩 완료 topic, ex) reclettervideo.letter.encodinginfo]
+KAFKA_LETTER_RESULTINFO_TOPIC=[영상 제작 결과 topic, ex) reclettervideo.letter.resultinfo]
 
-KAFKA_LETTER_REQUEST_CONSUMER_GROUP_ID=DownlaodAsset
-KAFKA_ASSET_DOWNLOADINFO_CONSUMER_GROUP_ID=EncodeVideo
-KAFKA_LETTER_ENCODINGINFO_CONSUMER_GROUP_ID=UploadVideo
-KAFKA_LETTER_RESULTINFO_CONSUMER_GROUP_ID=UpdateStudioStatus
-KAFKA_LETTER_RESULTINFO_DELETE_CONSUMER_GROUP_ID=DeleteVideo
-RECLETTER_VIDEO_PORT_1=8001
-RECLETTER_VIDEO_PORT_2=8002
-RECLETTER_VIDEO_PORT_3=8003
-
+KAFKA_LETTER_REQUEST_CONSUMER_GROUP_ID=[영상 제작 요청 topic을 소비하는 consumer group id, ex) DownlaodAsset]
+KAFKA_ASSET_DOWNLOADINFO_CONSUMER_GROUP_ID=[영상 제작에 필요한 에셋 다운로드 topic을 소비하여 인코딩을 시작하는 consumer group id, ex) EncodeVideo]
+KAFKA_LETTER_ENCODINGINFO_CONSUMER_GROUP_ID=[인코딩 완료 topic을 소비하여 업로드하는 consumer group id, ex) UploadVideo]
+KAFKA_LETTER_RESULTINFO_CONSUMER_GROUP_ID=[영상 제작 결과 toipic을 소비하여 결과를 업데이트하는 consumer group id, ex) UpdateStudioStatus]
+KAFKA_LETTER_RESULTINFO_DELETE_CONSUMER_GROUP_ID=[영상 제작 결과 topic을 소비하여 남은 에셋을 삭제하는 consumer group id, ex) DeleteVideo]
+RECLETTER_VIDEO_PORT_1=[video 서버 1 포트 번호, ex) 8001]
+RECLETTER_VIDEO_PORT_2=[video 서버 2 포트 번호, ex) 8002]
+RECLETTER_VIDEO_PORT_3=[video 서버 3 포트 번호, ex) 8003]
 ```
+---
+
+### 빌드용 tools 설정
+- Jenkins > Jenkins 관리 > Tools
+- > Gradle installations > Add Gradle
+  - name: Tool을 구분하기 위한 별칭
+  - version: backend에서 사용중인 Gradle version
+- > NodeJS installations > Add NodeJS
+  - name: Tool을 구분하기 위한 별칭
+  - version: frontend에서 사용중인 NodeJs version
+
+---
+
 ### 파이프라인 설정
+```
+pipeline {
+    agent any
+    
+    environment {
+        frontendImageName = [frontend docker hub repository 이름, ex) "ssuyas/recletter_frontend"]
+        backendImageName = [backend docker hub repository 이름, ex) "ssuyas/recletter_backend"]
+        videoBackendImageName = [video backend docker hub repository 이름, ex) "ssuyas/recletter_video"]
+        registryCredential = [docker credential id, ex) 'jenkins_docker']
+        
+        releaseServerAccount = [ssh 계정명, ex), 'ubuntu']
+        releaseServerUri = [ssh 접속 uri, ex) 'i00a000.p.ssafy.io']
+    }
+    
+    tools {
+        gradle [gradle tool name, ex) "gradle8.5"]
+        nodejs [nodejs tool name, ex) "nodejs18.19"]
+    }
+        
+    stages {
+        stage('Git Clone') {
+            steps {
+                git branch: [배포에 사용할 branch 이름, ex) 'master'],
+                    credentialsId: [Gitlab Credential Id, ex) 'treamor_gitlab'],
+                    url: [Gitlab url, ex) 'https://lab.ssafy.com/s10-webmobile1-sub2/S10P12A606']
+            }
+        }
+        stage('Jar Build') {
+            steps {
+                dir ([repository 내 backend 프로젝트 root directory, ex) 'backend']) {
+                    sh 'gradle clean bootjar'
+                }
+            }
+        }
+        stage('Backend Image Build & DockerHub Push') {
+            steps {
+                dir([repository 내 backend 프로젝트 root directory, ex) 'backend']) {
+                    script {
+                        docker.withRegistry('', registryCredential) {
+                            sh "docker buildx create --use --name mybuilder"
+                            sh "docker buildx build --platform linux/amd64,linux/arm64 -t $backendImageName:$BUILD_NUMBER --push ."
+                            sh "docker buildx build --platform linux/amd64,linux/arm64 -t $backendImageName:latest --push ."
+                        }
+                    }
+                }
+            }
+        }
+        stage('Node Build') {
+            steps {
+                dir ([repository 내 frontend 프로젝트 root directory, ex) 'frontend']) {
+                    withCredentials([file(credentialsId: [.env secret file id, ex) 'dotenv'], variable: 'dotenv')]) {
+                        sh 'cp ${dotenv} .'
+                        sh 'npm add @rollup/rollup-linux-x64-gnu'
+                        sh 'npm add @esbuild/linux-x64 --omit=optional'
+                        sh 'npm install'
+                        sh 'npm run build'
+                    }
+                }
+            }
+        }
+        stage('Front Image Build & DockerHub Push') {
+            steps {
+                dir([repository 내 frontend 프로젝트 root directory, ex) 'frontend']) {
+                    script {
+                        docker.withRegistry('', registryCredential) {
+                            sh "docker buildx create --use --name mybuilder"
+                            sh "docker buildx build --platform linux/amd64,linux/arm64 -t $frontendImageName:$BUILD_NUMBER --push ."
+                            sh "docker buildx build --platform linux/amd64,linux/arm64 -t $frontendImageName:latest --push ."
+                        }
+                    }
+                }
+            }
+        }
+        stage('Video Backend Image Build & DockerHub Push') {
+            steps {
+                dir([repository 내 videobackend 프로젝트 root directory, ex) 'videobackend']) {
+                    script {
+                        docker.withRegistry('', registryCredential) {
+                            sh "docker buildx create --use --name mybuilder"
+                            sh "docker buildx build --platform linux/amd64 -t $videoBackendImageName:$BUILD_NUMBER --push ."
+                            sh "docker buildx build --platform linux/amd64 -t $videoBackendImageName:latest --push ."
+                        }
+                    }
+                }
+            }
+        }
+        stage("Copy SQL To Server") {
+            steps {
+                dir([repository 내 backend 프로젝트 root directory, ex) 'backend']) {
+                    sshagent(credentials: [[ubuntu credential id, ex) 'ubuntu_a606']]) {
+                    sh '''
+                    scp -r ./db/initdb.d $releaseServerAccount@$releaseServerUri:/opt/openvidu/
+                    '''
+                    }
+                }
+            }
+        }
+        stage('Copy .env To Server') {
+            steps {
+                dir([repository 내 backend 프로젝트 root directory, ex) 'backend']) {
+                    withCredentials([file(credentialsId: [.env secret file id, ex) 'dotenv'], variable: 'dotenv')]) {
+                        sshagent(credentials: [[ubuntu credential id, ex) 'ubuntu_a606']]) {
+                            sh 'scp -r ${dotenv}  $releaseServerAccount@$releaseServerUri:/opt/openvidu/.env'
+                        }
+                    }
+                }
+            }
+        }
+        stage('Copy Cloud Front Key To Server') {
+            steps {
+                withCredentials([file(credentialsId: [cloud front secret file id, ex) 'cloudfront_key'], variable: 'key')]) {
+                    sshagent(credentials: [[ubuntu credential id, ex) 'ubuntu_a606']]) {
+                        sh 'scp -r ${key}  $releaseServerAccount@$releaseServerUri:/opt/openvidu/private_cloudfront_key.pem'
+                    }
+                }
+            }
+        }
+        stage('Service Stop') {
+            steps {
+                script {
+                    sshagent(credentials: ['ubuntu_a606']) {
+                    // sh '''
+                    // ssh -o StrictHostKeyChecking=no $releaseServerAccount@$releaseServerUri "cd app; sudo docker-compose down"
+                    // ssh -o StrictHostKeyChecking=no $releaseServerAccount@$releaseServerUri "cd app; sudo docker rmi $frontendImageName:latest"
+                    // ssh -o StrictHostKeyChecking=no $releaseServerAccount@$releaseServerUri "cd app; sudo docker rmi $backendImageName:latest"
+                    // '''
+                    sh 'ssh -o StrictHostKeyChecking=no $releaseServerAccount@$releaseServerUri "cd /opt/openvidu; sudo ./openvidu stop; sudo docker-compose -f docker-compose.yml down; sudo docker rmi $frontendImageName:latest; sudo docker rmi $backendImageName:latest; sudo docker rmi $videoBackendImageName:latest"'
+                    }
+                }
+            }
+        }
+        stage('Service Start') {
+            steps {
+                script {
+                    sshagent(credentials: ['ubuntu_a606']) {
+                        sh '''
+                            ssh -o StrictHostKeyChecking=no $releaseServerAccount@$releaseServerUri "cd /opt/openvidu; sudo docker-compose up -d"
+                        '''
+                    }
+                }
+            }
+        }
+    }
+}
+```
 
 ---
 
