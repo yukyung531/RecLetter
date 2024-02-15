@@ -4,6 +4,7 @@ services:
   RecLetterRedis:
     image: redis:7.2.3
     container_name: RecLetterRedis
+    restart: unless-stopped
     volumes:
       - redis-data:/data
     networks:
@@ -12,6 +13,7 @@ services:
   RecLetterMariaDB:
     image: mariadb:10.4
     container_name: RecLetterMariaDB
+    restart: unless-stopped
     volumes:
       - mariadb-data:/lib/var/mysql
       - ./initdb.d:/docker-entrypoint-initdb.d
@@ -31,6 +33,7 @@ services:
   zookeeper:
     image: bitnami/zookeeper:3.8.3
     container_name: RecLetterZookeeper
+    restart: unless-stopped
     ports:
       - '2181:2181'
     environment:
@@ -43,6 +46,7 @@ services:
   kafka:
     image: bitnami/kafka:3.6
     container_name: RecLetterKafka
+    restart: unless-stopped
     ports:
       - "9093:9093"
     expose:
