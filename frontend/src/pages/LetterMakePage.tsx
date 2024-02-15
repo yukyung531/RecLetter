@@ -567,9 +567,11 @@ export default function LetterMakePage() {
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => {
             console.log('사라지기전 ' + reloadingStudioId + '입니다');
-            dispatch(studioDeleteState(reloadingStudioId));
-            disconnect(reloadingStudioId);
-            window.removeEventListener('beforeunload', handleBeforeUnload);
+            if (reloadingStudioId) {
+                dispatch(studioDeleteState(reloadingStudioId));
+                disconnect(reloadingStudioId);
+                window.removeEventListener('beforeunload', handleBeforeUnload);
+            }
             window.removeEventListener('scroll', handleScroll);
         };
     }, []);
@@ -1032,7 +1034,7 @@ export default function LetterMakePage() {
                             ? '/src/assets/images/nothumb.png'
                             : customSticker
                     }
-                    className="w-16 h-16 cursor-pointer rounded-lg hover:bg-gray-100 hover:border hover:color-border-main"
+                    className="w-16 h-16 cursor-pointer rounded-lg hover:bg-gray-100 hover:border hover:color-border-main object-cover"
                     alt=""
                     onClick={(e) => {
                         if (customSticker) {
@@ -1062,7 +1064,7 @@ export default function LetterMakePage() {
         if (stickerMode === 0) {
             return (
                 <div className="w-full flex flex-col justify-start text-xl">
-                    <div className="flex flex-wrap m-2 h-40 overflow-y-scroll">
+                    <div className="flex flex-wrap m-2 h-40 overflow-y-scroll scroll-pink">
                         {stickerList.map((item, index) => {
                             const imgUrl = `/src/assets/sticker/${item}.png`;
                             return (
@@ -1086,7 +1088,7 @@ export default function LetterMakePage() {
                         })}
                     </div>
 
-                    <div className="p-2 border rounded-xl color-border-main justify-center ">
+                    <div className="p-2 border rounded-xl color-border-sublight justify-center my-3">
                         <div className="flex justify-between">
                             <p className="color-text-sublight">커스텀 스티커</p>
                             <label
@@ -1357,33 +1359,37 @@ export default function LetterMakePage() {
             sideBar = (
                 <div className="w-full flex flex-col justify-start text-xl ">
                     <p>프레임</p>
-                    <div className="flex flex-wrap text-center cursor-pointer">
-                        {frameList.map((frame, item) => {
-                            const source = `/src/assets/frames/frame${frame.frameId}.png`;
-                            return (
-                                <div
-                                    className="px-1 py-1 hover:bg-gray-100 rounded-lg"
-                                    key={frame.frameId}
-                                    onClick={() => {
-                                        selectImg(frame.frameId, source);
-                                    }}
-                                    style={
-                                        selectedFrame === frame.frameId
-                                            ? { border: '1px solid #ff777f' }
-                                            : {}
-                                    }
-                                >
-                                    <img
-                                        className="w-24 h-14 border rounded-md"
-                                        src={source}
-                                        alt=""
-                                    />
-                                    <p className="my-1 text-sm">
-                                        {frame.frameTitle}
-                                    </p>
-                                </div>
-                            );
-                        })}
+                    <div className="flex flex-wrap text-center cursor-pointer justify-around w-full">
+                        {frameList
+                            .sort((a, b) => a.frameId - b.frameId)
+                            .map((frame, item) => {
+                                const source = `/src/assets/frames/frame${frame.frameId}.png`;
+                                return (
+                                    <div
+                                        className="px-1 py-1 hover:bg-gray-100 rounded-lg my-1 flex flex-col items-center justify-center"
+                                        key={frame.frameId}
+                                        onClick={() => {
+                                            selectImg(frame.frameId, source);
+                                        }}
+                                        style={
+                                            selectedFrame === frame.frameId
+                                                ? {
+                                                      border: '1px solid #ff777f',
+                                                  }
+                                                : {}
+                                        }
+                                    >
+                                        <img
+                                            className="w-24 h-14 border rounded-md"
+                                            src={source}
+                                            alt=""
+                                        />
+                                        <p className="my-1 text-sm">
+                                            {frame.frameTitle}
+                                        </p>
+                                    </div>
+                                );
+                            })}
                     </div>
                 </div>
             );
@@ -2261,9 +2267,20 @@ export default function LetterMakePage() {
                                             : ''
                                     }`}
                                 ></div>
-                                <span className="material-symbols-outlined text-3xl">
-                                    movie_edit
-                                </span>
+                                {mode === 0 ? (
+                                    <img
+                                        className="w-6 h-6 my-1"
+                                        src="/src/assets/icons/sidebar-clip-pink.png"
+                                        alt=""
+                                    />
+                                ) : (
+                                    <img
+                                        className="w-6 h-6 my-1"
+                                        src="/src/assets/icons/sidebar-clip.png"
+                                        alt=""
+                                    />
+                                )}
+
                                 <p className="font-bold">영상</p>
                             </div>
                             <div
@@ -2287,9 +2304,19 @@ export default function LetterMakePage() {
                                             : ''
                                     }`}
                                 ></div>
-                                <span className="material-symbols-outlined text-3xl">
-                                    image
-                                </span>
+                                {mode === 1 ? (
+                                    <img
+                                        className="w-6 h-6 my-1"
+                                        src="/src/assets/icons/sidebar-frame-pink.png"
+                                        alt=""
+                                    />
+                                ) : (
+                                    <img
+                                        className="w-6 h-6 my-1"
+                                        src="/src/assets/icons/sidebar-frame.png"
+                                        alt=""
+                                    />
+                                )}
                                 <p className="font-bold">프레임</p>
                             </div>
                             <div
@@ -2313,9 +2340,19 @@ export default function LetterMakePage() {
                                             : ''
                                     }`}
                                 ></div>
-                                <span className="material-symbols-outlined text-3xl">
-                                    volume_up
-                                </span>
+                                {mode === 2 ? (
+                                    <img
+                                        className="w-6 h-6 my-1"
+                                        src="/src/assets/icons/sidebar-volume-pink.png"
+                                        alt=""
+                                    />
+                                ) : (
+                                    <img
+                                        className="w-6 h-6 my-1"
+                                        src="/src/assets/icons/sidebar-volume.png"
+                                        alt=""
+                                    />
+                                )}
                                 <p className="font-bold">오디오</p>
                             </div>
                             <div
@@ -2346,7 +2383,7 @@ export default function LetterMakePage() {
                             </div>
                         </div>
                         {/* 카테고리 선택에 따라 */}
-                        <div className="relative w-4/5 flex flex-col items-center p-6 overflow-y-scroll">
+                        <div className="relative w-[84%] flex flex-col items-center p-3 overflow-y-scroll">
                             {sideBar}
                         </div>
                     </div>
@@ -2471,7 +2508,7 @@ export default function LetterMakePage() {
                                         편지 정보
                                     </h5>
 
-                                    <div className="p-2 ms-1 overflow-y-scroll">
+                                    <div className="px-2 pt-3 ms-1 overflow-y-scroll scroll-pink">
                                         <p className="flex">
                                             <p className="font-bold">제목:</p>
                                             <p className="mx-2">
@@ -2620,7 +2657,7 @@ export default function LetterMakePage() {
                                 &lt;
                             </button>
                             <div
-                                className="w-11/12 flex items-center overflow-x-scroll py-2"
+                                className="relative w-11/12 flex items-center overflow-x-scroll py-2"
                                 ref={scrollRef}
                             >
                                 {usedClipList.map((clip, index) => {

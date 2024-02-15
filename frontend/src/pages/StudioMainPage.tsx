@@ -33,6 +33,8 @@ export default function StudioMainPage() {
     const [isModalActive, setIsModalActive] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
 
+    const [isHovered, setHovered] = useState(false);
+
     /** closeModal()
      *  모달창 닫기
      */
@@ -245,7 +247,7 @@ export default function StudioMainPage() {
             };
             getUserInfo();
         }
-        if (!token) {
+        if (!token || !isLogin) {
             navigate(`/login`);
         }
 
@@ -258,9 +260,11 @@ export default function StudioMainPage() {
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => {
             // console.log('사라지기전 ' + reloadingStudioId + '입니다');
-            dispatch(studioDeleteState(reloadingStudioId));
-            disconnect(reloadingStudioId);
-            window.removeEventListener('beforeunload', handleBeforeUnload);
+            if (reloadingStudioId) {
+                dispatch(studioDeleteState(reloadingStudioId));
+                disconnect(reloadingStudioId);
+                window.removeEventListener('beforeunload', handleBeforeUnload);
+            }
         };
     }, []);
 
@@ -269,10 +273,17 @@ export default function StudioMainPage() {
         if (
             Math.floor(
                 (expireDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-            ) < 2 &&
+            ) < 2 ||
             studioDetailInfo.studioOwner === userInfo.userId
         ) {
+            console.log(
+                Math.floor(
+                    (expireDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+                )
+            );
             setFinishAuth(true);
+        } else {
+            setFinishAuth(false);
         }
     }, [studioDetailInfo]);
 
@@ -549,7 +560,7 @@ export default function StudioMainPage() {
     const onClickCompletePage = async () => {
         if (!isSelectedClipList()) {
             setErrorMessage(
-                '하나 이상의 영상을 선택해야 영상 편지 완성이 가능합니다'
+                `하나 이상의 영상을 선택해야 영상 편지 완성이 가능합니다`
             );
             setIsModalActive(true);
             return;
@@ -658,9 +669,11 @@ export default function StudioMainPage() {
                             }}
                         >
                             <div className="h-16 categori-selected"></div>
-                            <span className="material-symbols-outlined text-3xl">
-                                movie_edit
-                            </span>
+                            <img
+                                className="w-6 h-6 my-1"
+                                src="/src/assets/icons/sidebar-clip-pink.png"
+                                alt=""
+                            />
                             <p className="font-bold">영상</p>
                         </div>
                     </div>
@@ -697,13 +710,16 @@ export default function StudioMainPage() {
                                     src="/src/assets/icons/empty-face.png"
                                     alt=""
                                 />
-                                <p className="text-sm color-text-darkgray mb-6 text-center">
+                                <p className="text-lg color-text-darkgray mb-3 text-center">
                                     아직 선택된 영상이 없어요
                                 </p>
-                                <p className="text-sm color-text-darkgray text-center">
-                                    전체 편지는 선택된 영상으로만 제작됩니다.
+                                <p className="text-lg color-text-darkgray text-center">
+                                    전체 편지는 선택된 영상으로
                                 </p>
-                                <p className="text-sm color-text-darkgray mb-20 text-center">
+                                <p className="text-lg color-text-darkgray text-center">
+                                    제작됩니다.
+                                </p>
+                                <p className="text-lg color-text-darkgray mb-20 text-center">
                                     편집에서 원하는 영상을 선택해주세요!
                                 </p>
                             </div>
@@ -819,7 +835,7 @@ export default function StudioMainPage() {
                         </div>
                         <div className=" flex flex-col justify-center items-center">
                             <div className="w-full  flex justify-start items-center">
-                                <p className="mt-8 ms-12 mb-4 text-2xl min-h-[32px]">
+                                <p className="mt-2 ms-12 mb-2 text-2xl min-h-[24px]">
                                     {selectedVideo.clipTitle}
                                 </p>
                             </div>
@@ -923,45 +939,57 @@ export default function StudioMainPage() {
                     {/* (영상 리스트, 참가자 관리) */}
                     <div className="w-1/4 p-2 border border-l-2 overflow-y-scroll">
                         <div className="w-full px-2 flex flex-col justify-center items-center">
-                            <div
-                                className={`flex items-center gap-3 w-52 text-center my-2 p-1 rounded-lg text-xl shadow-darkShadow cursor-pointer transform ${
-                                    finishAuth
-                                        ? 'hover:scale-105 color-bg-yellow2 color-text-main'
-                                        : 'color-text-darkgray cursor-not-allowed'
-                                }`}
-                                onClick={onClickCompletePage}
-                                style={
-                                    !finishAuth
-                                        ? {
-                                              backgroundColor:
-                                                  'rgb(204,204,204)',
-                                          }
-                                        : {}
-                                }
-                            >
-                                <img
-                                    className="w-9 h-9 ml-2.5"
-                                    src="/src/assets/icons/letter_complete2.svg"
-                                    alt=""
-                                />
-                                영상편지 완성하기
-                            </div>
+                            {finishAuth ? (
+                                <div
+                                    className={`flex items-center gap-3 w-full justify-center text-center my-2 p-1 rounded-lg text-xl shadow-darkShadow cursor-pointer transform hover:scale-105 color-bg-yellow2 color-text-main`}
+                                    onClick={onClickCompletePage}
+                                >
+                                    <img
+                                        className="w-9 h-9"
+                                        src="/src/assets/icons/finish-clip-pink.png"
+                                        alt=""
+                                    />
+                                    영상편지 완성하기
+                                </div>
+                            ) : (
+                                <div
+                                    className={`flex items-center gap-3 w-52 text-center my-2 p-1 rounded-lg text-xl shadow-darkShadow transform color-text-darkgray cursor-not-allowed bg-gray-300`}
+                                >
+                                    <img
+                                        className="w-9 h-9 ml-2.5"
+                                        src="/src/assets/icons/finish-clip.png"
+                                        alt=""
+                                    />
+                                    영상편지 완성하기
+                                </div>
+                            )}
+
                             <div
                                 className="w-full h-24 mx-4 my-2 color-bg-main text-white text-xl flex flex-col justify-center items-center border rounded-md cursor-pointer hover:color-bg-subbold"
                                 onClick={onClickRecordPage}
                             >
-                                <span className="material-symbols-outlined text-3xl">
-                                    photo_camera
-                                </span>
+                                <img
+                                    className="w-6 h-5"
+                                    src="/src/assets/icons/camera-white.png"
+                                    alt=""
+                                />
                                 <p>새 영상 촬영하기</p>
                             </div>
                             <Link
                                 to={`/lettermake/${studioDetailInfo.studioId}`}
                                 className="w-full h-24 mx-4 my-2 color-border-main color-text-main text-xl flex flex-col justify-center items-center border rounded-md hover:color-bg-sublight hover:color-border-sublight hover:text-white"
+                                onMouseEnter={() => setHovered(true)}
+                                onMouseLeave={() => setHovered(false)}
                             >
-                                <span className="material-symbols-outlined text-3xl">
-                                    theaters
-                                </span>
+                                <img
+                                    className="w-6 h-5"
+                                    src={
+                                        isHovered
+                                            ? '/src/assets/icons/edit-clip.png'
+                                            : '/src/assets/icons/edit-clip-pink.png'
+                                    }
+                                    alt=""
+                                />
                                 <p>영상편지 편집하기</p>
                             </Link>
                         </div>
