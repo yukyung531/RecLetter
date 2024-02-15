@@ -19,10 +19,6 @@ def concat_clip(clip_list: List[VideoClip]) -> VideoClip:
     return concatenate_videoclips(fadein_clip_list, method="compose")
 
 
-def cross_fade(clip: VideoClip) -> VideoClip:
-    return clip.crossfadeout(0.5).crossfadein(0.5)
-
-
 def mirror_clip(clip: VideoClip) -> VideoClip:
     return clip.fx(vfx.mirror_x)
 
@@ -30,8 +26,8 @@ def mirror_clip(clip: VideoClip) -> VideoClip:
 def encode_frame(clip: VideoClip, frame_id: int, sticker_file_path: str) -> VideoClip:
     frame_file_path = "./assets/frames/frame" + str(frame_id) + ".png"
 
-    frame = ImageClip(frame_file_path, duration=clip.duration)
-    sticker = ImageClip(sticker_file_path, duration=clip.duration)
+    frame = ImageClip(frame_file_path, duration=clip.duration).crossfadeout(0.5).crossfadein(0.5)
+    sticker = ImageClip(sticker_file_path, duration=clip.duration).crossfadeout(0.5).crossfadein(0.5)
 
     return CompositeVideoClip([clip, frame, sticker])
 

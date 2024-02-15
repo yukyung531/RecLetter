@@ -48,13 +48,11 @@ export default function LetterFinishPage() {
         <section className="section-center">
             <div className="pt-24 mt-64"></div>
             <p className="text-2xl mb-8">{title}</p>
-            <video className="w-[800px] h-[450px] my-8 bg-gray-300" controls>
-                <source src={qrcode} type="video/mp4" />
-                Your browser does not support the video tag.
+            <video className="w-[800px] h-[450px] my-8 bg-gray-300"  src={qrcode} crossOrigin="anonymous" controls>
             </video>
             <div className="w-1/3">
                 <div
-                    className="py-2 text-lg rounded-lg my-4 color-bg-main text-white flex justify-center items-center btn-animation"
+                    className="py-2 text-lg rounded-lg my-4 color-bg-main text-white flex justify-center items-center btn-animation cursor-pointer"
                     onClick={handleDownload}
                 >
                     동영상 다운로드
@@ -86,7 +84,6 @@ export default function LetterFinishPage() {
                             add_link
                         </span>
                     </div>
-                    <p>{qrcode}</p>
                 </div>
             </div>
             <div className="w-1/4">

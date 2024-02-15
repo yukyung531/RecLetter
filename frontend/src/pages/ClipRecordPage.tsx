@@ -734,7 +734,7 @@ export default function ClipRecordPage() {
                 <>
                     <GuideModal
                         onClick={closeWarning}
-                        message="영상은 최대 59초까지 촬영 가능합니다."
+                        message="영상은 최대 1분까지 촬영 가능합니다."
                     />
                     <div
                         className="z-20 fixed top-2/3 left-1/2 shadow-lg text-white"

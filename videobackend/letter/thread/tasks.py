@@ -146,20 +146,14 @@ def encode_letter():
                 )
                 del concatenated_letter
 
-                # 전체 영상 fade in/out
-                cross_fade_letter = cross_fade(frame_added_letter)
-                del frame_added_letter
-
                 # bgm 삽입
                 print("bgm 삽입")
                 bgm_inserted_letter = insert_bgm(
-                    cross_fade_letter,
+                    frame_added_letter,
                     make_letter_req.studio_bgm_id,
                     make_letter_req.studio_bgm_volume
                 )
-                del cross_fade_letter
-
-
+                del frame_added_letter
 
                 # letter 완성 후 저장
                 print("저장 시작")
