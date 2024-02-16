@@ -265,7 +265,7 @@ AWS_CLOUDFRONT_KEY_ID=[AWS Cloud Front Key Id]
 MAIL_ID=[SMTP에 사용할 메일 주소]
 MAIL_SECRET=[SMTP 메일 Secret key]
 
-JWT_KEY=[JWT 서명에 사용할 임의의 키]
+JWT_KEY=[JWT 서명에 사용할 임의의 키. 256bit(32Byte)이상의 임의의 문자열]
 
 REDIS_HOST=[배포 환경에서의 Redis 주소]
 REDIS_PORT=[배포 환경에서의 Redis 포트번호]
