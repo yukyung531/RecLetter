@@ -1,5 +1,59 @@
 # RecLetter Porting Manual
 
+- [RecLetter Porting Manual](#recletter-porting-manual)
+  * [개발환경](#----)
+  * [EC2 설정](#ec2---)
+    + [서버 시간 변경](#--------)
+    + [미러서버 변경](#-------)
+    + [패키지 목록 업데이트 및 패키지 업데이트](#----------------------)
+    + [Swap 영역 할당](#swap------)
+  * [AWS S3 설정](#aws-s3---)
+    + [버킷 만들기](#------)
+    + [버킷 이름 및 리전 설정](#-------------)
+    + [객체 소유권 지정](#---------)
+    + [IAM 사용자 생성](#iam-------)
+    + [IAM 사용자 Access Key 생성](#iam-----access-key---)
+  * [Docker](#docker)
+    + [Docker 설치전 필요 패키지 설치](#docker--------------)
+    + [GPC Key 인증](#gpc-key---)
+    + [apt 명령어에 Docker repository 등록](#apt------docker-repository---)
+    + [패키지 리스트 갱신](#----------)
+    + [Docker 패키지 설치](#docker-------)
+    + [Docker Compose 설치](#docker-compose---)
+  * [Jenkins](#jenkins)
+    + [Jenkins 컨테이너 생성](#jenkins--------)
+    + [Jenkins 플러그인 미러서버 변경](#jenkins-------------)
+    + [첫 젠킨스 접근](#--------)
+    + [Jenkins 기본 플러그인 설치](#jenkins-----------)
+    + [관리자 계정 설정](#---------)
+    + [Jenkins 내부에 Docker, Docker Compose 설치](#jenkins-----docker--docker-compose---)
+    + [추가 플러그인 설치 목록](#-------------)
+    + [Credential 설정](#credential---)
+      - [GitLab Credential](#gitlab-credential)
+      - [GitLab API Token](#gitlab-api-token)
+      - [Webhook](#webhook)
+      - [Docker Hub Token](#docker-hub-token)
+      - [Docker Hub Repository 생성](#docker-hub-repository---)
+      - [Ubuntu Credential 추가](#ubuntu-credential---)
+      - [Secret File 추가](#secret-file---)
+      - [.env](#env)
+    + [빌드용 tools 설정](#----tools---)
+    + [파이프라인 설정](#--------)
+  * [실행](#--)
+    + [SMTP용 계정 설정](#smtp-------)
+    + [Google OAuth2 사용을 위한 설정](#google-oauth2----------)
+    + [openvidu](#openvidu)
+      - [openvidu on-premise CE 버전 설치](#openvidu-on-premise-ce------)
+    + [docker network 생성](#docker-network---)
+    + [DB, Kafka 설정](#db--kafka---)
+      - [docker-compose-db.yml](#docker-compose-dbyml)
+    + [기본 app 제거](#---app---)
+      - [docker-compose.override.yml](#docker-composeoverrideyml)
+  * [실행](#---1)
+    + [빌드 없이 실행](#--------)
+    + [CI/CD 실행](#ci-cd---)
+  * [시연 시나리오](#시연_시나리오)
+
 ## 개발환경
 - IntelliJ IDEA 2023.3 Community
 - openjdk 17.0.2 2022-01-18
@@ -844,43 +898,15 @@ volumes:
 ---
 
 ## 실행
-
+### 빌드 없이 실행
+- 위의 과정을 모두 진행 한 후
+```
+sudo dokcer-compose up -d
+```
+- jenkins 제외 총 14개의 컨테이너가 실행중이면 완료
+### CI/CD 실행
+- 위 과정을 모두 진행 한 후, Jenkins에서 빌드 수행
 ---
 
 ## 시연 시나리오
-### 일반 회원가입
-#### 이메일 인증
-#### 제약 조건
-### 일반 로그인
-### 구글 회원가입
-### 구글 로그인
-### 스튜디오 생성
-#### 제목 설정
-#### 기한 설정
-#### 프레임 설정
-### 스튜디오 초대
-### 채팅
-### 클립 생성
-#### 녹화
-#### 클립 이름 설정
-#### 저장할 클립 선택
-#### 클립 길이 편집
-#### 클립 저장
-### 영상 편지 편집
-#### 화면 공유
-#### 클립 설정
-##### 클립 순서 결정
-##### 개별 클립 볼륨 조절
-#### 프레임 변경
-#### BGM 설정
-##### BGM 볼륨 조절
-#### 스티커 설정
-##### 스티커 사이즈 조절
-##### 스티커 각도 조절
-##### 스티커 붙이기
-##### 커스텀 스티커 이미지 업로드
-##### 텍스트 스티커
-##### 텍스트 스타일 설정
-#### 영상 편지 완성
-##### 완성된 영상 편지 공유
-##### 완성된 영상 편지 다운로드
+- [프로젝트 README.md 참고](../README.md)
