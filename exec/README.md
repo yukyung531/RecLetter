@@ -486,8 +486,94 @@ pipeline {
 ## 실행
 
 ### SMTP용 계정 설정
+- **메일을 발송할 계정으로 구글 로그인**
+
+  → .env의 `MAIL_ID`
+
+- **‘계정’ 클릭**
+  
+  <img width="800" alt="image" src="/image/Untitled.png">
+
+- **(2단계 인증이 되어 있지 않은 경우) 보안 탭 → 2단계 인증 진행**
+- 
+  <img width="800" alt="image" src="/image/Untitled 1.png">
+
+- **검색창에 ‘앱 비밀번호’ 검색 후 클릭**
+- 
+  <img width="800" alt="image" src="/image/Untitled 2.png">
+
+- **앱 이름 입력 후 ‘만들기’ 버튼 클릭**
+
+  <img width="800" alt="image" src="/image/Untitled 3.png">
+  
+- **생성된 앱 비밀번호 별도 저장 (재확인 불가)**
+
+  → .env의 `MAIL_SECRET`
+
+  <img width="800" alt="image" src="/image/Untitled 4.png">
+  
+- **구글 Gmail → 설정(우측 상단 톱니바퀴 아이콘 클릭) → 모든 설정 보기**
+- **‘전달 및 POP/IMAP’ 탭 → 아래와 같이 설정 → 변경사항 저장 클릭**
+
+  <img width="800" alt="image" src="/image/Untitled 5.png">
 
 ### Google OAuth2 사용을 위한 설정
+
+- [https://cloud.google.com/](https://cloud.google.com/) 접속 및 로그인
+- 우측 상단 ‘콘솔’ 클릭
+- 프로젝트 선택 → 새 프로젝트 → 만들기
+
+  <img width="800" alt="image" src="/image/Untitled 6.png">
+
+- 생성한 프로젝트 선택
+- API 및 서비스 > 사용자 인증 정보 > 사용자 인증 정보 만들기 > OAuth 클라이언트 ID > 동의 화면 구성
+
+  <img width="800" alt="image" src="/image/Untitled 7.png">
+
+  <img width="800" alt="image" src="/image/Untitled 8.png">
+  
+- User Type은 ‘외부’ 선택 후 ‘만들기’ 클릭
+
+  <img width="800" alt="image" src="/image/Untitled 9.png">
+  
+
+- [OAuth 동의 화면]
+  - 앱 이름, 사용자 지원 이메일, 앱 도메인, 개발자 연락처 정보 입력 후 ‘저장 후 계속’ 버튼 클릭
+
+  <img width="800" alt="image" src="/image/Untitled 10.png">
+  
+- [범위]
+  - ‘범위 추가 또는 삭제’ 버튼 클릭 → email, profile, openId 선택 후 아래 ‘업데이트’ 버튼 클릭
+
+  <img width="800" alt="image" src="/image/Untitled 11.png">
+  
+  - 저장 후 계속 버튼 클릭
+
+  <img width="800" alt="image" src="/image/Untitled 12.png">
+  
+- [테스트 사용자]
+  - 테스트 사용자 필요 시 테스트 사용자 추가 후 ‘저장 후 계속’ 버튼 클릭
+
+  <img width="800" alt="image" src="/image/Untitled 13.png">
+  
+- 좌측 ‘사용자 인증 정보’ 클릭 → 사용자 인증 정보 만들기 > OAuth 클라이언트 ID
+
+  <img width="800" alt="image" src="/image/Untitled 14.png">
+  
+- 애플리케이션 유형, 이름, 승인된 리디렉션 URI 작성 후 ‘만들기’ 버튼 클릭
+  - 애플리케이션 유형 : 웹 애플리케이션
+  - **승인된 리디렉션 URI : (도메인)**/login/oauth2/code/google
+
+    → .env의 `GOOGLE_REDIRECT_URL`
+
+
+  <img width="800" alt="image" src="/image/Untitled 15.png">
+
+- 클라이언트 ID, 클라이언트 보안 비밀번호 별도 저장 (비밀번호는 추후 재확인 불가)
+  - 클라이언트 ID → .env의 `GOOGLE_CLIENT_ID`
+  - 클라이언트 보안 비밀번호 → .env의 `GOOGLE_CLIENT_SECRET`
+
+  <img width="800" alt="image" src="/image/Untitled 16.png">
 
 ### openvidu
 - [공식문서](https://docs.openvidu.io/en/stable/deployment/ce/on-premises/)
