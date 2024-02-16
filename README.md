@@ -1,8 +1,3 @@
-# README
-
-Created: 2024년 2월 15일 오후 3:58
-완료: No
-
 # RECLETTER
 
 ---
