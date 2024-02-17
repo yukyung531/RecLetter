@@ -18,6 +18,7 @@ let uuid;
 let setConnect = true;
 let setCurrentPeople;
 let currentRoom = [];
+let unSubscribeFlag = false;
 
 /** create-react-app환경 */
 export function connect(
@@ -35,7 +36,7 @@ export function connect(
                 Authorization: `Bearer ${token}`, // JWT 토큰을 헤더에 추가
             },
             onConnect: () => {
-                // console.log('success');
+                console.log('----connect success----');
                 setConnect = true;
 
                 stuId = studioParam;
@@ -76,10 +77,10 @@ export function subscribe(
     chatList = setChattingList;
     setCurrentPeople = currentPeopleFunc;
     if (client === null) {
-        // console.log('현재 연결 상태: 재연결합니다');
+        console.log('----reConnect 시도----');
         connect(stuId, uuid, username, chatList, setCurrentPeople);
-    } else if (client.connected) {
-        // console.log('이미 연결된 상태입니다,');
+    } else if (client.connected && !unSubscribeFlag) {
+        console.log('----이미 connect 상태입니다----');
         connect(studioParam, uid, nickname, setChattingList, currentPeopleFunc);
         if (setConnect && !currentRoom.includes(stuId)) {
             client.subscribe(topic + `/${stuId}`, (payload) => {
@@ -94,10 +95,26 @@ export function subscribe(
             unSubscribe(stuId);
             client.deactivate();
         } else {
+            console.log('재구독');
             unSubscribe(stuId);
             client.subscribe(topic + `/${stuId}`, (payload) => {
                 onMeesageReceived(payload);
             });
+        }
+    } else {
+        if (!currentRoom.includes(stuId)) {
+            console.log('----구독합니다 ' + stuId + '----');
+            client.publish({
+                destination: app + `/${stuId}/join`,
+                body: JSON.stringify({
+                    type: 'JOIN',
+                    studioId: stuId,
+                }),
+            });
+            client.subscribe(topic + `/${stuId}`, (payload) => {
+                onMeesageReceived(payload);
+            });
+            currentRoom.push(stuId);
         }
     }
 }
@@ -106,26 +123,18 @@ export function reSubscribe(reSubStudioParam) {
     stuId = reSubStudioParam;
     setConnect = true;
     subscribe(stuId, uuid, username, chatList, setCurrentPeople);
-    client.publish({
-        destination: app + `/${stuId}/join`,
-        body: JSON.stringify({
-            type: 'JOIN',
-            studioId: reSubStudioParam,
-        }),
-    });
 }
 export function unSubscribe(studioId) {
-    // console.log('unScribe하겠습니다' + studioId);
+    console.log('----unScribe' + studioId + '----');
     client.subscribe(topic + `/${studioId}`, (payload) => {}).unsubscribe();
     if (currentRoom.includes(studioId)) {
         currentRoom.filter((prevTopics) => prevTopics !== studioId);
     }
+    unSubscribeFlag = true;
 }
 
 export function disconnect(studioId) {
-    // console.log('tfwe');
-    // console.log(stuId);
-    // console.log(studioId);
+    console.log('----' + stuId + '연결 dissconnect 시도----');
     if (stuId === studioId) {
         client.publish({
             destination: app + `/${studioId}/leave`,
@@ -169,7 +178,8 @@ function onMeesageReceived(payload) {
     // console.log(message);
 
     //이름이 같지 않을 때
-    if (message.type === 'CHAT') {
+    if (message.type === 'CHAT' && message.studioId === stuId) {
+        console.log(message);
         showMessage(
             message.sender,
             message.uuid,
@@ -185,8 +195,20 @@ function onMeesageReceived(payload) {
 }
 
 export function sendMessage(userName, content, sid) {
-    // console.log(sid);
+    console.log('----메시지를 보냅니다----');
     stuId = sid;
+
+    /** 시간 저장 */
+    // const now = new Date();
+    // const hours = now.getHours().toString().padStart(2, '0');
+    // const minutes = now.getMinutes().toString().padStart(2, '0');
+    // showMessage(userName, uuid, `${hours}:${minutes}`, content);
+
+    // console.log('----studioId : ' + stuId);
+    // console.log('----userName : ' + userName);
+    // console.log('----content : ' + content);
+    // console.log('----uuid : ' + uuid);
+
     client.publish({
         destination: app + `/${stuId}/sendMessage`,
         body: JSON.stringify({
