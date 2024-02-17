@@ -49,6 +49,7 @@ export default function ChattingBox() {
     const [peopleFlag, setPeopleFlag] = useState<boolean>(false);
     const [studioCurrentId, setStudioCurrentId] = useState<string>('');
     const [viewChatFlag, setViewChatFlag] = useState<boolean>(true);
+    const [currentPath, setCurrentPath] = useState<string>('');
 
     //스크롤 탐지용
     const messageEndRef = useRef<HTMLDivElement>(null);
@@ -131,6 +132,8 @@ export default function ChattingBox() {
         if (!chatToggle) {
             setViewChatFlag(false);
         }
+        setCurrentPath(getlastPath());
+        console.log(currentPath);
     }, [chattingList]);
 
     useEffect(() => {
@@ -304,13 +307,11 @@ export default function ChattingBox() {
 
     // 채팅 리스트 표시
     const chatting = () => {
-        const studioPath = getlastPath();
-        // console.log(chattingList);
         let index = -1;
         chattingList.map((item, itemIndex) => {
             // console.log('엥');
-
-            if (item.studioId == studioPath) {
+            console.log(chattingList);
+            if (item.studioId == currentPath) {
                 index = itemIndex;
             }
         });
@@ -331,7 +332,7 @@ export default function ChattingBox() {
                                 </div>
                             );
                         } else if (
-                            chat.type === 'chat' &&
+                            // chat.type === 'chat' &&
                             chat.uuid === userId
                         ) {
                             return (

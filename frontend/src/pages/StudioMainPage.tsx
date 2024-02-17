@@ -140,6 +140,9 @@ export default function StudioMainPage() {
                         if (res.status === httpStatusCode.OK) {
                             // 채팅방 불러오기 설정
                             if (chatStudioList.length === 0) {
+                                console.log(
+                                    '----Redux 최초 추가 : ' + studioId
+                                );
                                 dispatch(studioAddState(studioId));
                             } else {
                                 let chatListFlag = false;
@@ -152,6 +155,7 @@ export default function StudioMainPage() {
                                     }
                                 );
                                 if (!chatListFlag) {
+                                    console.log('----Redux 추가 : ' + studioId);
                                     dispatch(studioAddState(studioId));
                                 }
                             }
