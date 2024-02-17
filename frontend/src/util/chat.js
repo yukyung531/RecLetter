@@ -95,10 +95,26 @@ export function subscribe(
             unSubscribe(stuId);
             client.deactivate();
         } else {
+            console.log('재구독');
             unSubscribe(stuId);
             client.subscribe(topic + `/${stuId}`, (payload) => {
                 onMeesageReceived(payload);
             });
+        }
+    } else {
+        if (!currentRoom.includes(stuId)) {
+            console.log('----구독합니다 ' + stuId + '----');
+            client.publish({
+                destination: app + `/${stuId}/join`,
+                body: JSON.stringify({
+                    type: 'JOIN',
+                    studioId: stuId,
+                }),
+            });
+            client.subscribe(topic + `/${stuId}`, (payload) => {
+                onMeesageReceived(payload);
+            });
+            currentRoom.push(stuId);
         }
     }
 }
@@ -107,13 +123,6 @@ export function reSubscribe(reSubStudioParam) {
     stuId = reSubStudioParam;
     setConnect = true;
     subscribe(stuId, uuid, username, chatList, setCurrentPeople);
-    client.publish({
-        destination: app + `/${stuId}/join`,
-        body: JSON.stringify({
-            type: 'JOIN',
-            studioId: reSubStudioParam,
-        }),
-    });
 }
 export function unSubscribe(studioId) {
     console.log('----unScribe' + studioId + '----');
@@ -169,7 +178,7 @@ function onMeesageReceived(payload) {
     // console.log(message);
 
     //이름이 같지 않을 때
-    if (message.type === 'CHAT') {
+    if (message.type === 'CHAT' && message.studioId === stuId) {
         console.log(message);
         showMessage(
             message.sender,
@@ -194,6 +203,11 @@ export function sendMessage(userName, content, sid) {
     // const hours = now.getHours().toString().padStart(2, '0');
     // const minutes = now.getMinutes().toString().padStart(2, '0');
     // showMessage(userName, uuid, `${hours}:${minutes}`, content);
+
+    // console.log('----studioId : ' + stuId);
+    // console.log('----userName : ' + userName);
+    // console.log('----content : ' + content);
+    // console.log('----uuid : ' + uuid);
 
     client.publish({
         destination: app + `/${stuId}/sendMessage`,
