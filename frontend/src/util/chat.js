@@ -38,7 +38,6 @@ export function connect(setChattingList) {
                 if (setChattingList !== null && setChattingList !== undefined) {
                     chatList = setChattingList;
                 }
-                console.log(chatList);
                 await getUser().then((res) => {
                     if (res.status === httpStatusCode.OK) {
                         console.log('유저 정보를 새로이 받아옵니다.');
@@ -68,7 +67,6 @@ export function firstChatJoin(stuId) {
 
 export async function subscribe(setChattingList) {
     if (setChattingList !== undefined && setChattingList !== null) {
-        console.log('---- chatList account----', setChattingList);
         chatList = setChattingList;
     }
     await getUser().then((res) => {
@@ -102,6 +100,7 @@ export async function subscribe(setChattingList) {
                     client.subscribe(topic + `/${stuId}`, (payload) => {
                         onMeesageReceived(payload);
                     });
+                    unSubscribeFlag = false;
                 }
             } else {
                 if (!currentRoom.includes(stuId)) {
