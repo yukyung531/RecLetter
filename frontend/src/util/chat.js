@@ -2,6 +2,9 @@
 import * as StompJs from '@stomp/stompjs';
 import axios from 'axios';
 import { enterChatting } from '../api/chat';
+import { getlastPath } from './get-func';
+import { getUser } from '../api/user';
+import { httpStatusCode } from '../util/http-status';
 
 // 배포용
 // const websocketUrl = 'wss://recletter.me/ws';
@@ -16,18 +19,11 @@ let firstEnter = false;
 let username;
 let uuid;
 let setConnect = true;
-let setCurrentPeople;
 let currentRoom = [];
 let unSubscribeFlag = false;
 
 /** create-react-app환경 */
-export function connect(
-    studioParam,
-    uid,
-    nickname,
-    setChattingList,
-    currentPeopleFunc
-) {
+export function connect(setChattingList) {
     const token = localStorage.getItem('access-token');
     if (client === null) {
         client = new StompJs.Client({
@@ -35,19 +31,25 @@ export function connect(
             connectHeaders: {
                 Authorization: `Bearer ${token}`, // JWT 토큰을 헤더에 추가
             },
-            onConnect: () => {
+            onConnect: async () => {
                 console.log('----connect success----');
                 setConnect = true;
 
-                stuId = studioParam;
-                username = nickname;
-                uuid = uid;
-                chatList = setChattingList;
-                setCurrentPeople = currentPeopleFunc;
-
-                // console.log(stuId, uuid, username, chatList, setCurrentPeople)
-                subscribe(stuId, uuid, username, chatList, setCurrentPeople);
-                // console.log(setConnect);
+                if (setChattingList !== null && setChattingList !== undefined) {
+                    chatList = setChattingList;
+                }
+                console.log(chatList);
+                await getUser().then((res) => {
+                    if (res.status === httpStatusCode.OK) {
+                        console.log('유저 정보를 새로이 받아옵니다.');
+                        stuId = getlastPath();
+                        username = res.data.userNickname;
+                        uuid = res.data.userId;
+                        // console.log(stuId, uuid, username)
+                        subscribe(chatList);
+                        // console.log(setConnect);
+                    }
+                });
             },
         });
         client.activate();
@@ -64,65 +66,70 @@ export function firstChatJoin(stuId) {
     });
 }
 
-export function subscribe(
-    studioParam,
-    uid,
-    nickname,
-    setChattingList,
-    currentPeopleFunc
-) {
-    stuId = studioParam;
-    username = nickname;
-    uuid = uid;
-    chatList = setChattingList;
-    setCurrentPeople = currentPeopleFunc;
-    if (client === null) {
-        console.log('----reConnect 시도----');
-        connect(stuId, uuid, username, chatList, setCurrentPeople);
-    } else if (client.connected && !unSubscribeFlag) {
-        console.log('----이미 connect 상태입니다----');
-        connect(studioParam, uid, nickname, setChattingList, currentPeopleFunc);
-        if (setConnect && !currentRoom.includes(stuId)) {
-            client.subscribe(topic + `/${stuId}`, (payload) => {
-                onMeesageReceived(payload);
-            });
-            if (!firstEnter) {
-                firstChatJoin(stuId);
-                firstEnter = true;
-            }
-            currentRoom.push(stuId);
-        } else if (!setConnect) {
-            unSubscribe(stuId);
-            client.deactivate();
-        } else {
-            console.log('재구독');
-            unSubscribe(stuId);
-            client.subscribe(topic + `/${stuId}`, (payload) => {
-                onMeesageReceived(payload);
-            });
-        }
-    } else {
-        if (!currentRoom.includes(stuId)) {
-            console.log('----구독합니다 ' + stuId + '----');
-            client.publish({
-                destination: app + `/${stuId}/join`,
-                body: JSON.stringify({
-                    type: 'JOIN',
-                    studioId: stuId,
-                }),
-            });
-            client.subscribe(topic + `/${stuId}`, (payload) => {
-                onMeesageReceived(payload);
-            });
-            currentRoom.push(stuId);
-        }
+export async function subscribe(setChattingList) {
+    if (setChattingList !== undefined && setChattingList !== null) {
+        console.log('---- chatList account----', setChattingList);
+        chatList = setChattingList;
     }
+    await getUser().then((res) => {
+        if (res.status === httpStatusCode.OK) {
+            console.log('유저 정보를 새로이 받아옵니다.');
+            stuId = getlastPath();
+            username = res.data.userNickname;
+            uuid = res.data.userId;
+
+            if (client === null) {
+                console.log('----reConnect 시도----');
+                connect(chatList);
+            } else if (client.connected && !unSubscribeFlag) {
+                console.log('----이미 connect 상태입니다----');
+                connect(chatList);
+                if (setConnect && !currentRoom.includes(stuId)) {
+                    client.subscribe(topic + `/${stuId}`, (payload) => {
+                        onMeesageReceived(payload);
+                    });
+                    if (!firstEnter) {
+                        firstChatJoin(stuId);
+                        firstEnter = true;
+                    }
+                    currentRoom.push(stuId);
+                } else if (!setConnect) {
+                    unSubscribe(stuId);
+                    client.deactivate();
+                } else {
+                    console.log('재구독');
+                    unSubscribe(stuId);
+                    client.subscribe(topic + `/${stuId}`, (payload) => {
+                        onMeesageReceived(payload);
+                    });
+                }
+            } else {
+                if (!currentRoom.includes(stuId)) {
+                    console.log('----구독합니다 ' + stuId + '----');
+                    client.publish({
+                        destination: app + `/${stuId}/join`,
+                        body: JSON.stringify({
+                            type: 'JOIN',
+                            studioId: stuId,
+                        }),
+                    });
+                    client.subscribe(topic + `/${stuId}`, (payload) => {
+                        onMeesageReceived(payload);
+                    });
+                    currentRoom.push(stuId);
+                }
+            }
+        }
+    });
 }
-export function reSubscribe(reSubStudioParam) {
+export function reSubscribe(setChattingList) {
     // console.log('재구독 작동합니다');
-    stuId = reSubStudioParam;
+    if (setChattingList !== null && setChattingList !== undefined) {
+        chatList = setChattingList;
+    }
+    stuId = getlastPath();
     setConnect = true;
-    subscribe(stuId, uuid, username, chatList, setCurrentPeople);
+    subscribe(chatList);
 }
 export function unSubscribe(studioId) {
     console.log('----unScribe' + studioId + '----');
@@ -194,9 +201,10 @@ function onMeesageReceived(payload) {
     }
 }
 
-export function sendMessage(userName, content, sid) {
+export function sendMessage(userName, content, sid, setChattingList) {
     console.log('----메시지를 보냅니다----');
     stuId = sid;
+    chatList = setChattingList;
 
     /** 시간 저장 */
     // const now = new Date();
