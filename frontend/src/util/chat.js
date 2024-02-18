@@ -118,9 +118,10 @@ export async function subscribe(setChattingList) {
                     });
                     pushRoom();
                 } else {
-                    if (currentRoom.includes(stuid)) {
+                    stuId = getlastPath();
+                    if (currentRoom.includes(stuId)) {
                         currentRoom.filter(
-                            (prevTopics) => prevTopics !== stuid
+                            (prevTopics) => prevTopics !== stuId
                         );
                     }
                     pushRoom();
