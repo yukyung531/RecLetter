@@ -37,6 +37,10 @@ def tune_volume(clip: VideoClip, volume_ratio: int) -> VideoClip:
 
 
 def insert_bgm(clip: VideoClip, volume_id: int, volume_ratio: int) -> VideoClip:
+    if volume_id == 1:
+        return clip
+
+    volume_id -= 1
     bgm_file_path = "./assets/bgm/bgm" + str(volume_id) + ".mp3"
     bgm = AudioFileClip(bgm_file_path)
     bgm = afx.audio_loop(bgm, duration=clip.duration)
