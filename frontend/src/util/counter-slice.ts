@@ -6,6 +6,7 @@ export interface LoginState {
     studioName: string;
     theme: number;
     customColorSet: string[];
+    loginRoom: string;
 }
 const initialState: LoginState = {
     isLogin: false,
@@ -13,6 +14,7 @@ const initialState: LoginState = {
     studioName: '',
     theme: 0,
     customColorSet: [],
+    loginRoom: '',
 };
 
 export const loginSlice = createSlice({
@@ -24,6 +26,10 @@ export const loginSlice = createSlice({
         },
         studioState: (state, action) => {
             state.studioId = action.payload;
+        },
+        //구글 로그인을 위한 이동
+        googleLoginMain: (state, action) => {
+            state.loginRoom = action.payload;
         },
         //studio 추가
         studioAddState: (state, action) => {
@@ -61,5 +67,6 @@ export const {
     themeState,
     colorAddState,
     colorDeleteState,
+    googleLoginMain,
 } = loginSlice.actions;
 export default loginSlice.reducer;

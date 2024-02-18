@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { httpStatusCode } from '../util/http-status';
-import { useDispatch } from 'react-redux';
-import { loginState } from '../util/counter-slice';
+import { useDispatch, useSelector } from 'react-redux';
+import { googleLoginMain, loginState } from '../util/counter-slice';
 import axios from 'axios';
 
 export default function SocialPage() {
@@ -13,6 +13,10 @@ export default function SocialPage() {
         .VITE_REACT_GOOGLE_CHANGE_HOST;
     const VITE_REACT_GOOGLE_PROTOCOL = import.meta.env
         .VITE_REACT_GOOGLE_PROTOCOL;
+
+    const loginUrl: string = useSelector(
+        (state: any) => state.loginFlag.loginRoom
+    );
 
     useEffect(() => {
         const currentUri = window.location.href;
@@ -53,7 +57,12 @@ export default function SocialPage() {
                         res.data.refreshToken
                     );
                     dispatch(loginState(true));
-                    navigate(`/studiolist`);
+                    if (loginUrl !== '') {
+                        navigate(`/studiomain/${loginUrl}`);
+                        dispatch(googleLoginMain(''));
+                    } else {
+                        navigate(`/studiolist`);
+                    }
                 } else if (res.status === httpStatusCode.BADREQUEST) {
                     console.log('bad request');
                 }
