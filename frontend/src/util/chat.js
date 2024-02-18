@@ -35,7 +35,10 @@ export function connect(setChattingList) {
                 console.log('----connect success----');
                 setConnect = true;
 
+                console.log('chatlist 값 : ' + chatList);
+                console.log('setChattingList 값 : ' + setChattingList);
                 if (setChattingList !== null && setChattingList !== undefined) {
+                    console.log('chatlist를 갱신합니다.');
                     chatList = setChattingList;
                 }
                 await getUser().then((res) => {
@@ -66,12 +69,17 @@ export function firstChatJoin(stuId) {
 }
 
 export async function subscribe(setChattingList) {
-    if (setChattingList !== undefined && setChattingList !== null) {
-        chatList = setChattingList;
-    }
     await getUser().then((res) => {
         if (res.status === httpStatusCode.OK) {
-            console.log('유저 정보를 새로이 받아옵니다.');
+            console.log('subscribe 시작');
+            console.log('chatlist 값 : ' + chatList);
+            console.log('setChattingList 값 : ' + setChattingList);
+
+            if (setChattingList !== null && setChattingList !== undefined) {
+                console.log('chatlist를 갱신합니다.');
+                chatList = setChattingList;
+            }
+
             stuId = getlastPath();
             username = res.data.userNickname;
             uuid = res.data.userId;
@@ -92,7 +100,11 @@ export async function subscribe(setChattingList) {
                     }
                     currentRoom.push(stuId);
                 } else if (!setConnect) {
+                    console.log(
+                        'disconnect 로 인하여 client를 deactive합니다.'
+                    );
                     unSubscribe(stuId);
+                    setConnect = true;
                     client.deactivate();
                 } else {
                     console.log('재구독');
@@ -131,7 +143,7 @@ export function reSubscribe(setChattingList) {
     subscribe(chatList);
 }
 export function unSubscribe(studioId) {
-    console.log('----unScribe' + studioId + '----');
+    console.log('----unScribe ' + studioId + '----');
     client.subscribe(topic + `/${studioId}`, (payload) => {}).unsubscribe();
     if (currentRoom.includes(studioId)) {
         currentRoom.filter((prevTopics) => prevTopics !== studioId);
@@ -203,8 +215,9 @@ function onMeesageReceived(payload) {
 export function sendMessage(userName, content, sid, setChattingList) {
     console.log('----메시지를 보냅니다----');
     stuId = sid;
-    chatList = setChattingList;
-
+    if (setChattingList !== null && setChattingList !== undefined) {
+        chatList = setChattingList;
+    }
     /** 시간 저장 */
     // const now = new Date();
     // const hours = now.getHours().toString().padStart(2, '0');
