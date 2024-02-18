@@ -5,6 +5,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { httpStatusCode } from '../util/http-status';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+    googleLoginMain,
     loginState,
     studioNameState,
     studioState,
@@ -29,6 +30,7 @@ export default function LoginPage() {
     if (state) {
         location = state.location;
         position = state.position;
+        dispatch(googleLoginMain(location));
     }
 
     /** 모달창 */
@@ -50,6 +52,7 @@ export default function LoginPage() {
             // console.log(position);
             if (position === 'main') {
                 // console.log('메인으로갑니다');
+                dispatch(googleLoginMain(''));
                 navigate(`/studiomain/${location}`);
             } else {
                 // console.log('안ㅇ갑니다');
