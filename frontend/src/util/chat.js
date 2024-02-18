@@ -35,8 +35,6 @@ export function connect(setChattingList) {
                 console.log('----connect success----');
                 setConnect = true;
 
-                console.log('chatlist 값 : ' + chatList);
-                console.log('setChattingList 값 : ' + setChattingList);
                 if (setChattingList !== null && setChattingList !== undefined) {
                     console.log('chatlist를 갱신합니다.');
                     chatList = setChattingList;
@@ -58,7 +56,8 @@ export function connect(setChattingList) {
     }
 }
 
-export function firstChatJoin(stuId) {
+export function firstChatJoin(studioId) {
+    stuId = studioId;
     client.publish({
         destination: app + `/${stuId}/join`,
         body: JSON.stringify({
@@ -72,8 +71,6 @@ export async function subscribe(setChattingList) {
     await getUser().then((res) => {
         if (res.status === httpStatusCode.OK) {
             console.log('subscribe 시작');
-            console.log('chatlist 값 : ' + chatList);
-            console.log('setChattingList 값 : ' + setChattingList);
 
             if (setChattingList !== null && setChattingList !== undefined) {
                 console.log('chatlist를 갱신합니다.');
@@ -95,6 +92,7 @@ export async function subscribe(setChattingList) {
                         onMeesageReceived(payload);
                     });
                     if (!firstEnter) {
+                        console.log('처음접속 Join 작동합니다..');
                         firstChatJoin(stuId);
                         firstEnter = true;
                     }
@@ -205,6 +203,9 @@ function onMeesageReceived(payload) {
             message.content,
             'chat'
         );
+    }
+    if (message.type === 'JOIN') {
+        console.log('JOIN 합니다');
     }
     if (message.type === 'LEAVE') {
         setConnect = false;
