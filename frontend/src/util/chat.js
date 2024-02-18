@@ -76,7 +76,6 @@ export async function subscribe(setChattingList) {
                 console.log('chatlist를 갱신합니다.');
                 chatList = setChattingList;
             }
-
             stuId = getlastPath();
             username = res.data.userNickname;
             uuid = res.data.userId;
@@ -88,15 +87,12 @@ export async function subscribe(setChattingList) {
                 console.log('----이미 connect 상태입니다----');
                 connect(chatList);
                 if (setConnect && !currentRoom.includes(stuId)) {
-                    client.subscribe(topic + `/${stuId}`, (payload) => {
-                        onMeesageReceived(payload);
-                    });
+                    pushRoom();
                     if (!firstEnter) {
                         console.log('처음접속 Join 작동합니다..');
                         firstChatJoin(stuId);
                         firstEnter = true;
                     }
-                    currentRoom.push(stuId);
                 } else if (!setConnect) {
                     console.log(
                         'disconnect 로 인하여 client를 deactive합니다.'
@@ -107,9 +103,7 @@ export async function subscribe(setChattingList) {
                 } else {
                     console.log('재구독');
                     unSubscribe(stuId);
-                    client.subscribe(topic + `/${stuId}`, (payload) => {
-                        onMeesageReceived(payload);
-                    });
+                    pushRoom();
                     unSubscribeFlag = false;
                 }
             } else {
@@ -122,10 +116,14 @@ export async function subscribe(setChattingList) {
                             studioId: stuId,
                         }),
                     });
-                    client.subscribe(topic + `/${stuId}`, (payload) => {
-                        onMeesageReceived(payload);
-                    });
-                    currentRoom.push(stuId);
+                    pushRoom();
+                } else {
+                    if (currentRoom.includes(stuid)) {
+                        currentRoom.filter(
+                            (prevTopics) => prevTopics !== stuid
+                        );
+                    }
+                    pushRoom();
                 }
             }
         }
@@ -150,6 +148,7 @@ export function unSubscribe(studioId) {
 }
 
 export function disconnect(studioId) {
+    stuId = studioId;
     console.log('----' + stuId + '연결 dissconnect 시도----');
     if (stuId === studioId) {
         client.publish({
@@ -240,4 +239,10 @@ export function sendMessage(userName, content, sid, setChattingList) {
             studioId: stuId,
         }),
     });
+}
+function pushRoom() {
+    client.subscribe(topic + `/${stuId}`, (payload) => {
+        onMeesageReceived(payload);
+    });
+    currentRoom.push(stuId);
 }
