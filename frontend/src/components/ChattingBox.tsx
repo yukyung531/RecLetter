@@ -1,23 +1,9 @@
 import { BaseSyntheticEvent, useEffect, useRef, useState } from 'react';
-import {
-    connect,
-    disconnect,
-    firstChatJoin,
-    reSubscribe,
-    sendMessage,
-    subscribe,
-    unSubscribe,
-} from '../util/chat';
+import { connect, reSubscribe, sendMessage, subscribe } from '../util/chat';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUser } from '../api/user';
 import { httpStatusCode } from '../util/http-status';
-import {
-    studioAddState,
-    studioDeleteState,
-    studioNameState,
-    studioState,
-    themeState,
-} from '../util/counter-slice';
+import { studioDeleteState, themeState } from '../util/counter-slice';
 import { getlastPath } from '../util/get-func';
 
 type chattingMessageType = {
@@ -151,13 +137,7 @@ export default function ChattingBox() {
                     setUserId(res.data.userId);
                     setCurrentPeople([]);
                     const studioPath = getlastPath();
-                    connect(
-                        studioPath,
-                        res.data.userId,
-                        res.data.userNickname,
-                        setChattingList,
-                        setCurrentPeople
-                    );
+                    connect(setChattingList);
                     setChatToggle(false);
                     setChatFlag(true);
                     resetChattingList();
@@ -176,7 +156,7 @@ export default function ChattingBox() {
                     setChatFlag(true);
                     resetChattingList();
                     const studioPath = getlastPath();
-                    reSubscribe(studioPath);
+                    reSubscribe(setChattingList);
                 }
             });
         }
@@ -189,13 +169,7 @@ export default function ChattingBox() {
                 setUserId(res.data.userId);
                 setCurrentPeople([]);
                 const studioPath = getlastPath();
-                subscribe(
-                    studioPath,
-                    res.data.userId,
-                    res.data.userNickname,
-                    setChattingList,
-                    setCurrentPeople
-                );
+                subscribe(setChattingList);
                 setChatToggle(false);
                 setChatFlag(true);
                 resetChattingList();
@@ -219,7 +193,7 @@ export default function ChattingBox() {
     const sendChatting = () => {
         if (comment !== '') {
             const studioPath = getlastPath();
-            sendMessage(userNickname, comment, studioPath);
+            sendMessage(userNickname, comment, studioPath, setChattingList);
             setComment('');
         }
     };
