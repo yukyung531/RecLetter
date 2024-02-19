@@ -131,13 +131,15 @@ export async function subscribe(setChattingList) {
     });
 }
 export function reSubscribe(setChattingList) {
-    // console.log('재구독 작동합니다');
+    console.log('재구독 작동합니다');
     if (setChattingList !== null && setChattingList !== undefined) {
         chatList = setChattingList;
     }
     stuId = getlastPath();
     setConnect = true;
-    subscribe(chatList);
+    if (!currentRoom.includes(stuId)) {
+        subscribe(chatList);
+    }
 }
 export function unSubscribe(studioId) {
     console.log('----unScribe ' + studioId + '----');
@@ -150,16 +152,18 @@ export function unSubscribe(studioId) {
 
 export function disconnect(studioId) {
     stuId = studioId;
-    console.log('----' + stuId + '연결 dissconnect 시도----');
-    if (stuId === studioId) {
-        client.publish({
-            destination: app + `/${studioId}/leave`,
-            body: JSON.stringify({
-                type: 'LEAVE',
-                studioId: studioId,
-            }),
-        });
-    }
+    setConnect = false;
+    unSubscribe(stuId);
+    // console.log('----' + stuId + '연결 dissconnect 시도----');
+    // if (stuId === studioId) {
+    //     client.publish({
+    //         destination: app + `/${studioId}/leave`,
+    //         body: JSON.stringify({
+    //             type: 'LEAVE',
+    //             studioId: studioId,
+    //         }),
+    //     });
+    // }
 
     // console.log('채팅이 종료되었습니다.');
 }
@@ -208,8 +212,8 @@ function onMeesageReceived(payload) {
         console.log('JOIN 합니다');
     }
     if (message.type === 'LEAVE') {
-        setConnect = false;
-        unSubscribe(message.studioId);
+        // setConnect = false;
+        // unSubscribe(message.studioId);
     }
 }
 

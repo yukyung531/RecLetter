@@ -88,7 +88,7 @@ export default function ChattingBox() {
                 chatStudioList.length === 1 &&
                 chatStudioList[0] === studioPath
             ) {
-                console.log('----첫 리스트----');
+                // console.log('----첫 리스트----');
 
                 chatInitialAPI();
             } else if (
