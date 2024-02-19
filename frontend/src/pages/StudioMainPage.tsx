@@ -211,8 +211,11 @@ export default function StudioMainPage() {
                                 //왜냐하면 아직 studioDetailInfo가 업데이트 되지 않았기 때문
                                 //그래서 직접 조작 필요
                                 if (videoRef.current) {
-                                    setSelectedVideo(usedVidArr[0]);
-                                    setPlayingVideo(true);
+                                    // setSelectedVideo(usedVidArr[0]);
+                                    videoRef.current.src =
+                                        usedVidArr[0].clipUrl;
+                                    stopVideo();
+                                    // setPlayingVideo(true);
                                 }
                             }
                         }
@@ -420,7 +423,7 @@ export default function StudioMainPage() {
      *  비디오를 재생한다.
      */
     const playVideo = () => {
-        if (selectedVideo.clipId !== -1) {
+        if (selectedVideo.clipId !== -1 || videoRef.current?.src !== '') {
             setPlayingVideo(true);
             if (videoRef.current) {
                 videoRef.current.play();
