@@ -1458,6 +1458,7 @@ export default function LetterMakePage() {
                         id="bgm"
                         onChange={(event) => {
                             stopVideo();
+                            setBgmPlaying(false);
                             selectBGM(+event.target.value);
                             selectBGMUrl(+event.target.value);
                         }}
