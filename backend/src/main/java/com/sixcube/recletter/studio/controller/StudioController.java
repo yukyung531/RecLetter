@@ -209,7 +209,7 @@ public class StudioController {
     }
     //redis에서 인코딩 중 상태 삭제
     String key = RedisPrefix.ENCODING.prefix() + studioId;
-    if(!redisService.hasKey(key)) {
+    if(redisService.hasKey(key)) {
       redisService.deleteValues(key);
     }
   }
