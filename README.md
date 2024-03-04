@@ -1,492 +1,695 @@
-# RECLETTER
+# ■ RecLetter
+
+#### 💻 주요 코드
+
+##### 1. WebSocket
+
+**[Back-end]**
+
+📌 <u>**WebSocketConfig.java**</u> 
+
+```java
+package com.sixcube.recletter.config;
+
+...
+
+@RequiredArgsConstructor
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+    private final JwtTokenChannelInterceptor jwtTokenChannelInterceptor;
+
+    // 클라이언트로부터 들어오는 메시지를 처리할 인터셉터를 설정
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(jwtTokenChannelInterceptor);
+    }
+
+    /**
+     * 클라이언트가 메시지를 보낼 수 있는 endpoint 설정
+     */
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry config) {
+        // "/topic"으로 시작하는 메시지가 메시지 브로커로 라우팅되어야 함
+        // 메시지 브로커는 연결된 모든 클라이언트에게 메시지를 broadcast함
+        config.enableSimpleBroker("/topic");
+        // "/app"으로 시작하는 경로를 가진 메시지를 'message-handling methods', 즉 (@MessageMapping)로 라우팅함
+        config.setApplicationDestinationPrefixes("/app");
+    }
+
+    /**
+     * websocket endpoint 등록
+     */
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        // "/ws"라는 endpoint를 등록하고, 모든 도메인에서의 접근을 허용함
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("*");
+    }
+}
+```
+
+- WebSocket 통신의 경로 설정, 메시지 브로커 설정, 클라이언트로부터 들어오는 메시지를 처리할 인터셉터 설정
+
+
+<br>
+
+📌 <u>**ChatController.java**</u> 
+
+```java
+package com.sixcube.recletter.chat.controller;
+
+...
+
+@RequiredArgsConstructor
+@Controller
+public class ChatController {
+
+    private final ChatService chatService;
+
+    private final RedisListService redisListService;
+
+    /**
+     * 채팅방에 참여하는 엔드포인트
+     * @param studioId 클라이언트가 보낸 메시지의 목적지에서 추출한 스튜디오 ID.
+     * @param chatMessage 클라이언트가 보낸 메시지의 본문. JSON 형태의 메시지를 ChatMessage 객체로 변환하여 전달함.
+     * @param principal 현재 인증된 사용자의 정보(JwtTokenChannelInterceptor에서 인증받은 사용자의 정보).
+     * @return 채팅 서비스의 joinChat 메서드가 처리한 결과. 채팅 참가 요청의 처리 결과를 ChatMessage 객체로 반환.
+     */
+    @MessageMapping("/chat/{studioId}/join") // 클라이언트에서 보낸 메시지를 받을 메서드 지정
+    @SendTo("/topic/{studioId}") // 메서드가 처리한 결과를 보낼 목적지 지정
+    public ChatMessage joinChat(@DestinationVariable String studioId, @Payload ChatMessage chatMessage, Principal principal) {
+          /* @DestinationVariable: 메시지의 목적지에서 변수를 추출
+             @Payload: 메시지 본문(body)의 내용을 메서드의 인자로 전달할 때 사용
+                      (클라이언트가 JSON 형태의 메시지를 보냈다면, 이를 ChatMessage 객체로 변환하여 메서드에 전달)
+          */
+        // 현재 인증된 사용자의 정보를 User 객체로 변환
+        User user = (User) ((Authentication) principal).getPrincipal();
+        return chatService.joinChat(studioId, chatMessage, user);
+    }
+
+    /**
+     * 메시지를 보내는 엔드포인트
+     */
+    @MessageMapping("/chat/{studioId}/sendMessage")
+    @SendTo("/topic/{studioId}")
+    public ChatMessage sendMessage(@DestinationVariable String studioId, @Payload ChatMessage chatMessage, Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+        return chatService.sendMessage(studioId, chatMessage, user);
+    }
+
+    /**
+     * 채팅방 나가는 엔드포인트
+     */
+    @MessageMapping("/chat/{studioId}/leave")
+    @SendTo("/topic/{studioId}")
+    public ChatMessage leaveChat(@DestinationVariable String studioId, @Payload ChatMessage chatMessage, Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+        return chatService.leaveChat(studioId, chatMessage, user);
+    }
+
+    /**
+     * 채팅방(스튜디오)에 현재 접속해있는 유저리스트 조회
+     * @param studioId 확인할 채팅방(스튜디오)
+     * @return 채팅방(스튜디오)에 현재 접속해있는 유저리스트 반환
+     */
+    @GetMapping("/chat/{studioId}/userList")
+    public ResponseEntity<List<String>> searchChatUserList(@PathVariable String studioId) {
+        String key = RedisPrefix.STUDIO.prefix() + studioId;
+        List<String> userList = redisListService.getList(key);
+        return new ResponseEntity<>(userList, HttpStatus.OK);
+    }
+
+}
+```
+
+<br>
+
+📌 <u>**ChatServiceImpl.java**</u> 
+
+```java
+package com.sixcube.recletter.chat.service;
+
+...
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class ChatServiceImpl implements ChatService {
+
+    private final StudioRepository studioRepository;
+
+    private final RedisListService redisListService;
+
+    private final StudioUtil studioUtil;
+
+    @Override
+    public ChatMessage joinChat(String studioId, ChatMessage chatMessage, User user) throws StudioNotFoundException, AlreadyJoinedStudioException, ChatJoinFailureException {
+        try {
+            // studioId에 해당하는 studio가 존재하는지 확인
+            studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
+
+            // 해당 스튜디오에 현재 참여중인지 확인
+            studioUtil.isStudioParticipant(studioId, user.getUserId());
+
+            // 접속 정보를 레디스에 저장
+            String key = RedisPrefix.STUDIO.prefix() + studioId;
+            redisListService.addValueToList(key, user.getUserNickname());
+
+            // 메시지 sender에 userNickname 등록
+            chatMessage.setSender(user.getUserNickname());
+
+            // 메시지 studioId에 studioId 등록
+            chatMessage.setStudioId(studioId);
+
+            // 메시지 UUID에 UUID 등록
+            chatMessage.setUUID(user.getUserId());
+
+            // 메시지를 보낸 시간 설정
+            chatMessage.setTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+
+            // 참여 메시지 설정
+            chatMessage.setContent(chatMessage.getSender() + "님이 참여하였습니다.");
+
+            // 메시지를 채팅방에 브로드캐스트한다.
+            return chatMessage;
+        } catch (Exception e) {
+            throw new ChatJoinFailureException(e);
+        }
+    }
+
+    @Override
+    public ChatMessage sendMessage(String studioId, ChatMessage chatMessage, User user) throws StudioNotFoundException, ChatSendMessageFailureException {
+        try {
+            // studioId에 해당하는 studio가 존재하는지 확인
+            studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
+
+            // 해당 스튜디오에 현재 참여중인지 확인
+            studioUtil.isStudioParticipant(studioId, user.getUserId());
+
+            // 메시지 sender에 userNickname 등록
+            chatMessage.setSender(user.getUserNickname());
+
+            // 메시지 UUID에 UUID 등록
+            chatMessage.setUUID(user.getUserId());
+
+            // 메시지를 보낸 시간 설정
+            chatMessage.setTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+
+            return chatMessage;
+        } catch (Exception e) {
+            throw new ChatSendMessageFailureException(e);
+        }
+    }
+
+    @Override
+    public ChatMessage leaveChat(String studioId, ChatMessage chatMessage, User user) throws StudioNotFoundException, ChatLeaveFailureException {
+        try {
+
+            // studioId에 해당하는 studio가 존재하는지 확인
+            studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
+
+            // 해당 스튜디오에 현재 참여중인지 확인
+            studioUtil.isStudioParticipant(studioId, user.getUserId());
+
+            // 메시지 sender에 userNickname 등록
+            chatMessage.setSender(user.getUserNickname());
+
+            // 메시지 studioId에 studioId 등록
+            chatMessage.setStudioId(studioId);
+
+            // 메시지 UUID에 UUID 등록
+            chatMessage.setUUID(user.getUserId());
+
+            // 메시지를 보낸 시간 설정
+            chatMessage.setTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+
+            // 퇴장 메시지 설정
+            chatMessage.setContent(chatMessage.getSender() + "님이 퇴장하였습니다.");
+
+            /* 퇴장 정보를 레디스에 저장
+               redis key값에 해당 studioId가 존재하고 해당 user가 접속중이라면, 그 key의 value에 userNickname 제거
+               (하나만 제거, 중복될 수 있으니까)
+               redis key값에 해당 studioId가 존재하지 않는다면, 예외처리
+             */
+            String key = RedisPrefix.STUDIO.prefix() + studioId;
+            List<String> list = redisListService.getList(key);
+
+            if(list != null && list.contains(user.getUserNickname())) {
+                // 리스트에 userNickname이 존재하면, userNickname 제거
+                redisListService.removeValueFromList(key,user.getUserNickname());
+            } else {
+                // 리스트에 userNickname이 존재하지 않으면, 예외 발생
+                throw new NoSuchElementException("The userNickname does not exist in the list");
+            }
+
+            return chatMessage;
+        } catch (Exception e) {
+            throw new ChatLeaveFailureException(e);
+        }
+    }
+
+}
+```
+
+- `joinChat` 메소드는 채팅방에 참여하는 로직을 처리한다. 스튜디오가 존재하고, 해당 스튜디오에 사용자가 이미 참여하고 있지 않은지 확인한 후, 사용자의 참여 정보를 Redis에 저장하고, 참여 메시지를 생성하여 반환한다.
+- `sendMessage` 메소드는 채팅방에서 메시지를 보내는 로직을 처리한다. 스튜디오가 존재하고, 해당 스튜디오에 사용자가 참여하고 있는지 확인한 후, 메시지를 생성하여 반환한다.
+- `leaveChat` 메소드는 채팅방에서 나가는 로직을 처리한다. 스튜디오가 존재하고, 해당 스튜디오에 사용자가 참여하고 있는지 확인한 후, 사용자의 참여 정보를 Redis에서 삭제하고, 퇴장 메시지를 생성하여 반환한다.
+
+<br>
+
+📌 <u>**JwtTokenChannelInterceptor.java**</u> 
+
+```java
+package com.sixcube.recletter.chat.Interceptor;
+
+...
+
+// JwtTokenChannelInterceptor는 웹소켓 요청을 인터셉트하여 JWT 토큰을 확인하고 해당 사용자의 인증 정보를 가져오는 역할을 함
+@RequiredArgsConstructor
+@Component
+public class JwtTokenChannelInterceptor implements ChannelInterceptor {
+
+    private final JWTUtil jwtUtil;
+    private final UserRepository userRepository;
+
+    /**
+     * 메시지를 보내기 전에 실행되는 인터셉터 메소드
+     * @param message 전송될 메시지. 이 메시지의 헤더에는 JWT 토큰이 포함되어 있어야 함
+     * @param channel 메시지가 전송될 채널
+     * @return 수정된 메시지를 반환(사용자 인증 정보가 추가된 메시지)
+     */
+    @Override
+    public Message<?> preSend(Message<?> message, MessageChannel channel) {
+        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+        // 만약 메시지의 종류가 CONNECT(WebSocket 연결을 시작하는 요청)라면
+        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+            // 메시지 헤더에서 "Authorization" 정보를 가져온다. 이 정보는 JWT 토큰을 포함하고 있다.
+            String authToken = accessor.getFirstNativeHeader("Authorization");
+            // 만약 토큰이 null이 아니고, "Bearer "로 시작한다면
+            if (authToken != null && authToken.startsWith("Bearer ")) {
+                // "Bearer " 다음에 오는 부분을 토큰으로 저장한다.
+                String jwtToken = authToken.substring(7);
+                try {
+                    //토큰 소멸 시간 검증
+                    if (jwtUtil.isExpired(jwtToken)) {
+                        throw new JwtException("토큰이 만료되었습니다.");
+                    }
+                    //토큰에서 userId, role 획득
+                    String userId = jwtUtil.getUserId(jwtToken);
+                    String role = jwtUtil.getRole(jwtToken);
+
+                    //user를 생성하여 값 set
+                    User user = userRepository.findByUserId(userId).orElseThrow(()-> new JwtException("올바르지 않은 토큰입니다."));
+                    user.setUserRole(role);
+
+                    //스프링 시큐리티 인증 토큰 생성
+                    Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+
+                    // 사용자 정보를 메시지 헤더에 저장한다.
+                    accessor.setUser(authentication);
+                } catch (JwtException e) {
+                    throw new ChatTokenInvalidFailureException(e);
+                }
+            }
+        }
+        // 사용자 인증 정보가 추가된 메시지를 반환한다.
+        return message;
+    }
+}
+```
+
+- 웹소켓 요청을 인터셉트하여 JWT 토큰을 확인하고 해당 사용자의 인증 정보를 가져오는 역할을 함
+
+<br>
+
+<br>
+
+**2. OpenVidu**
+
+📌 <u>**MeetingController.java**</u> 
+
+```java
+package com.sixcube.recletter.meeting.controller;
+
+...
+
+@RestController
+@RequestMapping("/meeting")
+@RequiredArgsConstructor
+@Slf4j
+public class MeetingController {
+
+    private final MeetingService meetingService;
+
+    /**
+     * OpenVidu 서버에 새로운 세션을 생성하는 요청을 보내는 메서드
+     * 화면 공유를 할 수 있는 환경(세션)을 생성(화면 공유를 시작하려는 사용자가 실행)
+     * 이 세션에 대한 연결 개체가 생성되고 해당 토큰이 클라이언트 측에 전달될 수 있으므로, 클라이언트는 이를 사용하여 세션에 연결가능
+     * @param studioId 스튜디오 ID. 이 아이디는 생성될 세션의 고유 아이디로 사용됨
+     * @param user 현재 인증된 사용자. 이 사용자의 아이디는 편집 중인 사용자로 세션 정보에 추가됩니다.
+     * @return 세션 정보를 담은 JSON 문자열을 포함하는 ResponseEntity 객체를 반환합니다. 세션 생성에 실패하면 에러 메시지를 담은 ResponseEntity를 반환합니다.
+     */
+    @PostMapping("/{studioId}")
+    public ResponseEntity<String> initializeSession(@PathVariable("studioId") String studioId, @AuthenticationPrincipal User user) {
+        String sessionInfo = meetingService.initializeSession(studioId, user);
+        return ResponseEntity.ok().body(sessionInfo);
+    }
+
+    /**
+     * 세션에서 새 연결 생성(화면 공유를 시작하는 사용자 포함 화면공유 세션에 참여하려면 실행)
+     * @param sessionId 세션의 ID
+     * @param user      현재 인증된 사용자
+     * @return 연결 정보가 포함된 ResponseEntity 객체
+     */
+    @PostMapping("/{sessionId}/connections")
+    public ResponseEntity<String> createConnection(@PathVariable("sessionId") String sessionId, @AuthenticationPrincipal User user) {
+        String connectionInfo = meetingService.createConnection(sessionId, user);
+        return ResponseEntity.ok().body(connectionInfo);
+    }
+
+
+    /**
+     * 세션 종료(해당 세션의 모든 프로세스가 중지됨. 모든 연결, 스트림 및 녹음이 닫힘)
+     * @param sessionId 스튜디오마다 화면공유를 할 수 있는 환경을 생성하기 위한 param
+     * @param user 현재 인증된 사용자
+     * @return 종료 성공 메시지
+     */
+    @DeleteMapping("/{sessionId}")
+    public ResponseEntity<Void> deleteSession(@PathVariable("sessionId") String sessionId, @AuthenticationPrincipal User user) {
+        meetingService.deleteSession(sessionId, user);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * sessionId가 활성화되어 있는지 여부를 알려주는 메서드
+     * @param sessionId
+     * @return 활성화되어있다면 세션 객체를, 아니라면 false 반환
+     */
+    @GetMapping("/{sessionId}/exists")
+    public ResponseEntity<String> checkSession(@PathVariable("sessionId") String sessionId) {
+        String sessionInfo = meetingService.checkSession(sessionId);
+        return ResponseEntity.ok().body(sessionInfo);
+    }
+}
+```
+
+<br>
+
+📌 <u>**MeetingServiceImpl.java**</u> 
+
+```java
+package com.sixcube.recletter.meeting.service;
+
+...
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class MeetingServiceImpl implements MeetingService {
+
+    private final StudioRepository studioRepository;
+
+    @Value("${openvidu.url}")
+    private String OPENVIDU_URL;
+
+    @Value("${openvidu.secret}")
+    private String OPENVIDU_SECRET;
+
+    private RestTemplate restTemplate;
+
+    public String initializeSession(String studioId, User user) throws StudioNotFoundException, MeetingInitializeSessionFailureException {
+        // 스튜디오 존재 확인
+        studioRepository.findById(studioId).orElseThrow(StudioNotFoundException::new);
+
+        // RestTemplate 생성
+        restTemplate = new RestTemplate();
+
+        // OpenVidu 서버에 직접 HTTP POST 요청 보내기
+        // 헤더 생성
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setBasicAuth("OPENVIDUAPP", OPENVIDU_SECRET);
+
+        // 요청 본문 생성(sessionId에 studioId를, name에 userId를 넣어서 각 세션에서 편집을 시작한 유저의 정보를 편리하게 관리하고자 함)
+        String requestJson = "{\"customSessionId\":\"" + studioId + "\", \"defaultRecordingProperties\": {\"name\": \"" + user.getUserId() + "\"}}";
+
+        // HttpEntity 생성 (헤더와 본문 포함)
+        HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
+
+        try {
+            // POST 요청 보내기
+            ResponseEntity<String> response = restTemplate.exchange(OPENVIDU_URL, HttpMethod.POST, entity, String.class);
+
+            // ObjectMapper 생성(Java 객체와 JSON 사이의 변환을 담당)
+            ObjectMapper mapper = new ObjectMapper();
+
+            // 세션 객체(JSON 문자열)를 Map으로 변환(editingUserId를 세션 정보에 추가하기 위해)
+            Map<String, Object> sessionInfoMap = mapper.readValue(response.getBody(), new TypeReference<Map<String, Object>>() {
+            });
+
+            // 세션 정보를 JSON 문자열로 변환(HTTP 응답 본문은 문자열 형태로 전달되기 때문)
+            String sessionInfo = mapper.writeValueAsString(sessionInfoMap);
+
+            return sessionInfo;
+        } catch (Exception e) {
+            throw new MeetingInitializeSessionFailureException(e);
+        }
+    }
+
+    public String createConnection(String sessionId, User user) throws StudioNotFoundException, MaxMeetingParticipantException, MeetingCreateConnectionFailureException {
+        // 참가자 제한 수 설정
+        final int PARTICIPANT_LIMIT = 6;
+
+        // 스튜디오 존재 확인
+        studioRepository.findById(sessionId).orElseThrow(StudioNotFoundException::new);
+
+        // RestTemplate 객체를 생성하여 HTTP 요청을 보낼 준비
+        restTemplate = new RestTemplate();
+
+        // HTTP 요청 헤더를 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setBasicAuth("OPENVIDUAPP", OPENVIDU_SECRET);
+
+        // HttpEntity 객체를 생성(헤더 포함)
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        try {
+            // 세션 정보를 가져오기 위한 GET 요청을 보냄
+            ResponseEntity<String> response = restTemplate.exchange(OPENVIDU_URL + "/" + sessionId, HttpMethod.GET, entity, String.class);
+
+            // 응답받은 세션 정보의 본문 가져오기
+            String sessionInfo = response.getBody();
+
+            // JSON 문자열을 파싱하기 위해 ObjectMapper 객체를 생성
+            ObjectMapper mapper = new ObjectMapper();
+
+            // 세션 정보를 JSON 문자열에서 Map 객체로 변환
+            Map<String, Object> sessionInfoMap = mapper.readValue(sessionInfo, new TypeReference<Map<String, Object>>() {
+            });
+
+            // 현재 세션의 참가자 수 가져오기
+            int currentParticipantCount = (int) ((Map<String, Object>) sessionInfoMap.get("connections")).get("numberOfElements");
+
+            // 참가자 수 제한 확인(6명이 이미 들어와있다면 들어올 수 없음)
+            if (currentParticipantCount >= PARTICIPANT_LIMIT) {
+                throw new MaxMeetingParticipantException();
+            }
+
+            // HttpEntity 객체를 생성(본문, 헤더 포함)
+            HttpEntity<String> postEntity = new HttpEntity<>(sessionInfo, headers);
+
+            // POST 요청 보내기
+            ResponseEntity<String> postResponse = restTemplate.exchange(OPENVIDU_URL + "/" + sessionId + "/connection", HttpMethod.POST, postEntity, String.class);
+
+            // 응답받은 연결 정보의 본문 가져오기
+            String connectionInfo = postResponse.getBody();
+
+            // 연결 정보를 JSON 문자열에서 Map 객체로 변환
+            Map<String, Object> connectionInfoMap = mapper.readValue(connectionInfo, new TypeReference<Map<String, Object>>() {
+            });
+
+            // 연결 정보에 사용자 ID 추가
+            connectionInfoMap.put("joinUserId", user.getUserId());
+
+            // 연결 정보를 JSON 문자열로 다시 변환
+            connectionInfo = mapper.writeValueAsString(connectionInfoMap);
+
+            // 연결 정보를 포함한 connetionInfo 반환
+            return connectionInfo;
+        } catch (Exception e) {
+            throw new MeetingCreateConnectionFailureException(e);
+        }
+    }
+
+    public void deleteSession(String sessionId, User user) throws StudioNotFoundException, MeetingDeleteSessionFailureException{
+        // 스튜디오 존재 확인
+        studioRepository.findById(sessionId).orElseThrow(StudioNotFoundException::new);
+
+        // RestTemplate 생성
+        restTemplate = new RestTemplate();
+
+        // 헤더 생성
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setBasicAuth("OPENVIDUAPP", OPENVIDU_SECRET);
+
+        // HttpEntity 생성 (헤더 포함)
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        try {
+            // DELETE 요청 보내기
+            restTemplate.exchange(OPENVIDU_URL + "/" + sessionId, HttpMethod.DELETE, entity, String.class);
+        } catch (Exception e) {
+            throw new MeetingDeleteSessionFailureException(e);
+        }
+    }
+
+    public String checkSession(String sessionId) throws StudioNotFoundException, MeetingCheckSessionFailureException {
+        // 스튜디오 존재 확인
+        studioRepository.findById(sessionId).orElseThrow(StudioNotFoundException::new);
+
+        // RestTemplate 생성
+        restTemplate = new RestTemplate();
+
+        // 헤더 생성
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setBasicAuth("OPENVIDUAPP", OPENVIDU_SECRET);
+
+        // HttpEntity 생성 (헤더 포함)
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        try {
+            // 해당 세션 정보를 가져오기 위한 GET 요청을 보냄
+            log.info("openvidu_url: " + OPENVIDU_URL);
+            ResponseEntity<String> response = restTemplate.exchange(OPENVIDU_URL + "/" + sessionId, HttpMethod.GET, entity, String.class);
+
+            // HTTP 상태 코드가 200이면 세션 ID가 활성화되어 있으므로, 세션 객체를 반환
+            if (response.getStatusCode() == HttpStatus.OK) {
+                return response.getBody();
+            }
+
+        } catch (HttpClientErrorException e) {
+            // HTTP 상태 코드가 404이면 세션 ID가 존재하지 않음
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                return "no exists";
+            } else throw new MeetingCheckSessionFailureException(e);
+        }
+
+        return "no exists";
+    }
+}
+```
+
+- OpenVidu의 기본 기능을 활용하여 커스텀하였음
+  - 세션 생성 시, 스튜디오 ID를 세션 ID로 사용하고, 사용자 ID를 녹화 이름으로 사용하여 각 세션에서 편집을 시작한 사용자의 정보를 편리하게 관리.
+  - 연결 생성 시, 세션 참가자 수를 제한하여 최대 6명까지만 참가할 수 있도록 하였음.
+
+<br>
 
 ---
 
-![메인화면.PNG](README_ASSETS/main.png)
+## 🙋🏻‍♀️ 마무리
 
-# 목차
+<br>
 
----
+### 🔹어려웠던 점(원인, 해결, 느낀점)
 
-1. [개요](#1-개요)
-2. [개발 환경](#2-개발-환경)
-3. [서비스 화면](#3-서비스-화면)
-4. [주요 기능](#4-주요-기능)
-5. [기술 소개](#5-기술-소개)
-6. [설계 문서](#6-설계-문서)
-7. [팀원 소개](#7-팀원-소개)
+#### 1. (인터셉터를 만들기 전에는) 로그인한 유저의 정보를 가져올 수 없어서 계속 user가 null로 뜬다.
 
-# 1. 개요
+- **원인:**
 
----
+  - **HTTP 세션과 WebSocket 세션 간의 차이점** 때문에 발생
 
-## 프로젝트 소개
+  - HTTP와 WebSocket은 모두 인터넷 프로토콜이지만, 두 프로토콜은 다른 목적과 기능을 가지고 있다.
 
-### REC: LETTER
+    - HTTP는 요청-응답 모델을 기반으로 하는데, 이는 클라이언트가 서버에 요청을 보내면 서버가 응답을 반환하는 방식.
+    - WebSocket은 풀 더플렉스(full-duplex) 통신을 가능하게 하는 프로토콜로, 클라이언트와 서버 간에 양방향 통신이 가능.
 
--   영상으로 전하는 우리의 마음, 레크레터
--   REC: LETTER는 RECord + LETTER의 합성어로 우리의 감동과 담아 영상 편지를 제작하는 특별한 플랫폼입니다.
+    ⇒ 이 때문에 HTTP와 WebSocket은 각각 독립적인 보안 체인(security chain)과 설정(config)을 가지게 된다. 즉, **HTTP 요청을 처리하는 과정에서 인증된 사용자의 정보가 HTTP 세션에 저장되더라도, 이 정보는 WebSocket 세션에서는 사용할 수 없다.**
 
-### 목적
+  - 따라서, WebSocket 통신에서 인증된 사용자의 정보를 사용하려면 별도의 처리가 필요하다. 이를 위해 사용하는 것이 **인터셉터**입니다.
 
--   저희 서비스는 혼자 혹은 함께 영상을 촬영하고 꾸며 영상 편지로 만들어 소중한 대상에게 선물합니다.
--   기념일이나 추억을 남기고 싶을 때 쉽게 영상편지를 만드는 목적으로 만들어졌습니다.
+    **인터셉터는 메시지가 전송되기 전에 해당 메시지를 가로채서 필요한 처리를 수행할 수 있게 해준다.**
 
-### 타겟
+- **해결:**
 
--   특별한 날을 기념하고 싶은 10~30대
--   멀리 떨어진 사람에게 축하 메시지를 보내고 싶은 사람들
--   영상 편지는 찍고 싶으나 편집이 힘든 사람들
--   특히, SSAFY 소속 혹은 졸업생
+  - 인터셉터를 만들어 해결하였다.
 
-### 서비스 개요
+    1. `JwtTokenChannelInterceptor`
 
-- REC: LETTER는 영상 편지 제작 서비스로, 참가자들이 함께 영상을 촬영하고 자유롭게 꾸밀 수 있는 공간을 제공합니다. 사용자는 손쉽게 영상을 편집하고 완성된 작품을 공유할 수 있습니다.
+       WebSocket 연결 요청인 CONNECT 메시지를 가로채서, 이 메시지의 헤더에서 JWT 토큰을 추출하고 이 토큰을 디코딩하여 사용자 정보를 얻는 역할을 한다. 그리고 이 정보를 WebSocket 세션에 저장하여, 이후 WebSocket 통신에서도 이 정보를 사용할 수 있도록 한다.
 
-### 타 서비스와의 차별성
+       ⇒ WebSocket 세션에서도 인증된 사용자의 정보를 사용할 수 있게 되어, 사용자 인증이 필요한 WebSocket 통신을 보안적으로 안전하게 처리할 수 있다.
 
--   영상 제작 플랫폼_ : 다른 플랫폼들은 외주 위주로 돌아가는 경우가 많습니다. 하지만 REC: LETTER는 지인들끼리의 특별한 순간을 직접 참여하여 손쉽게 만들 수 있습니다.
--   영상 제작 프로그램_ : REC: LETTER는 어려운 기술과 능력 없이 누구라도 특별한 순간의 감동과 기억을 준다는 점에 초점을 두고있습니다. 손쉽게 영상을 촬영하고 취합, 편집하여 공유할 수 있다는 점에서 간편함을 추구합니다. 
+       ⇒ `HandshakeInterceptor` 가 아니라 `ChannelInterceptor` 를 사용한 이유
 
-# 2. 개발 환경
+       - `HandshakeInterceptor`:
 
----
+         이 인터페이스는 **WebSocket 핸드셰이크 단계에서 사용된다**. 핸드셰이크는 클라이언트와 서버가 WebSocket 연결을 시작할 때 진행하는 과정으로, 이 시점에서 어떤 동작을 수행하려면 `HandshakeInterceptor`를 사용한다.
 
-### Management Tool
+         예를 들어, **클라이언트의 IP 주소를 로깅하거나, 특정 조건을 만족하지 않는 클라이언트의 연결 요청을 거부하는 등의 작업**을 수행할 수 있다.
 
-![Git-F05032.svg](https://img.shields.io/badge/Git-F05032.svg?&style=for-the-badge&logo=Git&logoColor=white)
-![GitLab-FC6D26.svg](https://img.shields.io/badge/GitLab-FC6D26.svg?&style=for-the-badge&logo=GitLab&logoColor=white)
-![Jira Software-0052CC.svg](https://img.shields.io/badge/Jira_Software-0052CC.svg?&style=for-the-badge&logo=JiraSoftware&logoColor=white)
-![Mattermost-0058CC.svg](https://img.shields.io/badge/Mattermost-0058CC.svg?&style=for-the-badge&logo=Mattermost&logoColor=white)
-![Notion-000000.svg](https://img.shields.io/badge/Notion-000000.svg?&style=for-the-badge&logo=Notion&logoColor=white)
-![Figma-F24E1E.svg](https://img.shields.io/badge/Figma-F24E1E.svg?&style=for-the-badge&logo=Figma&logoColor=white)
+       - `ChannelInterceptor`:
 
-### IDE
+         이 인터페이스는 **WebSocket 메시지가 전송되는 채널에서 사용된다**. 즉, 연결이 완료된 후 클라이언트와 서버 간에 메시지를 주고받는 동안 어떤 동작을 수행하려면 `ChannelInterceptor`를 사용한다.
 
-![VS-CODE](https://img.shields.io/badge/Visual%20Studio%20Code-007ACC.svg?&style=for-the-badge&logo=Visual%20Studio%20Code&logoColor=white)
-![IntelliJ](https://img.shields.io/badge/IntelliJ%20IDEA-000000.svg?&style=for-the-badge&logo=IntelliJ%20IDEA&logoColor=white)
+         예를 들어, **메시지 헤더에 있는 토큰을 검증하거나, 메시지의 내용을 수정하는 등의 작업**을 수행할 수 있습니다.
 
-### Infra
+       ⇒ 따라서, JWT 토큰을 검증하고 **인증된 사용자의 정보를 WebSocket 세션에 저장하는 작업은 메시지 전송 동안 수행되어야 하므로**, `ChannelInterceptor`를 사용하는 것이다.
 
-![AWS](https://img.shields.io/badge/Amazon_AWS-232F3E.svg?&style=for-the-badge&logo=AmazonAWS_&logoColor=white)
-![Amazon_EC2](https://img.shields.io/badge/Amazon%20EC2-FF9900.svg?&style=for-the-badge&logo=Amazon%20EC2&logoColor=white)
-![Amazon_S3](https://img.shields.io/badge/Amazon%20S3-569A31.svg?&style=for-the-badge&logo=Amazon%20S3&logoColor=white)
-![nginx](https://img.shields.io/badge/NGINX-009639.svg?&style=for-the-badge&logo=NGINX&logoColor=white)
-![docker](https://img.shields.io/badge/Docker-2496ED.svg?&style=for-the-badge&logo=Docker&logoColor=white)
-![jenkins](https://img.shields.io/badge/Jenkins-D24939.svg?&style=for-the-badge&logo=Jenkins&logoColor=white)
-![apache_kafka](https://img.shields.io/badge/Apache_Kafka-231F20.svg?&style=for-the-badge&logo=ApacheKafka&logoColor=white)
-![MariaDB](https://img.shields.io/badge/MariaDB-003545.svg?&style=for-the-badge&logo=MariaDB&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-DC3872D.svg?&style=for-the-badge&logo=Redis&logoColor=white)
+       이렇게 하면 연결이 완료된 후에도 **클라이언트와 서버 간의 모든 메시지에 대해 인터셉터가 동작하므로, 보다 안전하고 효율적인 인증 처리가 가능**하다.
 
-### Frontend
+    2. WebSocketConfig 에서 사용할 인터셉터를 적용하도록 설정
 
-![HTML5](https://img.shields.io/badge/HTML5-E34F26.svg?&style=for-the-badge&logo=HTML5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6.svg?&style=for-the-badge&logo=CSS3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E.svg?&style=for-the-badge&logo=JavaScript&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-3172C6.svg?&style=for-the-badge&logo=TypeScript&logoColor=white)
-![React](https://img.shields.io/badge/React-61DAFB.svg?&style=for-the-badge&logo=React&logoColor=white)
-![SWC](https://img.shields.io/badge/Node\.js-339933.svg?&style=for-the-badge&logo=Node\.js&logoColor=white)
-![NodeJS](https://img.shields.io/badge/Amazon%20EC2-FF9900.svg?&style=for-the-badge&logo=Amazon%20EC2&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-646CFF.svg?&style=for-the-badge&logo=Vite&logoColor=white)
-![Axios](https://img.shields.io/badge/Axios-5A29E4.svg?&style=for-the-badge&logo=Axios&logoColor=white)
-![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4.svg?&style=for-the-badge&logo=TailwindCSS&logoColor=white)
-![PostCSS](https://img.shields.io/badge/PostCSS-DD3A0A.svg?&style=for-the-badge&logo=PostCSS&logoColor=white)
-![Sass](https://img.shields.io/badge/Sass-CC6699.svg?&style=for-the-badge&logo=Sass&logoColor=white)
-![Autoprefixer](https://img.shields.io/badge/Autoprefixer-DD3735.svg?&style=for-the-badge&logo=Autoprefixer&logoColor=white)
-![Redux](https://img.shields.io/badge/Redux-764ABC.svg?&style=for-the-badge&logo=Redux&logoColor=white)
-![OpenVidu](https://img.shields.io/badge/Openvidu-05D261.svg?&style=for-the-badge)
-![WebSocket](https://img.shields.io/badge/WebSocket-000000.svg?&style=for-the-badge)
-![WebRTC](https://img.shields.io/badge/WebRTC-333333.svg?&style=for-the-badge&logo=WebRTC%20EC2&logoColor=white)
-![Canvas](https://img.shields.io/badge/Canvas-000000.svg?&style=for-the-badge)
-![ffmpegWasm](https://img.shields.io/badge/FfmpegWasm-654FF0.svg?&style=for-the-badge&logo=FFmpeg&logoColor=white)
+    3. ChatController 에서 인증된 사용자 정보 가져오기
 
-### Backend
+- **느낀점**:
 
-![Java](https://img.shields.io/badge/Java-634533.svg?&style=for-the-badge)
-![SpringBoot](https://img.shields.io/badge/Spring_Boot-6DB33F.svg?&style=for-the-badge&logo=SpringBoot&logEoColor=white)
-![SpringSecurity](https://img.shields.io/badge/Spring_Security-6DB33F.svg?&style=for-the-badge&logo=SpringSecurity&logoColor=white)
-![SpringJPA](https://img.shields.io/badge/Spring_JPA-6DB33F.svg?&style=for-the-badge)
-![Python](https://img.shields.io/badge/Python-3776AB.svg?&style=for-the-badge&logo=Python&logoColor=white)
-![Moviepy](https://img.shields.io/badge/MoviePy-000000.svg?&style=for-the-badge)
-![FFMPEG](https://img.shields.io/badge/FFmpeg-007808.svg?&style=for-the-badge&logo=FFmpeg&logoColor=white)
+  - front 의 chat 기능 코드가 완성되기 전까지는 테스트를 해볼 수 없던 부분이라서 chat기능을 다 완성했다고 생각하고 있다가 수정해야 하는 상황을 맞닥뜨렸다.
 
-# 3. 서비스 화면
+    - 나중에 알고보니 postman으로도 websocket을 테스트할 수 있는 방법이 있는 듯했다.
 
----
+  - 생각지도 못했던 문제였어서 당황했지만, 인터넷의 여러 자료들과 공식문서를 확인하며 겨우겨우 인터셉터를 완성했다.
 
-### 로그인 페이지
+  - 여러 자료를 찾아보니까, 이 문제를 해결하는 방법에도 여러가지가 있는 듯해서 우리 프로젝트에는 어떤 것을 적용해야 할지 헷갈렸다.
 
--   일반 로그인
+    현재 버전에서 문제를 해결한 자료들이 많지 않아서 자료들을 찾아보는 데에 시간을 많이 소비하였다.
 
-![login.gif](README_ASSETS/login.gif)
+- OpenVidu를 처음 접해봐서 서버단에서 OpenVidu를 사용하는 방법을 잘 몰라서 어려움을 겪었다.
+  - 우선 튜토리얼을 따라해보았지만 도대체 서버단에서는 어떻게 하는지 알 수 없었다. 그래서 공식문서를 더 읽어보고, 다른 github을 참고하고, 구글링하며 서버단에서 직접 요청을 보내는 방법을 알아냈다. 
+- WebSocket을 처음 사용해봐서 WebSocket 실행 과정을 이해하고 적용하는 데 시행착오가 있었다.
+  - 여러 참고자료들을 보았는데, 자료들마다 다른 부분이 많아서 나의 프로젝트에 적용하는 방법을 찾는 데 시간이 걸렸다. 알고 보니 여러 방법이 있었을 뿐이고, 방법은 거의 유사한 것들이었다.
 
--   구글 소셜 로그인
+<br>
 
-![login-socialLogin.gif](README_ASSETS/login-socialLogin.gif)
+### 🔹아쉬운 점
 
--   기능 설명
-    -   일반 로그인이 가능하며, 구글 계정을 이용한 소셜 로그인도 지원합니다.
-    -   구글 계정은 별도의 회원 가입 절차 없이 구글 로그인 시 자동으로 회원가입, 로그인이 됩니다.
+- WebSocket과 OpenVidu를 담당했는데, 이 기능들에는 JPA를 별로 사용하지 않았다. JPA를 제대로 사용해보고 싶었는데, 그러지 못해서 아쉬웠다. 
 
-### 회원가입 페이지
+<br>
 
--   회원 가입 페이지
+### 🔹느낀 점
 
-![regist.gif](README_ASSETS/regist.gif)
+- 이번 프로젝트를 하면서 새로운 기술들을 많이 접해봐서 재미있었다! 내 역할이었던 WebSocket, OpenVidu는 물론이고,
 
--   기능 설명
-    -   일반 로그인에 사용할 계정을 생성하는 페이지입니다.
-    -   이메일, 이름, 비밀번호, 비밀번호 확인을 입력합니다.
-    -   이메일의 경우, 이메일 인증을 요청한 후, 이메일 인증이 된 경우만 회원가입이 가능합니다. 이미 가입된 계정이 있으면 안됩니다.
-        -   이메일 인증은 이메일을 전송한 후, 인증코드를 입력하는 방식으로, 인증 코드는 전송 후 10분간 유효합니다.
-    -   이름은 2자 이상, 16자 이하로 제한되어 있습니다.
-    -   비밀번호는 8자 이상 16자 이하로 가능하고, 비밀번호 확인란에 동일한 값을 입력해야 가입 가능합니다.
+  redis, S3, OAuth2.0 등을 접해볼 수 있어서 너무 좋았다. 물론 아직 완벽하게 이해했다고 말하기는 어렵지만, 이렇게 다양한 것들을 접해보고 나니 조금 자신감이 생긴 기분이다. 
 
-### 비밀번호 찾기
+  이번 프로젝트를 하면서 처음으로 JPA를 공부하고 사용해보았는데, 내 역할에서는 사용할 일이 많지 않아서 아쉬웠다. 다음 프로젝트를 할 때에는 더 공부해서 JPA를 제대로 사용해보고 싶다.
 
--   비밀번호 찾기 화면
+  로그인 관련 로직을 보니까 복잡하고 어려워보였지만 재미있을 것 같았다. 다음 프로젝트를 할 때는 로그인을 담당해서 Spring Security, jwt토큰, oauth2.0을 사용한 로그인을 구현해내는 것이 나의 목표이다!
 
-![findPw.gif](README_ASSETS/findPw.gif)
+- 이번 프로젝트를 진행하면서 디자인 부분에 많이 참여하였다. 생각보다 디자인하는 것도 재미있음을 느꼈다. 팀원들이 내가 디자인한 것을 보고 칭찬해주는 것에 뿌듯함을 느꼈다. 다음 프로젝트에서도 여유가 된다면 디자인에 적극적으로 참여하고 싶다.
 
--   이메일, 비밀번호, 비밀번호 확인을 입력합니다.
--   이메일 인증을 받은 후 이용 가능합니다.
-    -   이메일 인증 방식은 회원 가입 시와 동일한 인증코드 방식이고, 유효 시간은 10분으로 같습니다.
--   비밀번호를 알려주는 방식이 아닌 이메일 인증을 받은 후 비밀번호를 변경하는 방식입니다. 새 비밀번호와 비밀번호 확인을 입력한 후, 비밀번호 재설정 버튼을 눌러 비밀번호를 새로 입력한 값으로 설정하는 방식입니다.
-    -   비밀번호 제한 조건은 가입 시와 동일한 8~16자 입니다.
+- 이번 프로젝트에서 최종 발표를 맡게 되었다. 평소에 발표하는 것을 즐기지 않는 나로서는 달갑지 않았지만, 내가 맡게 된 역할이기에 열심히 연습하였다. 대본을 보지 않고 발표하는 것을 목표로, 발표자료를 보면서 시간을 재며 계속 연습하였다. 결국 우리조는 '우수상'이라는 좋은 결과를 받게 되어 뿌듯했다. 발표를 무서운 것이라고 생각했던 나에게는 아직도 여전히 발표는 많이 떨리지만,  발표에 대해 전보다 긍정적인 생각을 갖게 되었다.
 
-### 마이페이지
+- 팀원들이 누구하나 열심히 안 하는 팀원이 없어서 열심히 하는 분위기가 형성되어서 너무 좋았다. 힘들고 지칠 때도 옆에 팀원이 열심히 하고 있는 모습을 보면 나도 다시 힘내서 하게 되었다. 모두가 열심히 해서 우리의 프로젝트도 성공적으로 마칠 수 있었다. 좋은 팀원들을 만나는 것이 프로젝트 결과에 큰 영향을 끼친다는 것을 몸소 느낄 수 있었다.
 
--   이름 변경 화면
-
-![changeName.gif](README_ASSETS/changeName.gif)
-
--   회원 탈퇴 화면
-
-![myPage-withdrawal.gif](README_ASSETS/myPage-withdrawal.gif)
-
--   기능 설명
-    -   내 개인정보 열람 및 수정이 가능합니다. 개인정보로는 이메일, 이름이 있습니다.
-    -   이름은 수정 가능합니다. 이메일은 불가능합니다.
-    -   비밀번호 변경 버튼을 통해 비밀번호 변경 페이지로 갈 수 있습니다. 구글 소셜 로그인 시 비활성화 됩니다.
-    -   회원 탈퇴 버튼을 누르면 회원 탈퇴 진행이 가능합니다. 버튼 클릭 후 나오는 경고창에서 확인을 누르면 회원 탈퇴가 완료됩니다.
-
-### 비밀번호 변경 페이지
-
--   비밀번호 변경 페이지
-
-![changePw.gif](README_ASSETS/changePw.gif)
-
--   현재 비밀번호를 입력하고, 새 비밀번호로 변경 가능합니다.
--   새 비밀번호도 8~16자의 제한 조건이 있고, 새 비밀번호와 새 비밀번호 확인을 입력해야 합니다.
-
-### 메인 페이지
-
--   탭 전환
-
-![studioList-Tab.gif](README_ASSETS/studioList-Tab.gif)
-
--   스튜디오 삭제 화면
-
-![studioList-deleteStudio.gif](README_ASSETS/studioList-deleteStudio.gif)
-
--   기능 설명
-    -   로그인을 한 이후 보여지는 첫 화면입니다.
-    -   영상 스튜디오, 완성된 비디오 탭으로 이루어집니다.
-    -   영상 스튜디오 탭에서는 현재 참가중인 스튜디오의 목록이 나옵니다.
-        -   각 스튜디오의 이름, 남은 마감 기한, 참여 여부, 현재 있는 비디오 중 하나의 섬네일, 참여자 수, 영상 개수를 보여줍니다.
-            -   참여 여부는 스튜디오 참여자들 중 현재 스튜디오에 올린 영상이 있는지 여부로, 있으면 ‘참여 완료’, 없으면 ‘미참여’ 입니다.
-        -   본인이 만든 스튜디오면 왕관 모양이 뜹니다.
-        -   마감 기한이 가까운 순으로 나열됩니다.
-    -   완성된 비디오 탭에는 완성된 비디오 목록과 남은 유지 기간이 나옵니다.
-    -   새로 고침 버튼을 이용하여 스튜디오 정보를 새로 고침할 수 있습니다.
-    -   편집 버튼은 영상 스튜디오 탭이 활성화 되었을 때만 보입니다. 스튜디오를 선택해 삭제할 수 있습니다.
-    -   새로운 스튜디오 생성 버튼을 이용해 스튜디오 생성 페이지로 이동할 수 있습니다.
-
-### 스튜디오 메인 페이지
-
--   영상 감상 화면
-
-![studioMain-watchMovie.gif](README_ASSETS/studioMain-watchMovie.gif)
-
--   영상 삭제 화면
-
-![studioMain-delete2.gif](README_ASSETS/studioMain-delete2.gif)
-
--   스튜디오 이름 변경 화면
-
-![studioMain-changeName.gif](README_ASSETS/studioMain-changeName.gif)
-
--   초대 링크 복사, 편지 완성 화면
-
-![studioMain-copy,finish.gif](README_ASSETS/studioMain-copyfinish.gif)
-
--   기능 설명
-    -   스튜디오에 들어가면 제일 먼저 보이는 화면입니다.
-    -   링크를 복사해 전달할 경우, 전달 받은 상대방이 로그인 후 해당 링크로 이동하면 자동으로 스튜디오 참여자로 등록됩니다.
-        -   초대링크 복사하기 버튼을 통해 현재 주소를 복사 가능합니다.
-    -   현재 업로드된 영상을 모두 볼 수 있습니다.
-        -   현재 선택된 영상과 선택되지 않은 영상으로 나누어집니다. 선택된 영상은 현재 편집 상태에서 사용되었는지, 사용되지 않았는지로 구분됩니다.
-        -   선택된 영상의 경우, 편집 시의 순서대로 영상이 나열됩니다.
-        -   나의 영상이 우측 아래에 표시됩니다.
-        -   현재 선택된 프레임, 스티커가 적용된 상태로 영상이 재생됩니다.
-        -   전체 편지 자동재생을 통해 현재 선택된 영상의 연속 재생이 가능합니다. 전체 편지 자동 재생의 경우, 현재 선택한 BGM이 나옵니다.
-            -   전체 편지 자동재생은 중간에 개별 영상을 클릭하면 해제됩니다.
-        -   각 영상을 클릭해 개별적으로 재생 가능합니다. BGM은 지원하지 않습니다.
-        -   나의 영상은 삭제 가능합니다. 삭제 확인 모달에서 확인을 눌러 삭제 가능합니다.
-    -   새 영상 촬영하기 버튼으로 개인 영상 촬영 페이지로 이동합니다.
-    -   영상편지 편집하기 버튼으로 영상편지 편집 페이지로 이동합니다.
-    -   영상편지 완성하기 버튼을 눌러 영상 완성 요청을 할 수 있습니다.
-        -   기본적으로 스튜디오를 생성한 사람만 누를 수 있고, 마감기한이 2일 이하 남은 경우 다른 사용자도 누를 수 있습니다.
-        -   현재의 설정대로 영상이 인코딩됩니다.
-        -   선택된 영상이 있어야 누를 수 있습니다.
-        -   완성하기 요청이 전송된 이후로는 스튜디오에 접근할 수 없습니다.
-    -   스튜디오 이름 변경이 가능합니다. 변경은 스튜디오를 생성한 사람만 가능합니다.
-    -   우측 아래 채팅 버튼으로 채팅이 가능합니다. 현재 접속한 사용자들끼리 사용 가능하고, 이전의 기록은 소멸됩니다.
-        -   채팅은 각 스튜디오별로 개별적으로 작동합니다.
-
-### 개인 영상 촬영 페이지
-
--   영상 촬영 화면
-
-![clipRecord-record.gif](README_ASSETS/clipRecord-record.gif)
-
--   스크립트 기능 화면
-
-![clipRecord-script.gif](README_ASSETS/clipRecord-script.gif)
-
--   영상 선택 화면
-
-![clipRecord-select.gif](README_ASSETS/clipRecord-select.gif)
-
--   기능 설명
-    -   개인 영상 촬영이 가능합니다.
-    -   현재 적용된 프레임, 스티커를 볼 수 있습니다.
-    -   스크립트를 통해 영상 촬영에 사용할 스크립트를 볼 수 있고, 제공된 템플릿을 이용 가능합니다.
-    -   영상 촬영은 최대 1분까지입니다. 영상 촬영 버튼 클릭 시 경고문이 나오고 촬영이 시작됩니다.
-        -   경고문은 매 촬영마다 나오는 것이 기본값이며, ‘더 이상 안내문을 보지 않습니다’에 체크하면 추가적으로 나오지 않습니다. 만약 페이지를 나갔다가 다시 들어오면 다시 경고문이 활성화됩니다.
-        -   영상 길이가 1분을 넘어가려 하면 자동으로 촬영이 종료됩니다.
-        -   영상은 여러 개 촬영 가능합니다. 하지만 단 하나의 영상만 선택 가능합니다.
-        -   선택된 영상은 빨간 테두리로 표시되고, ‘다음단계로’ 버튼을 눌러 개인 영상 편집 페이지로 진행 가능합니다. 선택된 영상이 없으면 진행 불가능합니다. 영상 촬영이 종료되면 현재 촬영한 영상이 자동 선택됩니다.
-        -   페이지에서 나가면 현재 촬영한 영상은 소실됩니다. ‘다음단계로’버튼을 누를 경우, 현재 선택한 영상을 제외한 정보는 모두 소실됩니다.
-    -   좌측 사이드바에서 촬영한 영상 리스트를 볼 수 있고, 재생할 수 있으며, 영상 제목의 변경이 가능합니다. 삭제도 가능합니다.
-    -   우측 아래 채팅 버튼으로 채팅이 가능합니다. 현재 접속한 사용자들끼리 사용 가능하고, 이전의 기록은 소멸됩니다.
-        -   채팅은 각 스튜디오별로 개별적으로 작동합니다.
-
-### 개인 영상 편집 페이지
-
--   영상 편집 화면
-
-![clipEdit.gif](README_ASSETS/clipEdit.gif)
-
--   기능 설명
-    -   선택한 동영상 미리보기, 이름 변경, 사용 구간 선택이 가능합니다.
-        -   이름 변경의 경우 영상 플레이어 위 박스에서 작성 가능합니다.
-        -   사용할 구간 선택의 경우 왼쪽 사이드바에서 가능하고, 사용 구간을 조절하면 자동으로 비디오 플레이어는 해당 구간만 재생 가능합니다.
-        -   ‘편집 내용 전체 초기화’ 버튼을 통해 사용할 구간을 초기값으로 재설정 가능합니다. 초기값은 영상 전체입니다.
-    -   촬영한 영상 정보가 우측에 표시됩니다.
-    -   저장하기 버튼을 누르면 영상이 서버에 저장됩니다.
-    -   우측 아래 채팅 버튼으로 채팅이 가능합니다. 현재 접속한 사용자들끼리 사용 가능하고, 이전의 기록은 소멸됩니다.
-        -   채팅은 각 스튜디오별로 개별적으로 작동합니다.
-
-### 영상 편지 편집하기 페이지
-
--   화면 공유 화면
-
-![letterMake-screenShare.gif](README_ASSETS/letterMake-screenShare.gif)
-
--   영상 선택 화면
-
-![letterMake-selectOrder.gif](README_ASSETS/letterMake-selectOrder.gif)
-
--   영상 프레임, 오디오 설정 화면
-
-![letterMake-frameAndBGM.gif](README_ASSETS/letterMake-frameAndBGM.gif)
-
--   영상 스티커 기능 화면
-
-![letterMake-sticker.gif](README_ASSETS/letterMake-sticker.gif)
-
--   기능 설명
-    -   영상 편지의 편집이 가능합니다.
-    -   편집은 동시에 한 명만 이용 가능합니다.
-    -   접속과 동시에 화면 공유가 시작되고, 이후 입장하는 사람들은 영상 편집 감상 페이지로 자동 이동 되고, 해당 페이지에서 영상 편집 화면을 구경하고, 채팅을 통해 피드백 가능합니다.
-    -   영상 선택, 순서 변경, 프레임 변경, BGM 변경, 스티커 적용이 가능합니다.
-        -   좌측 사이드바에서 무엇을 변경할지 선택 가능합니다.
-        -   선택하지 않은 영상 리스트에서 클릭하면 추가한 순서대로 영상이 선택되고, 선택된 영상의 빼기 버튼으로 선택 취소도 가능합니다.
-        -   BGM의 볼륨을 조절할 수 있고, 선택된 영상별 볼륨 조절도 가능합니다.
-        -   전체 영상 볼륨 조절 버튼을 통해 모든 영상의 볼륨 조절이 가능합니다.
-        -   볼륨은 0~200 입니다.
-    -   스티커를 선택할 수 있고, 텍스트를 입력해 스티커로 만들 수 있고, 이미지를 업로드해 사용 가능합니다. 키보드를 눌러 돌리기, 크기 조작, 선택 해제가 가능합니다.
-    -   스티커 전체 지우기가 가능하고, 스티커 레이어 탭을 통해 개별 삭제도 가능합니다.
-    -   가운데 영상 플레이어에서 편집된 영상의 미리 보기가 가능하고, 아래쪽 영상을 클릭해, 선택한 영상부터 재생도 가능합니다.
-    -   현재의 영상 편지의 정보를 우측에서 볼 수 있습니다. 선택한 영상에 따라 영상의 길이가 바뀝니다. 완성된 영상의 길이와 현재 선택된 영상의 리스트를 볼 수 있습니다.
-    -   저장하기 버튼을 통해 현재의 편집 상태를 저장 가능합니다.
-    -   우측 아래 채팅 버튼으로 채팅이 가능합니다. 현재 접속한 사용자들끼리 사용 가능하고, 이전의 기록은 소멸됩니다.
-        -   채팅은 각 스튜디오별로 개별적으로 작동합니다.
-
-### 영상 편집 감상 페이지
-
--   영상 감상 화면
-
-![clipView.gif](README_ASSETS/clipView.gif)
-
--   기능 설명
-    -   현재 편집중인 사용자명과 영상 편집 화면을 감상할 수 있습니다.
-    -   채팅을 통해 현재 편집자에게 피드백 가능합니다.
-    -   회의 나가기 버튼을 통해 현재 페이지에서 나갈 수 있습니다.
-
-### 영상 편지 완성 페이지
-
--   완성된 편지 화면
-
-![letterFinish.gif](README_ASSETS/letterFinish.gif)
-
--   완성된 영상 편지를 감상 가능합니다.
--   영상을 다운로드 받거나 공유 가능합니다.
-    -   공유는 QR코드와 링크 복사를 통해 가능합니다.
--   아래의 ‘나도 영상편지 만들기’ 버튼을 누르면 메인 페이지로 이동합니다.
-
-### 헤더바
-
--   로그인 전
-
-![header-beforeLogin.gif](README_ASSETS/header-beforeLogin.gif)
-
--   로그인 후
-
-![header-logoutAndmypage.gif](README_ASSETS/header-logoutAndmypage.gif)
-
--   기능 설명
-    -   로그인, 로그아웃, 마이페이지 이동이 가능합니다.
-    -   마이페이지, 로그아웃은 로그인한 상태에서만 가능합니다.
-
-# 4. 주요 기능
-
----
-
--   로그인/로그아웃
-    -   OAuth2를 이용한 구글 소셜 로그인 지원
--   회원 가입
--   비밀번호 찾기, 이름 변경
--   회원 탈퇴
--   스튜디오 생성
-    -   기본 프레임, 마감 기한 설정
--   스튜디오 삭제
--   스튜디오 초대
--   개인 영상 촬영
-    -   스크립트 보기
-    -   영상 제목 변경
--   개인 영상 편집
-    -   앞뒤 자르기
-    -   영상 제목 변경
--   전체 영상 편집
-    -   사용 영상 선택 및 영상 순서 지정
-    -   프레임 변경
-    -   BGM 변경
-    -   스티커 이용
-    -   영상, BGM 볼륨 조절
-    -   편집된 영상 미리보기
-    -   편집 화면 공유
--   업로드 된 영상 미리 보기
-    -   현재 선택된 영상 전체 재생
--   본인 영상 삭제
--   영상 제작 완료
-    -   완성된 영상 감상
-    -   QR 코드, 링크 공유
-    -   다운로드
--   채팅
-
-# 5. 기술 소개
-
----
-
--   영상 촬영
-    -   `Media Capture and Streams API`를 이용해 영상 촬영 및 영상 녹화 기능 구현
--   영상 편집(프론트엔드)
-    -   `ffmpeg.wasm` 라이브러리를 이용하여 영상의 앞 뒤 자르기 구현.
--   영상 편집(백엔드)
-    -   `ffmpeg`, `moviepy`를 활용하여 사이즈 조절, 영상 연결, 프레임 이미지 삽입 등 필요한 편집 기능 구현
-    -   `Canvas`,`html2canvas`를 활용하여 영상 사이즈에 맞는 이미지 생성 및 배치, 통합 기능 구현
--   화면 공유
-    -   `WebRTC` 기술을 이용한 라이브러리의 일종인 `OpenVidu`를 이용해 타인과의 화면 공유 기술 구현
--   CI/CD
-    -   `Jenkins`, `Docker`, `Docker Hub`를 활용하여 CI/CD 구현
--   비동기 이벤트 분산 처리
-    -   `Kafka` 를 활용하여 영상 인코딩에 관련된 동작들을 비동기적으로 분산 처리하는 기능 구현
--   채팅
-    -   `WebSocket` 기술을 활용한 사용자 간 채팅 기능 구현
--   로그인
-    -   `OAuth2` 기술을 이용한 구글 소셜 로그인 구현
-    -   `JWT` 기술을 활용한 비밀번호 보안 강화
-
-# 6. 설계 문서
-
----
-
--   ERD
-
-![recletter_erd.png](README_ASSETS/recletter_erd.png)
-
--   API 문서
-
-| 분류 | 요청 방식 | 기능 | url | request | response |
-| --- | --- | --- | --- | --- | --- |
-| 회원 인증 | GET | 사용자 토큰 검증 | /auth |  |  |
-| 회원 인증 | POST | 회원가입 이메일 발송 요청 | /auth/email | userEmail |  |
-| 회원 인증 | POST | 회원가입 이메일 인증코드 검증 | /auth/email/code | userEmail code | isValid |
-| 회원 인증 | POST | 로그인 | /auth/login | userEmail userPassword | accessToken refreshToken |
-| 회원 인증 | GET | 로그아웃 | /auth/logout |  |  |
-| 회원 인증 | POST | 비밀번호 초기화 이메일 발송 요청  | /auth/password | userEmail | - |
-| 회원 인증 | GET | 비밀번호 초기화 | /auth/password/${key} |  |  |
-| 회원 인증 | POST | 비밀번호 초기화 인증코드 검증 | /auth/password/code | userEmail code | isValid |
-| 회원 인증 | POST | 사용자 토큰 재발급 | /auth/token | refreshToken | accessToken refreshToken |
-| 영상 스튜디오 | Message | 채팅전송 | /chat/{studioId}/sendMessage | chatMessage | ChatMessage |
-| 영상 스튜디오 | GET | 채팅방(스튜디오)에 현재 접속중인 사용자 조회 | /chat/{studioId}/userList |  | userList<String> |
-| 클립 편집 | POST | 촬영한 클립 업로드 | /clip | studioId clipTitle clipContent clip | - |
-| 클립 편집 | GET | 클립 상세 정보 조회 | /clip/{clipId} |  | clipId clipTitle clipContent clipDownloadUrl |
-| 클립 편집 | PUT | 클립 수정 | /clip/{clipId} | clipTitle clipContent clip | - |
-| 클립 편집 | DELETE | 클립 삭제 | /clip/{clipId} | - | - |
-| 영상 제작 | GET | 클립 썸네일 조회 | /clip/{clipId}/thumbnail | - | url |
-| 회원 인증 | GET | 소셜 로그인 | /login/oauth2/code/google | queryString (구글에서 제공해 주는 고정값) | accessToken refreshToken |
-| 영상 제작 | POST | 화상 회의 시작하기 | /meeting | studioId |  |
-| 영상 제작 | GET | 화상 회의 참여하기 | /meeting/{studioId} |  |  |
-| 영상 제작 | POST | 화면 공유 세션 연결 생성하기 | /meeting/{sessionId}/connections |  | connectionInfo{} |
-| 영상 제작 | POST | 화면 공유 세션 생성하기 | /meeting/{studioId} |  | sessionInfo{} |
-| 영상 제작 | DELETE | 화면 공유 세션 종료하기 | /meeting/{studioId} | |  |
-| 영상 제작 | GET | 특정 세션의 활성화 여부 조회하기 | /meeting/{studioId}/exists |  | sessionInfo{}/no exists |
-| 영상 스튜디오 | GET | 스튜디오 리스트 조회 | /studio | - | studioInfoList : [{ studioId, studioTitle, isStudioOwner, studioStatus, thumbnailUrl expireDate, hasMyClip, videoCount, attendMember studioFrameId, studioStickerUrl }] |
-| 영상 스튜디오 | POST | 스튜디오 생성 | /studio | studioTitle studioFrameId expireDate | - |
-| 영상 제작 | PUT | 영상 수정 | /studio | studioId usedClipList : [{ clipId,  clipVolume }] unusedClipList : [clipId] studioFrameId studioBgmId studioBgmVolume studioSticker | - |
-| 영상 스튜디오 | DELETE | 스튜디오 삭제 | /studio/{concantenatedStudioId} | - | - |
-| 영상 스튜디오 | GET | 스튜디오 상세 정보 조회 | /studio/{studioId} |  | studioId studioTitle studioStatus studioOwner expireDate clipInfoList: [{ clipId, clipTitle, clipOwner, clipLength, clipThumbnail, clipUrl, clipOrder, clipVolume, clipContent }] studioFrameId studioBgmId studioStickerUrl studioBgmVolume |
-| 영상 스튜디오 | POST | 스튜디오 참가 | /studio/{studioId} | - | - |
-| 영상 스튜디오 | GET | 스튜디오에 접속중인 사용자 정보 조회 | /studio/{studioId}/active | - | isActive |
-| 영상 스튜디오 | GET | 레터영상 다운로드 정보 가져오기 | /studio/{studioId}/download |  | studioTitle letterUrl |
-| 영상 제작 | GET | 레터영상 인코딩(=합치기) 요청 | /studio/{studioId}/letter |  |  |
-| 영상 스튜디오 | POST | 영상 인코딩 완료 | /studio/{studioId}/letter | isCompleted |  |
-| 영상 스튜디오 | GET | 스튜디오 썸네일 조회 | /studio/{studioId}/thumbnail |  | url |
-| 영상 스튜디오 | PUT | 스튜디오 제목 수정 | /studio/{studioId}/title | studioTitle | - |
-| 영상 스튜디오 | GET | BGM 리스트 조회 | /template/bgm | - | bgmTemplate : [{ bgmId, bgmUrl, }] |
-| 영상 스튜디오 | GET | 폰트 리스트 조회 | /template/font | - | fontTemplate : [{ fontId, fontTitle, fontFamily, fontUrl }] |
-| 영상 스튜디오 | GET | 프레임 템플릿 리스트 조회 | /template/frame | - | frameTemplate : [{ frameId, frameTitle, thumbnail, frameBody }] |
-| 영상 스튜디오 | GET | 스크립트 템플릿 리스트 조회 | /template/script | - | scriptTemplate : [{ scriptId, scriptTitle, scriptContent }] |
-| 회원 인증 | POST | 회원가입 | /user | userEmail userPassword userNickname | - |
-| 회원 마이페이지 | PUT | 회원 정보 수정 | /user | userNickname | - |
-| 회원 마이페이지 | DELETE | 회원 탈퇴 | /user | - | - |
-| 회원 인증 | GET | 유저 정보 | /user |  | userId userNickname userEmail userRole |
-| 회원 마이페이지 | POST | 비밀번호 초기화 후 비밀번호 재설정 | /user/password | userEmail newPassword |  |
-| 회원 마이페이지 | PUT | 비밀번호 수정 | /user/password | originalPassword newPassword |  |
-
--   아키텍처 구조도
-    ![시스템 아키텍쳐.png](README_ASSETS/system_architecture.png)
-
-# 7. 팀원 소개
-
----
-
--   정은수 : 팀장, 프론트엔드 담당
--   김연수 : 백엔드, 인프라 담당
--   김태운 : 프론트엔드 담당
--   권유경 : 백엔드 담당
--   전하영 : 백엔드 담당
--   이선재 : 백엔드, 디자인 담당
+<br>
